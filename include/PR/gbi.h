@@ -1538,8 +1538,8 @@ typedef struct {
  * Generic Gfx Packet
  */
 typedef struct {
-	unsigned int w0;
-	unsigned int w1;
+	uintptr_t w0;
+	uintptr_t w1;
 } Gwords;
 
 // xxxxxxxx 11223344 44555566 66666777
@@ -1663,7 +1663,7 @@ typedef union {
 {                                                \
     (_SHIFTL((c), 24, 8) | _SHIFTL((p), 16, 8) | \
      _SHIFTL((l), 0, 16)),                       \
-    (unsigned int)(s)                            \
+    (uintptr_t)(s)                            \
 }
 
 #define gDma2p(pkt, c, adrs, len, idx, ofs)                      \

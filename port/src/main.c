@@ -129,6 +129,7 @@ int main(int argc, const char **argv)
 	sysLogPrintf(LOG_NOTE, "rom  file at %p - %p", g_RomFile, g_RomFile + g_RomFileSize);
 
 	g_SndDisabled = sysArgCheck("--no-sound");
+	g_SndDisabled = true;
 
 	g_StageNum = sysArgGetInt("--boot-stage", STAGE_TITLE);
 
