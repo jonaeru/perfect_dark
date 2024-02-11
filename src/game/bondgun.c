@@ -12143,7 +12143,7 @@ struct ammotype g_AmmoTypes[] = {
 	{ 10,           0, 1  }, // AMMOTYPE_PROXY_MINE
 	{ 10,           0, 1  }, // AMMOTYPE_TIMED_MINE
 	{ 800,          0, 0  }, // AMMOTYPE_REAPER
-	{ 15,           0, -2 }, // AMMOTYPE_HOMINGROCKET
+	{ 100,          0, -2 }, // AMMOTYPE_HOMINGROCKET // GEX: Golden Gun
 	{ 50,           0, 0  }, // AMMOTYPE_DART
 	{ 10,           0, 0  }, // AMMOTYPE_NBOMB
 	{ 200,          0, 0  }, // AMMOTYPE_SEDATIVE

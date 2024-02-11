@@ -725,24 +725,25 @@ struct invaimsettings invaimsettings_magsec4 = {
 };
 
 struct weaponfunc_shootsingle invfunc_magsec_singleshot = {
+	// GEX: Golden Gun
 	INVENTORYFUNCTYPE_SHOOT_SINGLE,
 	L_GUN_085, // name
 	0, // unused
 	0, // ammoindex
 	&invnoisesettings_default,
-	invanim_magsec_shoot, // fire animation
+	invanim_falcon2_shoot, // fire animation
 	0, // flags
 	&invrecoilsettings_default,
-	16, // recoverytime60
-	1.1, // damage
-	6, // spread
-	4, 8, 3, 0,
+	18, // recoverytime60
+	100, // damage
+	0, // spread
+	4, 8, 0, 255,
 	5, // recoildist
 	10, // recoilangle
-	59.999996185303, // slidemax
-	10, // impactforce
+	0, // slidemax
+	0, // impactforce
 	0, // duration60
-	SFX_804C, // shootsound
+	SFX_806E, // shootsound
 	1, // penetration
 };
 
@@ -1029,26 +1030,42 @@ struct gunviscmd gunviscmds_phoenix[] = {
 };
 
 struct guncmd invanim_phoenix_reload_singlewield[] = {
+	// GEX: Golden Gun Reload (1x Gun)
 	gunscript_playanimation(ANIM_GUN_PHOENIX_RELOAD, 0, 10000)
-	gunscript_showpart(1, MODELPART_HAND_LEFT)
-	gunscript_showpart(1, MODELPART_PHOENIX_ORB)
-	gunscript_setsoundspeed(44, 1510)
-	gunscript_playsound(44, SFX_RELOAD_FARSIGHT)
-	gunscript_hidepart(50, MODELPART_PHOENIX_ORB)
+	gunscript_showpart(19, MODELPART_FALCON2_SILENCER) // 002D
+	gunscript_showpart(19, MODELPART_FALCON2_MAGAZINE1) // 002A
+	gunscript_playsound(19, SFX_0053)
+	gunscript_showpart(38, MODELPART_HAND_LEFT) // 0035
+	gunscript_showpart(38, MODELPART_FALCON2_MAGAZINE2) // 002B
+	gunscript_playsound(40, SFX_05D0)
+	gunscript_playsound(68, SFX_05CB)
+	gunscript_waittime(82, 1)
+	gunscript_setsoundspeed(111, 1104)
+	gunscript_playsound(111, SFX_0053)
+	gunscript_hidepart(115, MODELPART_FALCON2_SILENCER) // 002D
+	gunscript_hidepart(115, MODELPART_FALCON2_MAGAZINE1) // 002A
+	gunscript_hidepart(115, MODELPART_FALCON2_MAGAZINE2) // 002B
 	gunscript_end
 };
 
 struct guncmd invanim_phoenix_reload_dualwield[] = {
-	gunscript_playanimation(ANIM_GUN_PHOENIX_RELOAD_DUALWIELD, 0, 10000)
-	gunscript_showpart(1, MODELPART_HAND_LEFT)
-	gunscript_showpart(1, MODELPART_PHOENIX_ORB)
-	gunscript_setsoundspeed(44, 1510)
-	gunscript_playsound(44, SFX_RELOAD_FARSIGHT)
-	gunscript_hidepart(50, MODELPART_PHOENIX_ORB)
+	// GEX: Golden Gun Reload (2x Gun)
+	gunscript_playanimation(ANIM_GUN_PHOENIX_RELOAD, 0, 10000)
+	gunscript_showpart(19, MODELPART_FALCON2_SILENCER) // 002D
+	gunscript_showpart(19, MODELPART_FALCON2_MAGAZINE1) // 002A
+	gunscript_playsound(19, SFX_0053)
+	gunscript_playsound(40, SFX_05D0)
+	gunscript_hidepart(59, MODELPART_FALCON2_SILENCER) // 002D
+	gunscript_hidepart(59, MODELPART_FALCON2_MAGAZINE1) // 002A
+	gunscript_playsound(68, SFX_05CB)
+	gunscript_waittime(68, 1)
+	gunscript_setsoundspeed(103, 1104)
+	gunscript_playsound(103, SFX_0053)
 	gunscript_end
 };
 
 struct guncmd invanim_phoenix_equiporreload[] = {
+	// GEX: Golden Gun Reload
 	gunscript_include(1, invanim_phoenix_reload_dualwield)
 	gunscript_include(0, invanim_phoenix_reload_singlewield)
 	gunscript_end
@@ -1896,15 +1913,26 @@ struct weapon invitem_dragon = {
 };
 
 struct gunviscmd gunviscmds_superdragon[] = {
-	gunviscmd_sethidden(MODELPART_SUPERDRAGON_MAGAZINE1)
-	gunviscmd_sethidden(MODELPART_SUPERDRAGON_MAGAZINE2)
+	// GEX: Golden Gun
+	gunviscmd_sethidden(MODELPART_FALCON2_MAGAZINE1) // 002A
+	gunviscmd_sethidden(MODELPART_FALCON2_MAGAZINE2) // 002B
+	gunviscmd_sethidden(MODELPART_FALCON2_SCOPE) // 002C
+	gunviscmd_sethidden(MODELPART_FALCON2_SILENCER) // 002D
+	gunviscmd_sethidden(MODELPART_FALCON2_002E) // 002E
+	gunviscmd_sethidden(MODELPART_FALCON2_002F) // 002F
+	gunviscmd_sethidden(MODELPART_HAND_LEFT) // 0035
 	gunviscmd_end
 };
 
 struct modelpartvisibility invpartvisibility_superdragon[] = {
-	{ MODELPART_SUPERDRAGON_MAGAZINE1, false },
-	{ MODELPART_SUPERDRAGON_MAGAZINE2, false },
-	{ MODELPART_GUN_MUZZLEFLASH1,      false },
+	// GEX: Golden Gun
+	{ MODELPART_GUN_MUZZLEFLASH1,  false }, // 005A
+	{ MODELPART_FALCON2_MAGAZINE1, false }, // 002A
+	{ MODELPART_FALCON2_MAGAZINE2, false }, // 002B
+	{ MODELPART_FALCON2_SCOPE,     false }, // 002C
+	{ MODELPART_FALCON2_SILENCER,  false }, // 002D
+	{ MODELPART_FALCON2_002E,      false }, // 002E
+	{ MODELPART_FALCON2_002F,      false }, // 002F
 	{ 255 },
 };
 
@@ -2014,10 +2042,11 @@ struct weaponfunc_shootprojectile invfunc_superdragon_grenadelauncher = {
 };
 
 struct inventory_ammo invammo_superdragon = {
-	AMMOTYPE_RIFLE,
-	CASING_RIFLE,
-	30, // clip size
-	invanim_superdragon_reload, // reload animation
+	// GEX: Golden Gun
+	AMMOTYPE_HOMINGROCKET,
+	CASING_NONE,
+	1, // clip size
+	invanim_phoenix_equiporreload, // reload animation
 	0, // flags
 };
 
@@ -2030,28 +2059,29 @@ struct inventory_ammo invammo_superdragon_grenades = {
 };
 
 struct weapon invitem_superdragon = {
-	FILE_GDYSUPERDRAGON, // hi model
-	FILE_GDYSUPERDRAGONLOD, // lo model
-	invanim_superdragon_shoot, // equip animation
-	NULL, // unequip animation
-	invanim_superdragon_pritosec, // pritosec animation
-	invanim_superdragon_sectopri, // sectopri animation
-	{ &invfunc_superdragon_rapidfire, &invfunc_superdragon_grenadelauncher }, // functions
+	// GEX: Golden Gun
+	FILE_GLEEGUN1, // hi model
+	FILE_GLEEGUN1, // lo model
+	invanim_falcon2_equip, // equip animation
+	invanim_falcon2_unequip, // unequip animation
+	NULL, // pritosec animation
+	NULL, // sectopri animation
+	{ &invfunc_magsec_singleshot, NULL }, // functions
 	&invammo_superdragon, // pri ammo
-	&invammo_superdragon_grenades, // sec ammo
-	&invaimsettings_heavy,
+	NULL, // sec ammo
+	&invaimsettings_default,
 	1, // muzzlez
-	15, // posx
-	-29.5, // posy
-	-27, // posz
+	9, // posx
+	-21, // posy
+	-31, // posz
 	1, // sway
 	gunviscmds_superdragon, // gunviscmds
 	invpartvisibility_superdragon, // part visibility
-	L_GUN_018, // short name
-	L_GUN_018, // name
-	L_GUN_149, // manufacturer
-	L_GUN_167, // description
-	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
+	L_GUN_042, // short name
+	L_GUN_042, // name
+	L_GUN_000, // manufacturer
+	L_GUN_171, // description
+	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
 };
 
 struct gunviscmd gunviscmds_ar34[] = {
