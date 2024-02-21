@@ -112,12 +112,13 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_TEMPLE,     MPFEATURE_STAGE_TEMPLE,     L_MPMENU_133 },
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
+	{ STAGE_TEST_MP2,      0,                          L_MPMENU_129 }, // Custom: PD Plus Stack
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
 };
 
 s32 mpGetNumStages(void)
 {
-	return 17;
+	return 18;
 }
 
 s16 mpChooseRandomStage(void)
@@ -126,7 +127,7 @@ s16 mpChooseRandomStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 17; i++) {
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
@@ -134,7 +135,7 @@ s16 mpChooseRandomStage(void)
 
 	index = random() % numchallengescomplete;
 
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 17; i++) {
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
@@ -152,7 +153,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 	struct optiongroup groups[] = {
 		{ 0,  L_MPMENU_116 }, // "Dark"
 		{ 13, L_MPMENU_117 }, // "Classic"
-		{ 16, L_MPMENU_118 }, // "Random"
+		{ 17, L_MPMENU_118 }, // "Random"
 	};
 
 	s32 i;
