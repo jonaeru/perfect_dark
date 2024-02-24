@@ -1749,6 +1749,7 @@ struct mphead g_MpHeads[] = {
 	{ /*0x49*/ HEAD_MOTO,         0                          },
 #endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
+	{ /*0x4b*/ HEAD_GREY,         0                          }, // Custom: PD Plus Joanna (JP version)
 };
 
 u32 g_BotHeads[] = {
