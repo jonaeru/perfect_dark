@@ -44,6 +44,8 @@ Latest [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/actions) for
 * [i686-windows](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port/pd-i686-windows.zip)
 * [i686-linux](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port/pd-i686-linux.zip)
 
+If you are looking for netplay builds (the `port-net` branch), see [this link](https://github.com/fgsfdsfgs/perfect_dark/blob/port-net/README.md#download).
+
 ## Running
 
 You must already have a Perfect Dark ROM to run the game, as specified above.  

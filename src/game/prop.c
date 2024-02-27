@@ -1170,7 +1170,11 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 			bool isglass = false;
 
 			if (obj && gset->weaponnum != WEAPON_TRANQUILIZER) {
-				isglass = obj->type == OBJTYPE_GLASS || obj->type == OBJTYPE_TINTEDGLASS;
+				isglass =
+#ifdef AVOID_UB
+					(prop->type == PROPTYPE_OBJ) &&
+#endif
+					(obj->type == OBJTYPE_GLASS || obj->type == OBJTYPE_TINTEDGLASS);
 			}
 
 			if (arg2) {
