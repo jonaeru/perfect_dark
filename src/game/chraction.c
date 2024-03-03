@@ -3912,7 +3912,7 @@ void chrChoke(struct chrdata *chr, s32 choketype)
 			SFX_ARGH_MALE_0098,
 			SFX_ARGH_MALE_009A,
 			SFX_ARGH_MALE_009C,
-			SFX_ARGH_MALE_009E,
+			// SFX_ARGH_MALE_009E, // Custom: GE-X Beep
 			SFX_ARGH_MALE_0087,
 		};
 
@@ -3950,7 +3950,7 @@ void chrChoke(struct chrdata *chr, s32 choketype)
 			SFX_ARGH_MALE_009B,
 			SFX_ARGH_MALE_009C,
 			SFX_ARGH_MALE_009D,
-			SFX_ARGH_MALE_009E,
+			// SFX_ARGH_MALE_009E, // Custom: GE-X Beep
 		};
 
 		soundnum = sounds[nextindexmale];

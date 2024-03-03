@@ -1229,8 +1229,8 @@ void playerChooseBodyAndHead(s32 *bodynum, s32 *headnum, s32 *arg2)
 		*headnum = solo ? HEAD_TRENT : HEAD_TRENT;
 		break;
 	case OUTFIT_TRENCH:
-		*bodynum = BODY_DARK_TRENCH;
-		*headnum = solo ? HEAD_DARK_COMBAT : HEAD_VD;
+		*bodynum = BODY_DJBOND; // Custom: GEX Bond Body
+		*headnum = solo ? HEAD_CARRINGTON : HEAD_VD; // Custom: GEX Bond Head
 		break;
 	case OUTFIT_FROCK_RIPPED:
 		*bodynum = BODY_DARK_RIPPED;

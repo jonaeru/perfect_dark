@@ -66,7 +66,7 @@ struct headorbody g_HeadsAndBodies[] = {
 	//           |                                  height
 	//           |                                  |
 #if VERSION >= VERSION_NTSC_1_0
-	{ /*0x0000*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     167, FILE_CDJBOND,          1,    1.0446009635925,  0, FILE_GHAND_DDSECURITY      },
+	{ /*0x0000*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     167, FILE_CDJBOND,          1,    1.0446009635925,  0, FILE_GHAND_DDSECURITY      }, // Custom: GE-X Bond Body (No Change)
 	{ /*0x0001*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     167, FILE_CCONNERY,         1,    1.0300469398499,  0, FILE_GHAND_MRBLONDE        },
 	{ /*0x0002*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     165, FILE_CDALTON,          1,    1.0572769641876,  0, FILE_GHAND_DDSECURITY      },
 	{ /*0x0003*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     167, FILE_CMOORE,           1,    1.0399061441422,  0, FILE_GHAND_DDSECURITY      },
@@ -114,40 +114,40 @@ struct headorbody g_HeadsAndBodies[] = {
 	{ /*0x0027*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSTEVE_K,     1,    1,                0, 0                          },
 	{ /*0x0028*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADJONATHAN,    1,    1,                0, 0                          },
 	{ /*0x0029*/ 1, 1, 0, HEADBODYTYPE_MAIAN,       27,  FILE_CHEADMAIAN_S,     1,    1,                0, 0                          },
-	{ /*0x002a*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSHAUN,       1,    1,                0, 0                          },
-	{ /*0x002b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADBEAU,        1,    1,                0, 0                          },
-	{ /*0x002c*/ 0, 1, 0, HEADBODYTYPE_FEMALE,      13,  FILE_CHEADEILEEN_H,    1,    1,                0, 0                          },
-	{ /*0x002d*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSCOTT_H,     1,    1,                0, 0                          },
-	{ /*0x002e*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSANCHEZ,     1,    1,                0, 0                          },
-	{ /*0x002f*/ 0, 1, 0, HEADBODYTYPE_FEMALE,      13,  FILE_CHEADDARKAQUA,    1,    1,                0, 0                          },
-	{ /*0x0030*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADDDSNIPER,    1,    1,                0, 0                          },
-	{ /*0x0031*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADBEAU,        1,    1,                0, 0                          },
-	{ /*0x0032*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADBEAU,        1,    1,                0, 0                          },
-	{ /*0x0033*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADBEAU,        1,    1,                0, 0                          },
-	{ /*0x0034*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADBEAU,        1,    1,                0, 0                          },
-	{ /*0x0035*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADGRIFFEY,     1,    1,                0, 0                          },
-	{ /*0x0036*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADMOTO,        1,    1,                0, 0                          },
-	{ /*0x0037*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADKEITH,       1,    1,                0, 0                          },
-	{ /*0x0038*/ 0, 1, 0, HEADBODYTYPE_FEMALE,      13,  FILE_CHEADWINNER,      1,    1,                0, 0                          },
-	{ /*0x0039*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CA51FACEPLATE,    1,    1,                0, 0                          },
-	{ /*0x003a*/ 1, 1, 0, HEADBODYTYPE_MAIAN,       27,  FILE_CHEADELVIS_GOGS,  1,    1,                0, 0                          },
-	{ /*0x003b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSTEVEM,      1,    1,                0, 0                          },
-	{ /*0x003c*/ 0, 1, 0, HEADBODYTYPE_FEMALE,      13,  FILE_CHEADDARK_SNOW,   1,    1,                0, 0                          },
+	{ /*0x002a*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADPHELPS,      1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x002b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADDAVEC,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x002c*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADROBIN,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x002d*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSTAMPER,     1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x002e*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSILKE,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x002f*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADCOOK,        1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0030*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADTIM,         1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0031*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADMUNTON,      1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0032*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADJONES,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0033*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADJOEL,        1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0034*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADCARTER,      1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0035*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADWONG,        1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0036*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADGRANT,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0037*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADJULIANNE,    1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0038*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSMITH,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0039*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADLAURA,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x003a*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADROSS,        1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x003b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADMURCHIE,     1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x003c*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADDARK_SNOW,   1,    1,                0, 0                          },
 	{ /*0x003d*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADPRESIDENT,   1,    1,                0, 0                          },
-	{ /*0x003e*/ 0, 1, 0, HEADBODYTYPE_FEMALE,      13,  FILE_CHEAD_VD,         1,    1,                0, 0                          },
-	{ /*0x003f*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADKEN,         1,    1,                0, 0                          },
-	{ /*0x0040*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADJOEL,        1,    1,                0, 0                          },
-	{ /*0x0041*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADTIM,         1,    1,                0, 0                          },
-	{ /*0x0042*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADGRANT,       1,    1,                0, 0                          },
-	{ /*0x0043*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADPENNY,       1,    1,                0, 0                          },
-	{ /*0x0044*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADROBIN,       1,    1,                0, 0                          },
+	{ /*0x003e*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADTINTIN,      1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x003f*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADGARETH,      1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0040*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSANCHEZ,     1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0041*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSCOTT_H,     1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0042*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADWINNER,      1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0043*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADPRYCE,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
+	{ /*0x0044*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADKEITH,       1,    1,                0, 0                          }, // Custom: GE-X Random Head
 	{ /*0x0045*/ 0, 1, 0, HEADBODYTYPE_FEMALEGUARD, 13,  FILE_CHEADALEX,        1,    1,                0, 0                          },
 	{ /*0x0046*/ 0, 1, 0, HEADBODYTYPE_FEMALEGUARD, 13,  FILE_CHEADJULIANNE,    1,    1,                0, 0                          },
 	{ /*0x0047*/ 0, 1, 0, HEADBODYTYPE_FEMALEGUARD, 13,  FILE_CHEADLAURA,       1,    1,                0, 0                          },
 	{ /*0x0048*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADDAVEC,       1,    1,                0, 0                          },
 	{ /*0x0049*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADCOOK,        1,    1,                0, 0                          },
 	{ /*0x004a*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADPRYCE,       1,    1,                0, 0                          },
-	{ /*0x004b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSILKE,       1,    1,                0, 0                          },
+	{ /*0x004b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSTEVEM,      1,    1,                0, 0                          }, // Custom: GE-X Ourumov Head (No Change)
 	{ /*0x004c*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADSMITH,       1,    1,                0, 0                          },
 	{ /*0x004d*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADGARETH,      1,    1,                0, 0                          },
 	{ /*0x004e*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     13,  FILE_CHEADMURCHIE,     1,    1,                0, 0                          },
@@ -169,7 +169,7 @@ struct headorbody g_HeadsAndBodies[] = {
 	{ /*0x005b*/ 1, 0, 0, HEADBODYTYPE_MRBLONDE,    175, FILE_CMRBLONDE,        1,    1.1032863855362,  0, FILE_GHAND_MRBLONDE        },
 #endif
 	{ /*0x005c*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     159, FILE_CSKEDAR,          1,    1,                0, 0                          },
-	{ /*0x005d*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     161, FILE_CTRENT,           1,    0.93896716833115, 0, FILE_GHAND_TRENT           },
+	{ /*0x005d*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     174, FILE_CG5_GUARD,        1,    1.0778000355,     0, FILE_GHAND_FBIARM          }, // Custom: GE-X Ourumov Body
 	{ /*0x005e*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     157, FILE_CDDSHOCK,         1,    0.93896716833115, 0, FILE_GHAND_DDFODDER        },
 	{ /*0x005f*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     157, FILE_CLABTECH,         1,    0.93896716833115, 0, FILE_GHAND_MRBLONDE        },
 	{ /*0x0060*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     158, FILE_CSTRIPES,         1,    0.92769956588745, 0, FILE_GHAND_BLACKGUARD      },
@@ -185,7 +185,7 @@ struct headorbody g_HeadsAndBodies[] = {
 #endif
 	{ /*0x0067*/ 1, 0, 0, HEADBODYTYPE_MAIAN,       106, FILE_CTHEKING,         1,    0.57276993989944, 0, FILE_GHAND_ELVIS           },
 	{ /*0x0068*/ 0, 0, 1, HEADBODYTYPE_FEMALEGUARD, 160, FILE_CFEM_GUARD,       1,    0.96713620424271, 0, FILE_GHAND_JOTRENCH        },
-	{ /*0x0069*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     157, FILE_CDD_LABTECH,      1,    0.93896716833115, 0, FILE_GHAND_DDLABTECH       },
+	{ /*0x0069*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     167, FILE_CDD_LABTECH,      1,    1,                0, FILE_GHAND_MRBLONDE        }, // Custom: GE-X
 	{ /*0x006a*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     160, FILE_CDD_SECGUARD,     1,    0.93427228927612, 0, FILE_GHAND_DDSECURITY      },
 	{ /*0x006b*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CDRCARROLL,       1,    1,                0, 0                          },
 	{ /*0x006c*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CEYESPY,          1,    1,                0, 0                          },
@@ -208,7 +208,7 @@ struct headorbody g_HeadsAndBodies[] = {
 	{ /*0x007d*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CPRES_SECURITY,   1,    0.93896716833115, 0, FILE_GHAND_CARRINGTON      },
 	{ /*0x007e*/ 0, 0, 0, HEADBODYTYPE_FEMALE,      142, FILE_CNEGOTIATOR,      1,    0.85446006059647, 0, FILE_GHAND_JOFROCK         },
 	{ /*0x007f*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CG5_GUARD,        1,    0.93896716833115, 0, FILE_GHAND_G5GUARD         },
-	{ /*0x0080*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     159, FILE_CPELAGIC_GUARD,   1,    0.93896716833115, 0, FILE_GHAND_TRAGIC_PELAGIC  },
+	{ /*0x0080*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     167, FILE_CPELAGIC_GUARD,   1,    1,                0, FILE_GHAND_CIA             }, // Custom: GE-X
 	{ /*0x0081*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     158, FILE_CG5_SWAT_GUARD,   1,    0.93896716833115, 0, FILE_GHAND_G5GUARD         },
 	{ /*0x0082*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     158, FILE_CALASKAN_GUARD,   1,    0.93896716833115, 0, FILE_GHAND_JOSNOW          },
 	{ /*0x0083*/ 1, 0, 1, HEADBODYTYPE_MAIAN,       106, FILE_CMAIAN_SOLDIER,   1,    0.57276993989944, 0, FILE_GHAND_ELVIS           },
