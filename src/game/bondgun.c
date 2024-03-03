@@ -12824,7 +12824,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		bottom += 8;
 	}
 
-	fncolour = 0xff000040;
+	fncolour = 0x00ff0040; // Custom: GE-X Red Primary Function Color
 	funcnum = hand->gset.weaponfunc;
 	fnfaderinc = PALUP(g_Vars.lvupdate240 * 2);
 
@@ -12867,7 +12867,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	}
 
 	if (ctrl->fnfader > 128) {
-		fncolour = ((ctrl->fnfader * 2) - 256) << 16 | 0xff000040;
+		fncolour = ((ctrl->fnfader * 2) - 256) << 16 | 0x00ff0040; // Custom: GE-X Yellow Primary Function Color
 	}
 
 	gdl = textSetPrimColour(gdl, fncolour);
@@ -12892,7 +12892,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 		if (ctrl->guntypetimer < 255) {
-			colour = 0x55ffffff;
+			colour = 0xffffffff; // Custom: GE-X Gun Name Color
 
 			if (ctrl->guntypetimer);
 
@@ -12933,7 +12933,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gdl = text0f153838(gdl);
 			textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
-			textSetWaveColours(0xffffffff, 0xffffffff);
+			textSetWaveColours(0xffffffff, 0xffffffff); // Custom: GE-X Gun Name Leave Color?, Gun Fade Leave Color?
 			gdl = textRenderProjected(gdl, &x, &y, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, colour, textwidth, 1000, 0, 0);
 			textResetBlends();
 		}
@@ -12941,7 +12941,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		if (func) {
 			langGet(func->name);
 
-			colour = 0xff5555ff;
+			colour = 0x00ff00ff; // Custom: GE-X Red Primary Function Name Color
 
 			if ((ctrl->curfnstr != func->name && ctrl->fnfader > 128) || ctrl->curfnstr == 0) {
 				ctrl->fnstrtimer = 0;
@@ -12959,11 +12959,11 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 #if VERSION >= VERSION_NTSC_1_0
 				if (funcnum == FUNC_SECONDARY && func->name == ctrl->curfnstr) {
-					colour |= 0x00ff0000;
+					colour = 0x00ffffff; // Custom: GE-X Yellow Primary Function Name Color
 				}
 
 				if (funcnum == FUNC_PRIMARY && func->name != ctrl->curfnstr) {
-					colour |= 0x00ff0000;
+					colour = 0x00ffffff; // Custom: GE-X Yellow Primary Function Name Color
 				}
 #else
 				if (hand->gset.weaponfunc == FUNC_SECONDARY && func->name == ctrl->curfnstr) {
@@ -13060,9 +13060,9 @@ Gfx *bgunDrawHud(Gfx *gdl)
 			gdl = bgunDrawHudGauge(gdl,
 					xpos, bottom - reserveheight - clipheight - 3, xpos + barwidth, bottom - reserveheight - 3,
 					&lefthand->abmag, lefthand->loadedammo[ammoindex], lefthand->clipsizes[ammoindex],
-					0x00300080, 0x00ff0040, false);
+					0x40200080, 0xd0800070, false); // Custom: GE-X Top Ammo Bar Bg Color, Top Ammo Bar Contents Color
 			gdl = bgunDrawHudInteger(gdl, lefthand->loadedammo[ammoindex], xpos + barwidth + 2, true,
-					bottom - reserveheight - 8, 0, 0x00ff00a0);
+					bottom - reserveheight - 8, 0, 0xd08000c0); // Custom: GE-X Top Ammo Bar Count Color
 		}
 	}
 
@@ -13104,9 +13104,9 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				&& (weapon->ammos[ammoindex]->flags & AMMOFLAG_EQUIPPEDISRESERVE) == 0) {
 			gdl = bgunDrawHudGauge(gdl, xpos, bottom - reserveheight - clipheight - 3, xpos + barwidth,
 					bottom - reserveheight - 3, &hand->abmag, hand->loadedammo[ammoindex], hand->clipsizes[ammoindex],
-					0x00300080, 0x00ff0040, false);
+					0x40200080, 0xd0800070, false); // Custom: GE-X Top Ammo Bar Bg Color, Top Ammo Bar Contents Color
 			gdl = bgunDrawHudInteger(gdl, hand->loadedammo[ammoindex], xpos - 2, false,
-					bottom - reserveheight - 8, 0, 0x00ff00a0);
+					bottom - reserveheight - 8, 0, 0xd08000c0); // Custom: GE-X Top Ammo Bar Count Color
 		}
 
 		// Reserve
@@ -13126,8 +13126,8 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gdl = bgunDrawHudGauge(gdl, xpos, bottom - reserveheight, xpos + barwidth,
 					bottom, &ctrl->abmag, ammototal, g_AmmoTypes[ammotype].capacity,
-					0x00403080, 0x00ffc040, true);
-			gdl = bgunDrawHudInteger(gdl, ammototal, xpos - 2, false, bottom - reserveheight + 1, 0, 0x00ffc0a0);
+					0x30300080, 0xc0c00070, true); // Custom: GE-X Bottom Ammo Bar Bg Color, Bottom Ammo Bar Contents Color
+			gdl = bgunDrawHudInteger(gdl, ammototal, xpos - 2, false, bottom - reserveheight + 1, 0, 0xc0c000c0); // Custom: GE-X Bottom Ammo Bar Count Color
 		}
 
 		// Combat boost timer
@@ -13145,7 +13145,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				sprintf(text, "%02d:%02d\n", secs60 / TICKS(60), (secs60 - (secs60 / TICKS(60)) * TICKS(60)) * 100 / TICKS(60));
 			}
 
-			gdl = bgunDrawHudString(gdl, text, xpos + barwidth - 2, false, bottom - reserveheight + 1, 0, 0x00ffc0a0);
+			gdl = bgunDrawHudString(gdl, text, xpos + barwidth - 2, false, bottom - reserveheight + 1, 0, 0xc0c000c0); // Custom: GE-X Combat Boost Color
 		}
 	}
 

@@ -103,7 +103,7 @@ const struct menucolourpalette g_MenuColours[] = {
 #else
 const struct menucolourpalette g_MenuColours[] = {
 	{ 0x20202000, 0x20202000, 0x20202000, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x00000000, 0x00000000 },
-	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f7f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f },
+	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f7f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f }, // Custom: GE-X Menu Colors Blue (No Change)
 	{ 0xbf00007f, 0x5000007f, 0xff00007f, 0xffff00ff, 0x2f00007f, 0x6f00007f, 0xff7050ff, 0x7f0000ff, 0xffff00ff, 0xff9070ff, 0x440000ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0xff44447f },
 	{ 0x00bf007f, 0x0050007f, 0x00ff007f, 0xffff00ff, 0x002f007f, 0x00ff0028, 0x55ff55ff, 0x006f00af, 0xffffffff, 0x00000000, 0x004400ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0x44ff447f },
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
@@ -347,7 +347,7 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	gdl = text0f153838(gdl);
 
 	// Top and bottom borders (light blue)
-	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
+	gdl = textSetPrimColour(gdl, 0xffb0007f); // Cutom: GE-X Purple Menu Line Color
 	gDPFillRectangleScaled(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
 	gDPFillRectangleScaled(gdl++, x1, bannertop - 4, x2, bannertop - 2);
 	gdl = text0f153838(gdl);
@@ -2394,7 +2394,7 @@ void menuGetTeamTitlebarColours(u32 *top, u32 *middle, u32 *bottom)
 {
 	const u32 colours[][3] = {
 		// top, middle, bottom
-		{ 0xbf000000, 0x50000000, 0xff000000 },
+		{ 0xbf000000, 0x50000000, 0xff000000 }, // Custom: GE-X Team Color Set Menu Color 1, 2, 3 (No chaneg)
 		{ 0xbfbf0000, 0x50500000, 0xffff0000 },
 		{ 0x0000bf00, 0x00005000, 0x0000ff00 },
 		{ 0xbf00bf00, 0x50005000, 0xff00ff00 },
@@ -2766,7 +2766,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 				&& !g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog) {
 			gSPSetGeometryMode(gdl++, G_ZBUFFER);
 
-			gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_DEFAULT);
+			gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_2); // Custom: GE-X Menu Color Bank Choice? (03 Green)
 
 			gSPClearGeometryMode(gdl++, G_ZBUFFER);
 
@@ -5474,12 +5474,12 @@ Gfx *menuRender(Gfx *gdl)
 							colour = 0xffffffff;
 #else
 							strcpy(text, langGet(L_MISC_461));
-							colour = g_MenuData.playerjoinalpha[i] | 0xd00020ff;
+							colour = g_MenuData.playerjoinalpha[i] | 0xd00020ff; // Custom: GE-X Ready Text Color (No Change)
 #endif
 						} else {
 							// "Press START!"
 							strcpy(text, langGet(L_MPMENU_483));
-							colour = colourBlend(0x00ffff00, 0xffffff00, weight) | g_MenuData.playerjoinalpha[i];
+							colour = colourBlend(0xffff0000, 0xffffff00, weight) | g_MenuData.playerjoinalpha[i]; // Custom: GE-X Press Start
 						}
 
 						gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);

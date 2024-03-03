@@ -1651,7 +1651,7 @@ Gfx *amRender(Gfx *gdl)
 		if (redhealth) {
 			a2 = part1left + part1width - (s32) (part1width * (0.25f - healthfrac) * 4.0f);
 
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff000060);
+			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff000060); // Custom: GE-X Red Health Color (No Change)
 
 			// Part 1 red
 			RECT(gdl++, a2, y, part1left + part1width, y + barheight);
@@ -1664,7 +1664,7 @@ Gfx *amRender(Gfx *gdl)
 			// Part 2 black
 			RECT(gdl++, PART2LEFT(), y, part1left + barwidth, y + barheight);
 		} else {
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00c00060);
+			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff6e0060); // Custom: GE-X Green Health Color
 
 			// Part 1 green
 			RECT(gdl++, part1left, y, part1left + part1width, y + barheight);

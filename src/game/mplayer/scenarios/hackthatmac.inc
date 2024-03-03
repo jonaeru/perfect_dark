@@ -603,12 +603,12 @@ Gfx *htmRenderHud(Gfx *gdl)
 		s1 = barleft + (s32) (a1 * (dltime / TICKS(4800.0f)));
 
 		gdl = text0f153628(gdl);
-		gdl = textSetPrimColour(gdl, 0x60000060);
+		gdl = textSetPrimColour(gdl, 0x00600060); // Custom: GE-X Hacker Central Bar Color
 
 		gDPFillRectangle(gdl++, barleft, viewtop + 8, barright, viewtop + 16);
 
 		gdl = text0f153838(gdl);
-		gdl = textSetPrimColour(gdl, 0xc00000d0);
+		gdl = textSetPrimColour(gdl, 0x00c000d0); // Custom: GE-X Hacker Central Remaining Color
 
 		v1 = barleft + 1;
 		a0 = barleft;

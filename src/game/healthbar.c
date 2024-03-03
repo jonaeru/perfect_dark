@@ -175,7 +175,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	static s32 len1 = 170; // x pos of right side radius centre
 	static s32 len2 = 47;  // x pos of the left side of armour
 	static s32 len3 = 40;  // x pos of the right side of trauma (left side is 0)
-	static u32 shieldcol = 0x10500090;
+	static u32 shieldcol = 0x00668890; // Custom: GE-X Blue Shield Color
 	static u32 armourcol = 0x00c00060;
 	static u32 traumacol = 0xff000060;
 	static u32 bgcol = 0x00000080;
