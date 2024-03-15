@@ -1064,24 +1064,28 @@ s32 func0f188f9c(s32 arg0)
 
 s32 func0f189058(bool full)
 {
-	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 3 : ARRAYCOUNT(g_MpWeaponSets));
+	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 4 : ARRAYCOUNT(g_MpWeaponSets));
 }
 
 s32 func0f189088(void)
 {
-	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 2);
+	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 3);
 }
 
 char *mpGetWeaponSetName(s32 index)
 {
 	index = func0f188f9c(index);
 
-	if (index < 0 || index >= ARRAYCOUNT(g_MpWeaponSets) + 2) {
+	if (index < 0 || index >= ARRAYCOUNT(g_MpWeaponSets) + 3) {
 		return langGet(L_MPWEAPONS_041); // "Custom"
 	}
 
-	if (index == ARRAYCOUNT(g_MpWeaponSets) + 1) {
+	if (index == ARRAYCOUNT(g_MpWeaponSets) + 2) {
 		return langGet(L_MPWEAPONS_042); // "Random"
+	}
+
+	if (index == ARRAYCOUNT(g_MpWeaponSets) + 1) {
+		return (char *)"Random Dark\n"; // "Random Dark"
 	}
 
 	if (index == ARRAYCOUNT(g_MpWeaponSets)) {
@@ -1193,6 +1197,17 @@ void mpApplyWeaponSet(void)
 		}
 
 		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
+	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMDARK) {
+		s32 numoptions = mpGetNumWeaponOptions();
+
+		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
+			s32 randomweapon = random() % numoptions;
+			// Will reroll the weapon if it is a classic weapon
+			while(randomweapon > WEAPON_COMBATBOOST && randomweapon < WEAPON_MPSHIELD) {
+				randomweapon = random() % numoptions;
+			} 
+			mpSetWeaponSlot(i, randomweapon);
+		}
 	}
 }
 
