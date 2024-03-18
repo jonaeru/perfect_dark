@@ -92,7 +92,12 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	/*0x1f*/ { WEAPON_PROXIMITYMINE,    AMMOTYPE_PROXY_MINE,  5,   0,                   0,  0, MPFEATURE_WEAPON_PROXIMITYMINE,   MODEL_CHRPROXIMITYMINE, 384 },
 	/*0x20*/ { WEAPON_REMOTEMINE,       AMMOTYPE_REMOTE_MINE, 5,   0,                   0,  0, MPFEATURE_WEAPON_REMOTEMINE,      MODEL_CHRREMOTEMINE,    384 },
 	/*0x21*/ { WEAPON_LASER,            0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_LASER,           MODEL_CHRLASER,         512 },
+#ifndef PLATFORM_N64
+	// fix X-Ray Scanner model
+	/*0x22*/ { WEAPON_XRAYSCANNER,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_XRAYSCANNER,     MODEL_XRAYSPECS,        256 },
+#else
 	/*0x22*/ { WEAPON_XRAYSCANNER,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_XRAYSCANNER,     MODEL_CHRNIGHTSIGHT,    256 },
+#endif
 	/*0x23*/ { WEAPON_CLOAKINGDEVICE,   0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_CLOAKINGDEVICE,  MODEL_CHRCLOAKER,       256 },
 	/*0x24*/ { WEAPON_COMBATBOOST,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_COMBATBOOST,     MODEL_CHRSPEEDPILL,     256 },
 #ifndef PLATFORM_N64

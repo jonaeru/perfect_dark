@@ -1100,6 +1100,10 @@ void playerSpawn(void)
 			}
 		} else {
 #ifndef PLATFORM_N64
+			if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
+				invGiveSingleWeapon(WEAPON_NIGHTVISION);
+			}
+
 			if ((g_MpSetup.options & MPOPTION_SPAWNWITHWEAPON)
 					&& g_MpSetup.weapons[0] != MPWEAPON_NONE
 					&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED) {
