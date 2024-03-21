@@ -2488,6 +2488,11 @@ void mpEndMatch(void)
 		challengeConsiderMarkingComplete();
 	}
 
+	if (g_MpWeaponSetNum == WEAPONSET_RANDOM || g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE ||
+		g_MpWeaponSetNum == WEAPONSET_RANDOMDARK || g_MpWeaponSetNum == WEAPONSET_RANDOMCLASSIC) {
+		mpApplyWeaponSet();
+	}
+
 	func0f0f820c(NULL, -6);
 }
 
