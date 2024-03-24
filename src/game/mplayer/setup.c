@@ -31,6 +31,10 @@ struct menudialogdef g_MpChangeTeamNameMenuDialog;
 struct menudialogdef g_MpEditSimulantMenuDialog;
 struct menudialogdef g_MpSaveSetupNameMenuDialog;
 
+#ifndef PLATFORM_N64
+extern s32 g_MpWeaponSetNum;
+#endif
+
 MenuItemHandlerResult menuhandlerMpDropOut(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -1160,6 +1164,60 @@ struct menudialogdef g_MpSaveSetupExistsMenuDialog = {
 	NULL,
 };
 
+#ifndef PLATFORM_N64
+struct menuitem g_MpSelectWeaponsMenuItems[] = {
+	{
+		MENUITEMTYPE_LIST,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR,
+		0x00000078,
+		0x0000004d,
+		mpSelectTuneListHandler, // FIXME
+	},
+	{ MENUITEMTYPE_END },
+};
+
+struct menudialogdef g_MpSelectWeaponsMenuDialog = {
+	MENUDIALOGTYPE_DEFAULT,
+	(uintptr_t)"Select Weapons",
+	g_MpSelectWeaponsMenuItems,
+	NULL,
+	MENUDIALOGFLAG_LITERAL_TEXT,
+	NULL,
+};
+
+MenuItemHandlerResult menuhandlerMpWeaponSelection(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_CHECKDISABLED:
+	case MENUOP_CHECKHIDDEN:
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOMSELECTION) {
+			return false;
+		}
+		return true;
+	case MENUOP_SET:
+		menuPushDialog(&g_MpSelectWeaponsMenuDialog);
+	}
+
+	return 0;
+}
+
+MenuItemHandlerResult menuhandlerMpAutoRandomWeapon(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_CHECKDISABLED:
+	case MENUOP_CHECKHIDDEN:
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOM || g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE ||
+			g_MpWeaponSetNum == WEAPONSET_RANDOMSELECTION) {
+			return false;
+		}
+		return true;
+	}
+
+	return menuhandlerMpCheckboxOption(operation, item, data);
+}
+#endif
+
 struct menuitem g_MpWeaponsMenuItems[] = {
 	{
 		MENUITEMTYPE_DROPDOWN,
@@ -1241,6 +1299,32 @@ struct menuitem g_MpWeaponsMenuItems[] = {
 		0,
 		NULL,
 	},
+#ifndef PLATFORM_N64
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Auto Random\n",
+		MPOPTION_AUTORANDOM_WEAPON,
+		menuhandlerMpAutoRandomWeapon,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Select Weapons\n",
+		0,
+		menuhandlerMpWeaponSelection,
+	},
+	{
+		MENUITEMTYPE_SEPARATOR,
+		0,
+		0,
+		0,
+		0,
+		menuhandlerMpAutoRandomWeapon,
+	},
+#endif
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,

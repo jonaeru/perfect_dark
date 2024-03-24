@@ -1069,21 +1069,39 @@ s32 func0f188f9c(s32 arg0)
 
 s32 func0f189058(bool full)
 {
+#ifndef PLATFORM_N64
+	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 4 : ARRAYCOUNT(g_MpWeaponSets));
+#else
 	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 3 : ARRAYCOUNT(g_MpWeaponSets));
+#endif
 }
 
 s32 func0f189088(void)
 {
+#ifndef PLATFORM_N64
+	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 3);
+#else
 	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 2);
+#endif
 }
 
 char *mpGetWeaponSetName(s32 index)
 {
 	index = func0f188f9c(index);
 
+#ifndef PLATFORM_N64
+	if (index < 0 || index >= ARRAYCOUNT(g_MpWeaponSets) + 3) {
+#else
 	if (index < 0 || index >= ARRAYCOUNT(g_MpWeaponSets) + 2) {
+#endif
 		return langGet(L_MPWEAPONS_041); // "Custom"
 	}
+
+#ifndef PLATFORM_N64
+	if (index == ARRAYCOUNT(g_MpWeaponSets) + 2) {
+		return (char *)"Random (Selection)\n"; // "Random (Selection)"
+	}
+#endif
 
 	if (index == ARRAYCOUNT(g_MpWeaponSets) + 1) {
 		return langGet(L_MPWEAPONS_042); // "Random"
@@ -1198,6 +1216,16 @@ void mpApplyWeaponSet(void)
 		}
 
 		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
+#ifndef PLATFORM_N64
+	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMSELECTION) {
+		s32 numoptions = mpGetNumWeaponOptions() - 2;
+
+		for (i = 0; i < 5; i++) {
+			mpSetWeaponSlot(i, random() % numoptions + 1);
+		}
+
+		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
+#endif
 	}
 }
 
@@ -2457,6 +2485,16 @@ void mpEndMatch(void)
 	if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
 		challengeConsiderMarkingComplete();
 	}
+
+#ifndef PLATFORM_N64
+	if (g_MpSetup.options & MPOPTION_AUTORANDOM_WEAPON) {
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMSELECTION) {
+			mpApplyWeaponSet();
+		}
+	}
+#endif
 
 	func0f0f820c(NULL, -6);
 }

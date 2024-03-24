@@ -2890,6 +2890,7 @@
 #define MPOPTION_PAC_HIGHLIGHTTARGET    0x00080000
 #define MPOPTION_PAC_SHOWONRADAR        0x00100000
 #define MPOPTION_SPAWNWITHWEAPON        0x00200000
+#define MPOPTION_AUTORANDOM_WEAPON      0x00400000
 
 #define MPPAUSEMODE_UNPAUSED 0
 #define MPPAUSEMODE_PAUSED   1
@@ -4511,9 +4512,16 @@ enum weaponnum {
 #define WEAPONFLAG_AIMTRACK          0x40000000 // Allow drawing red box around targets in aim mode
 #define WEAPONFLAG_FIRETOACTIVATE    0x80000000 // For devices/gadgets
 
+#ifndef PLATFORM_N64
+#define WEAPONSET_RANDOMFIVE      0x0c
+#define WEAPONSET_RANDOM          0x0d
+#define WEAPONSET_RANDOMSELECTION 0x0e
+#define WEAPONSET_CUSTOM          0x0f
+#else
 #define WEAPONSET_RANDOMFIVE 0x0c
 #define WEAPONSET_RANDOM     0x0d
 #define WEAPONSET_CUSTOM     0x0e
+#endif
 
 #define WEATHERTYPE_RAIN 0
 #define WEATHERTYPE_SNOW 1
