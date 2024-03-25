@@ -1069,26 +1069,43 @@ s32 func0f188f9c(s32 arg0)
 
 s32 func0f189058(bool full)
 {
+#ifndef PLATFORM_N64
 	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 5 : ARRAYCOUNT(g_MpWeaponSets));
+#else
+	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 3 : ARRAYCOUNT(g_MpWeaponSets));
+#endif
 }
 
 s32 func0f189088(void)
 {
+#ifndef PLATFORM_N64
 	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 4);
+#else
+	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 2);
+#endif
 }
 
 char *mpGetWeaponSetName(s32 index)
 {
 	index = func0f188f9c(index);
 
+#ifndef PLATFORM_N64
 	if (index < 0 || index >= ARRAYCOUNT(g_MpWeaponSets) + 4) {
+#else
+	if (index < 0 || index >= ARRAYCOUNT(g_MpWeaponSets) + 2) {
+#endif
 		return langGet(L_MPWEAPONS_041); // "Custom"
 	}
 
+#ifndef PLATFORM_N64
 	if (index == ARRAYCOUNT(g_MpWeaponSets) + 3) {
+#else
+	if (index == ARRAYCOUNT(g_MpWeaponSets) + 1) {
+#endif
 		return langGet(L_MPWEAPONS_042); // "Random"
 	}
 
+#ifndef PLATFORM_N64
 	if (index == ARRAYCOUNT(g_MpWeaponSets) + 2) {
 		return (char *)"Random Classic\n"; // "Random Classic"
 	}
@@ -1096,6 +1113,7 @@ char *mpGetWeaponSetName(s32 index)
 	if (index == ARRAYCOUNT(g_MpWeaponSets) + 1) {
 		return (char *)"Random Dark\n"; // "Random Dark"
 	}
+#endif
 
 	if (index == ARRAYCOUNT(g_MpWeaponSets)) {
 		return langGet(L_MPWEAPONS_043); // "Random Five"
@@ -1206,13 +1224,15 @@ void mpApplyWeaponSet(void)
 		}
 
 		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
+
+#ifndef PLATFORM_N64
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMDARK) {
 		s32 numoptions = mpGetNumWeaponOptions();
 
 		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 			s32 randomweapon = random() % numoptions;
 			// Will reroll the weapon if it is a classic weapon
-			while(randomweapon > 0x24 && randomweapon < 0x2d) {
+			while (randomweapon > 0x24 && randomweapon < 0x2d) {
 				randomweapon = random() % numoptions;
 			} 
 			mpSetWeaponSlot(i, randomweapon);
@@ -1223,11 +1243,12 @@ void mpApplyWeaponSet(void)
 		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 			s32 randomweapon = random() % numoptions;
 			// Will reroll the weapon if it is a Perfect Dark weapon
-			while(randomweapon <= 0x24 && randomweapon != 0x00) {
+			while (randomweapon <= 0x24 && randomweapon != 0x00) {
 				randomweapon = random() % numoptions;
 			} 
 			mpSetWeaponSlot(i, randomweapon);
 		}
+#endif
 	}
 }
 
@@ -2488,10 +2509,16 @@ void mpEndMatch(void)
 		challengeConsiderMarkingComplete();
 	}
 
-	if (g_MpWeaponSetNum == WEAPONSET_RANDOM || g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE ||
-		g_MpWeaponSetNum == WEAPONSET_RANDOMDARK || g_MpWeaponSetNum == WEAPONSET_RANDOMCLASSIC) {
-		mpApplyWeaponSet();
+#ifndef PLATFORM_N64
+	if (g_MpSetup.options & MPOPTION_AUTORANDOM_WEAPON) {
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMDARK
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMCLASSIC) {
+			mpApplyWeaponSet();
+		}
 	}
+#endif
 
 	func0f0f820c(NULL, -6);
 }
