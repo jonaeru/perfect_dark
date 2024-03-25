@@ -4519,10 +4519,10 @@ enum weaponnum {
 #define WEAPONSET_RANDOM     0x0d
 #define WEAPONSET_CUSTOM     0x0e
 #else
-#define WEAPONSET_RANDOMDARK	0x0d
-#define WEAPONSET_RANDOMCLASSIC	0x0e
-#define WEAPONSET_RANDOM	    0x0f
-#define WEAPONSET_CUSTOM	    0x10
+#define WEAPONSET_RANDOMDARK    0x0d
+#define WEAPONSET_RANDOMCLASSIC 0x0e
+#define WEAPONSET_RANDOM        0x0f
+#define WEAPONSET_CUSTOM        0x10
 #endif
 
 #define WEATHERTYPE_RAIN 0
