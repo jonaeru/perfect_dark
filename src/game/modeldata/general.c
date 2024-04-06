@@ -439,7 +439,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x0021*/ { NULL, FILE_PA51_CRATE2,            0x1000 },
 	/*0x0022*/ { NULL, FILE_PA51_CRATE3,            0x1000 },
 	/*0x0023*/ { NULL, FILE_PA51_EXP1,              0x0199 },
+#ifdef PLATFORM_N64
 	/*0x0024*/ { NULL, FILE_PA51_UNEXP1,            0x1000 },
+#else // GoldenEye X Mod
+	/*0x0024*/ { NULL, FILE_PA51_UNEXP1,            0x0199 },
+#endif
 	/*0x0025*/ { NULL, FILE_PA51_EXP2,              0x0199 },
 	/*0x0026*/ { NULL, FILE_PA51_UNEXP2,            0x1000 },
 	/*0x0027*/ { NULL, FILE_PA51_UNEXP3,            0x0199 },
@@ -596,7 +600,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x00be*/ { NULL, FILE_PLAB_MAINFRAME,         0x1000 },
 	/*0x00bf*/ { NULL, FILE_PDD_LABDOOR,            0x1000 },
 	/*0x00c0*/ { NULL, FILE_PDD_LAB_DOORTOP,        0x1000 },
+#ifdef PLATFORM_N64
 	/*0x00c1*/ { NULL, FILE_PMULTI_AMMO_CRATE,      0x1000 },
+#else // GoldenEye X Mod
+	/*0x00c1*/ { NULL, FILE_PMULTI_AMMO_CRATE,      0x0199 },
+#endif
 	/*0x00c2*/ { NULL, FILE_PCHRCHAIN,              0x1000 },
 	/*0x00c3*/ { NULL, FILE_PTDOOR,                 0x1000 },
 	/*0x00c4*/ { NULL, FILE_PCI_SOFA,               0x1000 },
@@ -776,7 +784,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x0172*/ { NULL, FILE_PDD_EAR_CHAIR,          0x1000 },
 	/*0x0173*/ { NULL, FILE_PAIRBASE_TABLE2,        0x1000 },
 	/*0x0174*/ { NULL, FILE_PAIRBASE_CHAIR2,        0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0175*/ { NULL, FILE_PMISC_CRATE,            0x1000 },
+#else // GoldenEye X Mod
+	/*0x0175*/ { NULL, FILE_PMISC_CRATE,            0x0199 },
+#endif
 	/*0x0176*/ { NULL, FILE_PA51_CRATE1,            0x1000 },
 	/*0x0177*/ { NULL, FILE_PMISC_IRSPECS,          0x0c00 },
 	/*0x0178*/ { NULL, FILE_PA51_ROOFGUN,           0x0199 },
@@ -878,7 +890,11 @@ s8 g_PropExplosionTypes[] = {
 	/*0x0018*/ EXPLOSIONTYPE_NONE,
 	/*0x0019*/ EXPLOSIONTYPE_LAPTOP,
 	/*0x001a*/ EXPLOSIONTYPE_NONE,
+	#ifdef PLATFORM_N64
 	/*0x001b*/ EXPLOSIONTYPE_6,
+	#else // GoldenEye X Mod
+	/*0x001b*/ EXPLOSIONTYPE_NONE,
+	#endif
 	/*0x001c*/ EXPLOSIONTYPE_NONE,
 	/*0x001d*/ EXPLOSIONTYPE_NONE,
 	/*0x001e*/ EXPLOSIONTYPE_NONE,
@@ -891,9 +907,17 @@ s8 g_PropExplosionTypes[] = {
 	/*0x0025*/ EXPLOSIONTYPE_NONE,
 	/*0x0026*/ EXPLOSIONTYPE_NONE,
 	/*0x0027*/ EXPLOSIONTYPE_NONE,
+	#ifdef PLATFORM_N64
 	/*0x0028*/ EXPLOSIONTYPE_LAPTOP,
+	#else // GoldenEye X Mod
+	/*0x0028*/ EXPLOSIONTYPE_NONE,
+	#endif
 	/*0x0029*/ EXPLOSIONTYPE_LAPTOP,
+	#ifdef PLATFORM_N64
 	/*0x002a*/ EXPLOSIONTYPE_LAPTOP,
+	#else // GoldenEye X Mod
+	/*0x002a*/ EXPLOSIONTYPE_NONE,
+	#endif
 	/*0x002b*/ EXPLOSIONTYPE_NONE,
 	/*0x002c*/ EXPLOSIONTYPE_NONE,
 	/*0x002d*/ EXPLOSIONTYPE_NONE,
