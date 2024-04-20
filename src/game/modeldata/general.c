@@ -435,9 +435,17 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x001d*/ { NULL, FILE_PA51_VERT_DOOR_ST,      0x1000 },
 	/*0x001e*/ { NULL, FILE_PA51_HORIZ_DOOR_GL,     0x1000 },
 	/*0x001f*/ { NULL, FILE_PA51_HORIZ_DOOR_SECRET, 0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0020*/ { NULL, FILE_PA51_CRATE1,            0x1000 },
+#else // GoldenEye X Mod
+	/*0x0020*/ { NULL, FILE_PA51_CRATE1,            0x0199 },
+#endif
 	/*0x0021*/ { NULL, FILE_PA51_CRATE2,            0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0022*/ { NULL, FILE_PA51_CRATE3,            0x1000 },
+#else // GoldenEye X Mod
+	/*0x0022*/ { NULL, FILE_PA51_CRATE3,            0x0199 },
+#endif
 	/*0x0023*/ { NULL, FILE_PA51_EXP1,              0x0199 },
 #ifdef PLATFORM_N64
 	/*0x0024*/ { NULL, FILE_PA51_UNEXP1,            0x1000 },
@@ -488,8 +496,13 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x004e*/ { NULL, FILE_PPDTHREE,               0x0199 },
 	/*0x004f*/ { NULL, FILE_PPDFOUR,                0x0199 },
 	/*0x0050*/ { NULL, FILE_PDD_HOVCOP,             0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0051*/ { NULL, FILE_PDD_HOVMOTO,            0x1000 },
 	/*0x0052*/ { NULL, FILE_PDD_HOVTRUCK,           0x1000 },
+#else // GoldenEye X Mod
+	/*0x0051*/ { NULL, FILE_PDD_HOVMOTO,            0x0199 },
+	/*0x0052*/ { NULL, FILE_PDD_HOVTRUCK,           0x0199 },
+#endif
 	/*0x0053*/ { NULL, FILE_PDD_HOVCAR,             0x1000 },
 	/*0x0054*/ { NULL, FILE_PDD_HOVCAB,             0x1000 },
 	/*0x0055*/ { NULL, FILE_PDD_AC_UNEXP,           0x1000 },
@@ -584,7 +597,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x00ae*/ { NULL, FILE_PCH_SHUTTER1,           0x1000 },
 	/*0x00af*/ { NULL, FILE_PCCTV_PD,               0x1000 },
 	/*0x00b0*/ { NULL, FILE_PCOMHUB,                0x1000 },
+#ifdef PLATFORM_N64
 	/*0x00b1*/ { NULL, FILE_PQUADPOD,               0x1000 },
+#else // GoldenEye X Mod
+	/*0x00b1*/ { NULL, FILE_PQUADPOD,               0x0199 },
+#endif
 	/*0x00b2*/ { NULL, FILE_PPD_CONSOLE,            0x1000 },
 	/*0x00b3*/ { NULL, FILE_PDD_GRATE,              0x1000 },
 	/*0x00b4*/ { NULL, FILE_PLIFT_PLATFORM,         0x1000 },
@@ -637,7 +654,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x00df*/ { NULL, FILE_PSK_SUNSHAD2,           0x1000 },
 	/*0x00e0*/ { NULL, FILE_PSK_SUNNOSHAD1,         0x1000 },
 	/*0x00e1*/ { NULL, FILE_PSK_SUNNOSHAD2,         0x1000 },
+#ifdef PLATFORM_N64
 	/*0x00e2*/ { NULL, FILE_PBARREL,                0x1000 },
+#else // GoldenEye X Mod
+	/*0x00e2*/ { NULL, FILE_PBARREL,                0x0199 },
+#endif
 	/*0x00e3*/ { NULL, FILE_PGLASS_FLOOR,           0x0199 },
 	/*0x00e4*/ { NULL, FILE_PESCA_STEP,             0x0199 },
 	/*0x00e5*/ { NULL, FILE_PMATRIX_LIFT,           0x0199 },
@@ -752,7 +773,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x0152*/ { NULL, FILE_PTHUMBPRINTSCANNER,     0x1000 },
 	/*0x0153*/ { NULL, FILE_PRETINALOCK,            0x1000 },
 	/*0x0154*/ { NULL, FILE_PCARDLOCK,              0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0155*/ { NULL, FILE_PGOODSTATION,           0x1000 },
+#else // GoldenEye X Mod
+	/*0x0155*/ { NULL, FILE_PGOODSTATION,           0x0199 },
+#endif
 	/*0x0156*/ { NULL, FILE_PGOODPC,                0x1000 },
 	/*0x0157*/ { NULL, FILE_PCHRAUTOGUN,            0x0199 },
 	/*0x0158*/ { NULL, FILE_PG5BIGCHAIR,            0x0199 },
@@ -806,18 +831,34 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x0184*/ { NULL, FILE_PA51GATE_L,             0x1000 },
 	/*0x0185*/ { NULL, FILE_PAF1_LAMP,              0x1000 },
 	/*0x0186*/ { NULL, FILE_PAF1_TOILET,            0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0187*/ { NULL, FILE_PAF1_DOORBIG2,          0x1000 },
 	/*0x0188*/ { NULL, FILE_PAF1_PHONE,             0x1000 },
 	/*0x0189*/ { NULL, FILE_PAF1_CARGODOOR,         0x1000 },
+#else // GoldenEye X Mod
+	/*0x0187*/ { NULL, FILE_PAF1_DOORBIG2,          0x0199 },
+	/*0x0188*/ { NULL, FILE_PAF1_PHONE,             0x0199 },
+	/*0x0189*/ { NULL, FILE_PAF1_CARGODOOR,         0x0199 },
+#endif
 	/*0x018a*/ { NULL, FILE_PG5_ALARM,              0x1000 },
 	/*0x018b*/ { NULL, FILE_PG5_LASER_SWITCH,       0x1000 },
+#ifdef PLATFORM_N64
 	/*0x018c*/ { NULL, FILE_PSK_TEMPLECOLUMN4,      0x1000 },
 	/*0x018d*/ { NULL, FILE_PCOREHATCH,             0x1000 },
 	/*0x018e*/ { NULL, FILE_PA51GRATE,              0x1000 },
+#else // GoldenEye X Mod
+	/*0x018c*/ { NULL, FILE_PSK_TEMPLECOLUMN4,      0x0199 },
+	/*0x018d*/ { NULL, FILE_PCOREHATCH,             0x0199 },
+	/*0x018e*/ { NULL, FILE_PA51GRATE,              0x0199 },
+#endif
 	/*0x018f*/ { NULL, FILE_PAF1ESCAPEDOOR,         0x1000 },
 	/*0x0190*/ { NULL, FILE_PPRESCAPSULE,           0x1000 },
 	/*0x0191*/ { NULL, FILE_PSKEDARBRIDGE,          0x1000 },
+#ifdef PLATFORM_N64
 	/*0x0192*/ { NULL, FILE_PPELAGICDOOR2,          0x1000 },
+#else // GoldenEye X Mod
+	/*0x0192*/ { NULL, FILE_PPELAGICDOOR2,          0x0199 },
+#endif
 	/*0x0193*/ { NULL, FILE_PTTB_BOX,               0x0066 },
 	/*0x0194*/ { NULL, FILE_PINSTFRONTDOOR,         0x1000 },
 	/*0x0195*/ { NULL, FILE_PCHRLASER,              0x0199 },
@@ -846,7 +887,11 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x01ac*/ { NULL, FILE_PSK_WINDOW1,            0x1000 },
 	/*0x01ad*/ { NULL, FILE_PSK_HANGARDOORB_TOP,    0x1000 },
 	/*0x01ae*/ { NULL, FILE_PSK_HANGARDOORB_BOT,    0x1000 },
+#ifdef PLATFORM_N64
 	/*0x01af*/ { NULL, FILE_PAF1_INNERDOOR,         0x1000 },
+#else // GoldenEye X Mod
+	/*0x01af*/ { NULL, FILE_PAF1_INNERDOOR,         0x0199 },
+#endif
 	/*0x01b0*/ { NULL, FILE_PLASER_POST,            0x1000 },
 	/*0x01b1*/ { NULL, FILE_PTARGETAMP,             0x0199 },
 	/*0x01b2*/ { NULL, FILE_PSK_LIFT,               0x1000 },
@@ -903,9 +948,17 @@ s8 g_PropExplosionTypes[] = {
 	/*0x0025*/ EXPLOSIONTYPE_NONE,
 	/*0x0026*/ EXPLOSIONTYPE_NONE,
 	/*0x0027*/ EXPLOSIONTYPE_NONE,
+#ifdef PLATFORM_N64
 	/*0x0028*/ EXPLOSIONTYPE_LAPTOP,
+#else // GoldenEye X Mod
+	/*0x0028*/ EXPLOSIONTYPE_A51TABLE,
+#endif
 	/*0x0029*/ EXPLOSIONTYPE_LAPTOP,
+#ifdef PLATFORM_N64
 	/*0x002a*/ EXPLOSIONTYPE_LAPTOP,
+#else // GoldenEye X Mod
+	/*0x002a*/ EXPLOSIONTYPE_A51TABLE,
+#endif
 	/*0x002b*/ EXPLOSIONTYPE_NONE,
 	/*0x002c*/ EXPLOSIONTYPE_NONE,
 	/*0x002d*/ EXPLOSIONTYPE_NONE,
@@ -1097,7 +1150,11 @@ s8 g_PropExplosionTypes[] = {
 	/*0x00e7*/ EXPLOSIONTYPE_NONE,
 	/*0x00e8*/ EXPLOSIONTYPE_NONE,
 	/*0x00e9*/ EXPLOSIONTYPE_NONE,
+#ifdef PLATFORM_N64
 	/*0x00ea*/ EXPLOSIONTYPE_11,
+#else // GoldenEye X Mod
+	/*0x00ea*/ EXPLOSIONTYPE_GASBARREL,
+#endif
 	/*0x00eb*/ EXPLOSIONTYPE_NONE,
 	/*0x00ec*/ EXPLOSIONTYPE_NONE,
 	/*0x00ed*/ EXPLOSIONTYPE_NONE,
@@ -1194,7 +1251,11 @@ s8 g_PropExplosionTypes[] = {
 	/*0x0148*/ EXPLOSIONTYPE_NONE,
 	/*0x0149*/ EXPLOSIONTYPE_NONE,
 	/*0x014a*/ EXPLOSIONTYPE_NONE,
+#ifdef PLATFORM_N64
 	/*0x014b*/ EXPLOSIONTYPE_ROCKET,
+#else // GoldenEye X Mod
+	/*0x014b*/ EXPLOSIONTYPE_A51TABLE,
+#endif
 	/*0x014c*/ EXPLOSIONTYPE_7,
 	/*0x014d*/ EXPLOSIONTYPE_NONE,
 	/*0x014e*/ EXPLOSIONTYPE_NONE,
@@ -1212,7 +1273,11 @@ s8 g_PropExplosionTypes[] = {
 	/*0x015a*/ EXPLOSIONTYPE_6,
 	/*0x015b*/ EXPLOSIONTYPE_6,
 	/*0x015c*/ EXPLOSIONTYPE_6,
+#ifdef PLATFORM_N64
 	/*0x015d*/ EXPLOSIONTYPE_8,
+#else // GoldenEye X Mod
+	/*0x015d*/ EXPLOSIONTYPE_7,
+#endif
 	/*0x015e*/ EXPLOSIONTYPE_7,
 	/*0x015f*/ EXPLOSIONTYPE_7,
 	/*0x0160*/ EXPLOSIONTYPE_NONE,
@@ -1267,7 +1332,11 @@ s8 g_PropExplosionTypes[] = {
 	/*0x018d*/ EXPLOSIONTYPE_6,
 	/*0x018e*/ EXPLOSIONTYPE_NONE,
 	/*0x018f*/ EXPLOSIONTYPE_NONE,
+#ifdef PLATFORM_N64
 	/*0x0190*/ EXPLOSIONTYPE_6,
+#else // GoldenEye X Mod
+	/*0x0190*/ EXPLOSIONTYPE_NONE,
+#endif
 	/*0x0191*/ EXPLOSIONTYPE_NONE,
 	/*0x0192*/ EXPLOSIONTYPE_7,
 	/*0x0193*/ EXPLOSIONTYPE_7,

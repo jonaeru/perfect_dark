@@ -114,24 +114,30 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_TEST_MP2,      15, 20000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_AREA52,     15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_WAREHOUSE,  15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_MP_CARPARK,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP6,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#endif
 	{ STAGE_TEST_MP7,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP8,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_MP_RUINS,      15, 10000,   0,  0,  0, RGB(0x030000), NO_SUNS,            1, RGB(0x82e6aa),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#endif
 	{ STAGE_MP_SEWERS,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x646464),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_FELICITY,   10, 10000,   0,  0,  0, RGB(0x040500), NO_SUNS,            1, RGB(0x64d282),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 #ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_MP_FORTRESS,   15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x5a90a5),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 #endif
 	{ STAGE_MP_VILLA,      15, 10000,   0,  0,  0, RGB(0x8888dc), NO_SUNS,            1, RGB(0xffaa2a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_MP14,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#endif
 	{ STAGE_MP_GRID,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP16,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 #ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_MP17,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-#endif
 	{ STAGE_TEST_MP18,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#endif
 	{ STAGE_TEST_MP19,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP20,     15, 20000,   0,  0,  0, RGB(0x00103c), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ 0 },
