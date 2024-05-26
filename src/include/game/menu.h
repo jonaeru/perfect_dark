@@ -46,7 +46,7 @@ struct menuitem *dialogFindFirstItem(struct menudialog *dialog);
 struct menuitem *dialogFindFirstItemRight(struct menudialog *dialog);
 void dialogChangeItemFocusVertically(struct menudialog *dialog, s32 updown);
 s32 dialogChangeItemFocusHorizontally(struct menudialog *dialog, s32 leftright);
-s32 dialogChangeItemFocus(struct menudialog *dialog, s32 leftright, s32 updown);
+s32 dialogChangeItemFocus(struct menudialog *dialog, struct menuinputs *inputs);
 void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *arg1, struct menu *menu);
 void menuPushDialog(struct menudialogdef *dialogdef);
 

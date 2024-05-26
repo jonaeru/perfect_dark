@@ -65,4 +65,8 @@ void propsDefragRoomProps(void);
 void propGetBbox(struct prop *prop, f32 *radius, f32 *ymax, f32 *ymin);
 bool propUpdateGeometry(struct prop *prop, u8 **start, u8 **end);
 
+#ifndef PLATFORM_N64
+bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, struct coord *endpos3d);
+#endif
+
 #endif

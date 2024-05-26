@@ -732,9 +732,15 @@ bool menuitemListTick(struct menuitem *item, struct menuinputs *inputs, u32 tick
 				data->list.targetoffsety = menuitemListGetOffsetY(data->list.index, item);
 			}
 
+#ifdef PLATFORM_N64
 			if (inputs->updown) {
 				prev2 = data->list.index;
 				data->list.index += inputs->updown;
+#else
+			if (inputs->updown || inputs->mousescroll) {
+				prev2 = data->list.index;
+				data->list.index += inputs->updown + inputs->mousescroll;
+#endif
 
 				if (data->list.index < 0) {
 					data->list.index = handlerdata.list.value - 1;
@@ -1359,6 +1365,34 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 	if (tickflags & MENUTICKFLAG_ITEMISFOCUSED) {
 		s16 prevcol = kb->col;
 		s16 prevrow = kb->row;
+
+#ifndef PLATFORM_N64
+		// handle mouse
+		struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
+		if (dialog && g_MenuUsingMouse && !inputs->leftright && !inputs->updown) {
+			const s32 dleft = dialog->x + 4;
+			const s32 dright = dleft + 12 * 10;
+			const s32 dtop = dialog->y + 13 + 12;
+			const s32 dbottom = dtop + 11 * 5;
+			const s32 mx = inputs->mousex;
+			const s32 my = inputs->mousey;
+			if (mx > dleft && mx < dright && my > dtop && my < dbottom) {
+				kb->row = (my - dtop) / 11;
+				kb->col = (mx - dleft) / 12;
+				if (kb->row == 4) {
+					if (kb->col < 2) {
+						kb->col = 0;
+					} else if (kb->col < 5) {
+						kb->col = 2;
+					} else if (kb->col < 8) {
+						kb->col = 5;
+					} else {
+						kb->col = 8;
+					}
+				}
+			}
+		}
+#endif
 
 		// Handle left/right movement
 		// In most cases the loop only runs once, but on row 4 the buttons span
@@ -2420,6 +2454,34 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 	f32 f14;
 
 	if ((tickflags & MENUTICKFLAG_ITEMISFOCUSED)) {
+#ifndef PLATFORM_N64
+		if (g_MenuUsingMouse && inputs->select) {
+			// handle mouse
+			struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
+			if (dialog) {
+				const s32 left = dialog->x + dialog->width - 82;
+				const s32 right = dialog->x + dialog->width - 7;
+				const s32 size = right - left;
+				const s32 delta = inputs->mousex - left;
+				if (delta >= -8 && delta <= size + 8) {
+					index = (delta / (f32)size) * item->param3;
+					if (index < 0) {
+						index = 0;
+					}
+					if (index > item->param3) {
+						index = item->param3;
+					}
+					if (item->handler) {
+						item->handler(MENUOP_GET, item, &handlerdata);
+						handlerdata.slider.value = index;
+						item->handler(MENUOP_SET, item, &handlerdata);
+					}
+					return true;
+				}
+			}
+		}
+#endif
+
 		if (tickflags & MENUTICKFLAG_DIALOGISDIMMED) {
 			if (item->handler) {
 				item->handler(MENUOP_GETSLIDER, item, &handlerdata);

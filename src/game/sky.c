@@ -2518,7 +2518,7 @@ void skyCreateSunArtifact(struct artifact *artifact, s32 x, s32 y)
 		sunpos.x = env->suns[i].pos[0];
 		sunpos.y = env->suns[i].pos[1];
 		sunpos.z = env->suns[i].pos[2];
-		artifact->unk02 = artifactTestLos(&sunpos, &zero) * 0xfffc;
+		artifact->unk02 = artifactTestLos(&sunpos, &zero, x, y) * 0xfffc;
 #endif
 		artifact->unk08 = &g_ZbufPtr1[(s32)camGetScreenWidth() * y + x];
 		artifact->unk0c.u16_2 = x;

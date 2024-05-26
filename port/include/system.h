@@ -34,6 +34,12 @@ void *sysMemAlloc(const u32 size);
 void *sysMemZeroAlloc(const u32 size);
 void sysMemFree(void *ptr);
 
+// hns is specified in 100ns units
+void sysSleep(const s64 hns);
+
+// yield CPU if supported (e.g. during a busy loop)
+void sysCpuRelax(void);
+
 void crashInit(void);
 void crashShutdown(void);
 

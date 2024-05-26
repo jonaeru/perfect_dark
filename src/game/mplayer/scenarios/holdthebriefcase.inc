@@ -63,9 +63,25 @@ struct menuitem g_HtbOptionsMenuItems[] = {
 		MENUITEMTYPE_CHECKBOX,
 		0,
 		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Spawn With Weapon",
+		(uintptr_t)"Start Armed",
 		MPOPTION_SPAWNWITHWEAPON,
 		menuhandlerMpCheckboxOption,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"No Drug Blur",
+		MPOPTION_NODRUGBLUR,
+		menuhandlerMpCheckboxOption,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR,
+		L_OPTIONS_257, // "Friendly Fire"
+		MPOPTION_FRIENDLYFIRE,
+		menuhandlerMpDisplayTeam,
 	},
 #endif
 	{

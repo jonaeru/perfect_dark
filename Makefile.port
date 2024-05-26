@@ -36,7 +36,7 @@ ROMID ?= ntsc-final
 #
 # Supported values: -O0, -O1, -O2, -O3, -Os, -Og
 
-GCC_OPT_LVL = -O0
+GCC_OPT_LVL = -Og
 
 # ROM_SIZE - The desired ROM size in megabytes.
 #
@@ -86,8 +86,12 @@ endif
 
 # Set whether the target arch is 64- or 32-bit.
 ifneq (,$(findstring 64,$(TARGET_PLATFORM))$(findstring armv8,$(TARGET_PLATFORM)))
+  # TODO: we're not 64-bit compatible yet, error out if building the actual game
+  ifeq (,$(findstring clean,$(MAKECMDGOALS)))
+    $(error 64-bit target platforms are not supported yet)
+  endif
   TARGET_64BIT = 1
-else
+else # TODO
   TARGET_64BIT = 0
 endif
 
@@ -133,7 +137,6 @@ DEFINES := \
   PAL=$(IS_PAL) \
   PIRACYCHECKS=0 \
   ROM_SIZE=$(ROM_SIZE) \
-  PLATFORM_64BIT=1 \
   _LANGUAGE_C=1
 
 ifeq ($(DEBUG),1)
@@ -148,12 +151,14 @@ G_DIR := src/generated/$(ROMID)
 
 ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
   TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
-  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -static-libstdc++ -ldbghelp
-  ifeq (1,$(TARGET_64BIT))
-    TOOLCHAIN ?= x86_64-w64-mingw32-
-  else
+  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -ldbghelp
   # on windows/mingw we need this to be built with a 32-bit compiler so it finds the correct libs
-    TOOLCHAIN ?= i686-w64-mingw32-
+  TOOLCHAIN ?= i686-w64-mingw32-
+  # on GCC link libstdc++ statically
+  ifeq (,$(findstring clang,$(CC))$(findstring clang,$(CXX)))
+    TARGET_LDFLAGS += -static-libstdc++
+  else
+    TARGET_LDFLAGS += -lstdc++
   endif
 else # assume *nix
   TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
@@ -234,8 +239,8 @@ INCLUDES = \
   -I port/include
 
 TOOLCHAIN ?=
-CC := $(TOOLCHAIN)gcc -std=c11
-CXX := $(TOOLCHAIN)g++ -std=c++20
+CC ?= $(TOOLCHAIN)gcc
+CXX ?= $(TOOLCHAIN)g++
 ifneq (,$(CXX_O_FILES))
   LD := $(CXX)
 else
@@ -251,7 +256,6 @@ COMMON_CFLAGS := $(C_DEFINES) -DAVOID_UB=1 $(INCLUDES) $(TARGET_CFLAGS) -g \
   -fwrapv \
   -Wall \
   -Wno-address \
-  -Wno-aggressive-loop-optimizations \
   -Wno-int-in-bool-context \
   -Wno-misleading-indentation \
   -Wno-missing-braces \
@@ -262,8 +266,8 @@ COMMON_CFLAGS := $(C_DEFINES) -DAVOID_UB=1 $(INCLUDES) $(TARGET_CFLAGS) -g \
   -Wno-unused-variable \
   -Wno-format-truncation
 
-CFLAGS := $(COMMON_CFLAGS) -Wno-pointer-sign
-CXXFLAGS := $(COMMON_CFLAGS) -Wno-unused-function
+CFLAGS := -std=c11 $(COMMON_CFLAGS) -Wno-pointer-sign
+CXXFLAGS := -std=c++20 $(COMMON_CFLAGS) -Wno-unused-function
 LDFLAGS := $(TARGET_LDFLAGS)
 
 # Make ROMID available as an environment variable to all tooling.
@@ -272,7 +276,7 @@ export ROMID
 
 BIN := $(B_DIR)/$(BIN_NAME)
 
-default: $(JSON_HEADERS) $(BIN)
+default: $(BIN)
 
 ################################################################################
 # Asset Manager header generation
@@ -310,11 +314,11 @@ ifneq ($(CV2PDB),)
 	$(CV2PDB) $(BIN)
 endif
 
-$(B_DIR)/%.o: %.c
+$(B_DIR)/%.o: %.c $(JSON_HEADERS)
 	@mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) $(OPT_LVL) -o $@ $<
 
-$(B_DIR)/%.o: %.cpp
+$(B_DIR)/%.o: %.cpp $(JSON_HEADERS)
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) $(OPT_LVL) -o $@ $<
 

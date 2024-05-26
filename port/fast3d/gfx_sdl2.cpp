@@ -9,24 +9,6 @@
 #include "gfx_window_manager_api.h"
 #include "gfx_screen_config.h"
 
-// define a way to yield the cpu when in a busy wait
-#ifdef PLATFORM_WIN32
-// winapi provides a yield macro
-#include <windows.h>
-#define DO_YIELD() YieldProcessor()
-#elif defined(PLATFORM_X86) || defined(PLATFORM_X86_64)
-// this should work even if the code is not built with SSE enabled, at least on gcc and clang,
-// but if it doesn't we'll have to use  __builtin_ia32_pause() or something
-#include <immintrin.h>
-#define DO_YIELD() _mm_pause()
-#elif defined(PLATFORM_ARM)
-// same as YieldProcessor() on ARM Windows
-#define DO_YIELD() __asm__ volatile("dmb ishst\n\tyield":::"memory")
-#else
-// fuck it
-#define DO_YIELD() do { } while (0)
-#endif
-
 static SDL_Window* wnd;
 static SDL_GLContext ctx;
 static SDL_Renderer* renderer;
@@ -35,6 +17,7 @@ static bool vsync_enabled = true;
 // OTRTODO: These are redundant. Info can be queried from SDL.
 static int window_width = DESIRED_SCREEN_WIDTH;
 static int window_height = DESIRED_SCREEN_HEIGHT;
+static uint32_t fullscreen_flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
 static bool fullscreen_state;
 static bool maximized_state;
 static bool is_running = true;
@@ -44,34 +27,15 @@ static int target_fps = 120; // above 60 since vsync is enabled by default
 static uint64_t previous_time;
 static uint64_t qpc_freq;
 
-#ifdef PLATFORM_WIN32
-// on win32 we use waitable timers instead of nanosleep
-typedef HANDLE WINAPI (*CREATEWAITABLETIMEREXAFN)(LPSECURITY_ATTRIBUTES, LPCSTR, DWORD, DWORD);
-static HANDLE timer;
-static CREATEWAITABLETIMEREXAFN pfnCreateWaitableTimerExA;
-#endif
-
 #define FRAME_INTERVAL_US_NUMERATOR 1000000
 #define FRAME_INTERVAL_US_DENOMINATOR (target_fps)
-
-static inline void do_sleep(const int64_t left) {
-#ifdef PLATFORM_WIN32
-    static LARGE_INTEGER li;
-    li.QuadPart = -left;
-    SetWaitableTimer(timer, &li, 0, nullptr, nullptr, false);
-    WaitForSingleObject(timer, INFINITE);
-#else
-    const timespec spec = { 0, left * 100 };
-    nanosleep(&spec, nullptr);
-#endif
-}
 
 static void set_fullscreen(bool on, bool call_callback) {
     if (fullscreen_state == on) {
         return;
     }
     fullscreen_state = on;
-    SDL_SetWindowFullscreen(wnd, on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    SDL_SetWindowFullscreen(wnd, on ? fullscreen_flag : 0);
     if (call_callback && on_fullscreen_changed_callback) {
         on_fullscreen_changed_callback(on);
     }
@@ -97,10 +61,20 @@ static void gfx_sdl_get_active_window_refresh_rate(uint32_t* refresh_rate) {
     *refresh_rate = mode.refresh_rate;
 }
 
-static void gfx_sdl_init(const char* game_name, const char* gfx_api_name, bool start_in_fullscreen, bool start_maximized, uint32_t width,
-                         uint32_t height, int32_t posX, int32_t posY) {
-    window_width = width;
-    window_height = height;
+static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
+    window_width = set->width;
+    window_height = set->height;
+
+#ifdef SDL_HINT_VIDEO_HIGHDPI_DISABLED
+    if (!set->allow_hidpi) {
+        // HiDPI control, if available
+        SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+#if defined(PLATFORM_WIN32) && defined(SDL_HINT_WINDOWS_DPI_AWARENESS)
+        // if HiDPI is disabled, declare ourselves DPI aware to get 1:1 window size on Windows
+        SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitor");
+#endif
+    }
+#endif
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         sysFatalError("Could not init SDL:\n%s", SDL_GetError());
@@ -114,18 +88,38 @@ static void gfx_sdl_init(const char* game_name, const char* gfx_api_name, bool s
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
     }
 
-    char title[512];
-    snprintf(title, sizeof(title), "%s (%s)", game_name, gfx_api_name);
-
+    int posX = set->x;
+    int posY = set->y;
     int display_in_use = SDL_GetWindowDisplayIndex(wnd);
     if (display_in_use < 0) { // Fallback to default if out of bounds
         posX = 100;
         posY = 100;
     }
 
-    const Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL;
+    if (set->fullscreen_is_exclusive) {
+        fullscreen_flag = SDL_WINDOW_FULLSCREEN;
+    }
 
-    wnd = SDL_CreateWindow(title, posX, posY, window_width, window_height, flags);
+    Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
+
+    // if fullscreen was requested, start the window in fullscreen right away
+    if (set->fullscreen) {
+        flags |= fullscreen_flag;
+        fullscreen_state = true;
+    }
+
+    if (set->maximized) {
+        flags |= SDL_WINDOW_MAXIMIZED;
+        maximized_state = true;
+    }
+
+#ifdef SDL_WINDOW_ALLOW_HIGHDPI
+    if (set->allow_hidpi) {
+        flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+    }
+#endif
+
+    wnd = SDL_CreateWindow(set->title, posX, posY, window_width, window_height, flags);
     if (!wnd) {
         sysFatalError("Could not open SDL window:\n%s", SDL_GetError());
     }
@@ -180,23 +174,6 @@ static void gfx_sdl_init(const char* game_name, const char* gfx_api_name, bool s
     SDL_GL_SetSwapInterval(1);
 
     qpc_freq = SDL_GetPerformanceFrequency();
-
-#ifdef PLATFORM_WIN32
-    // this function is only present on Vista+, so try to import it from kernel32 by hand
-    pfnCreateWaitableTimerExA = (CREATEWAITABLETIMEREXAFN)GetProcAddress(GetModuleHandleA("kernel32.dll"), "CreateWaitableTimerExA");
-    if (pfnCreateWaitableTimerExA) {
-        // function exists, try to create a hires timer
-        timer = pfnCreateWaitableTimerExA(nullptr, nullptr, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);
-    }
-    if (!timer) {
-        // no function or hires timers not supported, fallback to lower resolution timer
-        sysLogPrintf(LOG_WARNING, "SDL: hires waitable timers not available");
-        timer = CreateWaitableTimerA(nullptr, false, nullptr);
-    }
-#endif
-
-    set_maximize_window(start_maximized);
-    set_fullscreen(start_in_fullscreen, false);
 }
 
 static void gfx_sdl_close(void) {
@@ -209,6 +186,18 @@ static void gfx_sdl_set_fullscreen_changed_callback(void (*on_fullscreen_changed
 
 static void gfx_sdl_set_fullscreen(bool enable) {
     set_fullscreen(enable, true);
+}
+
+static void gfx_sdl_set_fullscreen_exclusive(bool enable) {
+    const uint32_t newflag = enable ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP;
+    if (fullscreen_flag != newflag) {
+        fullscreen_flag = newflag;
+        // reset fullscreen to take new value into account if it already is in fullscreen
+        if (fullscreen_state) {
+            fullscreen_state = false;
+            set_fullscreen(enable, true);
+        }
+    }
 }
 
 static void gfx_sdl_set_maximize_window(bool enable) {
@@ -272,11 +261,11 @@ static inline void sync_framerate_with_timer(void) {
     // We want to exit a bit early, so we can busy-wait the rest to never miss the deadline
     left -= 15000UL;
     if (left > 0) {
-        do_sleep(left);
+        sysSleep(left);
     }
 
     do {
-        DO_YIELD();
+        sysCpuRelax();
         t = qpc_to_100ns(SDL_GetPerformanceCounter());
     } while ((int64_t)t < next);
 
@@ -335,6 +324,7 @@ struct GfxWindowManagerAPI gfx_sdl = {
     gfx_sdl_close,
     gfx_sdl_set_fullscreen_changed_callback,
     gfx_sdl_set_fullscreen,
+    gfx_sdl_set_fullscreen_exclusive,
     gfx_sdl_set_maximize_window,
     gfx_sdl_get_active_window_refresh_rate,
     gfx_sdl_set_cursor_visibility,

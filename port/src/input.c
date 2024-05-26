@@ -103,8 +103,8 @@ static const char *ckNames[CK_TOTAL_COUNT] = {
 	"STICK_XPOS",
 	"STICK_YNEG",
 	"STICK_YPOS",
-	"CK_0010",
-	"CK_0020",
+	"ACCEPT_BUTTON",
+	"CANCEL_BUTTON",
 	"CK_0040",
 	"CK_0080",
 	"CK_0100",
@@ -169,6 +169,8 @@ static const char *vkJoyNames[] = {
 
 static char vkNames[VK_TOTAL_COUNT][64];
 
+static s8 vkPrevState[VK_TOTAL_COUNT];
+
 void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 {
 	// TODO: make VK constants for all these
@@ -209,6 +211,8 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		{ CK_C_U,    SDL_CONTROLLER_BUTTON_DPAD_UP       },
 		{ CK_C_R,    SDL_CONTROLLER_BUTTON_DPAD_RIGHT    },
 		{ CK_C_L,    SDL_CONTROLLER_BUTTON_DPAD_LEFT     },
+		{ CK_ACCEPT, SDL_CONTROLLER_BUTTON_A             },
+		{ CK_CANCEL, SDL_CONTROLLER_BUTTON_B             },
 		{ CK_8000,   SDL_CONTROLLER_BUTTON_LEFTSTICK     },
 	};
 
@@ -799,12 +803,6 @@ static inline void inputUpdateMouse(void)
 
 	mouseX = mx;
 	mouseY = my;
-
-	if (!mouseLocked && (mouseButtons & SDL_BUTTON_LMASK)) {
-		inputLockMouse(1);
-	} else if (mouseLocked && inputKeyPressed(VK_ESCAPE)) {
-		inputLockMouse(0);
-	}
 }
 
 void inputUpdate(void)
@@ -1051,9 +1049,13 @@ s32 inputKeyPressed(u32 vk)
 	if (vk >= VK_KEYBOARD_BEGIN && vk < VK_MOUSE_BEGIN) {
 		const u8 *state = SDL_GetKeyboardState(NULL);
 		return state[vk - VK_KEYBOARD_BEGIN];
-	} else if (vk >= VK_MOUSE_BEGIN && vk < VK_JOY_BEGIN) {
-		return mouseButtons & SDL_BUTTON(vk - VK_MOUSE_BEGIN + 1);
-	} else if (vk >= VK_JOY_BEGIN && vk < VK_TOTAL_COUNT) {
+	}
+
+	if (vk >= VK_MOUSE_BEGIN && vk < VK_JOY_BEGIN) {
+		return (mouseButtons & SDL_BUTTON(vk - VK_MOUSE_BEGIN + 1)) != 0;
+	}
+
+	if (vk >= VK_JOY_BEGIN && vk < VK_TOTAL_COUNT) {
 		vk -= VK_JOY_BEGIN;
 		const s32 idx = vk / INPUT_MAX_CONTROLLER_BUTTONS;
 		if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS || !pads[idx]) {
@@ -1067,7 +1069,16 @@ s32 inputKeyPressed(u32 vk)
 		}
 		return SDL_GameControllerGetButton(pads[idx], vk);
 	}
+
 	return 0;
+}
+
+s32 inputKeyJustPressed(u32 vk)
+{
+	const s8 pressed = inputKeyPressed(vk);
+	const s32 result = pressed && !vkPrevState[vk];
+	vkPrevState[vk] = pressed;
+	return result;
 }
 
 static inline u32 inputContToContKey(const u32 cont)
@@ -1099,10 +1110,11 @@ s32 inputMouseIsLocked(void)
 	return mouseLocked;
 }
 
-void inputMouseGetPosition(s32 *x, s32 *y)
+s32 inputMouseGetPosition(s32 *x, s32 *y)
 {
 	if (x) *x = mouseX * videoGetNativeWidth() / videoGetWidth();
 	if (y) *y = mouseY * videoGetNativeHeight() / videoGetHeight();
+	return (mouseDX != 0 || mouseDY != 0);
 }
 
 void inputMouseGetRawDelta(s32 *dx, s32 *dy)
@@ -1172,9 +1184,7 @@ s32 inputGetMouseDefaultLocked(void)
 void inputSetMouseDefaultLocked(s32 defaultLocked)
 {
 	mouseDefaultLocked = !!defaultLocked;
-	if (mouseEnabled) {
-		inputLockMouse(mouseDefaultLocked);
-	}
+	inputLockMouse(mouseDefaultLocked);
 }
 
 const char *inputGetContKeyName(u32 ck)

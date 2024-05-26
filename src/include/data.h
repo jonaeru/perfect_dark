@@ -537,9 +537,12 @@ extern struct weathercfg g_WeatherConfig[WEATHERCFG_MAX_STAGES];
 extern const struct weathercfg g_DefaultWeatherConfig;
 extern const struct weathercfg *g_CurWeatherConfig;
 
+extern s32 g_MenuUsingMouse;
+
 extern f32 g_ViShakeIntensityMult;
 extern u32 g_TexFilter2D;
 extern s32 g_HudCenter;
+extern s32 g_MenuMouseControl;
 extern u32 g_HudAlignModeL;
 extern u32 g_HudAlignModeR;
 extern s32 g_PrevFrameFb;
@@ -547,6 +550,7 @@ extern s32 g_BlurFb;
 extern s32 g_BlurFbCapTimer;
 extern bool g_BlurFbDirty;
 extern s32 g_TickRateDiv;
+extern s32 g_TickExtraSleep;
 extern s32 g_MusicDisableMpDeath;
 extern s32 g_BgunGeMuzzleFlashes;
 extern s32 g_FileAutoSelect;

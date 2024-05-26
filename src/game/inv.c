@@ -511,6 +511,17 @@ s32 invGiveWeaponsByProp(struct prop *prop)
 			weaponnum = weapon->weaponnum;
 			otherweaponnum;
 
+#ifndef PLATFORM_N64
+			// always allow picking up a second gun if dual wield cheat is on
+			if (!g_Vars.normmplayerisrunning && cheatIsActive(CHEAT_DUALWIELDALLGUNS)) {
+				if (invHasSingleWeaponExcAllGuns(weaponnum) && !invHasDoubleWeaponExcAllGuns(weaponnum, weaponnum)) {
+					if (invGiveDoubleWeapon(weaponnum, weaponnum)) {
+						return 2;
+					}
+				}
+			}
+#endif
+
 			if (cheatIsActive(CHEAT_PERFECTDARKNESS) && weaponnum == WEAPON_NIGHTVISION) {
 				return 1;
 			}

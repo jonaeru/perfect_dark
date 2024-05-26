@@ -780,6 +780,12 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			movedata.freelookdy = -movedata.freelookdy;
 		}
 	}
+	// always pause with ESC
+	if (allowc1buttons && g_Vars.currentplayer->isdead == false && g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED) {
+		if (inputKeyJustPressed(VK_ESCAPE)) {
+			c1buttonsthisframe |= START_BUTTON;
+		}
+	}
 #endif
 
 	// Pausing
