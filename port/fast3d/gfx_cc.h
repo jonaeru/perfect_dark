@@ -8,17 +8,6 @@
 #include <compare>
 #endif
 
-/*enum {
-    CC_0,
-    CC_TEXEL0,
-    CC_TEXEL1,
-    CC_PRIM,
-    CC_SHADE,
-    CC_ENV,
-    CC_TEXEL0A,
-    CC_LOD
-};*/
-
 enum {
     SHADER_0,
     SHADER_INPUT_1,
@@ -34,7 +23,8 @@ enum {
     SHADER_TEXEL1A,
     SHADER_1,
     SHADER_COMBINED,
-    SHADER_NOISE
+    SHADER_NOISE,
+    SHADER_LOD_FRAC,
 };
 
 #define SHADER_OPT_ALPHA (1 << 0)
@@ -49,11 +39,7 @@ enum {
 #define SHADER_OPT_TEXEL0_CLAMP_T (1 << 9)
 #define SHADER_OPT_TEXEL1_CLAMP_S (1 << 10)
 #define SHADER_OPT_TEXEL1_CLAMP_T (1 << 11)
-#define SHADER_OPT_TEXEL0_MASK (1 << 12)
-#define SHADER_OPT_TEXEL1_MASK (1 << 13)
-#define SHADER_OPT_TEXEL0_BLEND (1 << 14)
-#define SHADER_OPT_TEXEL1_BLEND (1 << 15)
-#define SHADER_OPT_BLUR (1 << 16)
+#define SHADER_OPT_BLUR (1 << 12)
 
 struct ColorCombinerKey {
     uint64_t combine_mode;
@@ -61,10 +47,8 @@ struct ColorCombinerKey {
     auto operator<=>(const ColorCombinerKey&) const = default;
 };
 
-#define SHADER_MAX_TEXTURES 6
+#define SHADER_MAX_TEXTURES 2
 #define SHADER_FIRST_TEXTURE 0
-#define SHADER_FIRST_MASK_TEXTURE 2
-#define SHADER_FIRST_REPLACEMENT_TEXTURE 4
 
 struct CCFeatures {
     uint8_t c[2][2][4];
@@ -78,8 +62,6 @@ struct CCFeatures {
     bool opt_grayscale;
     bool opt_blur;
     bool used_textures[2];
-    bool used_masks[2];
-    bool used_blend[2];
     bool clamp[2][2];
     int num_inputs;
     bool do_single[2][2];

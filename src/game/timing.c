@@ -4,6 +4,9 @@
 #include "bss.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "system.h"
+#endif
 
 void frametimeInit(void)
 {
@@ -41,6 +44,12 @@ void frametimeCalculate(void)
 
 		diffframe60 = (g_Vars.lostframetime60t + diffframet + CYCLES_PER_FRAME / 2) / CYCLES_PER_FRAME;
 		diffframe240 = (g_Vars.lostframetime240t + diffframet + CYCLES_PER_FRAME / 2 / 4) / (CYCLES_PER_FRAME / 4);
+
+#ifndef PLATFORM_N64
+		if (g_TickExtraSleep) {
+			sysSleep(EXTRA_SLEEP_TIME);
+		}
+#endif
 	} while (g_Vars.mininc60 && diffframe60 < g_Vars.mininc60);
 
 	g_Vars.lostframetime60t = g_Vars.lostframetime60t + diffframet - diffframe60 * CYCLES_PER_FRAME;

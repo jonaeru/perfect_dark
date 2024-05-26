@@ -973,6 +973,117 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 	return result;
 }
 
+#ifndef PLATFORM_N64
+
+/**
+ * Checks if the specified line of sight (gunpos3d - endpos3d) intersects any props or BG,
+ * using the same process as shotCalculateHits, except with no side effects and cheap = true.
+ * Returns true if nothing was hit.
+ */
+bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, struct coord *endpos3d)
+{
+	struct prop **propptr;
+	struct hitthing sp664;
+	struct coord delta;
+	struct shotdata shotdata;
+	s32 i;
+	RoomNum rooms[131];
+	RoomNum spc8[8];
+	RoomNum spb8[8];
+	RoomNum *roomsptr;
+	struct prop *prop;
+
+	shotdata.gunpos3d.x = gunpos3d->x;
+	shotdata.gunpos3d.y = gunpos3d->y;
+	shotdata.gunpos3d.z = gunpos3d->z;
+
+	shotdata.gunpos2d.x = gunpos2d->x;
+	shotdata.gunpos2d.y = gunpos2d->y;
+	shotdata.gunpos2d.z = gunpos2d->z;
+
+	shotdata.gundir3d.x = gundir3d->x;
+	shotdata.gundir3d.y = gundir3d->y;
+	shotdata.gundir3d.z = gundir3d->z;
+
+	shotdata.gundir2d.x = gundir2d->x;
+	shotdata.gundir2d.y = gundir2d->y;
+	shotdata.gundir2d.z = gundir2d->z;
+
+	// use falcon2 as a dummy weapon
+	shotdata.gset.weaponnum = WEAPON_FALCON2;
+	shotdata.gset.weaponfunc = 0;
+	shotdata.gset.unk063a = 0;
+	shotdata.gset.unk0639 = 0;
+
+	shotdata.penetration = 1;
+	shotdata.distance = 999999999.f;
+
+	for (i = 0; i < ARRAYCOUNT(shotdata.hits); i++) {
+		shotdata.hits[i].prop = NULL;
+		shotdata.hits[i].hitpart = 0;
+		shotdata.hits[i].bboxnode = NULL;
+	}
+
+	rooms[0] = rooms[130] = -1;
+	spc8[0] = g_Vars.currentplayer->cam_room;
+	spc8[1] = -1;
+	portal00018148(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
+
+	roomsptr = rooms;
+
+	while (*roomsptr != -1) {
+		roomsptr++;
+	}
+
+	// Note this is being appended to rooms
+	bgGetForceOnscreenRooms(roomsptr, 100);
+
+	// Check for BG hits first
+	for (i = 0; rooms[i] != -1; i++) {
+		if (bgTestHitInRoom(&shotdata.gunpos3d, endpos3d, rooms[i], &sp664)) {
+			// check if it's far enough away from the end point
+			if (fabsf(sp664.pos.x - endpos3d->x) >= 0.1f ||
+					fabsf(sp664.pos.y - endpos3d->y) >= 0.1f ||
+					fabsf(sp664.pos.z - endpos3d->z) >= 0.1f) {
+				return false;
+			}
+		}
+	}
+
+	// didn't hit any bg, shrink distance to the line size
+	delta.x = endpos3d->x - gunpos3d->x;
+	delta.y = endpos3d->y - gunpos3d->y;
+	delta.z = endpos3d->z - gunpos3d->z;
+	shotdata.distance = sqrtf(delta.x * delta.x + delta.y * delta.y + delta.z * delta.z);
+
+	// and check props
+	propptr = g_Vars.endonscreenprops - 1;
+	while (propptr >= g_Vars.onscreenprops) {
+		prop = *propptr;
+		if (prop) {
+			if (prop->type == PROPTYPE_CHR
+					|| (prop->type == PROPTYPE_PLAYER && prop->chr && (g_Vars.in_cutscene || playermgrGetPlayerNumByProp(prop) != g_Vars.currentplayernum))) {
+				chrTestHit(prop, &shotdata, false, true);
+			} else if (prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_DOOR
+					|| (prop->type == PROPTYPE_OBJ && prop->obj->type != OBJTYPE_GLASS && prop->obj->type != OBJTYPE_TINTEDGLASS)) {
+				objTestHit(prop, &shotdata);
+			}
+			if (shotdata.hits[0].prop) {
+				// ignore some glass parts and shields
+				if (shotdata.hits[0].slowsbullet && shotdata.hits[0].hitthing.texturenum != 10000) {
+					return false;
+				}
+			}
+		}
+		propptr--;
+	}
+
+	// did not hit anything
+	return true;
+}
+
+#endif
+
 struct prop *propFindAimingAt(s32 handnum, bool isshooting, u32 context)
 {
 	struct coord gundir2d;

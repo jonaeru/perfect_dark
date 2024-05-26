@@ -4,12 +4,24 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+struct GfxWindowInitSettings {
+    const char *title;
+    uint32_t width;
+    uint32_t height;
+    int32_t x;
+    int32_t y;
+    bool fullscreen;
+    bool fullscreen_is_exclusive;
+    bool maximized;
+    bool allow_hidpi;
+};
+
 struct GfxWindowManagerAPI {
-    void (*init)(const char* game_name, const char* gfx_api_name, bool start_in_fullscreen, bool start_maximized, uint32_t width,
-                 uint32_t height, int32_t posX, int32_t posY);
+    void (*init)(const struct GfxWindowInitSettings *settings);
     void (*close)(void);
     void (*set_fullscreen_changed_callback)(void (*on_fullscreen_changed)(bool is_now_fullscreen));
     void (*set_fullscreen)(bool enable);
+    void (*set_fullscreen_exclusive)(bool exc);
     void (*set_maximize)(bool enable);
     void (*get_active_window_refresh_rate)(uint32_t* refresh_rate);
     void (*set_cursor_visibility)(bool visible);

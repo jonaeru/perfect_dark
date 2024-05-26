@@ -18,7 +18,7 @@ struct modeldef g_PlayerModeldef = {
 	3,
 	41.161228179932,
 	0,
-	NULL,
+	0,
 };
 
 //                                                       rodata                             parent        next  prev  child

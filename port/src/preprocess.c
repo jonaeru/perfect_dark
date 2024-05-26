@@ -1045,12 +1045,23 @@ void preprocessMpConfigs(u8 *data, u32 size)
 		// TODO: are these required or are they always 0?
 		PD_SWAP_VAL(cfg->setup.fileguid.deviceserial);
 		PD_SWAP_VAL(cfg->setup.fileguid.fileid);
-		// convert MPWEAPON_ to take classic weapons into account
+		// convert MPWEAPON_ to take classic weapons and JPN weapons into account
 		for (s32 j = 0; j < ARRAYCOUNT(cfg->setup.weapons); ++j) {
-			// old MPWEAPON_SHIELD (0x24/0x25) and above are affected
-			if (cfg->setup.weapons[j] >= MPWEAPON_PP9I) {
+#if VERSION == VERSION_JPN_FINAL /* TODO: replace with runtime check */
+			if (cfg->setup.weapons[j] >= 0x24) {
+				// weapons after and including the shield need to be shifted
 				cfg->setup.weapons[j] += (MPWEAPON_SHIELD - MPWEAPON_PP9I);
 			}
+			if (cfg->setup.weapons[j] >= 0x19) {
+				// weapons after the combat knife also need to be shifted up in JPN
+				cfg->setup.weapons[j]++;
+			}
+#else
+			// in other versions we only care about the shield and above
+			if (cfg->setup.weapons[j] >= 0x25) {
+				cfg->setup.weapons[j] += (MPWEAPON_SHIELD - MPWEAPON_PP9I);
+			}
+#endif
 		}
 	}
 }

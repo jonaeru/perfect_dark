@@ -26,17 +26,23 @@ jobs:
             mingw-w64-i686-SDL2
             mingw-w64-i686-zlib
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build pd.exe
         run: make -f Makefile.port -j
+      - name: Build pd.pal.exe
+        run: make -f Makefile.port -j ROMID=pal-final
+      - name: Build pd.jpn.exe
+        run: make -f Makefile.port -j ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
           cp build/ntsc-final-port/pd.exe bin/
+          cp build/pal-final-port/pd.pal.exe bin/
+          cp build/jpn-final-port/pd.jpn.exe bin/
           cp /mingw32/bin/{SDL2.dll,zlib1.dll,libgcc_s_dw2-1.dll,libwinpthread-1.dll} bin/
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pd-i686-windows
           path: bin/
@@ -51,18 +57,47 @@ jobs:
           sudo apt-get update
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-dev:i386 zlib1g-dev:i386
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build pd.exe
         run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2
+      - name: Build pd.pal.exe
+        run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2 ROMID=pal-final
+      - name: Build pd.jpn.exe
+        run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2 ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
           cp build/ntsc-final-port/pd.exe bin/pd
+          cp build/pal-final-port/pd.pal.exe bin/pd.pal
+          cp build/jpn-final-port/pd.jpn.exe bin/pd.jpn
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pd-i686-linux
           path: bin/
           retention-days: 0
-      
+
+  publish-latest-build:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/port'
+    needs: [build-i686-windows, build-i686-linux]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: ci-artifacts
+      - name: Publish latest dev-build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir ci-release
+          pushd ci-artifacts
+          tar czf ../ci-release/pd-i686-linux.tar.gz pd-i686-linux
+          zip -r ../ci-release/pd-i686-windows.zip pd-i686-windows
+          popd
+          git tag --force ci-dev-build port
+          git push --force origin ci-dev-build
+          gh release upload --clobber ci-dev-build ci-release/*

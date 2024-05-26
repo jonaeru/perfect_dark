@@ -449,6 +449,7 @@
 #define CHEAT_DMC                    39
 #define CHEAT_AR53                   40
 #define CHEAT_RCP45                  41
+#define CHEAT_DUALWIELDALLGUNS       42
 
 #define CHEATFLAG_TIMED       0
 #define CHEATFLAG_ALWAYSON    1
@@ -2890,6 +2891,10 @@
 #define MPOPTION_PAC_HIGHLIGHTTARGET    0x00080000
 #define MPOPTION_PAC_SHOWONRADAR        0x00100000
 #define MPOPTION_SPAWNWITHWEAPON        0x00200000
+#define MPOPTION_NODRUGBLUR             0x00400000
+#define MPOPTION_AUTORANDOMWEAPON_START 0x00800000
+#define MPOPTION_AUTORANDOMWEAPON_END   0x01000000
+#define MPOPTION_FRIENDLYFIRE           0x02000000
 
 #define MPPAUSEMODE_UNPAUSED 0
 #define MPPAUSEMODE_PAUSED   1
@@ -2969,23 +2974,35 @@
 #define MPWEAPON_DEVASTATOR       0x16
 #define MPWEAPON_ROCKETLAUNCHER   0x17
 #define MPWEAPON_SLAYER           0x18
-#define MPWEAPON_COMBATKNIFE      (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ?    0 : 0x19)
-#define MPWEAPON_CROSSBOW         (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x19 : 0x1a)
-#define MPWEAPON_TRANQUILIZER     (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x1a : 0x1b)
-#define MPWEAPON_GRENADE          (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x1b : 0x1c)
-#define MPWEAPON_NBOMB            (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x1c : 0x1d)
-#define MPWEAPON_TIMEDMINE        (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x1d : 0x1e)
-#define MPWEAPON_PROXIMITYMINE    (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x1e : 0x1f)
-#define MPWEAPON_REMOTEMINE       (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x1f : 0x20)
-#define MPWEAPON_LASER            (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x20 : 0x21)
-#define MPWEAPON_XRAYSCANNER      (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x21 : 0x22)
-#define MPWEAPON_CLOAKINGDEVICE   (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x22 : 0x23)
-#define MPWEAPON_COMBATBOOST      (VERSION == VERSION_JPN_FINAL && defined(PLATFORM_N64) ? 0x23 : 0x24)
 #ifdef PLATFORM_N64
+#define MPWEAPON_COMBATKNIFE      (VERSION == VERSION_JPN_FINAL ?    0 : 0x19)
+#define MPWEAPON_CROSSBOW         (VERSION == VERSION_JPN_FINAL ? 0x19 : 0x1a)
+#define MPWEAPON_TRANQUILIZER     (VERSION == VERSION_JPN_FINAL ? 0x1a : 0x1b)
+#define MPWEAPON_GRENADE          (VERSION == VERSION_JPN_FINAL ? 0x1b : 0x1c)
+#define MPWEAPON_NBOMB            (VERSION == VERSION_JPN_FINAL ? 0x1c : 0x1d)
+#define MPWEAPON_TIMEDMINE        (VERSION == VERSION_JPN_FINAL ? 0x1d : 0x1e)
+#define MPWEAPON_PROXIMITYMINE    (VERSION == VERSION_JPN_FINAL ? 0x1e : 0x1f)
+#define MPWEAPON_REMOTEMINE       (VERSION == VERSION_JPN_FINAL ? 0x1f : 0x20)
+#define MPWEAPON_LASER            (VERSION == VERSION_JPN_FINAL ? 0x20 : 0x21)
+#define MPWEAPON_XRAYSCANNER      (VERSION == VERSION_JPN_FINAL ? 0x21 : 0x22)
+#define MPWEAPON_CLOAKINGDEVICE   (VERSION == VERSION_JPN_FINAL ? 0x22 : 0x23)
+#define MPWEAPON_COMBATBOOST      (VERSION == VERSION_JPN_FINAL ? 0x23 : 0x24)
 #define MPWEAPON_SHIELD           (VERSION == VERSION_JPN_FINAL ? 0x24 : 0x25)
 #define MPWEAPON_DISABLED         (VERSION == VERSION_JPN_FINAL ? 0x25 : 0x26)
 #define NUM_MPWEAPONS             (VERSION == VERSION_JPN_FINAL ? 0x26 : 0x27)
-#else // add all classic weapons to multiplayer
+#else // add all classic weapons to multiplayer and allow combat knife in JPN
+#define MPWEAPON_COMBATKNIFE      0x19
+#define MPWEAPON_CROSSBOW         0x1a
+#define MPWEAPON_TRANQUILIZER     0x1b
+#define MPWEAPON_GRENADE          0x1c
+#define MPWEAPON_NBOMB            0x1d
+#define MPWEAPON_TIMEDMINE        0x1e
+#define MPWEAPON_PROXIMITYMINE    0x1f
+#define MPWEAPON_REMOTEMINE       0x20
+#define MPWEAPON_LASER            0x21
+#define MPWEAPON_XRAYSCANNER      0x22
+#define MPWEAPON_CLOAKINGDEVICE   0x23
+#define MPWEAPON_COMBATBOOST      0x24
 #define MPWEAPON_PP9I             0x25
 #define MPWEAPON_CC13             0x26
 #define MPWEAPON_KL01313          0x27
@@ -3789,6 +3806,10 @@
 #define SLOWMOTION_OFF   0
 #define SLOWMOTION_ON    1
 #define SLOWMOTION_SMART 2
+
+#define AUTORANDOMWEAPON_OFF   0
+#define AUTORANDOMWEAPON_START 1
+#define AUTORANDOMWEAPON_END   2
 
 #define SMOKETYPE_NONE             0
 #define SMOKETYPE_ELECTRICAL       1 // Dr Caroll, mainframes in Infiltration bunker
@@ -4687,6 +4708,9 @@ enum weaponnum {
 #define BUTTON_ACCEPT BUTTON_ACCEPT_WPNFORWARD
 #define BUTTON_WPNFORWARD BUTTON_ACCEPT_WPNFORWARD
 
+#define BUTTON_UI_ACCEPT BUTTON_ACCEPT_WPNFORWARD
+#define BUTTON_UI_CANCEL BUTTON_CANCEL_USE
+
 #else
 
 // xbla behavior
@@ -4706,6 +4730,9 @@ enum weaponnum {
 #define BUTTON_HALF_CROUCH    CONT_4000
 #define BUTTON_FULL_CROUCH    CONT_2000
 
+#define BUTTON_UI_ACCEPT      CONT_0010
+#define BUTTON_UI_CANCEL      CONT_0020
+
 #define MOUSEAIM_CLASSIC 0 // crosshair moves around the screen in aim mode
 #define MOUSEAIM_LOCKED 1  // crosshair locked to the center of the screen in aim mode
 
@@ -4721,6 +4748,8 @@ enum weaponnum {
 #define CROSSHAIR_HEALTH_OFF 0
 #define CROSSHAIR_HEALTH_ON_GREEN 1
 #define CROSSHAIR_HEALTH_ON_WHITE 2
+
+#define EXTRA_SLEEP_TIME 1000LL // 100us
 
 #endif
 

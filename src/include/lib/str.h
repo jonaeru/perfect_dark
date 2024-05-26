@@ -16,6 +16,7 @@ s32 isalpha(char c);
 s32 isspace(char c);
 s32 strtol(const char *src, const char **endptr, s32 base);
 #else
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #endif

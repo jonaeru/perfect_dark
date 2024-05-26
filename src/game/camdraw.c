@@ -1333,7 +1333,7 @@ void func0f14bdbc(s32 index)
 	s32 value;
 
 	for (i = 0; i < 30; i++) {
-		thing->unk0dc[i] = NULL;
+		thing->unk0dc[i] = 0;
 	}
 
 	thing->unk094 = 0;
