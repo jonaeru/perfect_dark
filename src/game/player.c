@@ -1106,12 +1106,20 @@ void playerSpawn(void)
 
 			if ((g_MpSetup.options & MPOPTION_SPAWNWITHWEAPON)
 					&& g_MpSetup.weapons[0] != MPWEAPON_NONE
-					&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED) {
+					&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED
+					&& g_MpSetup.weapons[0] != MPWEAPON_SHIELD) {
 				struct mpweapon *mpweapon = &g_MpWeapons[g_MpSetup.weapons[0]];
 				invGiveSingleWeapon(mpweapon->weaponnum);
+				const s32 ammotype = (g_MpSetup.weapons[0] == MPWEAPON_COMBATBOOST) ? AMMOTYPE_BOOST : mpweapon->priammotype;
+				if (ammotype) {
+					s32 startammo = mpweapon->priammoqty / 2;
+					if (startammo == 0) {
+						startammo = 1;
+					}
+					bgunSetAmmoQuantity(ammotype, startammo);
+				}
 				bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
 				bgunEquipWeapon2(HAND_RIGHT, mpweapon->weaponnum);
-				bgunSetAmmoQuantity(mpweapon->priammotype, mpweapon->priammoqty / 2);
 			} else
 #endif
 			{
@@ -2038,6 +2046,12 @@ void playerTickCutscene(bool arg0)
 	if (g_Vars.currentplayerindex == 0) {
 		g_CutsceneCurTotalFrame60f += g_Vars.lvupdate60freal;
 	}
+
+#ifndef PLATFORM_N64
+	if (arg0 && inputKeyJustPressed(VK_ESCAPE)) {
+		buttons |= START_BUTTON;
+	}
+#endif
 
 #if VERSION >= VERSION_NTSC_1_0
 	if (g_CutsceneCurTotalFrame60f > 30 && (buttons & 0xffffffff)) {
@@ -3297,6 +3311,12 @@ void playerTick(bool arg0)
 					s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 					u32 buttons = arg0 ? joyGetButtons(contpad1, 0xffffffff) : 0;
 
+#ifndef PLATFORM_N64
+					if (arg0 && inputKeyJustPressed(VK_ESCAPE)) {
+						buttons |= START_BUTTON;
+					}
+#endif
+
 					if (g_Vars.currentplayer->isdead == false
 							&& g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED
 							&& (buttons & START_BUTTON)) {
@@ -3576,6 +3596,12 @@ void playerTick(bool arg0)
 						pause = true;
 					}
 				}
+
+#ifndef PLATFORM_N64
+				if (g_PlayersWithControl[g_Vars.currentplayernum] && inputKeyJustPressed(VK_ESCAPE)) {
+					pause = true;
+				}
+#endif
 
 				if (pause) {
 					if (g_Vars.mplayerisrunning == false) {
@@ -4594,20 +4620,12 @@ Gfx *playerRenderHud(Gfx *gdl)
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_NIGHTVISION)) {
 			gdl = bviewDrawNvLens(gdl);
 			gdl = bviewDrawNvBinoculars(gdl);
-#ifndef PLATFORM_N64
-			// turn off "greenscale"
-			gDPGrayscaleEXT(gdl++, G_OFF);
-#endif
 		} else if (g_Vars.currentplayer->isdead == false
 				&& g_InCutscene == 0
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_IRSCANNER)) {
 			gdl = bviewDrawIrLens(gdl);
 			gdl = bviewDrawIrBinoculars(gdl);
-#ifndef PLATFORM_N64
-			// turn off "redscale"
-			gDPGrayscaleEXT(gdl++, G_OFF);
-#endif
 		}
 
 		if (g_Vars.currentplayer->eyesshutfrac > 0) {

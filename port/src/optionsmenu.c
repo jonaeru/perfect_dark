@@ -132,6 +132,22 @@ static MenuItemHandlerResult menuhandlerMouseDefaultLocked(s32 operation, struct
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerMenuMouseControl(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return g_MenuMouseControl;
+	case MENUOP_SET:
+		g_MenuMouseControl = data->checkbox.value;
+		if (!g_MenuMouseControl) {
+			g_MenuUsingMouse = false;
+		}
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	f32 x, y;
@@ -264,6 +280,14 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		(uintptr_t)"Grab Mouse Input by Default",
 		0,
 		menuhandlerMouseDefaultLocked,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Mouse Menu Navigation",
+		0,
+		menuhandlerMenuMouseControl,
 	},
 	{
 		MENUITEMTYPE_SEPARATOR,
@@ -678,6 +702,19 @@ static MenuItemHandlerResult menuhandlerTexFilter(s32 operation, struct menuitem
 	return 0;
 }
 
+static MenuItemHandlerResult menuhandlerTexDetail(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_GET:
+		return (videoGetDetailTextures() != 0);
+	case MENUOP_SET:
+		videoSetDetailTextures(data->checkbox.value);
+		break;
+	}
+
+	return 0;
+}
+
 static MenuItemHandlerResult menuhandlerTexFilter2D(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
@@ -768,6 +805,14 @@ struct menuitem g_ExtendedVideoMenuItems[] = {
 		(uintptr_t)"Maximize Window",
 		0,
 		menuhandlerMaximizeWindow,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Detail Textures",
+		0,
+		menuhandlerTexDetail,
 	},
 	{
 		MENUITEMTYPE_CHECKBOX,
@@ -1292,6 +1337,8 @@ static const struct menubind menuBinds[] = {
 	{ CK_8000,   "Cycle Crouch [+]\n",  "N64 Ext 8000\n" },
 	{ CK_4000,   "Half Crouch [+]\n",   "N64 Ext 4000\n" },
 	{ CK_2000,   "Full Crouch [+]\n",   "N64 Ext 2000\n" },
+	{ CK_ACCEPT, "UI Accept [+]\n",     "EXT UI Accept\n" },
+	{ CK_CANCEL, "UI Cancel [+]\n",     "EXT UI Cancel\n" },
 };
 
 static const char *menutextBind(struct menuitem *item);
@@ -1310,6 +1357,8 @@ static MenuItemHandlerResult menuhandlerResetBindsN64(s32 operation, struct menu
 	}
 
 struct menuitem g_ExtendedBindsMenuItems[] = {
+	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),

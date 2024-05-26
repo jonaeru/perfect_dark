@@ -291,6 +291,13 @@ bool weaponHasFlag(s32 itemid, u32 flag)
 		return false;
 	}
 
+#ifndef PLATFORM_N64
+	// always dual-wieldable if cheat is enabled
+	if (cheatIsActive(CHEAT_DUALWIELDALLGUNS) && (flag == WEAPONFLAG_DUALWIELD)) {
+		return true;
+	}
+#endif
+
 	return (weapon->flags & flag) != 0;
 }
 

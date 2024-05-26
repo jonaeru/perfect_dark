@@ -32,6 +32,10 @@
 
 #include "os_pfs.h"
 
+#ifndef PLATFORM_N64
+#include <stdio.h>
+#endif
+
 #ifdef _LANGUAGE_C_PLUS_PLUS
 extern "C" {
 #endif
@@ -86,7 +90,9 @@ extern void     bzero(void *, size_t);
 
 /* Printf */
 
+#ifdef PLATFORM_N64
 extern int		sprintf(char *s, const char *fmt, ...);
+#endif
 extern void		osSyncPrintf(const char *fmt, ...);
 
 

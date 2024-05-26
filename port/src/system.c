@@ -1,3 +1,7 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
+#endif
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -22,11 +26,11 @@ static CREATEWAITABLETIMEREXAFN pfnCreateWaitableTimerExA;
 // winapi also provides a yield macro
 #define DO_YIELD() YieldProcessor()
 
-#else
+// ask system for high performance GPU, if any
+__attribute__((dllexport)) u32 NvOptimusEnablement = 1;
+__attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
-#endif
+#else
 
 #include <unistd.h>
 

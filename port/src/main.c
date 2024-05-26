@@ -159,6 +159,7 @@ PD_CONSTRUCTOR static void gameConfigInit(void)
 {
 	configRegisterInt("Game.MemorySize", &g_OsMemSizeMb, 4, 2048);
 	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 2);
+	configRegisterInt("Game.MenuMouseControl", &g_MenuMouseControl, 0, 1);
 	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);
 	configRegisterInt("Game.TickRateDivisor", &g_TickRateDiv, 0, 10);
 	configRegisterInt("Game.ExtraSleep", &g_TickExtraSleep, 0, 1);

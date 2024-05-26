@@ -4339,6 +4339,19 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 		return;
 	}
 
+#ifndef PLATFORM_N64
+	// Don't damage if team multiplayer and friendly fire is off
+	if (g_Vars.mplayerisrunning
+			&& (g_MpSetup.options & MPOPTION_TEAMSENABLED)
+			&& !(g_MpSetup.options & MPOPTION_FRIENDLYFIRE)
+			&& aprop
+			&& aprop != vprop
+			&& (aprop->type == PROPTYPE_PLAYER || aprop->type == PROPTYPE_CHR)
+			&& chr->team == aprop->chr->team) {
+		return;
+	}
+#endif
+
 	if (gset == NULL) {
 		gset = &gset2;
 	}

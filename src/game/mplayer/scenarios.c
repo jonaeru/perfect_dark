@@ -25,6 +25,7 @@
 #include "game/mplayer/mplayer.h"
 #include "game/pad.h"
 #include "game/propobj.h"
+#include "game/options.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/snd.h"

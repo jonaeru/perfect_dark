@@ -50,6 +50,7 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "video.h"
+#include "input.h"
 #define BLUR_OFS 10
 #else
 #define BLUR_OFS 30
@@ -135,6 +136,11 @@ char *g_StringPointer2 = &g_CheatMarqueeString[VERSION >= VERSION_PAL_FINAL ? 15
 #endif
 
 s32 g_MpPlayerNum = 0;
+
+#ifndef PLATFORM_N64
+s32 g_MenuMouseControl = true;
+s32 g_MenuUsingMouse = false;
+#endif
 
 void menuPlaySound(s32 menusound)
 {
@@ -1347,20 +1353,68 @@ s32 dialogChangeItemFocusHorizontally(struct menudialog *dialog, s32 leftright)
 	return swipedir;
 }
 
-s32 dialogChangeItemFocus(struct menudialog *dialog, s32 leftright, s32 updown)
+#ifndef PLATFORM_N64
+
+bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
+{
+	struct menu *menu = &g_Menus[g_MpPlayerNum];
+	s32 col, row;
+	s32 curx, cury;
+	s32 colwidth = 0;
+
+	// only allow mouse control of player 1 menus; ignore mouse if navigating with keyboard
+	if (menu->playernum != 0 || !g_MenuUsingMouse) {
+		return false;
+	}
+
+	curx = dialog->x;
+
+	for (col = 0; col < dialog->numcols; col++, curx += colwidth) {
+		s32 colindex = dialog->colstart + col;
+		colwidth = menu->cols[colindex].width;
+		if (mx <= curx || mx >= curx + colwidth) {
+			continue;
+		}
+
+		cury = dialog->y + LINEHEIGHT + 1 + dialog->scroll;
+		for (row = 0; row < menu->cols[colindex].numrows; row++) {
+			s32 rowindex = menu->cols[colindex].rowstart + row;
+			s32 rowheight = menu->rows[rowindex].height;
+			struct menuitem *item = &dialog->definition->items[menu->rows[rowindex].itemindex];
+			if (my > cury && my < cury + rowheight &&
+					item != dialog->focuseditem && menuIsItemFocusable(item, dialog, 0)) {
+				dialog->focuseditem = item;
+				return true;
+			}
+			cury += rowheight;
+		}
+	}
+
+	return false;
+}
+
+#endif
+
+s32 dialogChangeItemFocus(struct menudialog *dialog, struct menuinputs *inputs)
 {
 	s32 swipedir = 0;
 
-	if (leftright == 0 && updown == 0) {
+	if (inputs->leftright == 0 && inputs->updown == 0) {
+#ifndef PLATFORM_N64
+		if (!dialogChangeItemFocusWithMouse(dialog, inputs->mousex, inputs->mousey)) {
+			return 0;
+		}
+#else
 		return 0;
+#endif
 	}
 
-	if (updown != 0) {
-		dialogChangeItemFocusVertically(dialog, updown);
+	if (inputs->updown != 0) {
+		dialogChangeItemFocusVertically(dialog, inputs->updown);
 	}
 
-	if (leftright != 0) {
-		swipedir = dialogChangeItemFocusHorizontally(dialog, leftright);
+	if (inputs->leftright != 0) {
+		swipedir = dialogChangeItemFocusHorizontally(dialog, inputs->leftright);
 	}
 
 	if (dialog->focuseditem != 0) {
@@ -3418,6 +3472,12 @@ void menuClose(void)
 	g_Menus[g_MpPlayerNum].curdialog = NULL;
 	g_Menus[g_MpPlayerNum].openinhibit = 10;
 
+#ifndef PLATFORM_N64
+	if (inputMouseIsEnabled()) {
+		inputLockMouse(true);
+	}
+#endif
+
 	if (g_MenuData.root == MENUROOT_MPPAUSE) {
 		g_PlayersWithControl[g_Menus[g_MpPlayerNum].playernum] = true;
 	}
@@ -3527,6 +3587,12 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	g_MenuData.unk5d5_04 = false;
 
 	g_PlayersWithControl[g_Menus[g_MpPlayerNum].playernum] = false;
+
+#ifndef PLATFORM_N64
+	if (inputMouseIsEnabled()) {
+		inputLockMouse(false);
+	}
+#endif
 
 	func0f0f1494();
 
@@ -4389,14 +4455,14 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 		if (layer->numsiblings <= 1) {
 			struct menuitem *prevfocuseditem = dialog->focuseditem;
 
-			dialogChangeItemFocus(dialog, inputs->leftright, inputs->updown);
+			dialogChangeItemFocus(dialog, inputs);
 
 			if (dialog->focuseditem != prevfocuseditem) {
 				menuPlaySound(MENUSOUND_FOCUS);
 			}
 		} else {
 			struct menuitem *prevfocuseditem = dialog->focuseditem;
-			s32 swipedir = dialogChangeItemFocus(dialog, inputs->leftright, inputs->updown);
+			s32 swipedir = dialogChangeItemFocus(dialog, inputs);
 
 			if (swipedir != 0) {
 				menuSwipe(swipedir);
@@ -4441,8 +4507,15 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 		s32 y = dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
 
 		if ((dialog->focuseditem->flags & MENUITEMFLAG_00010000) == 0) {
-			itemy = y + menu->rows[rowindex].height / 2;
-			dstscroll = (dialog->height - LINEHEIGHT - 1) / 2 - itemy;
+#ifndef PLATFORM_N64
+			if (g_MenuUsingMouse) {
+				dstscroll = dialog->dstscroll - inputs->mousescroll * LINEHEIGHT;
+			} else
+#endif
+			{
+				itemy = y + menu->rows[rowindex].height / 2;
+				dstscroll = (dialog->height - LINEHEIGHT - 1) / 2 - itemy;
+			}
 
 			if (dstscroll > 0) {
 				dstscroll = 0;
@@ -4590,6 +4663,28 @@ void menuProcessInput(void)
 	inputs.shoulder = 0;
 	inputs.back2 = 0;
 
+#ifndef PLATFORM_N64
+	inputs.mousemoved = false;
+	inputs.mousescroll = 0;
+	inputs.mousex = 0;
+	inputs.mousey = 0;
+	// only allow mouse controls for player 1 menus
+	if (menu->playernum == 0) {
+		// ESC always acts as back
+		inputs.back = inputKeyJustPressed(VK_ESCAPE);
+		if (inputMouseIsEnabled() && !inputMouseIsLocked() && g_MenuMouseControl) {
+			inputs.mousemoved = inputMouseGetPosition(&inputs.mousex, &inputs.mousey);
+			inputs.mousescroll = inputKeyPressed(VK_MOUSE_WHEEL_DN) - inputKeyPressed(VK_MOUSE_WHEEL_UP);
+			// aspect correct the X
+			const f32 cx = ((f32)inputs.mousex - (f32)(SCREEN_WIDTH_LO / 2)) * (videoGetAspect() / SCREEN_ASPECT);
+			inputs.mousex = (f32)(SCREEN_WIDTH_LO / 2) + cx;
+		}
+		if (dialog && inputs.mousemoved) {
+			g_MenuUsingMouse = true;
+		}
+	}
+#endif
+
 	if (g_Menus[g_MpPlayerNum].curdialog) {
 		stickx = 0;
 		sticky = 0;
@@ -4646,12 +4741,12 @@ void menuProcessInput(void)
 			}
 
 #ifndef PLATFORM_N64
-			// this seems sensible to achieve 1964 parity
-			if (buttonsnow & BUTTON_RADIAL) {
+			// separate buttons for UI accept/cancel
+			if (buttonsnow & BUTTON_UI_ACCEPT) {
 				inputs.select = 1;
 			}
 
-			if (buttonsnow & BUTTON_WPNBACK) {
+			if (buttonsnow & BUTTON_UI_CANCEL) {
 				inputs.back = 1;
 			}
 #endif
@@ -4685,6 +4780,7 @@ void menuProcessInput(void)
 			if ((sticky < 0 ? -sticky : sticky) < (thissticky < 0 ? -thissticky : thissticky)) {
 				sticky = thissticky;
 			}
+
 #ifndef PLATFORM_N64
 			if ((sticky < 0 ? -sticky : sticky) < (thisrsticky < 0 ? -thisrsticky : thisrsticky)) {
 				sticky = thisrsticky;
@@ -4993,6 +5089,25 @@ void menuProcessInput(void)
 		inputs.yaxis = sticky;
 		inputs.unk14 = 0;
 		inputs.start = starttap ? true : false;
+
+#ifndef PLATFORM_N64
+		// if we haven't been using the mouse but we have been keyboard scrolling disable the mouse
+		if (!inputs.mousemoved && (inputs.leftright || inputs.updown || inputs.leftrightheld || inputs.updownheld)) {
+			g_MenuUsingMouse = false;
+		}
+		// otherwise rotate left/right by clicking on the side of the menu
+		if (g_MenuUsingMouse && inputs.select && !inputs.leftright && !inputs.leftrightheld) {
+			if (inputs.mousey > dialog->y && inputs.mousey < dialog->y + dialog->height) {
+				if (inputs.mousex < dialog->x) {
+					inputs.leftright = -1;
+					inputs.select = 0;
+				} else if (inputs.mousex > dialog->x + dialog->width) {
+					inputs.leftright = 1;
+					inputs.select = 0;
+				}
+			}
+		}
+#endif
 
 		// Handle dialogs that allow pressing start to select,
 		// and handle pressing start on a list item.

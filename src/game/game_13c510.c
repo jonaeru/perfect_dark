@@ -20,7 +20,7 @@
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
 #include "game/player.h"
-f32 fabsf(f32 value);
+#include "game/prop.h"
 #endif
 
 u8 *var800a41a0;
@@ -104,8 +104,10 @@ s32 func0f13c710(f32 arg0)
 
 #ifndef PLATFORM_N64
 
-bool artifactTestLos(struct coord *spec, struct coord *roompos)
+bool artifactTestLos(struct coord *spec, struct coord *roompos, s32 xi, s32 yi)
 {
+	s32 i = 0;
+
 	if (!g_Vars.currentplayer) {
 		return false;
 	}
@@ -115,35 +117,15 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos)
 	endpos.y = roompos->y + spec->y;
 	endpos.z = roompos->z + spec->z;
 
-	// get what rooms the LOS goes through
-	RoomNum outrooms[17], tmprooms[8], srcrooms[2];
-	srcrooms[0] = g_Vars.currentplayer->cam_room;
-	srcrooms[1] = -1;
-	outrooms[16] = -1;
-	portal00018148(&g_Vars.currentplayer->cam_pos, &endpos, srcrooms, tmprooms, outrooms, 16);
+	struct coord gundir2d;
+	struct coord gunpos2d = {{ 0.f, 0.f, 0.f }};
+	struct coord gundir3d;
+	struct coord gunpos3d = g_Vars.currentplayer->cam_pos;
+	f32 crosspos[2] = { (f32)xi, (f32)yi };
+	cam0f0b4c3c(crosspos, &gundir2d, 1.f);
+	mtx4RotateVec(camGetProjectionMtxF(), &gundir2d, &gundir3d);
 
-	// cheaper LOS test against props first
-	const u32 cdtype = CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_PLAYERS | CDTYPE_CHRS;
-	const u16 geoflags = GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT;
-	if (!cdTestAToB(&g_Vars.currentplayer->cam_pos, &endpos, outrooms, cdtype, geoflags, true, 1, 0, 0)) {
-		return false;
-	}
-
-	// no prop was hit; check for bg hits
-	struct hitthing hit;
-	for (s32 i = 0; outrooms[i] != -1; ++i) {
-		if (bgTestHitInRoom(&g_Vars.currentplayer->cam_pos, &endpos, outrooms[i], &hit)) {
-			// check if it's far enough away from the end point
-			if (fabsf(hit.pos.x - endpos.x) >= 0.1f ||
-					fabsf(hit.pos.y - endpos.y) >= 0.1f ||
-					fabsf(hit.pos.z - endpos.z) >= 0.1f) {
-				return false;
-			}
-		}
-	}
-
-	// nothing hit
-	return true;
+	return shotTestLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
 }
 
 #endif
@@ -185,11 +167,6 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 	struct artifact *artifacts = schedGetWriteArtifacts();
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
 	struct artifact *artifact;
-
-#ifndef PLATFORM_N64
-	const bool prevperim = g_Vars.currentplayer->bondperimenabled;
-	playerSetPerimEnabled(g_Vars.currentplayer->prop, false);
-#endif
 
 	if (g_Rooms[roomnum].gfxdata != NULL && g_Rooms[roomnum].loaded240) {
 		numlights = g_Rooms[roomnum].gfxdata->numlights;
@@ -380,7 +357,7 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 
 								if (index < MAX_ARTIFACTS) {
 #ifndef PLATFORM_N64
-									artifact->unk02 = artifactTestLos(&spec, &g_BgRooms[roomnum].pos);
+									artifact->unk02 = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
 #endif
 									artifact->unk04 = func0f13c574(f0) >> 2;
 									artifact->unk08 = &g_ZbufPtr1[viGetWidth() * yi + xi];
@@ -396,10 +373,6 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 			}
 		}
 	}
-
-#ifndef PLATFORM_N64
-	playerSetPerimEnabled(g_Vars.currentplayer->prop, prevperim);
-#endif
 }
 
 u8 func0f13d3c4(u8 arg0, u8 arg1)

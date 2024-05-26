@@ -184,6 +184,15 @@ void mpStartMatch(void)
 	s32 numplayers = 0;
 	s32 stagenum;
 
+#ifndef PLATFORM_N64
+	if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_START) {
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
+			mpApplyWeaponSet();
+		}
+	}
+#endif
+
 	mpConfigureQuickTeamSimulants();
 
 	if (!challengeIsFeatureUnlocked(MPFEATURE_ONEHITKILLS)) {
@@ -528,6 +537,10 @@ void mpInit(void)
 		| MPOPTION_HTM_SHOWONRADAR
 		| MPOPTION_PAC_HIGHLIGHTTARGET
 		| MPOPTION_PAC_SHOWONRADAR;
+
+#ifndef PLATFORM_N64
+	g_MpSetup.options |= MPOPTION_FRIENDLYFIRE;
+#endif
 
 	g_Vars.mphilltime = 10;
 
@@ -2457,6 +2470,15 @@ void mpEndMatch(void)
 	if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
 		challengeConsiderMarkingComplete();
 	}
+
+#ifndef PLATFORM_N64
+	if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_END) {
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
+			mpApplyWeaponSet();
+		}
+	}
+#endif
 
 	func0f0f820c(NULL, -6);
 }

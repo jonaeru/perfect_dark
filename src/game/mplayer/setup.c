@@ -31,6 +31,10 @@ struct menudialogdef g_MpChangeTeamNameMenuDialog;
 struct menudialogdef g_MpEditSimulantMenuDialog;
 struct menudialogdef g_MpSaveSetupNameMenuDialog;
 
+#ifndef PLATFORM_N64
+extern s32 g_MpWeaponSetNum;
+#endif
+
 MenuItemHandlerResult menuhandlerMpDropOut(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -1208,6 +1212,52 @@ struct menudialogdef g_MpSaveSetupExistsMenuDialog = {
 	NULL,
 };
 
+#ifndef PLATFORM_N64
+MenuItemHandlerResult menuhandlerMpAutoRandomWeapon(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	static const char *labels[] = {
+		"Off",
+		"Start",
+		"End",
+	};
+
+	switch (operation) {
+	case MENUOP_CHECKDISABLED:
+	case MENUOP_CHECKHIDDEN:
+		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
+				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
+			return false;
+		}
+		return true;
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = ARRAYCOUNT(labels);
+		break;
+	case MENUOP_GETOPTIONTEXT:
+		return (intptr_t)labels[data->dropdown.value];
+	case MENUOP_SET:
+		g_MpSetup.options &= ~(MPOPTION_AUTORANDOMWEAPON_START | MPOPTION_AUTORANDOMWEAPON_END);
+
+		if (data->dropdown.value == AUTORANDOMWEAPON_START) {
+			g_MpSetup.options |= MPOPTION_AUTORANDOMWEAPON_START;
+		} else if (data->dropdown.value == AUTORANDOMWEAPON_END) {
+			g_MpSetup.options |= MPOPTION_AUTORANDOMWEAPON_END;
+		}
+		break;
+	case MENUOP_GETSELECTEDINDEX:
+		if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_END) {
+			data->dropdown.value = AUTORANDOMWEAPON_END;
+		} else if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_START) {
+			data->dropdown.value = AUTORANDOMWEAPON_START;
+		} else {
+			data->dropdown.value = AUTORANDOMWEAPON_OFF;
+		}
+		break;
+	}
+
+	return 0;
+}
+#endif
+
 struct menuitem g_MpWeaponsMenuItems[] = {
 	{
 		MENUITEMTYPE_DROPDOWN,
@@ -1217,6 +1267,16 @@ struct menuitem g_MpWeaponsMenuItems[] = {
 		0,
 		menuhandlerMpWeaponSetDropdown,
 	},
+#ifndef PLATFORM_N64
+	{
+		MENUITEMTYPE_DROPDOWN,
+		0,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Auto Random\n",
+		0,
+		menuhandlerMpAutoRandomWeapon,
+	},
+#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
