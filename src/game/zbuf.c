@@ -53,7 +53,7 @@ void zbufAllocate(void)
 	if (IS4MB()) {
 		g_ZbufWidth = MAX(320, FBALLOC_WIDTH_LO);
 
-		if (g_Vars.normmplayerisrunning && PLAYERCOUNT() >= 2) {
+		if (g_Vars.normmplayerisrunning && LOCALPLAYERCOUNT() >= 2) {
 			g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_LO) / 2;
 		} else {
 			g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_LO);
@@ -61,7 +61,7 @@ void zbufAllocate(void)
 	} else {
 		g_ZbufWidth = MAX(640, FBALLOC_WIDTH_HI);
 
-		if (g_Vars.normmplayerisrunning && PLAYERCOUNT() >= 2) {
+		if (g_Vars.normmplayerisrunning && LOCALPLAYERCOUNT() >= 2) {
 			g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_HI);
 		} else {
 			g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_HI);
@@ -101,7 +101,7 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
 	uintptr_t addr;
 
 	if (g_Vars.normmplayerisrunning
-			&& (g_Vars.currentplayernum >= 2 || (PLAYERCOUNT() == 2 && g_Vars.currentplayernum == 1))) {
+			&& (g_Vars.currentplayernum >= 2 || (LOCALPLAYERCOUNT() == 2 && g_Vars.currentplayernum == 1))) {
 		subamount = playerGetFbWidth() * playerGetFbHeight();
 
 		if (IS4MB() || optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -137,7 +137,7 @@ Gfx *zbufClear(Gfx *gdl)
 	gDPSetFillColor(gdl++, 0xfffcfffc);
 	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 0, playerGetFbWidth() * 4.0f, playerGetFbHeight() * 4.0f);
 
-	if (PLAYERCOUNT() <= 2) {
+	if (LOCALPLAYERCOUNT() <= 2) {
 		left = 0;
 		right = playerGetFbWidth() - 1;
 	} else if (g_Vars.currentplayernum == 0 || g_Vars.currentplayernum == 2) {

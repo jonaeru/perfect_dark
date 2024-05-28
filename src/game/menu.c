@@ -51,6 +51,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
+#include "net/net.h"
 #define BLUR_OFS 10
 #else
 #define BLUR_OFS 30
@@ -3496,7 +3497,7 @@ void menuClose(void)
 void func0f0f8120(void)
 {
 #ifdef AVOID_UB
-	u32 mpindex = g_MpPlayerNum % MAX_PLAYERS;
+	u32 mpindex = g_MpPlayerNum % MAX_LOCAL_PLAYERS;
 	struct menudialog *prev = g_Menus[mpindex].curdialog;
 	s32 i;
 #else
@@ -3511,9 +3512,6 @@ void func0f0f8120(void)
 	}
 
 #ifdef AVOID_UB
-	mpindex = g_MpPlayerNum;
-	if (mpindex >= MAX_PLAYERS)
-		mpindex -= MAX_PLAYERS;
 	if (g_Menus[mpindex].curdialog == prev) {
 		while (g_Menus[mpindex].depth > 0) {
 			menuPopDialog();
@@ -5460,7 +5458,7 @@ Gfx *menuRender(Gfx *gdl)
 		} else {
 			s32 i;
 
-			for (i = 0; i < MAX_PLAYERS; i++) {
+			for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 				g_MpPlayerNum = i;
 				gdl = menuRenderDialogs(gdl);
 			}
@@ -5493,7 +5491,20 @@ Gfx *menuRender(Gfx *gdl)
 
 			gdl = text0f153628(gdl);
 
-			for (i = 0; i < MAX_PLAYERS; i++) {
+#ifndef PLATFORM_N64
+			if (g_NetMode) {
+				if (g_NetMode == NETMODE_SERVER) {
+					sprintf(text, "Server: %d/%d %04x", g_NetNumClients, g_NetMaxClients, g_MpSetup.chrslots);
+				} else {
+					sprintf(text, "Client: ID %u", g_NetLocalClient->id);
+				}
+				x = viewleft + 2;
+				y = viewbottom - 9;
+				colour = 0x00ff00ff;
+				gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
+			} else
+#endif
+			for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 				// Figure out what text will be displayed. The text calculated
 				// here is for measuring purposes only and isn't rendered.
 				// Amusingly, there's a %d placeholder in the text which isn't

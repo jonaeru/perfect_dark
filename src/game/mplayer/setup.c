@@ -23,6 +23,9 @@
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "net/net.h"
+#endif
 
 struct menuitem g_MpCharacterMenuItems[];
 struct menudialogdef g_MpAddSimulantMenuDialog;
@@ -113,6 +116,9 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_FORTRESS,   MPFEATURE_STAGE_FORTRESS,   L_MPMENU_130 },
 	{ STAGE_MP_VILLA,      MPFEATURE_STAGE_VILLA,      L_MPMENU_131 },
 	{ STAGE_MP_CARPARK,    MPFEATURE_STAGE_CARPARK,    L_MPMENU_132 },
+#ifndef PLATFORM_N64
+	{ STAGE_DEFENSE,       0,                          VERSION == VERSION_JPN_FINAL ? L_OPTIONS_162 : L_OPTIONS_161 }, // "Defence (MP)"
+#endif
 	{ STAGE_MP_TEMPLE,     MPFEATURE_STAGE_TEMPLE,     L_MPMENU_133 },
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
@@ -121,7 +127,7 @@ struct mparena g_MpArenas[] = {
 
 s32 mpGetNumStages(void)
 {
-	return 17;
+	return 18;
 }
 
 s16 mpChooseRandomStage(void)
@@ -130,7 +136,7 @@ s16 mpChooseRandomStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 17; i++) {
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
@@ -138,7 +144,7 @@ s16 mpChooseRandomStage(void)
 
 	index = random() % numchallengescomplete;
 
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 17; i++) {
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
@@ -155,8 +161,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 {
 	struct optiongroup groups[] = {
 		{ 0,  L_MPMENU_116 }, // "Dark"
-		{ 13, L_MPMENU_117 }, // "Classic"
-		{ 16, L_MPMENU_118 }, // "Random"
+		{ 14, L_MPMENU_117 }, // "Classic"
+		{ 17, L_MPMENU_118 }, // "Random"
 	};
 
 	s32 i;
@@ -2226,7 +2232,7 @@ MenuItemHandlerResult mpLoadPlayerMenuHandler(s32 operation, struct menuitem *it
 		file = &g_FileLists[0]->files[data->list.value];
 		available = true;
 
-		for (i = 0; i < MAX_PLAYERS; i++) {
+		for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 			if (file->fileid == g_PlayerConfigsArray[i].fileguid.fileid
 					&& file->deviceserial == g_PlayerConfigsArray[i].fileguid.deviceserial) {
 				if ((g_MpSetup.chrslots & (1 << i)) == 0) {
@@ -2357,6 +2363,15 @@ MenuItemHandlerResult menuhandlerMpHandicapPlayer(s32 operation, struct menuitem
 char *mpMenuTextHandicapPlayerName(struct menuitem *item)
 {
 	if (g_MpSetup.chrslots & (1 << item->param)) {
+#ifndef PLATFORM_N64
+		if (g_NetMode) {
+			// use client names directly, as the config names are not set yet
+			struct netclient *cl = netClientForPlayerNum(item->param);
+			if (cl) {
+				return cl->settings.name;
+			}
+		}
+#endif
 		return g_PlayerConfigsArray[item->param].base.name;
 	}
 
@@ -2658,6 +2673,40 @@ struct menuitem g_MpHandicapsMenuItems[] = {
 		0x000000ff,
 		menuhandlerMpHandicapPlayer,
 	},
+#if MAX_PLAYERS > 4
+	{
+		MENUITEMTYPE_SLIDER,
+		4,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		5,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		6,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+	{
+		MENUITEMTYPE_SLIDER,
+		7,
+		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LOCKABLEMINOR,
+		(uintptr_t)&mpMenuTextHandicapPlayerName,
+		0x000000ff,
+		menuhandlerMpHandicapPlayer,
+	},
+#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -2756,7 +2805,7 @@ MenuItemHandlerResult mpAddChangeSimulantMenuHandler(s32 operation, struct menui
 		if (botnum < 0) {
 			botnum = mpGetSlotForNewBot();
 			creating = 1;
-		} else if ((g_MpSetup.chrslots & (1 << (botnum + 4))) == 0) {
+		} else if ((g_MpSetup.chrslots & (1 << (botnum + MAX_PLAYERS))) == 0) {
 			creating = 1;
 		}
 
@@ -2996,7 +3045,7 @@ MenuItemHandlerResult menuhandlerMpSimulantSlot(s32 operation, struct menuitem *
 	case MENUOP_SET:
 		g_Menus[g_MpPlayerNum].mpsetup.slotindex = item->param;
 
-		if ((g_MpSetup.chrslots & (1 << (item->param + 4))) == 0) {
+		if ((g_MpSetup.chrslots & (1 << (item->param + MAX_PLAYERS))) == 0) {
 			menuPushDialog(&g_MpAddSimulantMenuDialog);
 		} else if (IS4MB()) {
 			menuPushDialog(&g_MpEditSimulant4MbMenuDialog);
@@ -3022,7 +3071,7 @@ char *mpMenuTextSimulantName(struct menuitem *item)
 {
 	s32 index = item->param;
 
-	if (g_BotConfigsArray[index].base.name[0] == '\0' || (g_MpSetup.chrslots & 1 << (index + 4)) == 0) {
+	if (g_BotConfigsArray[index].base.name[0] == '\0' || (g_MpSetup.chrslots & 1 << (index + MAX_PLAYERS)) == 0) {
 		return "";
 	}
 
@@ -3034,7 +3083,7 @@ char *func0f17d3dc(struct menuitem *item)
 	s32 index = item->param;
 
 	if (g_BotConfigsArray[index].base.name[0] == '\0'
-			|| ((g_MpSetup.chrslots & 1 << (index + 4)) == 0)) {
+			|| ((g_MpSetup.chrslots & 1 << (index + MAX_PLAYERS)) == 0)) {
 		return "";
 	}
 
@@ -3422,7 +3471,7 @@ MenuItemHandlerResult menuhandlerMpHumansVsSimulants(s32 operation, struct menui
 			if (g_MpSetup.chrslots & (1 << i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
-				mpchr->team = i < 4 ? 0 : 1;
+				mpchr->team = i < MAX_PLAYERS ? 0 : 1;
 			}
 		}
 
@@ -3435,7 +3484,7 @@ MenuItemHandlerResult menuhandlerMpHumansVsSimulants(s32 operation, struct menui
 MenuItemHandlerResult menuhandlerMpHumanSimulantPairs(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		u8 team_ids[4] = {0, 1, 2, 3};
+		u8 team_ids[MAX_PLAYERS] = {0, 1, 2, 3, 4, 5, 6, 7};
 		s32 i;
 		s32 playerindex = 0;
 		s32 simindex = 0;
@@ -3444,7 +3493,7 @@ MenuItemHandlerResult menuhandlerMpHumanSimulantPairs(s32 operation, struct menu
 			if (g_MpSetup.chrslots & (1 << i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
-				if (i < 4) {
+				if (i < MAX_PLAYERS) {
 					mpchr->team = team_ids[playerindex++];
 				} else {
 					mpchr->team = team_ids[simindex++];
@@ -3467,6 +3516,15 @@ char *mpMenuTextChrNameForTeamSetup(struct menuitem *item)
 	struct mpchrconfig *mpchr = mpGetChrConfigBySlotNum(item->param);
 
 	if (mpchr) {
+#ifndef PLATFORM_N64
+		if (g_NetMode) {
+			// use client names directly, as the config names are not set yet
+			struct netclient *cl = netClientForPlayerNum(item->param);
+			if (cl) {
+				return cl->settings.name;
+			}
+		}
+#endif
 		return mpchr->name;
 	}
 
@@ -5213,7 +5271,7 @@ void mpCloseDialogsForNewSetup(void)
 	s32 k;
 
 	// Loop through each player
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		g_MpPlayerNum = i;
 
 		// If they have a menu open

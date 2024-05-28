@@ -4209,7 +4209,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, s32 curmode, struct menurendercontex
 			// during development the second player in the 2.x styles had to
 			// choose their control style separately to player 1, in which case
 			// there would have been 2.5, 2.6, 2.7 and 2.8 for player 2.
-			if (curmode > CONTROLMODE_24 && curmode != CONTROLMODE_PC) {
+			if (curmode > CONTROLMODE_24 && curmode < CONTROLMODE_PC) {
 				if (textnum == menuitemControllerGetButtonAction(prevmode + 4, i)) {
 					colour = labelcolour;
 				}
@@ -4294,7 +4294,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 			data->prevmode = -1;
 		}
 	} else {
-		if (g_Menus[g_MpPlayerNum].main.controlmode >= CONTROLMODE_21 && g_Menus[g_MpPlayerNum].main.controlmode != CONTROLMODE_PC) {
+		if (g_Menus[g_MpPlayerNum].main.controlmode >= CONTROLMODE_21 && g_Menus[g_MpPlayerNum].main.controlmode < CONTROLMODE_PC) {
 			data->controlgroup = 1;
 			data->contfadetimer = 0;
 			data->prevmode = -1;

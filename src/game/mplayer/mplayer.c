@@ -28,6 +28,9 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "net/net.h"
+#endif
 
 // bss
 struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];
@@ -35,7 +38,7 @@ struct mpchrconfig *g_MpAllChrConfigPtrs[MAX_MPCHRS];
 s32 g_MpNumChrs;
 u32 var800ac534;
 struct mpbotconfig g_BotConfigsArray[MAX_BOTS];
-u8 g_MpSimulantDifficultiesPerNumPlayers[MAX_BOTS][MAX_PLAYERS];
+u8 g_MpSimulantDifficultiesPerNumPlayers[MAX_BOTS][MAX_LOCAL_PLAYERS];
 struct mpplayerconfig g_PlayerConfigsArray[MAX_MPPLAYERCONFIGS];
 u8 g_AmBotCommands[9];
 struct mpsetup g_MpSetup;
@@ -132,7 +135,7 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	.crosshairhealth = CROSSHAIR_HEALTH_OFF, \
 }
 
-struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS] = { 
+struct extplayerconfig g_PlayerExtCfg[MAX_LOCAL_PLAYERS] = { 
 	PLAYER_EXT_CFG_DEFAULT,
 	PLAYER_EXT_CFG_DEFAULT,
 	PLAYER_EXT_CFG_DEFAULT,
@@ -147,10 +150,17 @@ struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS] = {
  * value 0 will return 0.1
  * value 127 will return 1
  * value 255 will return 10
+ * in a netgame it's always 1
  */
 f32 mpHandicapToDamageScale(u8 value)
 {
 	f32 tmp;
+
+#ifndef PLATFORM_N64
+	if (g_NetMode) {
+		return 1.f;
+	}
+#endif
 
 	if (value < 127) {
 		return (value / 127.0f) * (value / 127.0f) * 0.9f + 0.1f;
@@ -185,22 +195,38 @@ void mpStartMatch(void)
 	s32 stagenum;
 
 #ifndef PLATFORM_N64
-	if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_START) {
-		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
-				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
-			mpApplyWeaponSet();
+	if (g_NetMode == NETMODE_SERVER) {
+		g_MpSetup.chrslots &= 0xff00;
+		g_MpSetup.chrslots |= 1;
+		s32 slot = 1;
+		for (s32 i = 1; i < g_NetMaxClients; ++i) {
+			if (g_NetClients[i].state >= CLSTATE_LOBBY) {
+				g_MpSetup.chrslots |= (1 << slot);
+				++slot;
+			}
 		}
 	}
+
+	if (g_NetMode != NETMODE_CLIENT)
+#endif
+	{
+#ifndef PLATFORM_N64
+		if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_START) {
+			if (g_MpWeaponSetNum == WEAPONSET_RANDOM || g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
+				mpApplyWeaponSet();
+			}
+		}
 #endif
 
-	mpConfigureQuickTeamSimulants();
+		mpConfigureQuickTeamSimulants();
 
-	if (!challengeIsFeatureUnlocked(MPFEATURE_ONEHITKILLS)) {
-		g_MpSetup.options &= ~MPOPTION_ONEHITKILLS;
-	}
+		if (!challengeIsFeatureUnlocked(MPFEATURE_ONEHITKILLS)) {
+			g_MpSetup.options &= ~MPOPTION_ONEHITKILLS;
+		}
 
-	if (!challengeIsFeatureUnlocked(MPFEATURE_SLOWMOTION)) {
-		g_MpSetup.options &= ~(MPOPTION_SLOWMOTION_ON | MPOPTION_SLOWMOTION_SMART);
+		if (!challengeIsFeatureUnlocked(MPFEATURE_SLOWMOTION)) {
+			g_MpSetup.options &= ~(MPOPTION_SLOWMOTION_ON | MPOPTION_SLOWMOTION_SMART);
+		}
 	}
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
@@ -243,7 +269,15 @@ void mpReset(void)
 		g_Vars.lvmpbotlevel = true;
 	}
 
-	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
+#ifdef PLATFORM_N64
+	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
+#else
+	// Counter-Operative now uses a different approach which allows more than 2 players.
+	// Co-Operative, on the other hand, is currently limited to 2 players.
+	// Due to the change in approach, it's better to ignore 2.x controls for Counter-Operative.
+	if (g_Vars.coopplayernum >= 0)
+#endif
+	{
 		struct mpplayerconfig tmp;
 
 		tmp = g_PlayerConfigsArray[MAX_PLAYERS];
@@ -426,7 +460,7 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 	g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_11;
 
 #ifndef PLATFORM_N64
-	if (g_PlayerExtCfg[playernum % MAX_PLAYERS].extcontrols) {
+	if (g_PlayerExtCfg[playernum % MAX_LOCAL_PLAYERS].extcontrols) {
 		g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_PC;
 	}
 #endif
@@ -494,9 +528,9 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 	g_PlayerConfigsArray[playernum].survivormedals = 0;
 	g_PlayerConfigsArray[playernum].title = MPPLAYERTITLE_BEGINNER;
 
-	if (playernum < MAX_PLAYERS) {
+	if (playernum < MAX_LOCAL_PLAYERS) {
 		for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
-			for (j = 1; j <= MAX_PLAYERS; j++) {
+			for (j = 1; j <= MAX_LOCAL_PLAYERS; j++) {
 				challengeSetCompletedByPlayerWithNumPlayers(playernum, i, j, false);
 			}
 		}
@@ -1324,7 +1358,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 			&& g_Vars.currentplayer->redbloodfinished
 			&& g_Vars.currentplayer->deathanimfinished
 			&& !(g_Vars.coopplayernum >= 0 && ((g_Vars.bond->isdead && g_Vars.coop->isdead) || !g_Vars.currentplayer->coopcanrestart || g_InCutscene))
-			&& !(g_Vars.antiplayernum >= 0 && ((g_Vars.currentplayer != g_Vars.anti || g_InCutscene)))
+			&& !(g_Vars.antiplayernum >= 0 && ((PLAYER_IS_NOT_ANTI(g_Vars.currentplayer) || g_InCutscene)))
 			&& g_NumReasonsToEndMpMatch == 0) {
 		// Render "Press START" text
 		gdl = text0f153628(gdl);
@@ -2472,10 +2506,12 @@ void mpEndMatch(void)
 	}
 
 #ifndef PLATFORM_N64
-	if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_END) {
-		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
-				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
-			mpApplyWeaponSet();
+	if (g_NetMode != NETMODE_CLIENT) {
+		if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_END) {
+			if (g_MpWeaponSetNum == WEAPONSET_RANDOM
+					|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
+				mpApplyWeaponSet();
+			}
 		}
 	}
 #endif
@@ -2637,10 +2673,10 @@ void mpFindUnusedHeadAndBody(u8 *mpheadnum, u8 *mpbodynum)
 
 s32 mpChooseRandomLockPlayer(void)
 {
-	s32 start = random() % 4;
+	s32 start = random() % MAX_PLAYERS;
 	s32 i;
 
-	for (i = (start + 1) % 4;; i = (i + 1) % 4) {
+	for (i = (start + 1) % MAX_PLAYERS;; i = (i + 1) % MAX_PLAYERS) {
 		if ((g_MpSetup.chrslots & (1 << i)) || i == start) {
 			break;
 		}
@@ -3084,11 +3120,11 @@ void mpCreateBotFromProfile(s32 botnum, u8 profilenum)
 	g_BotConfigsArray[botnum].type = g_BotProfiles[profilenum].type;
 	g_BotConfigsArray[botnum].difficulty = g_BotProfiles[profilenum].difficulty;
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		g_MpSimulantDifficultiesPerNumPlayers[botnum][i] = g_BotConfigsArray[botnum].difficulty;
 	}
 
-	g_MpSetup.chrslots |= 1 << (botnum + 4);
+	g_MpSetup.chrslots |= 1 << (botnum + MAX_PLAYERS);
 	strcpy(g_BotConfigsArray[botnum].base.name, "Sim\n");
 	g_BotConfigsArray[botnum].base.team = team;
 
@@ -3117,7 +3153,7 @@ void mpSetBotDifficulty(s32 botnum, s32 difficulty)
 
 	g_BotConfigsArray[botnum].difficulty = difficulty;
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		g_MpSimulantDifficultiesPerNumPlayers[botnum][i] = g_BotConfigsArray[botnum].difficulty;
 	}
 }
@@ -3131,7 +3167,7 @@ s32 mpGetSlotForNewBot(void)
 {
 	s32 i = 0;
 
-	while (i < MAX_BOTS - 1 && g_MpSetup.chrslots & (1 << (i + 4))) {
+	while (i < MAX_BOTS - 1 && g_MpSetup.chrslots & (1 << (i + MAX_PLAYERS))) {
 		i++;
 	}
 
@@ -3140,7 +3176,7 @@ s32 mpGetSlotForNewBot(void)
 
 void mpRemoveSimulant(s32 index)
 {
-	g_MpSetup.chrslots &= ~(1 << (index + 4));
+	g_MpSetup.chrslots &= ~(1 << (index + MAX_PLAYERS));
 	g_BotConfigsArray[index].base.name[0] = '\0';
 	func0f1881d4(index);
 	mpGenerateBotNames();
@@ -3148,7 +3184,11 @@ void mpRemoveSimulant(s32 index)
 
 bool mpHasSimulants(void)
 {
+#if MAX_PLAYERS > 4
+	if ((g_MpSetup.chrslots & 0xff00) != 0) {
+#else
 	if ((g_MpSetup.chrslots & 0xfff0) != 0) {
+#endif
 		return true;
 	}
 
@@ -3160,7 +3200,7 @@ bool mpHasUnusedBotSlots(void)
 	s32 numvacant = challengeIsFeatureUnlocked(MPFEATURE_8BOTS) ? MAX_BOTS : 4;
 	s32 i;
 
-	for (i = 4; i < MAX_MPCHRS; i++) {
+	for (i = MAX_PLAYERS; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
 			numvacant--;
 		}
@@ -3178,9 +3218,9 @@ bool mpIsSimSlotEnabled(s32 slot)
 	s32 numfree = MAX_BOTS;
 	s32 i;
 
-	if ((g_MpSetup.chrslots & (1 << (slot + 4))) == 0) {
+	if ((g_MpSetup.chrslots & (1 << (slot + MAX_PLAYERS))) == 0) {
 		for (i = 0; i < MAX_BOTS; i++) {
-			if (g_MpSetup.chrslots & (1 << (i + 4))) {
+			if (g_MpSetup.chrslots & (1 << (i + MAX_PLAYERS))) {
 				numfree--;
 			}
 		}
@@ -3232,9 +3272,9 @@ void mpGenerateBotNames(void)
 	}
 
 	// Count the number of bots using each profile (MeatSim, TurtleSim etc)
-	for (i = 4; i < MAX_MPCHRS; i++) {
+	for (i = MAX_PLAYERS; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
-			profilenum = mpFindBotProfile(g_BotConfigsArray[i - 4].type, g_BotConfigsArray[i - 4].difficulty);
+			profilenum = mpFindBotProfile(g_BotConfigsArray[i - MAX_PLAYERS].type, g_BotConfigsArray[i - MAX_PLAYERS].difficulty);
 
 			if (profilenum >= 0 && profilenum < ARRAYCOUNT(g_BotProfiles)) {
 				counts[profilenum]++;
@@ -3253,20 +3293,20 @@ void mpGenerateBotNames(void)
 		}
 	}
 
-	for (i = 4; i < MAX_MPCHRS; i++) {
+	for (i = MAX_PLAYERS; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
-			profilenum = mpFindBotProfile(g_BotConfigsArray[i - 4].type, g_BotConfigsArray[i - 4].difficulty);
+			profilenum = mpFindBotProfile(g_BotConfigsArray[i - MAX_PLAYERS].type, g_BotConfigsArray[i - MAX_PLAYERS].difficulty);
 
 			if (profilenum >= 0 && profilenum < ARRAYCOUNT(g_BotProfiles)) {
 				if (counts[profilenum] >= 0) {
 					// Multiple bots using this profile - append the number
 					counts[profilenum]++;
 					sprintf(name, "%s:%d\n", langGet(g_BotProfiles[profilenum].name), counts[profilenum]);
-					strcpy(g_BotConfigsArray[i - 4].base.name, name);
+					strcpy(g_BotConfigsArray[i - MAX_PLAYERS].base.name, name);
 				} else {
 					// One bots using this profile - just use the profile name
 					sprintf(name, "%s\n", langGet(g_BotProfiles[profilenum].name));
-					strcpy(g_BotConfigsArray[i - 4].base.name, name);
+					strcpy(g_BotConfigsArray[i - MAX_PLAYERS].base.name, name);
 				}
 			}
 		}
@@ -3315,7 +3355,7 @@ s32 func0f18d074(s32 index)
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		if (&g_BotConfigsArray[i].base == g_MpAllChrConfigPtrs[index]) {
-			return i + 4;
+			return i + MAX_PLAYERS;
 		}
 	}
 
@@ -3437,13 +3477,13 @@ void mpplayerfileLoadWad(s32 playernum, struct savebuffer *buffer, s32 arg2)
 
 #ifndef PLATFORM_N64
 	// override with PC controls if enabled in the config
-	if (g_PlayerExtCfg[playernum % MAX_PLAYERS].extcontrols) {
+	if (g_PlayerExtCfg[playernum % MAX_LOCAL_PLAYERS].extcontrols) {
 		g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_PC;
 	}
 #endif
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
-		for (j = 1; j < MAX_PLAYERS + 1; j++) {
+		for (j = 1; j < MAX_LOCAL_PLAYERS + 1; j++) {
 			challengeSetCompletedByPlayerWithNumPlayers(playernum, i, j, savebufferReadBits(buffer, 1));
 		}
 	}
@@ -3583,7 +3623,7 @@ void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].options, 12);
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
-		for (j = 1; j < MAX_PLAYERS + 1; j++) {
+		for (j = 1; j < MAX_LOCAL_PLAYERS + 1; j++) {
 			savebufferOr(buffer, challengeIsCompletedByPlayerWithNumPlayers(playernum, i, j), 1);
 		}
 	}
@@ -3772,7 +3812,7 @@ void mpApplyConfig(struct mpconfigfull *config)
 	for (i = 0; i < MAX_BOTS; i++) {
 		g_BotConfigsArray[i].type = config->config.simulants[i].type;
 
-		for (j = 0; j < MAX_PLAYERS; j++) {
+		for (j = 0; j < MAX_LOCAL_PLAYERS; j++) {
 			g_MpSimulantDifficultiesPerNumPlayers[i][j] = config->config.simulants[i].difficulties[j];
 		}
 
@@ -3829,11 +3869,15 @@ void mp0f18dec4(s32 slot)
 	mpApplyConfig(config);
 
 #if VERSION >= VERSION_JPN_FINAL
+#if MAX_PLAYERS > 4
+	g_MpSetup.chrslots &= 0xff;
+#else
 	g_MpSetup.chrslots &= 0x0f;
+#endif
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		if (g_BotConfigsArray[i].difficulty != BOTDIFF_DISABLED) {
-			g_MpSetup.chrslots |= 1 << (i + 4);
+			g_MpSetup.chrslots |= 1 << (i + MAX_PLAYERS);
 		}
 	}
 #endif
@@ -3861,12 +3905,12 @@ void mpsetupfileLoadWad(struct savebuffer *buffer)
 		g_BotConfigsArray[i].type = savebufferReadBits(buffer, 5);
 		g_BotConfigsArray[i].difficulty = savebufferReadBits(buffer, 3);
 
-		for (j = 0; j < MAX_PLAYERS; j++) {
+		for (j = 0; j < MAX_LOCAL_PLAYERS; j++) {
 			g_MpSimulantDifficultiesPerNumPlayers[i][j] = g_BotConfigsArray[i].difficulty;
 		}
 
 		if (g_BotConfigsArray[i].difficulty != BOTDIFF_DISABLED) {
-			g_MpSetup.chrslots |= 1 << (i + 4);
+			g_MpSetup.chrslots |= 1 << (i + MAX_PLAYERS);
 		}
 
 		g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
@@ -3886,7 +3930,7 @@ void mpsetupfileLoadWad(struct savebuffer *buffer)
 	g_MpSetup.scorelimit = savebufferReadBits(buffer, 7);
 	g_MpSetup.teamscorelimit = savebufferReadBits(buffer, 9);
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		g_PlayerConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 	}
 
@@ -3902,7 +3946,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	func0f0d55a4(buffer, g_MpSetup.name);
 
 	for (i = 0; i < MAX_BOTS; i++) {
-		if (g_MpSetup.chrslots & (1 << (i + 4))) {
+		if (g_MpSetup.chrslots & (1 << (i + MAX_PLAYERS))) {
 			numsims++;
 		}
 	}
@@ -3918,7 +3962,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	for (i = 0; i < MAX_BOTS; i++) {
 		savebufferOr(buffer, g_BotConfigsArray[i].type, 5);
 
-		if (g_MpSetup.chrslots & (1 << (i + 4))) {
+		if (g_MpSetup.chrslots & (1 << (i + MAX_PLAYERS))) {
 			savebufferOr(buffer, g_BotConfigsArray[i].difficulty, 3);
 		} else {
 			savebufferOr(buffer, BOTDIFF_DISABLED, 3);
@@ -3950,7 +3994,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	savebufferOr(buffer, g_MpSetup.scorelimit, 7);
 	savebufferOr(buffer, g_MpSetup.teamscorelimit, 9);
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		savebufferOr(buffer, g_PlayerConfigsArray[i].base.team, 3);
 	}
 }

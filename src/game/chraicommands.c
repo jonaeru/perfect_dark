@@ -52,6 +52,10 @@
 #include "data.h"
 #include "types.h"
 
+#ifndef PLATFORM_N64
+#include "game/mplayer/mplayer.h"
+#endif
+
 /**
  * @cmd 0000
  */
@@ -6035,11 +6039,35 @@ bool aiSetChrPresetToChrNearPad(void)
 bool aiChrSetTeam(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
+#ifdef PLATFORM_N64
 	struct chrdata *chr = chrFindById(g_Vars.chrdata, cmd[2]);
 
 	if (chr) {
 		chr->team = cmd[3];
 	}
+#else
+	u32 playernum;
+	if (cmd[2] == CHR_ANTI && g_Vars.antiplayernum >= 0) {
+		// There can be multiple counter-op players, so set this for all.
+		for (playernum = 0; playernum < PLAYERCOUNT(); playernum++) {
+			struct player *player = g_Vars.players[playernum];
+
+			if (player && PLAYER_IS_ANTI(player)) {
+				struct chrdata *chr = player->prop->chr;
+
+				if (chr) {
+					chr->team = cmd[3];
+				}
+			}
+		}
+	} else {
+		struct chrdata *chr = chrFindById(g_Vars.chrdata, cmd[2]);
+
+		if (chr) {
+			chr->team = cmd[3];
+		}
+	}
+#endif
 
 	g_Vars.aioffset += 4;
 

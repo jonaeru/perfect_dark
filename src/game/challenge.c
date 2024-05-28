@@ -136,7 +136,7 @@ void challengeDetermineUnlockedFeatures(void)
 	}
 
 	// Now same as above, but per player
-	for (j = 0; j < MAX_PLAYERS; j++) {
+	for (j = 0; j < MAX_LOCAL_PLAYERS; j++) {
 		numgifted = 0;
 
 		for (challengeindex = 0; challengeindex < ARRAYCOUNT(g_MpChallenges); challengeindex++) {
@@ -197,7 +197,7 @@ void challengeDetermineUnlockedFeatures(void)
 		}
 
 		for (challengeindex = 0; challengeindex < ARRAYCOUNT(g_MpChallenges); challengeindex++) {
-			for (prev = 0; prev < MAX_PLAYERS; prev++) {
+			for (prev = 0; prev < MAX_LOCAL_PLAYERS; prev++) {
 				if (challengeIsAvailableToPlayer(prev, challengeindex)) {
 					for (i = 0; i < ARRAYCOUNT(g_MpChallenges[challengeindex].unlockfeatures); i++) {
 						if (g_MpChallenges[challengeindex].unlockfeatures[i] == j) {
@@ -249,7 +249,7 @@ void challengePerformSanityChecks(void)
 			}
 		}
 
-		// Turn off all simulants and turn them on if enabled
+		// Turn off all simulants (and players 5-8 if supported) and turn them on if enabled
 		// for this number of players
 		g_MpSetup.chrslots &= 0x000f;
 
@@ -265,8 +265,14 @@ void challengePerformSanityChecks(void)
 			g_Vars.mphilltime = 10;
 		}
 	} else if (!challengeIsFeatureUnlocked(MPFEATURE_8BOTS)) {
-		// Limit to 4 players and 4 simulants
+		// Limit to 4 players and 4 simulants in local games
+#ifndef PLATFORM_N64
+		g_MpSetup.chrslots &= (g_NetMode ? 0x0fff : 0x0f0f);
+#elif MAX_PLAYERS > 4
+		g_MpSetup.chrslots &= 0x0f0f;
+#else
 		g_MpSetup.chrslots &= 0x00ff;
+#endif
 	}
 }
 

@@ -6,7 +6,6 @@
 #include "mixer.h"
 #include "platform.h"
 
-#define MINIMP3_IMPLEMENTATION
 #include "external/minimp3.h"
 
 #ifdef __SSE4_1__
