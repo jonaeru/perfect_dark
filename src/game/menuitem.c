@@ -1372,7 +1372,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 		if (dialog && g_MenuUsingMouse && !inputs->leftright && !inputs->updown) {
 			const s32 dleft = dialog->x + 4;
 			const s32 dright = dleft + 12 * 10;
-			const s32 dtop = dialog->y + 13 + 12;
+			const s32 dtop = menuitemGetTop(item, dialog) + 12;
 			const s32 dbottom = dtop + 11 * 5;
 			const s32 mx = inputs->mousex;
 			const s32 my = inputs->mousey;
@@ -4514,3 +4514,28 @@ Gfx *menuitemOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menuitem *it
 
 	return gdl;
 }
+
+#ifndef PLATFORM_N64
+
+s32 menuitemGetTop(struct menuitem *item, struct menudialog *dialog)
+{
+	struct menu *menu = &g_Menus[g_MpPlayerNum];
+	s32 dtop = dialog->y + LINEHEIGHT + 1;
+
+	for (s32 i = 0; i < dialog->numcols; ++i) {
+		const s32 colindex = i + dialog->colstart;
+
+		for (s32 j = 0; j < menu->cols[colindex].numrows; ++j) {
+			const s32 rowindex = j + menu->cols[colindex].rowstart;
+			struct menuitem *pitem = &dialog->definition->items[menu->rows[rowindex].itemindex];
+			if (pitem == item) {
+				return dtop;
+			}
+			dtop += menu->rows[rowindex].height;
+		}
+	}
+
+	return dtop;
+}
+
+#endif
