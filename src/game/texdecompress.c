@@ -2269,7 +2269,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 				// Copy the compressed texture to RAM
 				dmaExec(alignedcompbuffer,
 						(romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8),
-						((u32) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
+						((uintptr_t) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
 				compptr = (u8 *) alignedcompbuffer + (thisoffset & 7);
 			}
 			thisoffset = 0;

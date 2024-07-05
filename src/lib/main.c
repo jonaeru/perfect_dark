@@ -489,7 +489,7 @@ void mainInit(void)
 
 			if (*(s16 *) receivedmsg == OS_SC_RETRACE_MSG) {
 				viUpdateMode();
-				rdpCreateTask(var8005dcc8, var8005dcc8 + ARRAYCOUNT(var8005dcc8), 0, (s32) &scdonemsg);
+				rdpCreateTask(var8005dcc8, var8005dcc8 + ARRAYCOUNT(var8005dcc8), 0, (uintptr_t) &scdonemsg);
 				j++;
 			}
 		}
@@ -611,7 +611,7 @@ void mainInit(void)
 
 			if (*(s16 *) receivedmsg == OS_SC_RETRACE_MSG) {
 				viUpdateMode();
-				rdpCreateTask(var8005dcc8, var8005dcc8 + ARRAYCOUNT(var8005dcc8), 0, (s32) &scdonemsg);
+				rdpCreateTask(var8005dcc8, var8005dcc8 + ARRAYCOUNT(var8005dcc8), 0, (uintptr_t) &scdonemsg);
 				i++;
 			}
 		}
@@ -1092,7 +1092,7 @@ void mainTick(void)
 			viUpdateMode();
 		}
 
-		rdpCreateTask(gdlstart, gdl, 0, (s32) &msg);
+		rdpCreateTask(gdlstart, gdl, 0, (uintptr_t) &msg);
 		g_MainNumGfxTasks++;
 		memaPrint();
 		func0f16cf94();

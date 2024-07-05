@@ -861,7 +861,11 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 	ingdl = instart;
 	outgdl = outstart;
 
+#ifdef PLATFORM_64BIT
+	numcmdsremaining = gdlsizeinbytes >> 4;
+#else
 	numcmdsremaining = gdlsizeinbytes >> 3;
+#endif
 
 	texResetTiles();
 
@@ -1157,7 +1161,12 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 
 void texCopyGdls(Gfx *src, Gfx *dst, s32 count)
 {
+#ifdef PLATFORM_64BIT
+	count = (count >> 4);
+#else
 	count = (count >> 3);
+#endif
+
 	src = src + (count - 1);
 	dst = dst + (count - 1);
 

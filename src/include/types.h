@@ -2856,9 +2856,9 @@ struct cover {
 struct padsfileheader {
 	s32 numpads;
 	s32 numcovers;
-	s32 waypointsoffset;
-	s32 waygroupsoffset;
-	s32 coversoffset;
+	uintptr_t waypointsoffset;
+	uintptr_t waygroupsoffset;
+	uintptr_t coversoffset;
 	u16 padoffsets[1];
 };
 
@@ -5168,7 +5168,7 @@ struct shieldhit {
 };
 
 struct bgroom {
-	u32 unk00;
+	uintptr_t unk00;
 	struct coord pos;
 	u8 br_light_min;
 	u8 br_light_max;

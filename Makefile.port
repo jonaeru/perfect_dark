@@ -86,12 +86,8 @@ endif
 
 # Set whether the target arch is 64- or 32-bit.
 ifneq (,$(findstring 64,$(TARGET_PLATFORM))$(findstring armv8,$(TARGET_PLATFORM)))
-  # TODO: we're not 64-bit compatible yet, error out if building the actual game
-  ifeq (,$(findstring clean,$(MAKECMDGOALS)))
-    $(error 64-bit target platforms are not supported yet)
-  endif
   TARGET_64BIT = 1
-else # TODO
+else
   TARGET_64BIT = 0
 endif
 
@@ -151,7 +147,7 @@ G_DIR := src/generated/$(ROMID)
 
 ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
   TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
-  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -ldbghelp
+  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -ldbghelp -lws2_32
   # on windows/mingw we need this to be built with a 32-bit compiler so it finds the correct libs
   TOOLCHAIN ?= i686-w64-mingw32-
   # on GCC link libstdc++ statically

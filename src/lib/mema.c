@@ -400,7 +400,7 @@ void memaPrint(void)
 
 void *memaAlloc(u32 size)
 {
-	u32 addr;
+	uintptr_t addr;
 	u32 diff;
 	s32 i;
 
