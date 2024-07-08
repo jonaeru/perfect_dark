@@ -895,7 +895,7 @@ bool playerSpawnAnti(struct chrdata *hostchr, bool force)
 
 		if (hostchr->bodynum == BODY_SKEDAR) {
 			g_Vars.antiheadnum = HEAD_MRBLONDE;
-			g_Vars.antibodynum = BODY_MRBLONDE;
+			g_Vars.antibodynum = BODY_PRESIDENT_CLONE; // Custom: PD Plus Skedar
 		} else {
 			g_Vars.antiheadnum = hostchr->headnum;
 			g_Vars.antibodynum = hostchr->bodynum;
