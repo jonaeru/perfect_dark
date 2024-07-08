@@ -81,6 +81,12 @@ enum contkey {
 	CK_TOTAL_COUNT
 };
 
+enum mouselockmode {
+	MLOCK_OFF = 0,
+	MLOCK_ON = 1,
+	MLOCK_AUTO = 2
+};
+
 // returns bitmask of connected controllers or -1 if failed
 s32 inputInit(void);
 
@@ -201,8 +207,14 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode);
 void inputClearLastKey(void);
 s32 inputGetLastKey(void);
 
-// get/set Input.MouseDefaultLocked
-s32 inputGetMouseDefaultLocked(void);
-void inputSetMouseDefaultLocked(s32 defaultLocked);
+// get/set Input.MouseLockMode
+s32 inputGetMouseLockMode(void);
+void inputSetMouseLockMode(s32 lockmode);
+
+// same as inputLockMouse but works only if mouse is enabled and lockmode == MLOCK_AUTO
+s32 inputAutoLockMouse(s32 wantlock);
+
+// show/hide mouse cursor; if mouse lock is on the cursor is always hidden
+void inputMouseShowCursor(s32 show);
 
 #endif

@@ -119,14 +119,25 @@ static MenuItemHandlerResult menuhandlerMouseAimLock(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseDefaultLocked(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseLockMode(s32 operation, struct menuitem *item, union handlerdata *data)
 {
+	static const char *opts[] = {
+		"Always Off",
+		"Always On",
+		"Auto"
+	};
+
 	switch (operation) {
-	case MENUOP_GET:
-		return inputGetMouseDefaultLocked();
-	case MENUOP_SET:
-		inputSetMouseDefaultLocked(data->checkbox.value);
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = ARRAYCOUNT(opts);
 		break;
+	case MENUOP_GETOPTIONTEXT:
+		return (intptr_t)opts[data->dropdown.value];
+	case MENUOP_SET:
+		inputSetMouseLockMode(data->checkbox.value);
+		break;
+	case MENUOP_GETSELECTEDINDEX:
+		data->dropdown.value = inputGetMouseLockMode();
 	}
 
 	return 0;
@@ -274,12 +285,12 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		menuhandlerMouseAimLock,
 	},
 	{
-		MENUITEMTYPE_CHECKBOX,
+		MENUITEMTYPE_DROPDOWN,
 		0,
 		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Grab Mouse Input by Default",
+		(uintptr_t)"Mouse Lock Mode",
 		0,
-		menuhandlerMouseDefaultLocked,
+		menuhandlerMouseLockMode,
 	},
 	{
 		MENUITEMTYPE_CHECKBOX,

@@ -33,9 +33,7 @@
 void menuStop(void)
 {
 #ifndef PLATFORM_N64
-	if (inputMouseIsEnabled()) {
-		inputLockMouse(true);
-	}
+	inputAutoLockMouse(true);
 #endif
 
 	if (var80062944) {
