@@ -1884,7 +1884,7 @@ Gfx *menuitemModelRender(Gfx *gdl, struct menurendercontext *context)
 		renderdata.unk10 = true;
 
 		data.type19.gdl = gdl;
-		data.type19.unk04 = (s32)&renderdata;
+		data.type19.unk04 = (uintptr_t)&renderdata;
 		data.type19.renderdata2 = &renderdata;
 
 		gdl = (Gfx *)context->item->handler(MENUOP_RENDER, context->item, &data);

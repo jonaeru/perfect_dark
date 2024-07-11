@@ -1454,6 +1454,10 @@ void playerTickChrBody(void)
 
 			model->rwdatalen = 256;
 
+#ifdef PLATFORM_64BIT
+			model->rwdatalen += 128;
+#endif
+
 			texGetPoolLeftPos(&texpool);
 
 			// @TODO: Figure out these arguments

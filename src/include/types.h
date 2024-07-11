@@ -27,7 +27,7 @@
 typedef s32 PakErr1;
 typedef s32 PakErr2;
 typedef s32 MenuDialogHandlerResult;
-typedef intptr_t MenuItemHandlerResult;
+typedef uintptr_t MenuItemHandlerResult;
 typedef s16 RoomNum;
 
 #ifdef PLATFORM_N64
@@ -3427,7 +3427,7 @@ struct menuitem {
 	intptr_t param3;
 
 	union {
-		s32 (*handler)(s32 operation, struct menuitem *item, union handlerdata *data);
+		uintptr_t (*handler)(s32 operation, struct menuitem *item, union handlerdata *data);
 		void (*handlervoid)(s32 operation, struct menuitem *item, union handlerdata *data);
 	};
 };
@@ -3877,7 +3877,11 @@ struct menumodel {
 	/*0x05e*/ s16 curanimnum;
 	/*0x060*/ struct model bodymodel;
 	/*0x084*/ struct anim bodyanim;
+#ifdef PLATFORM_64BIT
+	/*0x110*/ u32 rwdata[256+128];
+#else
 	/*0x110*/ u32 rwdata[256];
+#endif
 	/*0x510*/ f32 curposx;
 	/*0x514*/ f32 curposy;
 	/*0x518*/ f32 curposz;

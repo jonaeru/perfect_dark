@@ -7,6 +7,8 @@
 #include "data.h"
 #include "types.h"
 
+#include "system.h"
+
 struct model *g_ModelSlots;
 struct anim *g_AnimSlots;
 s32 g_ModelNumObjs;
@@ -204,7 +206,7 @@ struct model *modelmgrInstantiateModel(struct modeldef *modeldef, bool withanim)
 					}
 				}
 			} else {
-				// empty
+				sysLogPrintf(LOG_WARNING, "Unable to allocate rwdata");
 			}
 
 			if (withanim) {
@@ -212,6 +214,10 @@ struct model *modelmgrInstantiateModel(struct modeldef *modeldef, bool withanim)
 			} else {
 				datalen = IS4MB() ? 52 : 256;
 			}
+
+#ifdef PLATFORM_64BIT
+			datalen += 128;
+#endif
 
 			if (datalen < modeldef->rwdatalen) {
 				datalen = modeldef->rwdatalen;

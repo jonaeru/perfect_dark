@@ -97,7 +97,7 @@ u16 g_BgUnloadDelay240;
 u16 g_BgUnloadDelay240_2;
 u32 var800a4bf4;
 RoomNum g_GlareRooms[100];
-u32 *g_BgPrimaryData2;
+uintptr_t *g_BgPrimaryData2;
 struct bgroom *g_BgRooms;
 struct bgportal *g_BgPortals;
 struct portalmetric *g_PortalMetrics;
@@ -2937,7 +2937,7 @@ void bgLoadRoom(s32 roomnum)
 
 		// Copy gdls to the right-side of the allocation
 		// and build a pointer array to them
-		texCopyGdls((void *) gfxblocks[0], (void *) (allocation + alloclen - (gfxblocks[numgdls] - gfxblocks[0])), (u32) (gfxblocks[numgdls] - gfxblocks[0]));
+		texCopyGdls((void *) gfxblocks[0], (void *) (allocation + alloclen - (gfxblocks[numgdls] - gfxblocks[0])), (uintptr_t) (gfxblocks[numgdls] - gfxblocks[0]));
 
 		for (i = 0; i < numgdls + 1; i++) {
 			gdlpointers[i] = gfxblocks[i] + (allocation + alloclen - gfxblocks[numgdls]);
@@ -4243,7 +4243,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 
 	vtx = bgFindVerticesForGdl(roomnum, gdl);
 	iter = &gdl[batch->gbicmdindex];
-	vtx = (Vtx *)((UNSEGADDR(iter->words.w1) & 0xffffff) + (s32)vtx);
+	vtx = (Vtx *)((UNSEGADDR(iter->words.w1) & 0xffffff) + (uintptr_t)vtx);
 	numvertices = (((u32) iter->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 	ptr = var800a6470;
 

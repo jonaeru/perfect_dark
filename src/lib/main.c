@@ -978,7 +978,7 @@ void mainLoop(void)
 				{
 					char message[80];
 					u32 stack2;
-					sprintf(message, "boss.c default: %08x type %d\n", (s32) msg, *(s16 *) msg);
+					sprintf(message, "boss.c default: %08x type %d\n", (uintptr_t) msg, *(s16 *) msg);
 					crashSetMessage(message);
 					CRASH();
 				}

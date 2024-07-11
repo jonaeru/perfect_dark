@@ -475,7 +475,7 @@ char *menuResolveText(uintptr_t thing, void *dialogoritem)
 
 	// Text ID
 	if (thing < 0x5a00) {
-		return langGet((u32)thing);
+		return langGet((uintptr_t)thing);
 	}
 
 #ifdef PLATFORM_N64 // unreliable otherwise, the above check should be enough?
@@ -1880,7 +1880,11 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						totalfilelen += ALIGN64(fileGetInflatedSize(headfilenum));
 					}
 
+#ifdef PLATFORM_64BIT
+					totalfilelen += 0x6000;
+#else
 					totalfilelen += 0x4000;
+#endif
 
 					texInitPool(&texpool, menumodel->allocstart + totalfilelen, menumodel->alloclen - totalfilelen);
 
@@ -1902,7 +1906,11 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					modelInit(&menumodel->bodymodel, menumodel->bodymodeldef, menumodel->rwdata, true);
 					animInit(&menumodel->bodyanim);
 
+#ifdef PLATFORM_64BIT
+					menumodel->bodymodel.rwdatalen = 256 + 128;
+#else
 					menumodel->bodymodel.rwdatalen = 256;
+#endif
 					menumodel->bodymodel.anim = &menumodel->bodyanim;
 
 					body0f02ce8c(bodynum, headnum, menumodel->bodymodeldef, menumodel->headmodeldef, totalfilelen * 0, &menumodel->bodymodel, false, 1);
@@ -1921,7 +1929,11 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					modelInit(&menumodel->bodymodel, menumodel->bodymodeldef, menumodel->rwdata, true);
 					animInit(&menumodel->bodyanim);
 
+#ifdef PLATFORM_64BIT
+					menumodel->bodymodel.rwdatalen = 256+128;
+#else
 					menumodel->bodymodel.rwdatalen = 256;
+#endif
 					menumodel->bodymodel.anim = &menumodel->bodyanim;
 				}
 
@@ -3891,11 +3903,19 @@ void menuReset(void)
 		}
 
 		for (i = 0; i < max; i++) {
+#ifdef PLATFORM_64BIT
+			menuResetModel(&g_Menus[i].menumodel, IS4MB() ? 0xb400 : 0x38400, true); // 50% more
+#else
 			menuResetModel(&g_Menus[i].menumodel, IS4MB() ? 0xb400 : 0x25800, true);
+#endif
 		}
 
 		if (IS8MB()) {
+#ifdef PLATFORM_64BIT
+			menuResetModel(&g_MenuData.hudpiece, 0x12c00, true); // 50% more
+#else
 			menuResetModel(&g_MenuData.hudpiece, 0xc800, true);
+#endif
 		}
 
 		g_MenuData.hudpiece.newparams = MENUMODELPARAMS_SET_FILENUM(FILE_GHUDPIECE);

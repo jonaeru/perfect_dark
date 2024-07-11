@@ -428,7 +428,7 @@ s32 filemgrGetDeviceNameOrStartIndex(s32 listnum, s32 operation, s32 optionindex
 		if (g_FileLists[listnum]->devicestartindexes[i] != -1) {
 			if (remaining == 0) {
 				if (operation == MENUOP_GETOPTGROUPTEXT) {
-					return (s32)langGet(names[i]);
+					return (uintptr_t)langGet(names[i]);
 				}
 
 				return g_FileLists[listnum]->devicestartindexes[i];
@@ -1252,7 +1252,7 @@ void func0f1097d0(s32 device)
 		thing = memaAlloc(align16(g_FileTypeSizes[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1]));
 
 		if (thing) {
-			filemgrSaveOrLoad(&g_FilemgrFileToCopy, g_Menus[g_MpPlayerNum].fm.filetypeplusone + 103, (s32) thing);
+			filemgrSaveOrLoad(&g_FilemgrFileToCopy, g_Menus[g_MpPlayerNum].fm.filetypeplusone + 103, (uintptr_t) thing);
 		} else {
 			filemgrPushErrorDialog(FILEERROR_OUTOFMEMORY);
 		}

@@ -1049,7 +1049,7 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 
 			lightGetBboxCentre(roomnum, lightnum, &centre);
 
-			room = (void *) ((u8 *) g_BgRooms + (u32) room);
+			room = (void *) ((u8 *) g_BgRooms + (uintptr_t) room);
 			centre.x += room->pos.x;
 			centre.y += room->pos.y;
 			centre.z += room->pos.z;

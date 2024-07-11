@@ -2097,7 +2097,7 @@ void texInitPool(struct texpool *pool, u8 *start, s32 len)
 	pool->start = start;
 	pool->end = (struct tex *)(start + len);
 	pool->leftpos = start;
-	pool->rightpos = (struct tex *)((s32)start + len);
+	pool->rightpos = (struct tex *)((uintptr_t)start + len);
 }
 
 struct tex *texFindInPool(s32 texturenum, struct texpool *pool)
@@ -2144,7 +2144,7 @@ struct tex *texFindInPool(s32 texturenum, struct texpool *pool)
 
 s32 texGetPoolFreeBytes(struct texpool *pool)
 {
-	return (s32) pool->rightpos - (s32) pool->leftpos;
+	return (uintptr_t) pool->rightpos - (uintptr_t) pool->leftpos;
 }
 
 u8 *texGetPoolLeftPos(struct texpool *pool)

@@ -3798,13 +3798,13 @@ void bgunTickGunLoad(void)
 	s32 padding;
 	u32 allocsize;
 	u32 loadsize;
-	u32 ptr;
+	uintptr_t ptr;
 	struct player *player = g_Vars.currentplayer;
 	struct modeldef *modeldef;
 	struct fileinfo *fileinfo;
 	struct fileinfo *gunfileinfo;
 	s32 newvalue;
-	u32 end;
+	uintptr_t end;
 	u32 stack;
 #if VERSION >= VERSION_NTSC_1_0
 	u32 stack2;
@@ -3854,7 +3854,7 @@ void bgunTickGunLoad(void)
 
 		fileinfo = &g_FileInfo[player->gunctrl.loadfilenum];
 		fileinfo->allocsize = allocsize;
-		end = ALIGN16((s32)ptr + allocsize);
+		end = ALIGN16((uintptr_t)ptr + allocsize);
 		allocsize = end - ptr;
 		if (1);
 		remaining -= allocsize;
