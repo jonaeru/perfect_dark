@@ -2155,11 +2155,16 @@ u8 *texGetPoolLeftPos(struct texpool *pool)
 void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, s32 arg2)
 {
 	u8 *bytes = (u8 *)gdl;
+	u8 ofs = 4;
+#ifdef PLATFORM_64BIT
+	ofs = 8;
+#endif
+
 
 	while (bytes[GFX_W0_BYTE(0)] != (u8)G_ENDDL) {
 		// Look for GBI sequence: fd...... abcd....
 		if (bytes[GFX_W0_BYTE(0)] == G_SETTIMG && bytes[GFX_W1_BYTE(0)] == 0xab && bytes[GFX_W1_BYTE(1)] == 0xcd) {
-			texLoad((texnum_t *)((uintptr_t)bytes + 4), pool, arg2);
+			texLoad((texnum_t *)((uintptr_t)bytes + ofs), pool, arg2);
 		}
 
 		bytes += sizeof(Gfx);

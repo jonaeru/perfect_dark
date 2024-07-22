@@ -64,7 +64,7 @@ struct curmp3 {
 };
 
 s32 g_NumSounds;
-u32 *g_ALSoundRomOffsets;
+uintptr_t *g_ALSoundRomOffsets;
 s32 g_SndMaxFxBusses;
 u32 var80094eac;
 struct curmp3 g_SndCurMp3;
@@ -984,12 +984,12 @@ void sndLoadSfxCtl(void)
 	// Calculate the size of the ALInstrument and load it. The pointer is then
 	// shifted forward to point to the instrument's ALSound array. This leaks
 	// some memory but this is initialisation code so it's not much of an issue.
-	size = g_NumSounds * 4 + 20;
+	size = g_NumSounds * sizeof(uintptr_t) + 20;
 	size = ALIGN16(size);
 	g_ALSoundRomOffsets = alHeapAlloc(&g_SndHeap, 1, size);
 	dmaExec(g_ALSoundRomOffsets, romaddr, size);
 
-	*(u32 *)&g_ALSoundRomOffsets += 0x10;
+	*(uintptr_t *)&g_ALSoundRomOffsets += 0x10;
 
 	// Convert ctl-local offsets to ROM offsets
 	for (i = 0; i < g_NumSounds; i++) {
@@ -1030,8 +1030,8 @@ void sndIncrementAges(void)
 ALEnvelope *sndLoadEnvelope(u32 offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x50];
-	u8 sp5f[0x50];
+	u8 spaf[0x90];
+	u8 sp5f[0x90];
 	ALEnvelope *s2 = (ALEnvelope *)ALIGN16((uintptr_t)spaf);
 	ALEnvelope *s1 = (ALEnvelope *)ALIGN16((uintptr_t)sp5f);
 	s32 i;
@@ -1041,14 +1041,14 @@ ALEnvelope *sndLoadEnvelope(u32 offset, u16 cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 0x40);
+		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((u32 *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 0x40);
+		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
@@ -1077,8 +1077,8 @@ ALEnvelope *sndLoadEnvelope(u32 offset, u16 cacheindex)
 ALKeyMap *sndLoadKeymap(u32 offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x50];
-	u8 sp5f[0x50];
+	u8 spaf[0x90];
+	u8 sp5f[0x90];
 	ALKeyMap *s2 = (ALKeyMap *)ALIGN16((uintptr_t)spaf);
 	ALKeyMap *s1 = (ALKeyMap *)ALIGN16((uintptr_t)sp5f);
 	s32 i;
@@ -1088,14 +1088,14 @@ ALKeyMap *sndLoadKeymap(u32 offset, u16 cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 0x40);
+		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((u32 *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 0x40);
+		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
@@ -1171,8 +1171,8 @@ ALADPCMBook *sndLoadAdpcmBook(u32 offset, u16 cacheindex)
 ALADPCMloop *sndLoadAdpcmLoop(u32 offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x50];
-	u8 sp5f[0x50];
+	u8 spaf[0x90];
+	u8 sp5f[0x90];
 	ALADPCMloop *s2 = (ALADPCMloop *)ALIGN16((uintptr_t)spaf);
 	ALADPCMloop *s1 = (ALADPCMloop *)ALIGN16((uintptr_t)sp5f);
 	s32 i;
@@ -1186,14 +1186,14 @@ ALADPCMloop *sndLoadAdpcmLoop(u32 offset, u16 cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 0x40);
+		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((u32 *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 0x40);
+		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
@@ -1226,8 +1226,8 @@ ALADPCMloop *sndLoadAdpcmLoop(u32 offset, u16 cacheindex)
 ALWaveTable *sndLoadWavetable(u32 offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x50];
-	u8 sp5f[0x50];
+	u8 spaf[0x90];
+	u8 sp5f[0x90];
 	ALWaveTable *s2 = (ALWaveTable *)ALIGN16((uintptr_t)spaf);
 	ALWaveTable *s1 = (ALWaveTable *)ALIGN16((uintptr_t)sp5f);
 	s32 i;
@@ -1238,14 +1238,14 @@ ALWaveTable *sndLoadWavetable(u32 offset, u16 cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 0x40);
+		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((u32 *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 0x40);
+		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
@@ -1455,6 +1455,10 @@ void sndInit(void)
 	u32 heaplen = 1024 * 441;
 #else
 	u32 heaplen = 1024 * 438;
+#endif
+
+#ifdef PLATFORM_64BIT
+	heaplen = 1024 * 661;
 #endif
 
 	g_Vars.langfilteron = false;

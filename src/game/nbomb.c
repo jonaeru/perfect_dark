@@ -314,7 +314,11 @@ s32 nbombCalculateAlpha(struct nbomb *nbomb)
 Gfx *nbombCreateGdl(void)
 {
 	Vtx *vertices;
+#ifdef PLATFORM_64BIT
+	u32 gdlsizes[] = { 0x0a30*2, 0x0330*2 }; // 1 player, 2+ players
+#else
 	u32 gdlsizes[] = { 0x0a30, 0x0330 }; // 1 player, 2+ players
+#endif
 	Gfx *gdlstart;
 	Gfx *gdl;
 	s32 index = 0;

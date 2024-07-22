@@ -592,7 +592,11 @@ void func0f001c0c(void)
 	table2size = align16(g_NumPortals * 4);
 	table3size = align16(g_Vars.roomcount * 4);
 	table4size = align16((u32)var8009cae0 * (u32)var8009cae0);
+#ifdef PLATFORM_64BIT
+	sp68 = align16(g_Vars.roomcount * 8 * 2);
+#else
 	sp68 = align16(g_Vars.roomcount * 8);
+#endif
 
 	mempGetStageFree();
 
@@ -1695,11 +1699,19 @@ void func0f004c6c(void)
 	u8 *ptr;
 	u8 *backupptr;
 
+#ifdef PLATFORM_64BIT
+	sp44 = align16(0x2000 * 2);
+	sp40 = align16(g_NumPortals * 4 * 2);
+	sp3c = align16(g_NumPortals * 0xc * 2);
+	sp38 = align16(g_NumPortals * 4 * 2);
+	sp34 = align16(g_NumPortals * 2 * 2);
+#else
 	sp44 = align16(0x2000);
 	sp40 = align16(g_NumPortals * 4);
 	sp3c = align16(g_NumPortals * 0xc);
 	sp38 = align16(g_NumPortals * 4);
 	sp34 = align16(g_NumPortals * 2);
+#endif
 
 	for (i = 0, s4 = sp38; i < g_NumPortals; i++) {
 		if (i != 0) {

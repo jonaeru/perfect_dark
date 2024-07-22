@@ -165,8 +165,13 @@ u32 fill2[1];
 
 Lights1 var80070090 = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0x4d, 0x2e);
 
+#ifdef PLATFORM_64BIT
+u32 g_BgunGunMemBaseSizeDefault = 150 * 1024 * 2; // #TODO adjust these values properly
+u32 g_BgunGunMemBaseSize4Mb2P = 120 * 1024 * 2;
+#else
 u32 g_BgunGunMemBaseSizeDefault = 150 * 1024;
 u32 g_BgunGunMemBaseSize4Mb2P = 120 * 1024;
+#endif
 
 u16 g_CartFileNums[] = {
 	FILE_GCARTRIDGE,
@@ -3844,6 +3849,9 @@ void bgunTickGunLoad(void)
 
 		// Reserve some space for textures
 		allocsize = fileGetLoadedSize(player->gunctrl.loadfilenum) + 0xe00;
+#ifdef PLATFORM_64BIT
+		allocsize += 0xe00;
+#endif
 
 		osSyncPrintf("BriGun:  Used size %d (Ob Size %d)\n");
 		osSyncPrintf("BriGun:  block len %d usedsize %d\n");

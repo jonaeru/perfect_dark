@@ -40,7 +40,11 @@ void setupPreparePads(void)
 	s32 offset;
 
 	g_PadsFile = (struct padsfileheader *)g_StageSetup.padfiledata;
+#ifdef PLATFORM_64BIT
+	g_PadOffsets = (u16 *)(g_StageSetup.padfiledata + 0x20);
+#else
 	g_PadOffsets = (u16 *)(g_StageSetup.padfiledata + 0x14);
+#endif
 	padnum = 0;
 	numpads = g_PadsFile->numpads;
 

@@ -1414,6 +1414,9 @@ void playerTickChrBody(void)
 			rwdatas = (u32 *)(allocation + offset1);
 			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
+#ifdef PLATFORM_64BIT
+			offset1 += 0x200;
+#endif
 			offset1 = ALIGN64(offset1);
 
 			weaponobj = (struct weaponobj *)(allocation + offset1);
@@ -1432,6 +1435,9 @@ void playerTickChrBody(void)
 			}
 
 			offset2 += 0x4000;
+#ifdef PLATFORM_64BIT
+			offset2 += 0x2000;
+#endif
 			bgunCalculateGunMemCapacity();
 			spe8 = g_Vars.currentplayer->gunmem2 + offset2;
 			texInitPool(&texpool, spe8, bgunCalculateGunMemCapacity() - offset2);

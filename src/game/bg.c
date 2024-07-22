@@ -763,7 +763,7 @@ Gfx *bgRenderGdlInXray(Gfx *gdl, s8 *readgdl, Vtx *vertices, s16 arg3[3])
 			gdl = bgProcessXrayTri(gdl, &xraydata, dmemvertices[x], dmemvertices[y], dmemvertices[z], dmemcolours[x], dmemcolours[y], dmemcolours[z], inrange[x], inrange[y], inrange[z]);
 		}
 
-		readgdl += 8;
+		readgdl += sizeof(Gfx);
 	}
 
 	gdl = bgRenderXrayData(gdl, &xraydata);
@@ -1606,7 +1606,7 @@ void bgReset(s32 stagenum)
 	var800a4920 = *(u32 *)g_BgPrimaryData;
 
 	if (var800a4920 == 0) {
-		g_BgPrimaryData2 = (u32 *)g_BgPrimaryData;
+		g_BgPrimaryData2 = (uintptr_t*)g_BgPrimaryData;
 		g_BgRooms = (struct bgroom *)(g_BgPrimaryData2[1] + g_BgPrimaryData - 0x0f000000);
 		goto foo; foo:;
 		g_Vars.roomcount = 0;
