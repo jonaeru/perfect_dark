@@ -102,7 +102,7 @@ static void extract_font(const char *filename, uint32_t romoffset, size_t srclen
 
 	// Write it
 	char outfilename[1024];
-	sprintf(outfilename, "%s/fonts/%s.bin", g_OutPath, filename);
+	sprintf(outfilename, "%s/segs/font%s", g_OutPath, filename);
 
 	FILE *fp = openfile(outfilename);
 	fwrite(dst, dst_offset, 1, fp);

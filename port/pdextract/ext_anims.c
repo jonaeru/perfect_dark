@@ -22,10 +22,10 @@ static void extract_anims_data(uint32_t romoffset, size_t len)
 	fclose(fp);
 }
 
-static void extract_anims_table(uint32_t romoffset)
+static void extract_anims_table(uint32_t data_offset, uint32_t table_offset)
 {
-	int num_anims = srctoh32(*(uint32_t *) &g_Rom[romoffset]);
-	struct animtableentry *srcanims = (struct animtableentry *) &g_Rom[romoffset + 4];
+	int num_anims = srctoh32(*(uint32_t *) &g_Rom[table_offset]);
+	struct animtableentry *srcanims = (struct animtableentry *) &g_Rom[table_offset + 4];
 
 	size_t dstlen = ALIGN16(4 + num_anims * sizeof(struct animtableentry));
 	uint8_t *dst = calloc(1, dstlen);
@@ -42,9 +42,11 @@ static void extract_anims_table(uint32_t romoffset)
 	}
 
 	char outfilename[1024];
-	sprintf(outfilename, "%s/anims_table.bin", g_OutPath);
+	sprintf(outfilename, "%s/segs/animations", g_OutPath);
 
 	FILE *fp = openfile(outfilename);
+	size_t datalen = table_offset - data_offset;
+	fwrite(&g_Rom[data_offset], datalen, 1, fp);
 	fwrite(dst, dstlen, 1, fp);
 	fclose(fp);
 
@@ -72,6 +74,5 @@ void extract_anims(void)
 		break;
 	}
 
-	extract_anims_data(data_offset, table_offset - data_offset);
-	extract_anims_table(table_offset);
+	extract_anims_table(data_offset, table_offset);
 }

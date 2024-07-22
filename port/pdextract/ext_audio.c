@@ -421,7 +421,7 @@ static void extract_audio_ctl(const char *filename, uint32_t romoffset, size_t s
 	dstpos = convert_audio_bankfile(dst, dstpos, src, 0);
 
 	char outfilename[1024];
-	sprintf(outfilename, "%s/%s.ctl", g_OutPath, filename);
+	sprintf(outfilename, "%s/segs/%sctl", g_OutPath, filename);
 
 	FILE *fp = openfile(outfilename);
 	fwrite(dst, ALIGN16(dstpos), 1, fp);
@@ -433,7 +433,7 @@ static void extract_audio_ctl(const char *filename, uint32_t romoffset, size_t s
 static void extract_audio_tbl(const char *filename, uint32_t romoffset, size_t len)
 {
 	char outfilename[1024];
-	sprintf(outfilename, "%s/%s.tbl", g_OutPath, filename);
+	sprintf(outfilename, "%s/segs/%stbl", g_OutPath, filename);
 
 	FILE *fp = openfile(outfilename);
 	fwrite(&g_Rom[romoffset], len, 1, fp);

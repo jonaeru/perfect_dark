@@ -87,13 +87,7 @@ static int convert_pads(uint8_t *dst, int dstpos, uint8_t *src, int srcpos, int 
 		struct padheader *host_padheader = (struct padheader *) &dst[dstpos];
 		uint32_t flags = (n64_padheader >> 14) & 0x3ffff;
 
-#ifdef FORCE_BE32
-		*(uint32_t *) host_padheader = htodst32(n64_padheader);
-#else
-		host_padheader->flags = flags;
-		host_padheader->room = (n64_padheader >> 4) & 0x3ff;
-		host_padheader->liftnum = n64_padheader & 0xf;
-#endif
+		*(uint32_t*)host_padheader = htodst32(n64_padheader);
 
 		srcpos += sizeof(struct padheader);
 		dstpos += sizeof(struct padheader);

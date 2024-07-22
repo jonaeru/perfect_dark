@@ -6,7 +6,7 @@
 static void extract_jpnfont(const char *filename, uint32_t romoffset, size_t len)
 {
 	char outfilename[1024];
-	sprintf(outfilename, "%s/%s.bin", g_OutPath, filename);
+	sprintf(outfilename, "%s/segs/%s", g_OutPath, filename);
 
 	FILE *fp = openfile(outfilename);
 	fwrite(&g_Rom[romoffset], len, 1, fp);

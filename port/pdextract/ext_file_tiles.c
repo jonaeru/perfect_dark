@@ -33,7 +33,7 @@ void extract_file_tiles(char *filename, uint32_t romoffset, size_t len)
 	int num_rooms = srctoh32(*(uint32_t *) src);
 
 	size_t src_ptr_table_len = (num_rooms + 1) * 4;
-	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(uintptr_t);
+	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(uint32_t);
 
 	uint32_t *src_offsets = (uint32_t *) &src[4];
 
@@ -43,8 +43,8 @@ void extract_file_tiles(char *filename, uint32_t romoffset, size_t len)
 
 	*(uint32_t *) dst = htodst32(num_rooms);
 
-	uintptr_t *dst_offsets = (uintptr_t *) (dst + ALIGN(4, sizeof(uintptr_t)));
-	uint32_t cur_dst_offset = ALIGN(4, sizeof(uintptr_t)) + dst_ptr_table_len;
+	uint32_t*dst_offsets = (uint32_t*) (dst + sizeof(uint32_t));
+	uint32_t cur_dst_offset = dst_ptr_table_len + sizeof(uint32_t);
 
 	uint32_t cur_src_offset = srctoh32(src_offsets[0]);
 	uint32_t end_src_offset = srctoh32(src_offsets[num_rooms]);
