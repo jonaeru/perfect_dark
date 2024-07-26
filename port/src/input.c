@@ -28,6 +28,9 @@
 #define WHEEL_UP_MASK SDL_BUTTON(VK_MOUSE_WHEEL_UP - VK_MOUSE_BEGIN + 1)
 #define WHEEL_DN_MASK SDL_BUTTON(VK_MOUSE_WHEEL_DN - VK_MOUSE_BEGIN + 1)
 
+#define CURSOR_HIDE_THRESHOLD 1
+#define CURSOR_HIDE_TIME 3000000 // us
+
 static SDL_GameController *pads[INPUT_MAX_CONTROLLERS];
 
 #define CONTROLLERCFG_DEFAULT { \
@@ -70,12 +73,15 @@ static s32 connectedMask = 0;
 static s32 numJoysticks = 0;
 
 static s32 mouseEnabled = 1;
-static s32 mouseLocked = 0;
-static s32 mouseDefaultLocked = 0;
 static s32 mouseX, mouseY;
 static s32 mouseDX, mouseDY;
 static u32 mouseButtons;
 static s32 mouseWheel = 0;
+
+static s32 mouseLocked = 0;
+static s32 mouseLockMode = MLOCK_AUTO;
+static u64 mouseCursorTime = 0;
+static s32 mouseShowCursor = 1;
 
 static f32 mouseSensX = 1.5f;
 static f32 mouseSensY = 1.5f;
@@ -672,7 +678,9 @@ s32 inputInit(void)
 		inputSetDefaultKeyBinds(i, 0);
 	}
 
-	inputLockMouse(mouseDefaultLocked);
+	if (mouseLockMode != MLOCK_AUTO) {
+		inputLockMouse(mouseLockMode);
+	}
 
 	// update the axis maps
 	// NOTE: by default sticks get swapped for 1.2: "right stick" here means left stick on your controller
@@ -803,6 +811,20 @@ static inline void inputUpdateMouse(void)
 
 	mouseX = mx;
 	mouseY = my;
+
+	// if MLOCK_AUTO is enabled, disable cursor if mouse is unlocked
+	// and we haven't moved it for a few seconds
+	if (mouseLockMode == MLOCK_AUTO && !mouseLocked) {
+		if (abs(mouseDX) > CURSOR_HIDE_THRESHOLD || abs(mouseDY) > CURSOR_HIDE_THRESHOLD) {
+			if (!mouseShowCursor) {
+				inputMouseShowCursor(1);
+			}
+		} else if (sysGetMicroseconds() > mouseCursorTime) {
+			if (mouseShowCursor) {
+				inputMouseShowCursor(0);
+			}
+		}
+	}
 }
 
 void inputUpdate(void)
@@ -1171,20 +1193,42 @@ s32 inputMouseIsEnabled(void)
 void inputMouseEnable(s32 enabled)
 {
 	mouseEnabled = !!enabled;
-	if (!mouseEnabled && mouseLocked) {
+	if (!mouseEnabled && mouseLockMode != MLOCK_ON && mouseLocked) {
 		inputLockMouse(0);
 	}
 }
 
-s32 inputGetMouseDefaultLocked(void)
+s32 inputAutoLockMouse(s32 wantlock)
 {
-	return mouseDefaultLocked;
+	if (mouseEnabled && mouseLockMode == MLOCK_AUTO) {
+		inputLockMouse(wantlock);
+		return 1;
+	}
+	return 0;
 }
 
-void inputSetMouseDefaultLocked(s32 defaultLocked)
+void inputMouseShowCursor(s32 show)
 {
-	mouseDefaultLocked = !!defaultLocked;
-	inputLockMouse(mouseDefaultLocked);
+	mouseShowCursor = !!show;
+	SDL_ShowCursor(mouseShowCursor);
+	if (show) {
+		mouseCursorTime = sysGetMicroseconds() + CURSOR_HIDE_TIME;
+	}
+}
+
+s32 inputGetMouseLockMode(void)
+{
+	return mouseLockMode;
+}
+
+void inputSetMouseLockMode(s32 lockmode)
+{
+	mouseLockMode = lockmode;
+	if (lockmode == MLOCK_ON) {
+		inputLockMouse(1);
+	} else {
+		inputLockMouse(0);
+	}
 }
 
 const char *inputGetContKeyName(u32 ck)
@@ -1264,7 +1308,7 @@ s32 inputGetLastKey(void)
 PD_CONSTRUCTOR static void inputConfigInit(void)
 {
 	configRegisterInt("Input.MouseEnabled", &mouseEnabled, 0, 1);
-	configRegisterInt("Input.MouseDefaultLocked", &mouseDefaultLocked, 0, 1);
+	configRegisterInt("Input.MouseLockMode", &mouseLockMode, MLOCK_OFF, MLOCK_AUTO);
 	configRegisterFloat("Input.MouseSpeedX", &mouseSensX, -10.f, 10.f);
 	configRegisterFloat("Input.MouseSpeedY", &mouseSensY, -10.f, 10.f);
 	configRegisterInt("Input.FakeGamepads", &fakeControllers, 0, 4);
