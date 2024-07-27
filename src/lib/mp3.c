@@ -88,7 +88,7 @@ void mp3Init(ALHeap *heap)
 	func00038b90(func00038ba8);
 }
 
-void mp3PlayFile(s32 romaddr, s32 filesize)
+void mp3PlayFile(uintptr_t romaddr, s32 filesize)
 {
 	if (g_Mp3Vars.var8009c3dc == NULL) {
 		return;
@@ -389,7 +389,7 @@ void func00038b90(void *fn)
 
 s32 func00038ba8(s32 arg0, u8 *arg1, s32 arg2, s32 arg3)
 {
-	u32 sp1c;
+	uintptr_t sp1c;
 	ALDMAproc proc;
 
 	if (arg3 != -1) {

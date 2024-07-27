@@ -411,7 +411,7 @@ struct menudialogdef g_FilemgrErrorMenuDialog = {
  * For a file listing, iterate the devices until the one at optionindex is found.
  * Depending on operation, return the device name or index of the first file.
  */
-s32 filemgrGetDeviceNameOrStartIndex(s32 listnum, s32 operation, s32 optionindex)
+uintptr_t filemgrGetDeviceNameOrStartIndex(s32 listnum, s32 operation, s32 optionindex)
 {
 	u16 names[] = {
 		L_OPTIONS_111, // "Game Pak"

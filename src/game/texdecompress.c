@@ -2381,12 +2381,12 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 	}
 }
 
-void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct texpool *pool, s32 arg3)
+void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct texpool *pool, uintptr_t arg3)
 {
 	s32 i;
 
 	for (i = 0; i < numconfigs; i++) {
-		if ((s32)configs[i].texturenum < NUM_TEXTURES) {
+		if ((uintptr_t)configs[i].texturenum < NUM_TEXTURES) {
 			texLoad(&configs[i].texturenum, pool, true);
 			configs[i].unk0b = 1;
 		} else {

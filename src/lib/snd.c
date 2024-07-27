@@ -952,7 +952,7 @@ void sndLoadSfxCtl(void)
 	u8 *buffer;
 	ALBankFile *file;
 	ALBank *bank;
-	u32 romaddr;
+	romptr_t romaddr;
 	u32 size;
 
 	g_ALSoundRomOffsets = NULL;
@@ -966,14 +966,14 @@ void sndLoadSfxCtl(void)
 	// then load the first 256 bytes of the bank.
 	file = (ALBankFile *) buffer;
 	romaddr = (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-	romaddr += (u32)file->bankArray[0];
+	romaddr += (uintptr_t)file->bankArray[0];
 	dmaExec(buffer, romaddr, size);
 
 	// Get the ROM address of the first (and only) instrument,
 	// then load the first 256 bytes of the instrument.
 	bank = (ALBank *) buffer;
 	romaddr = (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-	romaddr += (u32)bank->instArray[0];
+	romaddr += (uintptr_t)bank->instArray[0];
 	dmaExec(buffer, romaddr, size);
 
 	// Get the soundCount (spoiler: there's 1545+1).
@@ -1027,7 +1027,7 @@ void sndIncrementAges(void)
 }
 #endif
 
-ALEnvelope *sndLoadEnvelope(u32 offset, u16 cacheindex)
+ALEnvelope *sndLoadEnvelope(uintptr_t offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
 	u8 spaf[0x90];
@@ -1074,7 +1074,7 @@ ALEnvelope *sndLoadEnvelope(u32 offset, u16 cacheindex)
 	return s1;
 }
 
-ALKeyMap *sndLoadKeymap(u32 offset, u16 cacheindex)
+ALKeyMap *sndLoadKeymap(uintptr_t offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
 	u8 spaf[0x90];
@@ -1121,7 +1121,7 @@ ALKeyMap *sndLoadKeymap(u32 offset, u16 cacheindex)
 	return s1;
 }
 
-ALADPCMBook *sndLoadAdpcmBook(u32 offset, u16 cacheindex)
+ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
 	u8 spaf[0x150];
@@ -1168,7 +1168,7 @@ ALADPCMBook *sndLoadAdpcmBook(u32 offset, u16 cacheindex)
 	return s1;
 }
 
-ALADPCMloop *sndLoadAdpcmLoop(u32 offset, u16 cacheindex)
+ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
 	u8 spaf[0x90];
@@ -1223,7 +1223,7 @@ ALADPCMloop *sndLoadAdpcmLoop(u32 offset, u16 cacheindex)
 	return s1;
 }
 
-ALWaveTable *sndLoadWavetable(u32 offset, u16 cacheindex)
+ALWaveTable *sndLoadWavetable(uintptr_t offset, u16 cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
 	u8 spaf[0x90];

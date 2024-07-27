@@ -137,7 +137,7 @@ void modeldef0f1a7560(struct modeldef *modeldef, u16 filenum, u32 arg2, struct m
 		texCopyGdls((Gfx *)((uintptr_t)modeldef + (UNSEGADDR(gdl) & 0xffffff)),
 				(Gfx *)(v1 + (uintptr_t)modeldef),
 				loadedsize - (uintptr_t)(((uintptr_t)modeldef + (UNSEGADDR(gdl) & 0xffffff)) - (uintptr_t)modeldef));
-		texLoadFromConfigs(modeldef->texconfigs, modeldef->numtexconfigs, texpool, (uintptr_t)modeldef2 - arg2);
+		texLoadFromConfigs(modeldef->texconfigs, modeldef->numtexconfigs, texpool, (uintptr_t)modeldef2 - (uintptr_t)arg2);
 
 		while (node) {
 			prevnode = node;
@@ -190,7 +190,7 @@ struct modeldef *modeldefLoad(u16 fileid, u8 *dst, s32 size, struct texpool *arg
 	if (dst) {
 		modeldef = fileLoadToAddr(fileid, FILELOADMETHOD_EXTRAMEM, dst, size);
 	} else {
-		modeldef = fileLoadToNew(fileid, FILELOADMETHOD_EXTRAMEM);
+		modeldef = fileLoadToNew(fileid, FILELOADMETHOD_EXTRAMEM, FT_LANG);
 	}
 
 	modelPromoteTypeToPointer(modeldef);

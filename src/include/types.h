@@ -2307,7 +2307,7 @@ struct hand {
 	/*0x0dc0*/ u32 fspare8;
 	/*0x0dc4*/ struct abmag abmag;
 	/*0x0dcc*/ s32 *unk0dcc;
-	/*0x0dd0*/ s32 *unk0dd0;
+	/*0x0dd0*/ uintptr_t *unk0dd0;
 	/*0x0dd4*/ s32 unk0dd4;
 	/*0x0dd8*/ Mtxf *unk0dd8;
 };
@@ -2354,8 +2354,8 @@ struct gunctrl {
 	/*0x15b1*/ u8 gunloadstate;
 	/*0x15b2*/ u16 loadfilenum;
 	/*0x15b4*/ struct modeldef **loadtomodeldef;
-	/*0x15b8*/ u32 *loadmemptr;
-	/*0x15bc*/ u32 *loadmemremaining;
+	/*0x15b8*/ uintptr_t *loadmemptr;
+	/*0x15bc*/ uintptr_t*loadmemremaining;
 	/*0x15c0*/ struct texpool texpool;
 	/*0x15d0*/ u32 nexttexturetoload;
 	/*0x15d4*/ struct fileinfo fileinfo;
@@ -3363,8 +3363,8 @@ struct handlerdata_label {
 
 struct handlerdata_list {
 	union {
-		u32 value;
-		s32 values32;
+		uintptr_t value;
+		intptr_t values32;
 	};
 	union {
 		s32 unk04;

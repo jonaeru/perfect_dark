@@ -113,7 +113,7 @@ struct portalcamcacheitem *g_PortalCameraCache;
 struct bgsnake g_BgSnake;
 
 s32 g_StageIndex = 1;
-u32 var8007fc04 = 0;
+uintptr_t var8007fc04 = 0;
 u8 *var8007fc08 = NULL;
 
 #if VERSION < VERSION_NTSC_1_0
@@ -1468,7 +1468,7 @@ void bgReset(s32 stagenum)
 	u32 section2compsize;
 	u32 section2start;
 	u32 section1compsize;
-	u32 scratch;
+	uintptr_t scratch;
 
 	var8007fc0c = 8;
 
@@ -3640,7 +3640,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 	Gfx *imggdl = NULL;
 	s32 texturenum;
 	f32 lowestsqdist = MAXFLOAT;
-	s32 offset;
+	uintptr_t offset;
 	s32 numvertices;
 	Gfx *tri4gdl;
 	s32 count;
