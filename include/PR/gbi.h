@@ -23,6 +23,11 @@
 #include <PR/ultratypes.h>
 #include "gbiex.h"
 
+#ifndef PLATFORM_N64
+#include "platform.h"
+#endif
+
+
 /*
  * To use the F3DEX ucodes, define F3DEX_GBI before include this file.
  *
@@ -594,10 +599,10 @@
 #define G_BL_0       3
 
 #define GBL_c1(m1a, m1b, m2a, m2b)                        \
-    (m1a) << 30 | (m1b) << 26 | (m2a) << 22 | (m2b) << 18
+    (u32)(m1a) << 30 | (u32)(m1b) << 26 | (u32)(m2a) << 22 | (u32)(m2b) << 18
 
 #define GBL_c2(m1a, m1b, m2a, m2b)                        \
-    (m1a) << 28 | (m1b) << 24 | (m2a) << 20 | (m2b) << 16
+    (u32)(m1a) << 28 | (u32)(m1b) << 24 | (u32)(m2a) << 20 | (u32)(m2b) << 16
 
 #define RM_AA_ZB_OPA_SURF(clk)                                   \
     AA_EN | Z_CMP | Z_UPD | IM_RD | CVG_DST_CLAMP |              \
@@ -1306,6 +1311,14 @@ typedef union {
 /*
  *  Graphics DMA Packet
  */
+#ifdef PLATFORM_64BIT
+typedef struct {
+    intptr_t par : 24;
+    intptr_t cmd : 8;
+    intptr_t len : 32;
+    uintptr_t addr;
+} Gdma;
+#else
 typedef struct {
 #ifdef PLATFORM_BIG_ENDIAN
 	int          cmd:8;
@@ -1319,6 +1332,7 @@ typedef struct {
 	unsigned int addr;
 #endif
 } Gdma;
+#endif
 
 /*
  * Graphics Immediate Mode Packet types
@@ -1357,6 +1371,9 @@ typedef struct {
 	unsigned char z4:4;
 	unsigned char pad:8;
 	unsigned char cmd:8;
+#ifdef PLATFORM_64BIT
+    unsigned char pad2[4];
+#endif
 	unsigned char x1:4;
 	unsigned char y1:4;
 	unsigned char x2:4;
@@ -1365,6 +1382,9 @@ typedef struct {
 	unsigned char y3:4;
 	unsigned char x4:4;
 	unsigned char y4:4;
+#ifdef PLATFORM_64BIT
+    unsigned char pad3[4];
+#endif
 #endif
 } Gtri4;
 
@@ -1633,6 +1653,9 @@ typedef union {
 #ifdef PLATFORM_BIG_ENDIAN
 #define GFX_W0_BYTE(i) (i)
 #define GFX_W1_BYTE(i) (4 + (i))
+#elif PLATFORM_64BIT
+#define GFX_W0_BYTE(i) (3 - (i))
+#define GFX_W1_BYTE(i) (11 - (i))
 #else
 #define GFX_W0_BYTE(i) (3 - (i))
 #define GFX_W1_BYTE(i) (7 - (i))
