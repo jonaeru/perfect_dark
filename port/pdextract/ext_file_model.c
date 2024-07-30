@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common.h"
+#include "system.h"
+
+#include <PR/ultratypes.h>
+
+#undef near
+#undef far
 
 enum contenttype {
 	/* 0*/ CT_MODELDEF,
@@ -45,7 +51,7 @@ struct alignconfig m_AlignConfigs[] = {
 	/* 2*/ { 4,  4 },
 	/* 3*/ { 8,  8 },
 	/* 4*/ { 4,  4 },
-	/* 5*/ { 4,  8 },
+	/* 5*/ { 8,  8 },
 	/* 6*/ { 8,  8 },
 	/* 7*/ { 4,  4 },
 	/* 8*/ { 4,  4 },
@@ -396,6 +402,8 @@ static void populate_markers(uint8_t *src)
 	for (int i = 0; i < m_NumMarkers; i++) {
 		struct marker *marker = &m_Markers[i];
 		void *src_thing = &src[marker->src_offset];
+		int numvtx = 0;
+		uint32_t colstart = 0;
 
 		switch (marker->type) {
 		case CT_MODELDEF:
@@ -439,9 +447,14 @@ static void populate_markers(uint8_t *src)
 			break;
 		case CT_RODATA_GUNDL:
 			struct src_rodata_gundl *src_gundl = src_thing;
+			numvtx = srctoh16(src_gundl->numvertices);
+			colstart = srctoh32(src_gundl->ptr_vertices) + numvtx * 12;
+			colstart = ALIGN(colstart, m_AlignConfigs[marker->type].before);
+
 			set_marker(srctoh32(src_gundl->ptr_opagdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_gundl->ptr_xlugdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_gundl->ptr_vertices), CT_VTXCOL, marker->src_offset);
+			set_marker(colstart, CT_VTXCOL, marker->src_offset);
 			break;
 		case CT_RODATA_DISTANCE:
 			struct src_rodata_distance *src_dist = src_thing;
@@ -462,11 +475,18 @@ static void populate_markers(uint8_t *src)
 			break;
 		case CT_RODATA_STARGUNFIRE:
 			struct src_rodata_stargunfire *src_stargunfire = src_thing;
+			numvtx = srctoh16(src_stargunfire->unk00);
+
 			set_marker(srctoh32(src_stargunfire->ptr_vertices), CT_VTXCOL, marker->src_offset);
+			set_marker(srctoh32(src_stargunfire->ptr_vertices) + numvtx * 12, CT_VTXCOL, marker->src_offset);
 			set_marker(srctoh32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
 			break;
 		case CT_RODATA_DL:
 			struct src_rodata_dl *src_dl = src_thing;
+			numvtx = srctoh16(src_dl->numvertices);
+			colstart = srctoh32(src_dl->ptr_vertices) + numvtx * 12;
+			colstart = ALIGN(colstart, 8);
+
 			set_marker(srctoh32(src_dl->ptr_opagdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_dl->ptr_xlugdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_dl->ptr_colours), CT_VTXCOL, marker->src_offset);
@@ -609,10 +629,7 @@ static uint32_t convert_content(uint8_t *dst, uint8_t *src, uint32_t src_file_le
 				dst_vtx = dsttoh32(dst_rodata->ptr_vertices) & 0x00ffffff;
 			}
 
-			gbi_set_vtx(src_vtx, dst_vtx);
-			gbi_set_segment(0x04, dst_vtx);
-			gbi_set_segment(0x05, 0);
-			dstpos = gbi_convert_gdl(dst, dstpos, src, marker->src_offset);
+			dstpos = gbi_convert_gdl(dst, dstpos, src, marker->src_offset, 0);
 			break;
 		case CT_RODATA_CHRINFO:
 			struct generic_rodata_chrinfo *src_chrinfo = src_thing;
@@ -803,6 +820,7 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 			struct dst_texconfig *dst_texconfig = dst_thing;
 			if ((srctoh32(src_texconfig->ptr) & 0xff000000) == 0x05000000) {
 				dst_texconfig->ptr = htodst32(resolve_pointer(srctoh32(src_texconfig->ptr)));
+				gbi_add_tex_addr(srctoh32(src_texconfig->ptr), dst_texconfig->ptr);
 			}
 			break;
 		case CT_PARTS:
@@ -825,6 +843,17 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 			dst_gundl->ptr_opagdl = htodst32(resolve_pointer(srctoh32(src_gundl->ptr_opagdl)));
 			dst_gundl->ptr_xlugdl = htodst32(resolve_pointer(srctoh32(src_gundl->ptr_xlugdl)));
 			dst_gundl->ptr_vertices = htodst32(resolve_pointer(srctoh32(src_gundl->ptr_vertices)));
+			
+			gbi_convert_vtx(dst, dst_gundl->ptr_vertices & 0x00ffffff, dst_gundl->numvertices);
+
+			gbi_set_vtx(srctoh32(src_gundl->ptr_vertices), dst_gundl->ptr_vertices);
+			gbi_set_segment(0x04, dst_gundl->ptr_vertices);
+
+			gbi_gdl_rewrite_addrs(dst, dst_gundl->ptr_opagdl);
+			gbi_gdl_rewrite_addrs(dst, dst_gundl->ptr_xlugdl);
+
+			if (dst_gundl->ptr_opagdl) dst_gundl->ptr_opagdl |= 1;
+			if (dst_gundl->ptr_xlugdl) dst_gundl->ptr_xlugdl |= 1;
 			break;
 		case CT_RODATA_DISTANCE:
 			struct src_rodata_distance *src_dist = src_thing;
@@ -841,6 +870,9 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 			struct src_rodata_chrgunfire *src_chrgunfire = src_thing;
 			struct dst_rodata_chrgunfire *dst_chrgunfire = dst_thing;
 			dst_chrgunfire->ptr_texture = htodst32(resolve_pointer(srctoh32(src_chrgunfire->ptr_texture)));
+			if ((srctoh32(dst_chrgunfire->ptr_texture) & 0xff000000) == 0x05000000) {
+				gbi_add_tex_addr(srctoh32(dst_chrgunfire->ptr_texture), dst_chrgunfire->ptr_texture);
+			}
 			break;
 		case CT_RODATA_TOGGLE:
 			struct src_rodata_toggle *src_toggle = src_thing;
@@ -852,6 +884,13 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 			struct dst_rodata_stargunfire *dst_stargunfire = dst_thing;
 			dst_stargunfire->ptr_vertices = htodst32(resolve_pointer(srctoh32(src_stargunfire->ptr_vertices)));
 			dst_stargunfire->ptr_gdl = htodst32(resolve_pointer(srctoh32(src_stargunfire->ptr_gdl)));
+
+			gbi_convert_vtx(dst, dst_stargunfire->ptr_vertices & 0x00ffffff, dst_stargunfire->unk00);
+
+			gbi_set_vtx(srctoh32(src_stargunfire->ptr_vertices), dst_stargunfire->ptr_vertices);
+			gbi_set_segment(0x04, dst_stargunfire->ptr_vertices);
+			gbi_gdl_rewrite_addrs(dst, dst_stargunfire->ptr_gdl);
+			if (dst_stargunfire->ptr_gdl) dst_stargunfire->ptr_gdl |= 1;
 			break;
 		case CT_RODATA_DL:
 			struct src_rodata_dl *src_dl = src_thing;
@@ -860,6 +899,16 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 			dst_dl->ptr_xlugdl = htodst32(resolve_pointer(srctoh32(src_dl->ptr_xlugdl)));
 			dst_dl->ptr_colours = htodst32(resolve_pointer(srctoh32(src_dl->ptr_colours)));
 			dst_dl->ptr_vertices = htodst32(resolve_pointer(srctoh32(src_dl->ptr_vertices)));
+			
+			gbi_convert_vtx(dst, dst_dl->ptr_vertices & 0x00ffffff, dst_dl->numvertices);
+
+			gbi_set_vtx(srctoh32(src_dl->ptr_vertices), dst_dl->ptr_vertices);
+			gbi_set_segment(0x04, dst_dl->ptr_vertices);
+			gbi_gdl_rewrite_addrs(dst, dst_dl->ptr_opagdl);
+			gbi_gdl_rewrite_addrs(dst, dst_dl->ptr_xlugdl);
+			
+			if (dst_dl->ptr_opagdl) dst_dl->ptr_opagdl |= 1;
+			if (dst_dl->ptr_xlugdl) dst_dl->ptr_xlugdl |= 1;
 			break;
 		case CT_TEXDATA:
 		case CT_VTXCOL:
@@ -904,6 +953,7 @@ static int convert_model(uint8_t *dst, uint8_t *src, uint32_t srclen)
 
 void extract_file_model(char *filename, uint32_t romoffset, size_t len)
 {
+	gbi_reset();
 	// Unzip it
 	size_t infsize = rzip_get_infsize(&g_Rom[romoffset]);
 	uint8_t *src = malloc(infsize);
@@ -916,7 +966,7 @@ void extract_file_model(char *filename, uint32_t romoffset, size_t len)
 	}
 
 	// Convert it
-	uint8_t *dst = calloc(1, infsize * 4);
+	uint8_t *dst = calloc(1, infsize * 2);
 
 	int dstpos = convert_model(dst, src, infsize);
 
@@ -941,6 +991,8 @@ void extract_file_model(char *filename, uint32_t romoffset, size_t len)
 	// Write it
 	char outfilename[1024];
 	sprintf(outfilename, "%s/files/%s", g_OutPath, filename);
+
+	sysLogPrintf(LOG_NOTE, "%s	%d	%d	%.3f", filename, infsize, dstpos, (f32)dstpos/infsize);
 
 	FILE *fp = openfile(outfilename);
 	fwrite(zipped, ziplen, 1, fp);
