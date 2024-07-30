@@ -431,10 +431,6 @@ void playerReset(void)
 	g_Vars.currentplayer->bond2.unk00.y = 0;
 	g_Vars.currentplayer->bond2.unk00.z = cosf(turnanglerad);
 
-	// #TEMP
-	g_Vars.currentplayer->prop->pos.f[0] = -1101.97473;
-	g_Vars.currentplayer->prop->pos.f[1] = 481.576385;
-	g_Vars.currentplayer->prop->pos.f[2] = 283.67334;
 
 	g_Vars.currentplayer->prop->pos.f[0] = g_Vars.currentplayer->bondprevpos.f[0] = pos.f[0];
 	g_Vars.currentplayer->prop->pos.f[1] = g_Vars.currentplayer->bondprevpos.f[1] = pos.f[1];
