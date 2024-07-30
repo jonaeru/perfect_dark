@@ -256,7 +256,7 @@ typedef struct {
     ALOscStop           stopOsc;
     ALSeqMarker        *loopStart;
     ALSeqMarker        *loopEnd;
-    s32                 loopCount;      /* -1 = loop forever, 0 = no loop   */
+    intptr_t            loopCount;      /* -1 = loop forever, 0 = no loop   */
     u8 unk88;
     u8 unk89;
 } N_ALSeqPlayer;
@@ -284,9 +284,19 @@ typedef struct {
     ALOscInit           initOsc;
     ALOscUpdate         updateOsc;
     ALOscStop           stopOsc;
+
+#ifdef PLATFORM_64BIT
+    s32 _pad1_;
+    f32 unk7c;
+    s32 _pad2_;
+    f32 unk80;
+#else
     f32 unk7c;
     f32 unk80;
+#endif
+
     void *queue;
+
     u8 unk88;
     u8 unk89;
 } N_ALCSPlayer;

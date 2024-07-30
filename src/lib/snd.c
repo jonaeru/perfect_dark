@@ -105,6 +105,8 @@ s32 var8005dddc = 0;
 
 u8 *g_SndGuardStringPtr = NULL;
 
+uintptr_t* g_SeqRomAddrs;
+
 enum audioconfig_e {
 	AUDIOCONFIG_00,
 	AUDIOCONFIG_01,
@@ -1526,8 +1528,10 @@ void sndInit(void)
 		dmaExec(g_SeqTable, (romptr_t) REF_SEG _sequencesSegmentRomStart, (len + 0xf) & ~0xf);
 
 		// Promote segment-relative offsets to ROM addresses
+		g_SeqRomAddrs = mempAlloc(g_SeqTable->count * sizeof(uintptr_t), MEMPOOL_PERMANENT);
+		
 		for (i = 0; i < g_SeqTable->count; i++) {
-			g_SeqTable->entries[i].romaddr += (romptr_t) REF_SEG _sequencesSegmentRomStart;
+			g_SeqRomAddrs[i] = g_SeqTable->entries[i].romaddr + (romptr_t) REF_SEG _sequencesSegmentRomStart;
 		}
 
 		synconfig.maxVVoices = 44;
@@ -1639,7 +1643,7 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 		return false;
 	}
 
-	if (g_SeqTable->entries[seq->tracknum].romaddr < 0x10000) {
+	if (g_SeqRomAddrs[seq->tracknum] < 0x10000) {
 		return false;
 	}
 
@@ -1688,7 +1692,7 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 		binstart = seq->data;
 		zipstart = binstart + binlen - ziplen;
 	
-		dmaExec(zipstart, g_SeqTable->entries[seq->tracknum].romaddr, ziplen);
+		dmaExec(zipstart, g_SeqRomAddrs[seq->tracknum], ziplen);
 		ziplen = rzipInflate(zipstart, binstart, scratch);
 	}
 
