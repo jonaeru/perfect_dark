@@ -4,6 +4,7 @@
 #include <string.h>
 #include "common.h"
 #include "system.h"
+#include "platform.h"
 
 struct ptrmarker {
 	uint32_t ptr_src;
@@ -18,7 +19,7 @@ int m_SizeGDLs;
 static void add_marker(uint32_t ptr_src, uintptr_t ptr_host)
 {
 	if (m_NumPtrMarkers >= ARRAYCOUNT(m_PtrMarkers)) {
-		fprintf(stderr, "[BG] Marker limit exceeded\n");
+		sysLogPrintf(LOG_ERROR, "[BG] Marker limit exceeded");
 		exit(EXIT_FAILURE);
 	}
 
@@ -216,7 +217,7 @@ static void convert_primary_rooms(uint8_t *dst, uint32_t *dstpos, uint8_t *src, 
 	}
 
 	for (int i = 0; i < m_NumRooms + 1; i++) {
-		host_rooms[i].ptr_gfxdata = 0; // Not known at this point
+		host_rooms[i].ptr_gfxdata = srctodst32(n64_rooms[i].ptr_gfxdata);
 		host_rooms[i].pos[0] = srctodst32(n64_rooms[i].pos[0]);
 		host_rooms[i].pos[1] = srctodst32(n64_rooms[i].pos[1]);
 		host_rooms[i].pos[2] = srctodst32(n64_rooms[i].pos[2]);
@@ -273,9 +274,9 @@ static void convert_primary_portals(uint8_t *dst, uint32_t *dstpos, uint8_t *src
 	}
 }
 
-static void convert_primary_bgcmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos, uint32_t dst_portalvtxs, uint32_t src_portalvtxs)
+static void convert_primary_bgcmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t dst_portalvtxs, uint32_t src_portalvtxs)
 {
-	struct bgcmd *n64_cmds = (struct bgcmd *) &src[*srcpos];
+	struct bgcmd *n64_cmds = (struct bgcmd *) src;
 	struct bgcmd *host_cmds = (struct bgcmd *) &dst[*dstpos];
 	int num_cmds = 0;
 
@@ -296,7 +297,6 @@ static void convert_primary_bgcmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src,
 		}
 	}
 
-	*srcpos += sizeof(*n64_cmds) * num_cmds;
 	*dstpos += sizeof(*host_cmds) * num_cmds;
 }
 
@@ -347,25 +347,17 @@ void relink_ptr(uintptr_t** ptr)
 	*ptr = marker->ptr_host;
 }
 
-static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t compsize, uint32_t src_roomoffset, uint32_t dst_roomoffset)
+static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint8_t *src, uint32_t infsize, uint32_t src_ofs)
 {
 	reset_markers();
-	dst_roomoffset += 0x0f000000;
-	size_t infsize = rzip_get_infsize(src);
-	uint8_t* src_roomgfxdata = calloc(1, infsize);
 
-	int ret = rzip_inflate(src_roomgfxdata, infsize, src, compsize);
-
-	if (ret < 0) {
-		fprintf(stderr, "Unable to inflate roomgfxdata %d\n", ret);
-		exit(EXIT_FAILURE);
-	}
+	uint32_t dst_roomoffset = src_ofs;
 
 	uintptr_t gdls_addr[64];
 	int numgdls = 0;
 
-	struct n64_roomgfxdata *src_header = (struct n64_roomgfxdata*)src_roomgfxdata;
-	struct host_roomgfxdata *dst_header = (struct host_roomgfxdata*)&dst[dstpos];
+	struct n64_roomgfxdata *src_header = (struct n64_roomgfxdata*)src;
+	struct host_roomgfxdata *dst_header = (struct host_roomgfxdata*)dst;
 
 	dst_header->ptr_vertices = srctoh32(src_header->ptr_vertices);
 	dst_header->ptr_colours = srctoh32(src_header->ptr_colours);
@@ -376,7 +368,7 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 	dst_header->numvertices = srctoh16(src_header->numvertices);
 	dst_header->numcolours = srctoh16(src_header->numcolours);
 
-	intptr_t endpos = dst_header->ptr_vertices - src_roomoffset;
+	intptr_t endpos = dst_header->ptr_vertices - src_ofs;
 	uintptr_t curpos_src = sizeof(struct n64_roomgfxdata);
 	uintptr_t curpos_dst = sizeof(struct host_roomgfxdata);
 
@@ -388,7 +380,7 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 
 	int numblocks = 0;
 	while ((intptr_t)(curpos_src + sizeof(struct n64_roomblock)) <= endpos) {
-		struct n64_roomblock *src_roomblock = (struct n64_roomblock*)&src_roomgfxdata[curpos_src];
+		struct n64_roomblock *src_roomblock = (struct n64_roomblock*)&src[curpos_src];
 		struct host_roomblock *dest_roomblock = (struct host_roomblock*)&dst[curpos_dst];
 
 		dest_roomblock->type = src_roomblock->type;
@@ -397,15 +389,15 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 		dest_roomblock->ptr_vertices = srctoh32(src_roomblock->ptr_vertices);
 		dest_roomblock->ptr_colours = srctoh32(src_roomblock->ptr_colours);
 
-		add_marker(curpos_src + src_roomoffset, curpos_dst + dst_roomoffset);
+		add_marker(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
 		if (src_roomblock->type == BLOCK_PARENT) {
 			ncoords++;
-			uintptr_t vtx_ptr = dest_roomblock->ptr_vertices - src_roomoffset;
+			uintptr_t vtx_ptr = dest_roomblock->ptr_vertices - src_ofs;
 			if (vtx_ptr < endpos) endpos = vtx_ptr;
 		}
 		else if (src_roomblock->ptr_gdl) {
-			gdls_addr[numgdls++] = srctoh32(src_roomblock->ptr_gdl) - src_roomoffset;
+			gdls_addr[numgdls++] = srctoh32(src_roomblock->ptr_gdl) - src_ofs;
 		}
 
 		curpos_src += sizeof(struct n64_roomblock);
@@ -415,7 +407,7 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 
 	// block coords
 	for (size_t i = 0; i < ncoords; i++) {
-		uint32_t *src_coord = (uint32_t*)(src_roomgfxdata + curpos_src);
+		uint32_t *src_coord = (uint32_t*)(src + curpos_src);
 		uint32_t *dst_coord = (uint32_t*)(dst + curpos_dst);
 
 		dst_coord[0] = srctoh32(src_coord[0]);
@@ -426,7 +418,7 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 		dst_coord[4] = srctoh32(src_coord[4]);
 		dst_coord[5] = srctoh32(src_coord[5]);
 
-		add_marker(curpos_src + src_roomoffset, curpos_dst + dst_roomoffset);
+		add_marker(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
 		curpos_src += 6 * sizeof(uint32_t);
 		curpos_dst += 6 * sizeof(uint32_t);
@@ -435,16 +427,15 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 	curpos_dst = ALIGN8(curpos_dst);
 
 	// vertices
-	uintptr_t ptr_src_vertices = curpos_src = ALIGN8(dst_header->ptr_vertices - src_roomoffset);
+	uintptr_t ptr_src_vertices = curpos_src = ALIGN8(dst_header->ptr_vertices - src_ofs);
 	uintptr_t ptr_dst_vertices = curpos_dst + dst_roomoffset;
 
-	add_marker(curpos_src + src_roomoffset, curpos_dst + dst_roomoffset);
+	add_marker(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
-	uintptr_t vtx_end = dst_header->ptr_colours - src_roomoffset;
-	vtx_end = dst_header->ptr_colours == 0 ? infsize : vtx_end;
-	
-	while (curpos_src < vtx_end) {
-		struct vtx *src_vtx = (struct vtx*)(src_roomgfxdata + curpos_src);
+	uintptr_t vtx_end = dst_header->ptr_colours - src_ofs;
+
+	while (dst_header->ptr_colours && curpos_src < vtx_end) {
+		struct vtx *src_vtx = (struct vtx*)(src + curpos_src);
 		struct vtx *dst_vtx = (struct vtx*)(dst + curpos_dst);
 
 		dst_vtx->coord[0] = srctoh16(src_vtx->coord[0]);
@@ -452,7 +443,7 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 		dst_vtx->coord[2] = srctoh16(src_vtx->coord[2]);
 		
 		dst_vtx->flag = src_vtx->flag;
-		dst_vtx->color= src_vtx->color;
+		dst_vtx->color = src_vtx->color;
 
 		dst_vtx->s = srctoh16(src_vtx->s);
 		dst_vtx->t = srctoh16(src_vtx->t);
@@ -468,15 +459,15 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 	uintptr_t ptr_dst_colors = 0;
 
 	if (dst_header->ptr_colours) {
-		ptr_src_colors = curpos_src = ALIGN8(dst_header->ptr_colours - src_roomoffset);
+		ptr_src_colors = curpos_src = ALIGN8(dst_header->ptr_colours - src_ofs);
 		ptr_dst_colors = curpos_dst + dst_roomoffset;
 
-		add_marker(curpos_src + src_roomoffset, curpos_dst + dst_roomoffset);
-		
+		add_marker(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
+
 		uintptr_t col_end = numgdls > 0 != 0 ? gdls_addr[0] : infsize;
 		size_t col_len = col_end - curpos_src;
 
-		memcpy(dst + curpos_dst, src_roomgfxdata + curpos_src, col_len);
+		memcpy(dst + curpos_dst, src + curpos_src, col_len);
 		curpos_src += col_len;
 		curpos_dst += col_len;
 	}
@@ -488,8 +479,8 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 	m_SizeGDLs = 0;
 	uintptr_t gdlstart = curpos_dst;
 	for (size_t i = 0; i < numgdls; i++) {
-		add_marker(gdls_addr[i] + src_roomoffset, curpos_dst + dst_roomoffset);
-		curpos_dst = gbi_convert_gdl(dst, curpos_dst, src_roomgfxdata, gdls_addr[i], 1);
+		add_marker(gdls_addr[i] + src_ofs, curpos_dst + dst_roomoffset);
+		curpos_dst = gbi_convert_gdl(dst, curpos_dst, src, gdls_addr[i], 1);
 	}
 	m_SizeGDLs = curpos_dst - gdlstart;
 
@@ -501,8 +492,8 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 
 		if (block->type == BLOCK_LEAF) {
 			relink_ptr(&block->ptr_gdl);
-			uint32_t offset_vtx = block->ptr_vertices - ptr_src_vertices - src_roomoffset;
-			uint32_t offset_col = block->ptr_colours - ptr_src_colors - src_roomoffset;
+			uint32_t offset_vtx = block->ptr_vertices - ptr_src_vertices - src_ofs;
+			uint32_t offset_col = block->ptr_colours - ptr_src_colors - src_ofs;
 
 			block->ptr_vertices = ptr_dst_vertices + offset_vtx;
 			block->ptr_colours = ptr_dst_colors + offset_col;
@@ -519,122 +510,40 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint32_t dstpos, uint
 	relink_ptr(&dst_header->ptr_opablocks);
 	relink_ptr(&dst_header->ptr_xlublocks);
 
-	free(src_roomgfxdata);
 	return curpos_dst;
 }
 
-static uint32_t convert_section1(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, struct fileheader *n64_header)
+static uint32_t convert_section1(uint8_t *dst, uint8_t *src, uint32_t ofs)
 {
-	struct fileheader *host_header = (struct fileheader *) &dst[dstpos];
-	dstpos += sizeof(*host_header);
-
-	// Unzip primary
-	size_t infsize = srctoh32(n64_header->primary_infsize);
-	uint8_t *srcbin = calloc(1, infsize);
-	uint8_t *dstbin = calloc(1, infsize * 2);
-	uint32_t srcbinpos = 0;
-	uint32_t dstbinpos = 0;
-
-	int ret = rzip_inflate(srcbin, infsize, &src[srcpos], srctoh32(n64_header->primary_cmpsize));
-
-	if (ret < 0) {
-		fprintf(stderr, "Unable to inflate BG primary data: %d\n", ret);
-		exit(EXIT_FAILURE);
-	}
-
 	// Convert primary
-	struct host_primaryheader *host_primary_header = (struct host_primaryheader *) &dstbin[dstbinpos];
-	struct n64_primaryheader *n64_primary_header = (struct n64_primaryheader *) &srcbin[srcbinpos];
-	srcbinpos += sizeof(struct n64_primaryheader);
-	dstbinpos += sizeof(*host_primary_header);
+	uint32_t srcpos = 0;
+	uint32_t dstpos = 0;
+	struct host_primaryheader *host_primary_header = (struct host_primaryheader *) dst;
+	struct n64_primaryheader *n64_primary_header = (struct n64_primaryheader *) src;
+	srcpos += sizeof(struct n64_primaryheader);
+	dstpos += sizeof(*host_primary_header);
 
-	uint32_t src_bgcmds = srctodst32(n64_primary_header->ptr_bgcmds) - 0x0f000000;
+	uint32_t src_bgcmds = srctodst32(n64_primary_header->ptr_bgcmds) - ofs;
 
 	host_primary_header->unused1 = 0;
 	host_primary_header->unused2 = 0;
 
-	host_primary_header->ptr_rooms = dstbinpos + 0x0f000000;
-	convert_primary_rooms(dstbin, &dstbinpos, srcbin, &srcbinpos);
+	host_primary_header->ptr_rooms = dstpos + ofs;
+	convert_primary_rooms(dst, &dstpos, src, &srcpos);
 	
 	if (n64_primary_header->ptr_lights) {
-		host_primary_header->ptr_lights = dstbinpos + 0x0f000000;
-		srcbinpos = srctodst32(n64_primary_header->ptr_lights) - 0x0f000000;
-		convert_primary_lights(dstbin, &dstbinpos, srcbin, &srcbinpos, src_bgcmds);
+		host_primary_header->ptr_lights = dstpos + ofs;
+		srcpos = srctodst32(n64_primary_header->ptr_lights) - ofs;
+		convert_primary_lights(dst, &dstpos, src, &srcpos, src_bgcmds);
 	}
 
-	host_primary_header->ptr_portals = dstbinpos + 0x0f000000;
-	srcbinpos = srctodst32(n64_primary_header->ptr_portals) - 0x0f000000;
+	host_primary_header->ptr_portals = dstpos + ofs;
+	srcpos = srctodst32(n64_primary_header->ptr_portals) - ofs;
 	uint32_t src_portalvtxs, dst_portalvtxs;
-	convert_primary_portals(dstbin, &dstbinpos, srcbin, &srcbinpos, &src_portalvtxs, &dst_portalvtxs);
+	convert_primary_portals(dst, &dstpos, src, &srcpos, &src_portalvtxs, &dst_portalvtxs);
 
-	host_primary_header->ptr_bgcmds = dstbinpos + 0x0f000000;
-	srcbinpos = src_bgcmds;
-	convert_primary_bgcmds(dstbin, &dstbinpos, srcbin, &srcbinpos, dst_portalvtxs, src_portalvtxs);
-
-	// Convert room gfxdata
-	uint32_t n64_primary_diff = srctoh32(n64_header->primary_infsize) - srctoh32(n64_header->primary_cmpsize) - 0xc;
-	struct n64_room *n64_rooms = (struct n64_room *) &srcbin[sizeof(struct n64_primaryheader)];
-	struct host_room *host_rooms = (struct host_room *) &dstbin[sizeof(struct host_primaryheader)];
-	
-	uint8_t *roomgfxbuf = calloc(1, (size_t)1024 * 1024);
-	uint8_t *allcmp = calloc(1, (size_t)1024 * 1024);
-	int cmppos = 0;
-
-	host_rooms[0].ptr_gfxdata = 0;
-	for (int i = 1; i <= m_NumRooms; i++) {
-		host_rooms[i].ptr_gfxdata = dstbinpos + cmppos + 0x0f000000;
-
-		if (i == m_NumRooms) break;
-
-		uint32_t gfxdatacompsize = srctoh32(n64_rooms[i + 1].ptr_gfxdata) - srctoh32(n64_rooms[i].ptr_gfxdata);
-		srcpos = srctoh32(n64_rooms[i].ptr_gfxdata) - n64_primary_diff - 0x0f000000;
-		uint32_t src_roomoffset = srctoh32(n64_rooms[i].ptr_gfxdata);
-		uint32_t roomgfxbufpos = convert_section1_roomgfxdata(roomgfxbuf, 0, src+srcpos, gfxdatacompsize, src_roomoffset, dstbinpos + cmppos);
-
-		size_t ziplen = 0;
-		ret = rzip_deflate(&allcmp[cmppos], &ziplen, roomgfxbuf, roomgfxbufpos);
-		if (ret < 0) {
-			fprintf(stderr, "Unable to compress BG roomgfxdata for room 0x%x: %d\n", i, ret);
-			exit(EXIT_FAILURE);
-		}
-
-		ziplen = ALIGN16(ziplen);
-		cmppos += ziplen;
-
-		m_AllocSizes[i - 1] = roomgfxbufpos + (ziplen > m_SizeGDLs ? ziplen*4 : m_SizeGDLs*4);
-	}
-	
-	host_rooms[m_NumRooms+1].ptr_gfxdata = 0;
-
-	// Zip primary
-	size_t ziplen = 0;
-
-	printf("dstbin:%d = %p\n", __LINE__, dstbin);
-	printf("dstpos:%d = %d\n", __LINE__, dstpos);
-	printf("dstbinpos:%d = %d\n", __LINE__, dstbinpos);
-	ret = rzip_deflate(&dst[dstpos], &ziplen, dstbin, dstbinpos);
-
-	if (ret < 0) {
-		fprintf(stderr, "Unable to compress BG primary data: %d\n", ret);
-		exit(EXIT_FAILURE);
-	}
-
-	printf("ziplen:%d = %d\n", __LINE__, ziplen);
-	ziplen = ALIGN16(ziplen);
-	dstpos += ziplen;
-
-	// Paste compressed roomgfxdata after it
-	memcpy(&dst[dstpos], allcmp, cmppos);
-	dstpos += cmppos;
-
-	free(roomgfxbuf);
-	free(allcmp);
-	free(srcbin);
-	free(dstbin);
-
-	host_header->primary_infsize = dstbinpos;
-	host_header->section1_cmpsize = ziplen + cmppos;
-	host_header->primary_cmpsize = ziplen;
+	host_primary_header->ptr_bgcmds = dstpos + ofs;
+	convert_primary_bgcmds(dst, &dstpos, &src[src_bgcmds], dst_portalvtxs, src_portalvtxs);
 
 	return dstpos;
 }
@@ -691,102 +600,36 @@ static void convert_section3_lightcounts(uint8_t *dst, uint32_t *dstpos, uint8_t
 	*dstpos += (m_NumRooms - 1);
 }
 
-static uint32_t convert_zipped_section(int section_num, uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, struct sectionheader *n64_header)
+#ifdef PLATFORM_64BIT
+void preprocessBgSection1(uint8_t *data, uint32_t size, uint32_t ofs)
 {
-	struct sectionheader *host_header = (struct sectionheader *) &dst[dstpos];
-	dstpos += sizeof(*host_header);
+	uint8_t *dst = sysMemZeroAlloc(size);
 
-	// Unzip
-	size_t infsize = rzip_get_infsize(&src[srcpos]);
-	uint8_t *srcbin = calloc(1, infsize);
-	uint8_t *dstbin = calloc(1, infsize);
-	uint32_t srcbinpos = 0;
-	uint32_t dstbinpos = 0;
+	uint32_t newSize = convert_section1(dst, data, ofs);
 
-	int ret = rzip_inflate(srcbin, infsize, &src[srcpos], srctoh16(n64_header->cmpsize));
-
-	if (ret < 0) {
-		fprintf(stderr, "Unable to inflate BG section %d: %d\n", section_num, ret);
+	if (newSize > size) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a bg file, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}
 
-	// Convert
-	if (section_num == 2) {
-		convert_section2_texturenums(dstbin, &dstbinpos, srcbin, &srcbinpos, infsize);
-	} else if (section_num == 3) {
-		convert_section3_bboxes(dstbin, &dstbinpos, srcbin, &srcbinpos);
-		convert_section3_allocsizes(dstbin, &dstbinpos, srcbin, &srcbinpos);
-		convert_section3_lightcounts(dstbin, &dstbinpos, srcbin, &srcbinpos);
-	}
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
+}
 
-	// Zip
-	size_t ziplen = 0;
+uint32_t preprocessBgRoom(uint8_t *data, uint32_t size, uint32_t room_ofs)
+{
+	size *= 2;
+	uint8_t *dst = sysMemZeroAlloc(size);
+	uint32_t newSize = convert_section1_roomgfxdata(dst, data, size, room_ofs);
 
-	ret = rzip_deflate(&dst[dstpos], &ziplen, dstbin, dstbinpos);
-
-	if (ret < 0) {
-		fprintf(stderr, "Unable to compress BG section %d: %d\n", section_num, ret);
+	if (newSize > size) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a bg room, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}
 
-	ziplen = ALIGN16(ziplen);
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
 
-	host_header->infsize = dstbinpos;
-	host_header->cmpsize = ziplen;
-
-	dstpos += ziplen;
-
-	free(srcbin);
-	free(dstbin);
-
-	return dstpos;
+	return newSize;
 }
-
-void extract_file_bg(char *filename, uint32_t romoffset, size_t len)
-{
-	if (0) {
-		if (strcmp(filename, "bgdata/bg_mp5.seg") != 0) {
-			return;
-		}
-	}
-
-	if (strcmp(filename, "ob/ob_mid.seg") == 0) {
-		return;
-	}
-
-	size_t dstlen = len * 2;
-	uint8_t *dst = calloc(1, dstlen);
-	uint32_t dstpos = 0;
-	m_NumPtrMarkers = 0;
-	m_SizeGDLs = 0;
-	gbi_reset();
-
-	printf("--------------------------------------------------------------------------------\n");
-	printf("-- %s\n", filename);
-
-	uint8_t *src = &g_Rom[romoffset];
-	struct fileheader *n64_fileheader = (struct fileheader *) src;
-	uint32_t n64_section2_start = sizeof(*n64_fileheader) + srctoh32(n64_fileheader->section1_cmpsize);
-	struct sectionheader *n64_section2header = (struct sectionheader *) &src[n64_section2_start];
-	uint32_t n64_section3_start = n64_section2_start + sizeof(*n64_section2header) + (srctoh16(n64_section2header->cmpsize) & 0x7fff);
-	struct sectionheader *n64_section3header = (struct sectionheader *) &src[n64_section3_start];
-
-	printf("section2_start 0x%x\n", n64_section2_start);
-	printf("section3_start 0x%x\n", n64_section3_start);
-
-	dstpos = convert_section1(dst, dstpos, src, sizeof(*n64_fileheader), n64_fileheader);
-	dstpos = convert_zipped_section(2, dst, dstpos, src, n64_section2_start + sizeof(*n64_section2header), n64_section2header);
-	dstpos = convert_zipped_section(3, dst, dstpos, src, n64_section3_start + sizeof(*n64_section3header), n64_section3header);
-	dstpos = ALIGN16(dstpos);
-
-	sysLogPrintf(LOG_NOTE, "%s	%d	%d	%.3f", filename, len, dstpos, (f32)dstpos / len);
-
-	char outfilename[1024];
-	sprintf(outfilename, "%s/files/%s", g_OutPath, filename);
-
-	FILE *fp = openfile(outfilename);
-	fwrite(dst, dstpos, 1, fp);
-	fclose(fp);
-
-	free(dst);
-}
+#endif

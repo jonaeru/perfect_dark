@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common.h"
+#include "system.h"
 
 #define PADFLAG_INTPOS          0x0001
 #define PADFLAG_UPALIGNTOX      0x0002
@@ -276,7 +277,7 @@ static int convert_cover(uint8_t *dst, int dstpos, uint8_t *src, int srcpos, int
 	return dstpos;
 }
 
-static int convert_binary(uint8_t *dst, uint8_t *src)
+static int convert_pads_file(uint8_t *dst, uint8_t *src)
 {
 	int dstpos = 0;
 	struct n64_header *n64_header = (struct n64_header *) src;
@@ -307,45 +308,21 @@ static int convert_binary(uint8_t *dst, uint8_t *src)
 	return dstpos;
 }
 
-void extract_file_pads(char *filename, uint32_t romoffset, size_t len)
-{
-	// Unzip it
-	size_t infsize = rzip_get_infsize(&g_Rom[romoffset]);
-	uint8_t *src = malloc(infsize);
+u8* preprocessPadsFile_x64(u8 *data, u32 size, u32 *outSize) {
+	u32 newSizeEstimated = (u32)(size * 1.7);
+	u8* dst = sysMemZeroAlloc(newSizeEstimated);
 
-	int ret = rzip_inflate(src, infsize, &g_Rom[romoffset], len);
+	u32 newSize = convert_pads_file(dst, data);
 
-	if (ret < 0) {
-		fprintf(stderr, "%s: Unable to inflate file: %d\n", filename, ret);
+	if (newSize > newSizeEstimated) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a pads file, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}
 
-	// Convert it
-	uint8_t *dst = calloc(1, infsize * 2);
-	int dstpos = convert_binary(dst, src);
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
 
-	dstpos = ALIGN16(dstpos);
+	*outSize = newSize;
 
-	// Zip it
-	uint8_t *zipped = calloc(1, dstpos);
-	size_t ziplen = dstpos;
-
-	ret = rzip_deflate(zipped, &ziplen, dst, dstpos);
-
-	if (ret < 0) {
-		fprintf(stderr, "%s: Unable to compress file: %d\n", filename, ret);
-		exit(EXIT_FAILURE);
-	}
-
-	// Write it
-	char outfilename[1024];
-	sprintf(outfilename, "%s/files/%s", g_OutPath, filename);
-
-	FILE *fp = openfile(outfilename);
-	fwrite(zipped, ALIGN16(ziplen), 1, fp);
-	fclose(fp);
-
-	free(src);
-	free(dst);
-	free(zipped);
+	return 0;
 }

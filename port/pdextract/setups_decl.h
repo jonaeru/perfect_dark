@@ -1,8 +1,6 @@
 #ifndef _IN_SETUP_DECL
 #define _IN_SETUP_DECL
 
-
-#include <PR/ultratypes.h>
 #include "common.h"
 
 

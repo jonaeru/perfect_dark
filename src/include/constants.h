@@ -48,7 +48,9 @@
 
 #define ABS(val)            ((val) > 0 ? (val) : -(val))
 #define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
+#define ALIGN(val, size) ((val + (size - 1)) & ~(size - 1))
 #define ALIGN2(val)         (((val) | 1) ^ 0x1)
+#define ALIGN4(val)         (((val) | 3) ^ 0x3)
 #define ALIGN8(val)         ((((val) + 0x7) | 0x7) ^ 0x7)
 #define ALIGN16(val)        ((((val) + 0xf) | 0xf) ^ 0xf)
 #define ALIGN64(val)        (((((uintptr_t)(val)) + 0x3f) | 0x3f) ^ 0x3f)

@@ -6,7 +6,16 @@
 #include <stdlib.h>
 
 #include <winsock2.h>
+// this BS comes from windows.h
+#undef near
+#undef far
+
 #include <sys/param.h>
+
+#include <PR/ultratypes.h>
+
+#include "constants.h"
+
 
 #if __BIG_ENDIAN__
 	#define htonll(x)   (x)
@@ -59,37 +68,6 @@
 #ifdef FORCE_BE32
 #define uintptr_t uint32_t
 #endif
-
-enum romversion {
-	ROMVERSION_NTSC10,
-	ROMVERSION_NTSCFINAL,
-	ROMVERSION_PALFINAL,
-	ROMVERSION_JPNFINAL,
-	ROMVERSION_NTSCBETA,
-	ROMVERSION_PALBETA,
-	ROMVERSION_UNKNOWN,
-};
-
-extern uint8_t *g_Rom;
-extern enum romversion g_RomVersion;
-extern char g_OutPath[1024];
-
-typedef uint32_t n64ptr_t;
-
-#define ALIGN(val, size) ((val + (size - 1)) & ~(size - 1))
-#define ALIGN16(val) ((val + 0xf) & ~0xf)
-#define ALIGN8(val) ((val + 0x7) & ~0x7)
-#define ALIGN4(val) ((val + 0x3) & ~0x3)
-
-#define ARRAYCOUNT(arr) (int) (sizeof(arr) / sizeof(arr[0]))
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-FILE *openfile(char *filename);
-size_t rzip_get_infsize(uint8_t *src);
-int rzip_inflate(uint8_t *dst, size_t dstlen, uint8_t *src, size_t srclen);
-int rzip_deflate(uint8_t *dst, size_t *dstlen, uint8_t *src, size_t srclen);
 
 void gbi_reset(void);
 void gbi_set_segment(int segment, uint32_t offset);

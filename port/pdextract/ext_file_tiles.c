@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common.h"
+#include "system.h"
+
 
 struct tile {
 	uint8_t type;
@@ -17,19 +19,8 @@ struct tile {
 	uint16_t floorcol;
 };
 
-void extract_file_tiles(char *filename, uint32_t romoffset, size_t len)
+uint32_t convert_tiles(uint8_t *dst, uint8_t *src, size_t srclen)
 {
-	// Unzip it
-	size_t infsize = rzip_get_infsize(&g_Rom[romoffset]);
-	uint8_t *src = malloc(infsize);
-
-	int ret = rzip_inflate(src, infsize, &g_Rom[romoffset], len);
-
-	if (ret < 0) {
-		fprintf(stderr, "%s: Unable to inflate file: %d\n", filename, ret);
-		exit(EXIT_FAILURE);
-	}
-
 	int num_rooms = srctoh32(*(uint32_t *) src);
 
 	size_t src_ptr_table_len = (num_rooms + 1) * 4;
@@ -37,13 +28,11 @@ void extract_file_tiles(char *filename, uint32_t romoffset, size_t len)
 
 	uint32_t *src_offsets = (uint32_t *) &src[4];
 
-	size_t data_len = infsize - src_ptr_table_len - 4;
-
-	uint8_t *dst = calloc(1, dst_ptr_table_len + data_len + 0x20);
+	size_t data_len = srclen - src_ptr_table_len - 4;
 
 	*(uint32_t *) dst = htodst32(num_rooms);
 
-	uint32_t*dst_offsets = (uint32_t*) (dst + sizeof(uint32_t));
+	uint32_t *dst_offsets = (uint32_t *) (dst + sizeof(uint32_t));
 	uint32_t cur_dst_offset = dst_ptr_table_len + sizeof(uint32_t);
 
 	uint32_t cur_src_offset = srctoh32(src_offsets[0]);
@@ -92,31 +81,24 @@ void extract_file_tiles(char *filename, uint32_t romoffset, size_t len)
 		}
 	}
 
-	cur_dst_offset = ALIGN16(cur_dst_offset);
+	return ALIGN16(cur_dst_offset);
+}
 
-	// Zip it
-	uint8_t *zipped = calloc(1, cur_dst_offset);
-	size_t ziplen = cur_dst_offset;
+uint8_t *preprocessTilesFile_x64(uint8_t *data, uint32_t size, uint32_t *outSize)
+{
+	uint8_t *dst = sysMemZeroAlloc(size);
 
-	ret = rzip_deflate(zipped, &ziplen, dst, cur_dst_offset);
+	uint32_t newSize = convert_tiles(dst, data, size);
 
-	if (ret < 0) {
-		fprintf(stderr, "%s: Unable to compress file: %d\n", filename, ret);
+	if (newSize > size) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a tiles file, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}
 
-	ziplen = ALIGN16(ziplen);
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
 
-	// Write it
-	char outfilename[1024];
+	*outSize = newSize;
 
-	sprintf(outfilename, "%s/files/%s", g_OutPath, filename);
-
-	FILE *fp = openfile(outfilename);
-	fwrite(zipped, ziplen, 1, fp);
-	fclose(fp);
-
-	free(zipped);
-	free(dst);
-	free(src);
+	return 0;
 }

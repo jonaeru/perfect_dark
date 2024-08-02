@@ -4,7 +4,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <PR/ultratypes.h>
-#include <PR/ultratypes.h>
 #include "lib/rzip.h"
 #include "romdata.h"
 #include "fs.h"
@@ -99,6 +98,13 @@ static struct romfile fileSlots[ROMDATA_MAX_FILES] = {
 #define ROMSEG_START(n) _ ## n ## SegmentRomStart
 #define ROMSEG_END(n) _ ## n ## SegmentRomEnd
 
+// for x64 preprocess functions
+#ifdef PLATFORM_64BIT
+#define F(preprocessFunc) preprocessFunc##_x64
+#else
+#define F(preprocessFunc) preprocessFunc
+#endif
+
 /* segment table for ntsc-final                                                     */
 /* size will get calculated automatically if it is 0                                */
 /* if there are replacement files in the data dir, they will be loaded instead      */
@@ -116,15 +122,15 @@ static struct romfile fileSlots[ROMDATA_MAX_FILES] = {
 	ROMSEG_DECL_SEG(mpstringsS,         0x7e2f20,  0x7ce720,  0x7d25b0,  0x3700,   NULL                    ) \
 	ROMSEG_DECL_SEG(mpstringsI,         0x7e6620,  0x7d1e20,  0x7d5cb0,  0x3700,   NULL                    ) \
 	ROMSEG_DECL_SEG(firingrange,        0x7e9d20,  0x7d5520,  0x7d93b0,  0x1550,   NULL                    ) \
-	ROMSEG_DECL_SEG(fonttahoma,         0x7f7860,  0x7e3060,  0x7e6ef0,  0x0,      preprocessFont          ) \
-	ROMSEG_DECL_SEG(fontnumeric,        0x7f8b20,  0x7e4320,  0x7e81b0,  0x0,      preprocessFont          ) \
-	ROMSEG_DECL_SEG(fonthandelgothicsm, 0x7f9d30,  0x7e5530,  0x7e93c0,  0x0,      preprocessFont          ) \
-	ROMSEG_DECL_SEG(fonthandelgothicxs, 0x7fbfb0,  0x7e87b0,  0x7ec640,  0x0,      preprocessFont          ) \
-	ROMSEG_DECL_SEG(fonthandelgothicmd, 0x7fdd80,  0x7eae20,  0x7eecb0,  0x0,      preprocessFont          ) \
-	ROMSEG_DECL_SEG(fonthandelgothiclg, 0x8008e0,  0x7eee70,  0x7f2d00,  0x0,      preprocessFont          ) \
-	ROMSEG_DECL_SEG(sfxctl,             0x80a250,  0x7f87e0,  0x7fc670,  0x2fb80,  preprocessALBankFile    ) \
+	ROMSEG_DECL_SEG(fonttahoma,         0x7f7860,  0x7e3060,  0x7e6ef0,  0x0,      F(preprocessFont)       ) \
+	ROMSEG_DECL_SEG(fontnumeric,        0x7f8b20,  0x7e4320,  0x7e81b0,  0x0,      F(preprocessFont)       ) \
+	ROMSEG_DECL_SEG(fonthandelgothicsm, 0x7f9d30,  0x7e5530,  0x7e93c0,  0x0,      F(preprocessFont)       ) \
+	ROMSEG_DECL_SEG(fonthandelgothicxs, 0x7fbfb0,  0x7e87b0,  0x7ec640,  0x0,      F(preprocessFont)       ) \
+	ROMSEG_DECL_SEG(fonthandelgothicmd, 0x7fdd80,  0x7eae20,  0x7eecb0,  0x0,      F(preprocessFont)       ) \
+	ROMSEG_DECL_SEG(fonthandelgothiclg, 0x8008e0,  0x7eee70,  0x7f2d00,  0x0,      F(preprocessFont)       ) \
+	ROMSEG_DECL_SEG(sfxctl,             0x80a250,  0x7f87e0,  0x7fc670,  0x2fb80,  F(preprocessALBankFile) ) \
 	ROMSEG_DECL_SEG(sfxtbl,             0x839dd0,  0x828360,  0x82c1f0,  0x4c2160, NULL                    ) \
-	ROMSEG_DECL_SEG(seqctl,             0xcfbf30,  0xcea4c0,  0xcee350,  0xa060,   preprocessALBankFile    ) \
+	ROMSEG_DECL_SEG(seqctl,             0xcfbf30,  0xcea4c0,  0xcee350,  0xa060,   F(preprocessALBankFile) ) \
 	ROMSEG_DECL_SEG(seqtbl,             0xd05f90,  0xcf4520,  0xcf83b0,  0x17c070, NULL                    ) \
 	ROMSEG_DECL_SEG(sequences,          0xe82000,  0xe70590,  0xe74420,  0x563a0,  preprocessSequences     ) \
 	ROMSEG_DECL_SEG(texturesdata,       0x1d65f40, 0x1d5ca20, 0x1d61f90, 0x0,      NULL                    ) \
@@ -165,13 +171,15 @@ static struct romfile romSegs[] = {
 static preprocessfunc filePreprocFuncs[] = {
 	/* LOADTYPE_NONE  */ NULL,
 	/* LOADTYPE_BG    */ NULL, // loaded in parts
-	/* LOADTYPE_TILES */ preprocessTilesFile,
-	/* LOADTYPE_LANG  */ preprocessLangFile,
-	/* LOADTYPE_SETUP */ preprocessSetupFile,
-	/* LOADTYPE_PADS  */ preprocessPadsFile,
-	/* LOADTYPE_MODEL */ preprocessModelFile,
-	/* LOADTYPE_GUN   */ preprocessGunFile,
+	/* LOADTYPE_TILES */ F(preprocessTilesFile),
+	/* LOADTYPE_LANG  */ F(preprocessLangFile),
+	/* LOADTYPE_SETUP */ F(preprocessSetupFile),
+	/* LOADTYPE_PADS  */ F(preprocessPadsFile),
+	/* LOADTYPE_MODEL */ F(preprocessModelFile),
+	/* LOADTYPE_GUN   */ F(preprocessModelFile),
 };
+
+#undef F
 
 static inline void romdataWrongRomError(const char *fmt, ...)
 {
@@ -236,6 +244,17 @@ static inline void romdataLoadRom(void)
 	romDataSegSize = dataSegLen;
 }
 
+static inline void romdataUpdateSegStartEnd(struct romfile* seg)
+{
+	if (seg->segstart) {
+		*seg->segstart = seg->data;
+	}
+
+	if (seg->segend) {
+		*seg->segend = seg->data + seg->size;
+	}
+}
+
 static inline void romdataInitSegment(struct romfile *seg)
 {
 	if (!seg->data) {
@@ -269,7 +288,7 @@ static inline void romdataInitSegment(struct romfile *seg)
 		if (g_RomFile) {
 			newData = g_RomFile + (uintptr_t)seg->data;
 			seg->source = SRC_ROM;
-			sysLogPrintf(LOG_NOTE, "loading segment %s from ROM (offset %08x pointer %p)", seg->name, (u32)seg->data, newData);
+			sysLogPrintf(LOG_NOTE, "loading segment %s from ROM (offset %08x pointer %p)", seg->name, (uintptr_t)seg->data, newData);
 		} else {
 			sysFatalError("No ROM or external file for segment:\n%s", seg->name);
 		}
@@ -281,17 +300,19 @@ static inline void romdataInitSegment(struct romfile *seg)
 
 	seg->data = newData;
 
-	if (seg->segstart) {
-		*seg->segstart = seg->data;
-	}
-
-	if (seg->segend) {
-		*seg->segend = seg->data + seg->size;
-	}
+	romdataUpdateSegStartEnd(seg);
 
 	// call the post load function if any
 	if (seg->preprocess && !seg->preprocessed) {
-		seg->preprocess(seg->data, seg->size);
+		newData = seg->preprocess(seg->data, seg->size, &seg->size);
+
+		if (newData) {
+			if (seg->source == SRC_EXTERNAL)
+				sysMemFree(seg->data);
+			seg->data = newData;
+			romdataUpdateSegStartEnd(seg);
+		}
+		
 		seg->preprocessed = 1;
 	}
 }
@@ -447,7 +468,7 @@ u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
 	return out;
 }
 
-void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size)
+void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *outSize)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		sysLogPrintf(LOG_ERROR, "romdataFilePreprocess: invalid file num %d", fileNum);
@@ -465,7 +486,7 @@ void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size)
 				}
 			}
 			// then preprocess
-			filePreprocFuncs[loadType](data, size);
+			filePreprocFuncs[loadType](data, size, outSize);
 			// fileSlots[fileNum].preprocessed = 1;
 		}
 	}

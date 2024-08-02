@@ -36,8 +36,8 @@ static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
 
 #define PD_SWAP_PTR(x) x = swapPtr((void *)(x))
 
-#define PD_PTR_BASE(x, b) (void *)((u8 *)b + (u32)x)
-#define PD_PTR_BASEOFS(x, b, d) (void *)((u8 *)b - d + (u32)x)
+#define PD_PTR_BASE(x, b) (void *)((u8 *)b + (uintptr_t)x)
+#define PD_PTR_BASEOFS(x, b, d) (void *)((u8 *)b - d + (uintptr_t)x)
 
 // HACK: to prevent double-swapping stuff, flag swapped offsets in a bitmap
 
@@ -1007,7 +1007,7 @@ static void preprocessIntroScript(s32 *cmd)
 	PD_SWAP_VAL(cmd[0]);
 }
 
-void preprocessAnimations(u8 *data, u32 size)
+u8* preprocessAnimations(u8* data, u32 size, u32* outSize)
 {
 	// set the anim table pointers as well
 	extern u8 *_animationsTableRomStart;
@@ -1032,9 +1032,10 @@ void preprocessAnimations(u8 *data, u32 size)
 			anim->data = 0xffffffff;
 		}
 	}
+	return 0;
 }
 
-void preprocessMpConfigs(u8 *data, u32 size)
+u8* preprocessMpConfigs(u8* data, u32 size, u32* outSize)
 {
 	const u32 count = size / sizeof(struct mpconfig);
 	struct mpconfig *cfg = (struct mpconfig *)data;
@@ -1064,10 +1065,12 @@ void preprocessMpConfigs(u8 *data, u32 size)
 #endif
 		}
 	}
+	return 0;
 }
 
-void preprocessFont(u8 *data, u32 size)
+u8* preprocessFont(u8* data, u32 size, u32* outSize)
 {
+	return;
 	struct font *fnt = (struct font *)data;
 
 	for (s32 i = 0; i < ARRAYCOUNT(fnt->kerning); ++i) {
@@ -1092,14 +1095,16 @@ void preprocessFont(u8 *data, u32 size)
 		PD_SWAP_VAL(fnt->chars[i].kerningindex);
 		PD_SWAP_PTR(fnt->chars[i].pixeldata);
 	}
+	return 0;
 }
 
-void preprocessJpnFont(u8 *data, u32 size)
+u8* preprocessJpnFont(u8* data, u32 size, u32* outSize)
 {
 	// ???
+	return 0;
 }
 
-void preprocessALBankFile(u8 *data, u32 size)
+u8* preprocessALBankFile(u8* data, u32 size, u32* outSize)
 {
 	memset(swapmap, 0, sizeof(swapmap));
 
@@ -1111,6 +1116,7 @@ void preprocessALBankFile(u8 *data, u32 size)
 		PD_SWAP_PTR(bankf->bankArray[i]);
 		preprocessALBank(PD_PTR_BASE(bankf->bankArray[i], data), data);
 	}
+	return 0;
 }
 
 void preprocessALCMidiHdr(u8 *data, u32 size)
@@ -1122,7 +1128,7 @@ void preprocessALCMidiHdr(u8 *data, u32 size)
 	}
 }
 
-void preprocessSequences(u8 *data, u32 size)
+u8* preprocessSequences(u8* data, u32 size, u32* outSize)
 {
 	struct seqtable *seq = (struct seqtable *)data;
 	PD_SWAP_VAL(seq->count);
@@ -1132,9 +1138,10 @@ void preprocessSequences(u8 *data, u32 size)
 		PD_SWAP_VAL(seq->entries[i].ziplen);
 		PD_SWAP_VAL(seq->entries[i].romaddr);
 	}
+	return 0;
 }
 
-void preprocessTexturesList(u8 *data, u32 size)
+u8* preprocessTexturesList(u8* data, u32 size, u32* outSize)
 {
 	struct texture *tex = (struct texture *)data;
 	const u32 count = size / sizeof(*tex);
@@ -1148,6 +1155,7 @@ void preprocessTexturesList(u8 *data, u32 size)
 		tex->soundsurfacetype = tex->surfacetype;
 		tex->surfacetype = tmp;
 	}
+	return 0;
 }
 
 void preprocessTextureRGBA32Embedded(u32* dest, u32 size_bytes)
@@ -1218,15 +1226,16 @@ void preprocessModel(u8 *base, u32 ofs)
 	}
 }
 
-void preprocessLangFile(u8 *data, u32 size)
+u8* preprocessLangFile(u8* data, u32 size, u32* outSize)
 {
 	// lang banks are just an offset table + text data right after
 	// offsets are from the beginning of the bank
 	// however we cannot byteswap them in advance because the length of the
 	// offset table is unknown, so that's done in lang.c on demand instead
+	return 0;
 }
 
-void preprocessPadsFile(u8 *data, u32 size)
+u8* preprocessPadsFile(u8* data, u32 size, u32* outSize)
 {
 	struct padsfileheader *hdr = (void *)data;
 
@@ -1297,9 +1306,10 @@ void preprocessPadsFile(u8 *data, u32 size)
 			++wg;
 		}
 	}
+	return 0;
 }
 
-void preprocessTilesFile(u8 *data, u32 size)
+u8* preprocessTilesFile(u8* data, u32 size, u32* outSize)
 {
 	u32 *roomTable = (u32 *)data;
 	PD_SWAP_VAL(roomTable[0]);
@@ -1368,9 +1378,10 @@ void preprocessTilesFile(u8 *data, u32 size)
 				break;
 		}
 	}
+	return 0;
 }
 
-void preprocessSetupFile(u8 *data, u32 size)
+u8* preprocessSetupFile(u8* data, u32 size, u32* outSize)
 {
 	struct stagesetup *set = (void *)data;
 
@@ -1422,16 +1433,19 @@ void preprocessSetupFile(u8 *data, u32 size)
 	}
 
 	// the rest of the pointers are set after loading
+	return 0;
 }
 
-void preprocessModelFile(u8 *data, u32 size)
+u8* preprocessModelFile(u8* data, u32 size, u32* outSize)
 {
 	preprocessModel(data, 0x5000000);
+	return 0;
 }
 
-void preprocessGunFile(u8 *data, u32 size)
+u8* preprocessGunFile(u8* data, u32 size, u32* outSize)
 {
 	preprocessModel(data, 0x5000000);
+	return 0;
 }
 
 void preprocessBgSection1Header(u8 *data, u32 size)
@@ -1442,6 +1456,7 @@ void preprocessBgSection1Header(u8 *data, u32 size)
 	PD_SWAP_VAL(header[2]); // primcompsize
 }
 
+#ifndef PLATFORM_64BIT
 void preprocessBgSection1(u8 *data, u32 ofs) {
 	struct {
 		u32 unk00;
@@ -1505,6 +1520,7 @@ void preprocessBgSection1(u8 *data, u32 ofs) {
 		// unused, so won't swap the contents
 	}
 }
+#endif
 
 void preprocessBgSection2Header(u8 *data, u32 size)
 {
@@ -1549,6 +1565,7 @@ void preprocessBgSection3(u8 *data, u32 size)
 	}
 }
 
+#ifndef PLATFORM_64BIT
 void preprocessBgRoom(u8 *data, u32 ofs) {
 	struct roomgfxdata *rgfx = (void *)data;
 
@@ -1607,6 +1624,7 @@ void preprocessBgRoom(u8 *data, u32 ofs) {
 		}
 	}
 }
+#endif
 
 void preprocessBgLights(u8 *data, u32 ofs)
 {

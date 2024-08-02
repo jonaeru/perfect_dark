@@ -4209,7 +4209,7 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 #ifndef PLATFORM_N64
 	// byteswap/preprocess file according to g_LoadType right after inflating it
 	const u32 dstsize = allocationlen ? info->loadedsize : romsize; 
-	romdataFilePreprocess(filenum, g_LoadType, dst, dstsize);
+	romdataFilePreprocess(filenum, g_LoadType, dst, dstsize, &info->loadedsize);
 	g_LoadType = LOADTYPE_NONE;
 #endif
 }

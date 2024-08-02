@@ -4,11 +4,6 @@
 #include "common.h"
 #include "system.h"
 
-#include <PR/ultratypes.h>
-
-#undef near
-#undef far
-
 enum contenttype {
 	/* 0*/ CT_MODELDEF,
 	/* 1*/ CT_NODE,
@@ -923,21 +918,6 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 	}
 }
 
-int calc_align(uint32_t value)
-{
-	if ((value % 16) == 0) {
-		return 16;
-	} else if ((value % 8) == 0) {
-		return 8;
-	} else if ((value % 4) == 0) {
-		return 4;
-	} else if ((value % 2) == 0) {
-		return 2;
-	} else {
-		return 1;
-	}
-}
-
 static int convert_model(uint8_t *dst, uint8_t *src, uint32_t srclen)
 {
 	uint32_t dstpos;
@@ -951,54 +931,24 @@ static int convert_model(uint8_t *dst, uint8_t *src, uint32_t srclen)
 	return dstpos;
 }
 
-void extract_file_model(char *filename, uint32_t romoffset, size_t len)
+uint8_t *preprocessModelFile_x64(uint8_t *data, uint32_t size, uint32_t *outSize)
 {
 	gbi_reset();
-	// Unzip it
-	size_t infsize = rzip_get_infsize(&g_Rom[romoffset]);
-	uint8_t *src = malloc(infsize);
 
-	int ret = rzip_inflate(src, infsize, &g_Rom[romoffset], len);
+	uint32_t newSizeEstimated = (uint32_t)(size * 1.7);
+	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	if (ret < 0) {
-		fprintf(stderr, "%s: Unable to inflate file: %d\n", filename, ret);
+	uint32_t newSize = convert_model(dst, data, size);
+
+	if (newSize > newSizeEstimated) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess model, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}
 
-	// Convert it
-	uint8_t *dst = calloc(1, infsize * 2);
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
 
-	int dstpos = convert_model(dst, src, infsize);
+	*outSize = newSize;
 
-	if (dstpos > infsize * 2) {
-		fprintf(stderr, "%s: overflow\n", filename);
-		exit(EXIT_FAILURE);
-	}
-
-	// Zip it
-	uint8_t *zipped = calloc(1, dstpos);
-	size_t ziplen = dstpos;
-
-	ret = rzip_deflate(zipped, &ziplen, dst, dstpos);
-
-	if (ret < 0) {
-		fprintf(stderr, "%s: Unable to compress file: %d\n", filename, ret);
-		exit(EXIT_FAILURE);
-	}
-
-	ziplen = ALIGN16(ziplen);
-
-	// Write it
-	char outfilename[1024];
-	sprintf(outfilename, "%s/files/%s", g_OutPath, filename);
-
-	sysLogPrintf(LOG_NOTE, "%s	%d	%d	%.3f", filename, infsize, dstpos, (f32)dstpos/infsize);
-
-	FILE *fp = openfile(outfilename);
-	fwrite(zipped, ziplen, 1, fp);
-	fclose(fp);
-
-	free(zipped);
-	free(dst);
-	free(src);
+	return 0;
 }

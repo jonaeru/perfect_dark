@@ -2,21 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "types.h"
+
 #include "common.h"
 #include "system.h"
 #include "assert.h"
 #include "setups_decl.h"
 
-#include "types.h"
 
-static inline f32 convF32(f32 *dst, f32 src) { *(u32*)dst = srctoh32(*(u32*)&src); }
-static inline u32 convU32(u32 *dst, u32 src) { *dst = srctoh32(src); }
-static inline s32 convS32(s32 *dst, s32 src) { *dst = srctoh32(src); }
-static inline u16 convU16(u16 *dst, u32 src) { *dst = srctoh16(src); }
-static inline s16 convS16(s16 *dst, s32 src) { *dst = srctoh16(src); }
-static inline u8 cpyByte(u8 *dst, u8 src) { *dst = src; }
-static inline void* convPtr(void** dst, u32 src) { *dst = srctoh32(src); }
-static inline struct coord convCoord(struct coord* dst, struct n64_coord src) { convF32(&dst->x, src.x); convF32(&dst->y, src.y); convF32(&dst->z, src.z); }
+static inline void convF32(f32 *dst, f32 src) { *(u32*)dst = srctoh32(*(u32*)&src); }
+static inline void convU32(u32 *dst, u32 src) { *dst = srctoh32(src); }
+static inline void convS32(s32 *dst, s32 src) { *dst = srctoh32(src); }
+static inline void convU16(u16 *dst, u32 src) { *dst = srctoh16(src); }
+static inline void convS16(s16 *dst, s32 src) { *dst = srctoh16(src); }
+static inline void cpyByte(u8 *dst, u8 src) { *dst = src; }
+static inline void convCoord(struct coord* dst, struct n64_coord src) { convF32(&dst->x, src.x); convF32(&dst->y, src.y); convF32(&dst->z, src.z); }
 static u32 convUnk(void* x, u32 y) { __debugbreak(); }
 
 #define PD_CONV_VAL(dst, src) _Generic((dst), \
@@ -1231,54 +1231,21 @@ void test_conv_functions()
 	PD_CONV_ARRAY2D(dst8, src8);
 }
 
-void extract_file_setups(char* filename, u32 romoffset, size_t len)
-{
-	// Unzip it
-	size_t infsize = rzip_get_infsize(&g_Rom[romoffset]);
-	u8* src = malloc(infsize);
+u8 *preprocessSetupFile_x64(u8 *data, u32 size, u32 *outSize) { 
+	u32 newSizeEstimated = (u32)(size * 3.3);
+	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	int ret = rzip_inflate(src, infsize, &g_Rom[romoffset], len);
+	u32 newSize = convert_setup(dst, data, size);
 
-	if (ret < 0) {
-		sysLogPrintf(LOG_ERROR, "%s: Unable to inflate file: %d", filename, ret);
+	if (newSize > newSizeEstimated) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a model file, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}
 
-	// Convert it
-	u8* dst = calloc(1, infsize * 4);
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
 
-	int* mark = strstr(filename, "mp_setupdam");
-	u32 dstpos = convert_setup(dst, src, infsize);
+	*outSize = newSize;
 
-	if (dstpos > infsize * 4) {
-		sysLogPrintf(LOG_ERROR, "%s: overflow", filename);
-		exit(EXIT_FAILURE);
-	}
-
-	sysLogPrintf(LOG_NOTE, "%s	%d	%d	%.3f", filename, infsize, dstpos, (f32)dstpos / infsize);
-
-	// Zip it
-	u8* zipped = calloc(1, dstpos);
-	size_t ziplen = dstpos;
-
-	ret = rzip_deflate(zipped, &ziplen, dst, dstpos);
-
-	if (ret < 0) {
-		sysLogPrintf(LOG_ERROR, "%s: Unable to compress file: %d", filename, ret);
-		exit(EXIT_FAILURE);
-	}
-
-	ziplen = ALIGN16(ziplen);
-
-	// Write it
-	char outfilename[1024];
-	sprintf(outfilename, "%s/files/%s", g_OutPath, filename);
-
-	FILE* fp = openfile(outfilename);
-	fwrite(zipped, ziplen, 1, fp);
-	fclose(fp);
-
-	free(zipped);
-	free(dst);
-	free(src);
+	return 0;
 }

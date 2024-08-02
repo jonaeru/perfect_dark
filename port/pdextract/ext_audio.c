@@ -391,95 +391,34 @@ static int convert_audio_bank(uint8_t *dst, int dstpos, uint8_t *src, int srcpos
 	return dstpos;
 }
 
-static int convert_audio_bankfile(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_bankfile(uint8_t *dst, uint8_t *src)
 {
-	struct n64_bankfile *n64_bankfile = (struct n64_bankfile *) &src[srcpos];
-	struct host_bankfile *host_bankfile = (struct host_bankfile *) &dst[dstpos];
+	struct n64_bankfile *n64_bankfile = (struct n64_bankfile *)src;
+	struct host_bankfile *host_bankfile = (struct host_bankfile *)dst;
 	int bankCount = srctoh16(n64_bankfile->bankCount);
 
 	host_bankfile->revision = srctodst16(n64_bankfile->revision);
 	host_bankfile->bankCount = htodst16(bankCount);
 
-	dstpos = dstpos + sizeof(struct host_bankfile) + sizeof(uintptr_t) * (bankCount - 1);
+
+	uint32_t dstpos = sizeof(struct host_bankfile) + sizeof(uintptr_t) * (bankCount - 1);
 
 	for (int i = 0; i < bankCount; i++) {
 		host_bankfile->bankArray[i] = htodst32(dstpos);
-		srcpos = srctoh32(n64_bankfile->bankArray[i]);
+		uint32_t srcpos = srctoh32(n64_bankfile->bankArray[i]);
 		dstpos = convert_audio_bank(dst, dstpos, src, srcpos);
 	}
 
 	return dstpos;
 }
 
-static void extract_audio_ctl(const char *filename, uint32_t romoffset, size_t srclen)
+uint8_t *preprocessALBankFile_x64(uint8_t *src, uint32_t size, uint32_t *outSize)
 {
-	size_t dstlen = srclen * 4;
-	uint8_t *src = &g_Rom[romoffset];
+	size_t dstlen = size * 4;
 	uint8_t *dst = calloc(1, dstlen);
-	int dstpos = 0;
 
-	dstpos = convert_audio_bankfile(dst, dstpos, src, 0);
+	*outSize = convert_audio_bankfile(dst, src);
+	*outSize = ALIGN16(*outSize);
 
-	char outfilename[1024];
-	sprintf(outfilename, "%s/segs/%sctl", g_OutPath, filename);
-
-	FILE *fp = openfile(outfilename);
-	fwrite(dst, ALIGN16(dstpos), 1, fp);
-	fclose(fp);
-
-	free(dst);
-}
-
-static void extract_audio_tbl(const char *filename, uint32_t romoffset, size_t len)
-{
-	char outfilename[1024];
-	sprintf(outfilename, "%s/segs/%stbl", g_OutPath, filename);
-
-	FILE *fp = openfile(outfilename);
-	fwrite(&g_Rom[romoffset], len, 1, fp);
-	fclose(fp);
-}
-
-void extract_audio(void)
-{
-	uint32_t sfx_ctl = 0;
-	uint32_t sfx_tbl = 0;
-	uint32_t sfx_end = 0;
-
-	uint32_t seq_ctl = 0;
-	uint32_t seq_tbl = 0;
-	uint32_t seq_end = 0;
-
-	switch (g_RomVersion) {
-	case ROMVERSION_NTSC10:
-	case ROMVERSION_NTSCFINAL:
-		sfx_ctl = 0x80a250;
-		sfx_tbl = 0x839dd0;
-		sfx_end = 0xcfbf30;
-		seq_ctl = 0xcfbf30;
-		seq_tbl = 0xd05f90;
-		seq_end = 0xe82000;
-		break;
-	case ROMVERSION_PALFINAL:
-		sfx_ctl = 0x7f87e0;
-		sfx_tbl = 0x828360;
-		sfx_end = 0xcea4c0;
-		seq_ctl = 0xcea4c0;
-		seq_tbl = 0xcf4520;
-		seq_end = 0xe70590;
-		break;
-	case ROMVERSION_JPNFINAL:
-		sfx_ctl = 0x7fc670;
-		sfx_tbl = 0x82c1f0;
-		sfx_end = 0xcee350;
-		seq_ctl = 0xcee350;
-		seq_tbl = 0xcf83b0;
-		seq_end = 0xe74420;
-		break;
-	}
-
-	extract_audio_ctl("sfx", sfx_ctl, sfx_tbl - sfx_ctl);
-	extract_audio_tbl("sfx", sfx_tbl, sfx_end - sfx_tbl);
-	extract_audio_ctl("seq", seq_ctl, seq_tbl - seq_ctl);
-	extract_audio_tbl("seq", seq_tbl, seq_end - seq_tbl);
+	return dst;
 }
