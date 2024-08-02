@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "common.h"
+#include "system.h"
 
 enum {
 	AL_ADPCM_WAVE = 0,
@@ -414,8 +416,8 @@ static int convert_audio_bankfile(u8 *dst, u8 *src)
 
 u8 *preprocessALBankFile_x64(u8 *src, u32 size, u32 *outSize)
 {
-	size_t dstlen = size * 4;
-	u8 *dst = calloc(1, dstlen);
+	u32 dstlen = size * 4;
+	u8* dst = sysMemZeroAlloc(dstlen);
 
 	*outSize = convert_audio_bankfile(dst, src);
 	*outSize = ALIGN16(*outSize);

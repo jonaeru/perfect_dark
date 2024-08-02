@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "common.h"
+#include "romdata.h"
 #include "system.h"
 
 static int get_next_nonzero(u8 *src, u32 offset, size_t len)
@@ -74,7 +76,7 @@ u32 convert_lang_file(u8 *dst, u8 *src, size_t srclen)
 }
 
 u8 *preprocessLangFile_x64(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = (u32)(size * 1.3);
+	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_LANG);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convert_lang_file(dst, data, size);

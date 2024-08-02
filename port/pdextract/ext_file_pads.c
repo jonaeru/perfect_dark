@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "common.h"
+#include "romdata.h"
 #include "system.h"
 
 #define PADFLAG_INTPOS          0x0001
@@ -309,7 +311,7 @@ static int convert_pads_file(u8 *dst, u8 *src)
 }
 
 u8* preprocessPadsFile_x64(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = (u32)(size * 1.7);
+	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_PADS);
 	u8* dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convert_pads_file(dst, data);

@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "common.h"
+#include "romdata.h"
 #include "system.h"
 
 enum contenttype {
@@ -935,7 +937,7 @@ u8 *preprocessModelFile_x64(u8 *data, u32 size, u32 *outSize)
 {
 	gbi_reset();
 
-	u32 newSizeEstimated = (u32)(size * 1.7);
+	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_MODEL);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convert_model(dst, data, size);

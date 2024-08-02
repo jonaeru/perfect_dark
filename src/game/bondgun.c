@@ -3831,7 +3831,7 @@ void bgunTickGunLoad(void)
 		*player->gunctrl.loadmemptr = ptr;
 		*player->gunctrl.loadmemremaining = remaining;
 
-		loadsize = ALIGN64(fileGetInflatedSize(player->gunctrl.loadfilenum)) + 0x8000;
+		loadsize = ALIGN64(fileGetInflatedSize(player->gunctrl.loadfilenum, FT_MODEL)) + 0x8000;
 
 		osSyncPrintf("BriGun:  Loading - %s, pMem 0x%08x Size %d\n");
 
@@ -3933,7 +3933,7 @@ void bgunTickGunLoad(void)
 
 		modeldef0f1a7560(modeldef, player->gunctrl.loadfilenum, 0x05000000, modeldef, &player->gunctrl.texpool, false);
 
-		fileGetInflatedSize(player->gunctrl.loadfilenum);
+		fileGetInflatedSize(player->gunctrl.loadfilenum, FT_MODEL);
 		fileGetLoadedSize(player->gunctrl.loadfilenum);
 		fileGetLoadedSize(player->gunctrl.loadfilenum);
 		fileGetLoadedSize(player->gunctrl.loadfilenum);
@@ -3946,7 +3946,7 @@ void bgunTickGunLoad(void)
 
 		newvalue = ALIGN64(texGetPoolLeftPos(&player->gunctrl.texpool));
 		remaining = *player->gunctrl.loadmemremaining;
-		remaining -= (s32)(newvalue - *player->gunctrl.loadmemptr);
+		remaining -= (intptr_t)(newvalue - *player->gunctrl.loadmemptr);
 
 		*player->gunctrl.loadmemptr = newvalue;
 		*player->gunctrl.loadmemremaining = remaining;

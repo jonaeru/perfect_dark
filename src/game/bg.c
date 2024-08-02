@@ -1509,6 +1509,11 @@ void bgReset(s32 stagenum)
 	primcompsize = *(u32 *)&header[8];
 	var8007fc54 = inflatedsize - primcompsize;
 	var8007fc54 -= 0xc;
+
+#ifdef PLATFORM_64BIT
+	inflatedsize = romdataGetEstimatedFileSize(inflatedsize, FT_BG);
+#endif
+
 	inflatedsize = ALIGN16(inflatedsize);
 
 	// Allocate space for the primary bg data
@@ -1529,7 +1534,7 @@ void bgReset(s32 stagenum)
 	bgInflate((u8 *) scratch, g_BgPrimaryData, primcompsize);
 
 #ifndef PLATFORM_N64
-	preprocessBgSection1(g_BgPrimaryData, 0x0f000000);
+	preprocessBgSection1(g_BgPrimaryData, inflatedsize, 0x0f000000);
 #endif
 
 	// Shrink the allocation (ie. free the scratch space)
@@ -1998,7 +2003,8 @@ void bgBuildTables(s32 stagenum)
 			numlightsptr++;
 		}
 
-#ifndef PLATFORM_N64
+// in x64, lights are already pre-processed at this point (TEMP)
+#if !defined(PLATFORM_N64) && !defined(PLATFORM_64BIT)
 		preprocessBgLights(g_BgLightsFileData, 0);
 #endif
 
@@ -2820,6 +2826,11 @@ void bgLoadRoom(s32 roomnum)
 #endif
 	}
 
+#ifdef PLATFORM_64BIT
+	alloclen = alloclen * 4; // just to be safe for now, adjust properly later #TODO
+#endif
+
+
 #ifdef PLATFORM_N64
 	bgGarbageCollectRooms(alloclen, false);
 
@@ -2856,7 +2867,7 @@ void bgLoadRoom(s32 roomnum)
 		// Inflate the data to the left side of the allocation
 		inflatedlen = bgInflate(memaddr, allocation, g_BgRooms[roomnum + 1].unk00 - g_BgRooms[roomnum].unk00);
 #ifndef PLATFORM_N64
-		preprocessBgRoom(allocation, g_BgRooms[roomnum].unk00);
+		inflatedlen = preprocessBgRoom(allocation, inflatedlen, g_BgRooms[roomnum].unk00);
 #endif
 
 		g_Rooms[roomnum].gfxdata = (struct roomgfxdata *)allocation;

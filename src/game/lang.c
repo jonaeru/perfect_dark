@@ -382,6 +382,7 @@ void langLoad(s32 bank)
 	if ((uintptr_t)g_LangBuffer + len + g_LangBufferSize - (uintptr_t)g_LangBufferPos >= 0) {
 		s32 len2 = (uintptr_t)g_LangBuffer + g_LangBufferSize - (uintptr_t)g_LangBufferPos;
 		len2 = len2 / 32 * 32;
+		g_LoadType = LOADTYPE_LANG;
 		g_LangBanks[bank] = fileLoadToAddr(langGetFileId(bank), FILELOADMETHOD_DEFAULT, (u8 *)g_LangBufferPos, len2);
 		g_LangBufferPos = (u8 *)(align32((uintptr_t)g_LangBufferPos + len));
 	} else {
@@ -389,13 +390,15 @@ void langLoad(s32 bank)
 	}
 #else
 	s32 file_id = langGetFileId(bank);
-	g_LangBanks[bank] = fileLoadToNew(file_id, FILELOADMETHOD_DEFAULT);
+	g_LoadType = LOADTYPE_LANG;
+	g_LangBanks[bank] = fileLoadToNew(file_id, FILELOADMETHOD_DEFAULT, FT_LANG);
 #endif
 }
 
 void langLoadToAddr(s32 bank, u8 *dst, s32 size)
 {
 	s32 file_id = langGetFileId(bank);
+	g_LoadType = LOADTYPE_LANG;
 	g_LangBanks[bank] = fileLoadToAddr(file_id, FILELOADMETHOD_DEFAULT, dst, size);
 }
 
@@ -418,12 +421,15 @@ char *langGet(s32 textid)
 {
 	s32 bankindex = textid >> 9;
 	s32 textindex = textid & 0x1ff;
-	uintptr_t *bank = g_LangBanks[bankindex];
+	uintptr_t *bank = (uintptr_t*)g_LangBanks[bankindex];
 	uintptr_t addr;
 
 	if (bank && bank[textindex]) {
-//		addr = (uintptr_t)bank + PD_BE32(bank[textindex]);
-		addr = (u8*)bank + (bank[textindex]);
+#ifdef PLATFORM_64BIT
+		addr = (uintptr_t)bank + bank[textindex];
+#else
+		addr = (uintptr_t)bank + PD_BE32(bank[textindex]);
+#endif
 	} else {
 		addr = 0;
 	}

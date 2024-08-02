@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "common.h"
+#include "romdata.h"
 #include "system.h"
 
 
@@ -86,11 +88,12 @@ u32 convert_tiles(u8 *dst, u8 *src, size_t srclen)
 
 u8 *preprocessTilesFile_x64(u8 *data, u32 size, u32 *outSize)
 {
-	u8 *dst = sysMemZeroAlloc(size);
+	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_TILES);
+	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convert_tiles(dst, data, size);
 
-	if (newSize > size) {
+	if (newSize > newSizeEstimated) {
 		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a tiles file, size %d newsize %d", size, newSize);
 		exit(EXIT_FAILURE);
 	}

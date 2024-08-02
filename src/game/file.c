@@ -11,7 +11,7 @@
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64
-#include "romdata.h"
+#include "system.h"
 #endif
 
 /**
@@ -4176,7 +4176,7 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 		dmaExec(dst, *romaddrptr, romsize);
 	} else {
 		// DMA the compressed data to scratch space then inflate
-		u8 *scratch = (dst + allocationlen) - ((romsize + 7) & 0xfffffffffffffff8);
+		u8 *scratch = (dst + allocationlen) - ((romsize + 7) & (uintptr_t)~7);
 
 		if ((uintptr_t)scratch - (uintptr_t)dst < 8) {
 			info->loadedsize = 0;
@@ -4255,7 +4255,7 @@ void fileLoadPartToAddr(u16 filenum, void *memaddr, s32 offset, u32 len)
 	}
 }
 
-u32 fileGetInflatedSize(s32 filenum)
+u32 fileGetInflatedSize(s32 filenum, FileType filetype)
 {
 	u8 *ptr;
 	u8 buffer[0x50];
@@ -4283,7 +4283,11 @@ u32 fileGetInflatedSize(s32 filenum)
 	}
 
 	if (rzipIs1173(ptr)) {
+#ifdef PLATFORM_N64
 		return (ptr[2] << 16) | (ptr[3] << 8) | ptr[4];
+#else
+		return romdataGetEstimatedFileSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], filetype);
+#endif
 	}
 
 #if VERSION < VERSION_NTSC_1_0
@@ -4300,7 +4304,7 @@ u32 fileGetInflatedSize(s32 filenum)
 	return 0;
 }
 
-void *fileLoadToNew(s32 filenum, u32 method)
+void *fileLoadToNew(s32 filenum, u32 method, FileType filetype)
 {
 	struct fileinfo *info = &g_FileInfo[filenum];
 	u32 stack;
@@ -4308,7 +4312,7 @@ void *fileLoadToNew(s32 filenum, u32 method)
 
 	if (method == FILELOADMETHOD_EXTRAMEM || method == FILELOADMETHOD_DEFAULT) {
 		if (info->loadedsize == 0) {
-			info->loadedsize = (fileGetInflatedSize(filenum) + 0x20) & 0xfffffff0;
+			info->loadedsize = (fileGetInflatedSize(filenum, filetype) + 0x20) & 0xfffffff0;
 
 			if (method == FILELOADMETHOD_EXTRAMEM) {
 				info->loadedsize += 0x8000;

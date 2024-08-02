@@ -1869,7 +1869,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 					bodyfilenum = g_HeadsAndBodies[bodynum].filenum;
 
-					totalfilelen = fileGetInflatedSize(bodyfilenum);
+					totalfilelen = fileGetInflatedSize(bodyfilenum, FT_MODEL);
 					totalfilelen = ALIGN64(totalfilelen);
 
 					if (g_HeadsAndBodies[bodynum].unk00_01) {
@@ -1877,7 +1877,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						headfilenum = 0xffff;
 					} else {
 						headfilenum = g_HeadsAndBodies[headnum].filenum;
-						totalfilelen += ALIGN64(fileGetInflatedSize(headfilenum));
+						totalfilelen += ALIGN64(fileGetInflatedSize(headfilenum, FT_MODEL));
 					}
 
 #ifdef PLATFORM_64BIT
@@ -1915,7 +1915,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 					body0f02ce8c(bodynum, headnum, menumodel->bodymodeldef, menumodel->headmodeldef, totalfilelen * 0, &menumodel->bodymodel, false, 1);
 				} else {
-					totalfilelen = ALIGN64(fileGetInflatedSize(menumodel->newparams)) + 0x4000;
+					totalfilelen = ALIGN64(fileGetInflatedSize(menumodel->newparams, FT_MODEL)) + 0x4000;
 					if (1);
 
 					texInitPool(&texpool, &menumodel->allocstart[(u32)totalfilelen], menumodel->alloclen - totalfilelen);

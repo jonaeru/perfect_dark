@@ -4,10 +4,13 @@
 
 #include "types.h"
 
-#include "common.h"
-#include "system.h"
 #include "assert.h"
+
+#include "common.h"
 #include "setups_decl.h"
+
+#include "romdata.h"
+#include "system.h"
 
 
 static inline void convF32(f32 *dst, f32 src) { *(u32*)dst = srctoh32(*(u32*)&src); }
@@ -1232,7 +1235,7 @@ void test_conv_functions()
 }
 
 u8 *preprocessSetupFile_x64(u8 *data, u32 size, u32 *outSize) { 
-	u32 newSizeEstimated = (u32)(size * 3.3);
+	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_SETUP);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convert_setup(dst, data, size);
