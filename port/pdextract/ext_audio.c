@@ -9,44 +9,44 @@ enum {
 };
 
 struct generic_adpcm_book {
-	int32_t order;
-	int32_t npredictors;
-	int16_t book[128];
+	s32 order;
+	s32 npredictors;
+	s16 book[128];
 };
 
 struct generic_adpcm_loop {
-	uint32_t start;
-	uint32_t end;
-	uint32_t count;
-	int16_t state[16];
+	u32 start;
+	u32 end;
+	u32 count;
+	s16 state[16];
 };
 
 struct generic_raw_loop {
-	uint32_t start;
-	uint32_t end;
-	uint32_t count;
+	u32 start;
+	u32 end;
+	u32 count;
 };
 
 struct generic_envelope {
-	int32_t attackTime;
-	int32_t decayTime;
-	int32_t releaseTime;
-	uint8_t attackVolume;
-	uint8_t decayVolume;
+	s32 attackTime;
+	s32 decayTime;
+	s32 releaseTime;
+	u8 attackVolume;
+	u8 decayVolume;
 };
 
 struct generic_keymap {
-	uint8_t velocityMin;
-	uint8_t velocityMax;
-	uint8_t keyMin;
-	uint8_t keyMax;
-	uint8_t keyBase;
-	int8_t detune;
+	u8 velocityMin;
+	u8 velocityMax;
+	u8 keyMin;
+	u8 keyMax;
+	u8 keyBase;
+	s8 detune;
 };
 
 struct n64_adpcm_waveinfo {
-	uint32_t loop; // ptr to struct generic_adpcm_loop
-	uint32_t book; // ptr to struct generic_adpcm_book
+	u32 loop; // ptr to struct generic_adpcm_loop
+	u32 book; // ptr to struct generic_adpcm_book
 };
 
 struct host_adpcm_waveinfo {
@@ -55,7 +55,7 @@ struct host_adpcm_waveinfo {
 };
 
 struct n64_raw_waveinfo {
-	uint32_t loop; // ptr to struct generic_raw_loop
+	u32 loop; // ptr to struct generic_raw_loop
 };
 
 struct host_raw_waveinfo {
@@ -63,10 +63,10 @@ struct host_raw_waveinfo {
 };
 
 struct n64_wavetable {
-	uint32_t base;
-	int32_t len;
-	uint8_t type;
-	uint8_t flags;
+	u32 base;
+	s32 len;
+	u8 type;
+	u8 flags;
 	union {
 		struct n64_adpcm_waveinfo adpcmWave;
 		struct n64_raw_waveinfo rawWave;
@@ -75,9 +75,9 @@ struct n64_wavetable {
 
 struct host_wavetable {
 	uintptr_t base;
-	int32_t len;
-	uint8_t type;
-	uint8_t flags;
+	s32 len;
+	u8 type;
+	u8 flags;
 	union {
 		struct host_adpcm_waveinfo adpcmWave;
 		struct host_raw_waveinfo rawWave;
@@ -85,90 +85,90 @@ struct host_wavetable {
 };
 
 struct n64_sound {
-	uint32_t envelope; // ptr to struct generic_envelope
-	uint32_t keyMap; // ptr to struct generic_keymap
-	uint32_t wavetable; // ptr to struct n64_wavetable
-	uint8_t samplePan;
-	uint8_t sampleVolume;
-	uint8_t flags;
+	u32 envelope; // ptr to struct generic_envelope
+	u32 keyMap; // ptr to struct generic_keymap
+	u32 wavetable; // ptr to struct n64_wavetable
+	u8 samplePan;
+	u8 sampleVolume;
+	u8 flags;
 };
 
 struct host_sound {
 	uintptr_t envelope; // ptr to struct generic_envelope
 	uintptr_t keyMap; // ptr to struct generic_keymap
 	uintptr_t wavetable; // ptr to struct host_wavetable
-	uint8_t samplePan;
-	uint8_t sampleVolume;
-	uint8_t flags;
+	u8 samplePan;
+	u8 sampleVolume;
+	u8 flags;
 };
 
 struct n64_instrument {
-	uint8_t volume;
-	uint8_t pan;
-	uint8_t priority;
-	uint8_t flags;
-	uint8_t tremType;
-	uint8_t tremRate;
-	uint8_t tremDepth;
-	uint8_t tremDelay;
-	uint8_t vibType;
-	uint8_t vibRate;
-	uint8_t vibDepth;
-	uint8_t vibDelay;
-	int16_t bendRange;
-	int16_t soundCount;
-	uint32_t soundArray[1]; // ptr to struct n64_sound
+	u8 volume;
+	u8 pan;
+	u8 priority;
+	u8 flags;
+	u8 tremType;
+	u8 tremRate;
+	u8 tremDepth;
+	u8 tremDelay;
+	u8 vibType;
+	u8 vibRate;
+	u8 vibDepth;
+	u8 vibDelay;
+	s16 bendRange;
+	s16 soundCount;
+	u32 soundArray[1]; // ptr to struct n64_sound
 };
 
 struct host_instrument {
-	uint8_t volume;
-	uint8_t pan;
-	uint8_t priority;
-	uint8_t flags;
-	uint8_t tremType;
-	uint8_t tremRate;
-	uint8_t tremDepth;
-	uint8_t tremDelay;
-	uint8_t vibType;
-	uint8_t vibRate;
-	uint8_t vibDepth;
-	uint8_t vibDelay;
-	int16_t bendRange;
-	int16_t soundCount;
+	u8 volume;
+	u8 pan;
+	u8 priority;
+	u8 flags;
+	u8 tremType;
+	u8 tremRate;
+	u8 tremDepth;
+	u8 tremDelay;
+	u8 vibType;
+	u8 vibRate;
+	u8 vibDepth;
+	u8 vibDelay;
+	s16 bendRange;
+	s16 soundCount;
 	uintptr_t soundArray[1]; // ptr to struct host_sound
 };
 
 struct n64_bank {
-	int16_t instCount;
-	uint8_t flags;
-	uint8_t pad;
-	int32_t sampleRate;
-	uint32_t percussion; // ptr to struct n64_instrument
-	uint32_t instArray[1]; // ptr to struct n64_instrument
+	s16 instCount;
+	u8 flags;
+	u8 pad;
+	s32 sampleRate;
+	u32 percussion; // ptr to struct n64_instrument
+	u32 instArray[1]; // ptr to struct n64_instrument
 };
 
 struct host_bank {
-	int16_t instCount;
-	uint8_t flags;
-	uint8_t pad;
-	int32_t sampleRate;
+	s16 instCount;
+	u8 flags;
+	u8 pad;
+	s32 sampleRate;
 	uintptr_t percussion; // ptr to struct host_instrument
 	uintptr_t instArray[1]; // ptr to struct host_instrument
 };
 
 struct n64_bankfile {
-	int16_t revision;
-	int16_t bankCount;
-	uint32_t bankArray[1]; // ptr to struct n64_bank
+	s16 revision;
+	s16 bankCount;
+	u32 bankArray[1]; // ptr to struct n64_bank
 };
 
 struct host_bankfile {
-	int16_t revision;
-	int16_t bankCount;
+	s16 revision;
+	s16 bankCount;
 	uintptr_t bankArray[1]; // ptr to struct host_bank
 };
 
-static int convert_audio_envelope(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_envelope(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct generic_envelope *n64_envelope = (struct generic_envelope *) &src[srcpos];
 	struct generic_envelope *host_envelope = (struct generic_envelope *) &dst[dstpos];
@@ -184,7 +184,7 @@ static int convert_audio_envelope(uint8_t *dst, int dstpos, uint8_t *src, int sr
 	return dstpos;
 }
 
-static int convert_audio_keymap(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_keymap(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct generic_keymap *n64_keymap = (struct generic_keymap *) &src[srcpos];
 	struct generic_keymap *host_keymap = (struct generic_keymap *) &dst[dstpos];
@@ -201,7 +201,7 @@ static int convert_audio_keymap(uint8_t *dst, int dstpos, uint8_t *src, int srcp
 	return dstpos;
 }
 
-static int convert_audio_adpcm_loop(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_adpcm_loop(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct generic_adpcm_loop *n64_loop = (struct generic_adpcm_loop *) &src[srcpos];
 	struct generic_adpcm_loop *host_loop = (struct generic_adpcm_loop *) &dst[dstpos];
@@ -219,7 +219,7 @@ static int convert_audio_adpcm_loop(uint8_t *dst, int dstpos, uint8_t *src, int 
 	return dstpos;
 }
 
-static int convert_audio_adpcm_book(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_adpcm_book(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct generic_adpcm_book *n64_book = (struct generic_adpcm_book *) &src[srcpos];
 	struct generic_adpcm_book *host_book = (struct generic_adpcm_book *) &dst[dstpos];
@@ -236,7 +236,7 @@ static int convert_audio_adpcm_book(uint8_t *dst, int dstpos, uint8_t *src, int 
 	return dstpos;
 }
 
-static int convert_audio_raw_loop(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_raw_loop(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct generic_raw_loop *n64_loop = (struct generic_raw_loop *) &src[srcpos];
 	struct generic_raw_loop *host_loop = (struct generic_raw_loop *) &dst[dstpos];
@@ -250,7 +250,7 @@ static int convert_audio_raw_loop(uint8_t *dst, int dstpos, uint8_t *src, int sr
 	return dstpos;
 }
 
-static int convert_audio_wavetable(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_wavetable(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct n64_wavetable *n64_wavetable = (struct n64_wavetable *) &src[srcpos];
 	struct host_wavetable *host_wavetable = (struct host_wavetable *) &dst[dstpos];
@@ -291,7 +291,7 @@ static int convert_audio_wavetable(uint8_t *dst, int dstpos, uint8_t *src, int s
 	return dstpos;
 }
 
-static int convert_audio_sound(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_sound(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct n64_sound *n64_sound = (struct n64_sound *) &src[srcpos];
 	struct host_sound *host_sound = (struct host_sound *) &dst[dstpos];
@@ -329,7 +329,7 @@ static int convert_audio_sound(uint8_t *dst, int dstpos, uint8_t *src, int srcpo
 	return dstpos;
 }
 
-static int convert_audio_instrument(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_instrument(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct n64_instrument *n64_instrument = (struct n64_instrument *) &src[srcpos];
 	struct host_instrument *host_instrument = (struct host_instrument *) &dst[dstpos];
@@ -361,7 +361,7 @@ static int convert_audio_instrument(uint8_t *dst, int dstpos, uint8_t *src, int 
 	return dstpos;
 }
 
-static int convert_audio_bank(uint8_t *dst, int dstpos, uint8_t *src, int srcpos)
+static int convert_audio_bank(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct n64_bank *n64_bank = (struct n64_bank *) &src[srcpos];
 	struct host_bank *host_bank = (struct host_bank *) &dst[dstpos];
@@ -391,7 +391,7 @@ static int convert_audio_bank(uint8_t *dst, int dstpos, uint8_t *src, int srcpos
 	return dstpos;
 }
 
-static int convert_audio_bankfile(uint8_t *dst, uint8_t *src)
+static int convert_audio_bankfile(u8 *dst, u8 *src)
 {
 	struct n64_bankfile *n64_bankfile = (struct n64_bankfile *)src;
 	struct host_bankfile *host_bankfile = (struct host_bankfile *)dst;
@@ -401,21 +401,21 @@ static int convert_audio_bankfile(uint8_t *dst, uint8_t *src)
 	host_bankfile->bankCount = htodst16(bankCount);
 
 
-	uint32_t dstpos = sizeof(struct host_bankfile) + sizeof(uintptr_t) * (bankCount - 1);
+	u32 dstpos = sizeof(struct host_bankfile) + sizeof(uintptr_t) * (bankCount - 1);
 
 	for (int i = 0; i < bankCount; i++) {
 		host_bankfile->bankArray[i] = htodst32(dstpos);
-		uint32_t srcpos = srctoh32(n64_bankfile->bankArray[i]);
+		u32 srcpos = srctoh32(n64_bankfile->bankArray[i]);
 		dstpos = convert_audio_bank(dst, dstpos, src, srcpos);
 	}
 
 	return dstpos;
 }
 
-uint8_t *preprocessALBankFile_x64(uint8_t *src, uint32_t size, uint32_t *outSize)
+u8 *preprocessALBankFile_x64(u8 *src, u32 size, u32 *outSize)
 {
 	size_t dstlen = size * 4;
-	uint8_t *dst = calloc(1, dstlen);
+	u8 *dst = calloc(1, dstlen);
 
 	*outSize = convert_audio_bankfile(dst, src);
 	*outSize = ALIGN16(*outSize);

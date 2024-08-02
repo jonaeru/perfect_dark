@@ -6,37 +6,37 @@
 
 
 struct tile {
-	uint8_t type;
-	uint8_t numvertices;
-	uint16_t flags;
-	uint16_t floortype;
-	uint8_t xmin;
-	uint8_t ymin;
-	uint8_t zmin;
-	uint8_t xmax;
-	uint8_t ymax;
-	uint8_t zmax;
-	uint16_t floorcol;
+	u8 type;
+	u8 numvertices;
+	u16 flags;
+	u16 floortype;
+	u8 xmin;
+	u8 ymin;
+	u8 zmin;
+	u8 xmax;
+	u8 ymax;
+	u8 zmax;
+	u16 floorcol;
 };
 
-uint32_t convert_tiles(uint8_t *dst, uint8_t *src, size_t srclen)
+u32 convert_tiles(u8 *dst, u8 *src, size_t srclen)
 {
-	int num_rooms = srctoh32(*(uint32_t *) src);
+	int num_rooms = srctoh32(*(u32 *) src);
 
 	size_t src_ptr_table_len = (num_rooms + 1) * 4;
-	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(uint32_t);
+	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(u32);
 
-	uint32_t *src_offsets = (uint32_t *) &src[4];
+	u32 *src_offsets = (u32 *) &src[4];
 
 	size_t data_len = srclen - src_ptr_table_len - 4;
 
-	*(uint32_t *) dst = htodst32(num_rooms);
+	*(u32 *) dst = htodst32(num_rooms);
 
-	uint32_t *dst_offsets = (uint32_t *) (dst + sizeof(uint32_t));
-	uint32_t cur_dst_offset = dst_ptr_table_len + sizeof(uint32_t);
+	u32 *dst_offsets = (u32 *) (dst + sizeof(u32));
+	u32 cur_dst_offset = dst_ptr_table_len + sizeof(u32);
 
-	uint32_t cur_src_offset = srctoh32(src_offsets[0]);
-	uint32_t end_src_offset = srctoh32(src_offsets[num_rooms]);
+	u32 cur_src_offset = srctoh32(src_offsets[0]);
+	u32 end_src_offset = srctoh32(src_offsets[num_rooms]);
 	int room = 0;
 
 	while (1) {
@@ -73,9 +73,9 @@ uint32_t convert_tiles(uint8_t *dst, uint8_t *src, size_t srclen)
 
 		// Write tile vertices
 		for (int i = 0; i < hosttile.numvertices; i++) {
-			*(int16_t *) &dst[cur_dst_offset + 0] = srctodst16(*(int16_t *) &src[cur_src_offset + 0]);
-			*(int16_t *) &dst[cur_dst_offset + 2] = srctodst16(*(int16_t *) &src[cur_src_offset + 2]);
-			*(int16_t *) &dst[cur_dst_offset + 4] = srctodst16(*(int16_t *) &src[cur_src_offset + 4]);
+			*(s16 *) &dst[cur_dst_offset + 0] = srctodst16(*(s16 *) &src[cur_src_offset + 0]);
+			*(s16 *) &dst[cur_dst_offset + 2] = srctodst16(*(s16 *) &src[cur_src_offset + 2]);
+			*(s16 *) &dst[cur_dst_offset + 4] = srctodst16(*(s16 *) &src[cur_src_offset + 4]);
 			cur_dst_offset += 6;
 			cur_src_offset += 6;
 		}
@@ -84,11 +84,11 @@ uint32_t convert_tiles(uint8_t *dst, uint8_t *src, size_t srclen)
 	return ALIGN16(cur_dst_offset);
 }
 
-uint8_t *preprocessTilesFile_x64(uint8_t *data, uint32_t size, uint32_t *outSize)
+u8 *preprocessTilesFile_x64(u8 *data, u32 size, u32 *outSize)
 {
-	uint8_t *dst = sysMemZeroAlloc(size);
+	u8 *dst = sysMemZeroAlloc(size);
 
-	uint32_t newSize = convert_tiles(dst, data, size);
+	u32 newSize = convert_tiles(dst, data, size);
 
 	if (newSize > size) {
 		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a tiles file, size %d newsize %d", size, newSize);

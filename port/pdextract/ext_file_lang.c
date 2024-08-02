@@ -4,10 +4,10 @@
 #include "common.h"
 #include "system.h"
 
-static int get_next_nonzero(uint8_t *src, uint32_t offset, size_t len)
+static int get_next_nonzero(u8 *src, u32 offset, size_t len)
 {
-	uint32_t *ptr = (uint32_t *) &src[offset];
-	uint32_t *end = (uint32_t *) &src[len];
+	u32 *ptr = (u32 *) &src[offset];
+	u32 *end = (u32 *) &src[len];
 
 	while (ptr < end) {
 		if (*ptr != 0) {
@@ -20,21 +20,21 @@ static int get_next_nonzero(uint8_t *src, uint32_t offset, size_t len)
 	return 0;
 }
 
-static int get_num_strings(uint8_t *src, size_t len)
+static int get_num_strings(u8 *src, size_t len)
 {
-	uint32_t ptr_table_len = get_next_nonzero(src, 0, len);
+	u32 ptr_table_len = get_next_nonzero(src, 0, len);
 
 	if (ptr_table_len) {
-		return ptr_table_len / sizeof(uint32_t);
+		return ptr_table_len / sizeof(u32);
 	}
 
 	return 1;
 }
 
-uint32_t convert_lang_file(uint8_t *dst, uint8_t *src, size_t srclen)
+u32 convert_lang_file(u8 *dst, u8 *src, size_t srclen)
 {
 	// Convert it
-	uint32_t *src_offsets = (uint32_t *) src;
+	u32 *src_offsets = (u32 *) src;
 	size_t src_ptr_table_len = srctoh32(src_offsets[0]);
 	size_t src_str_table_len = srclen - src_ptr_table_len;
 	int num_strings = get_num_strings(src, srclen);
@@ -46,14 +46,14 @@ uint32_t convert_lang_file(uint8_t *dst, uint8_t *src, size_t srclen)
 	uintptr_t *dst_offsets = (uintptr_t *) dst;
 
 	for (int i = 0; i < num_strings; i++) {
-		uint32_t src_offset = srctoh32(src_offsets[i]);
+		u32 src_offset = srctoh32(src_offsets[i]);
 
 		if (src_offset) {
 			// Write pointer
 			dst_offsets[i] = htodst32(cur_dst_offset);
 
 			// Write string
-			uint32_t end = get_next_nonzero(src, (i + 1) * 4, num_strings * 4);
+			u32 end = get_next_nonzero(src, (i + 1) * 4, num_strings * 4);
 
 			if (!end) {
 				end = srclen;
@@ -73,11 +73,11 @@ uint32_t convert_lang_file(uint8_t *dst, uint8_t *src, size_t srclen)
 	return ALIGN16(cur_dst_offset);
 }
 
-uint8_t *preprocessLangFile_x64(uint8_t *data, uint32_t size, uint32_t *outSize) {
-	uint32_t newSizeEstimated = (uint32_t)(size * 1.3);
-	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated);
+u8 *preprocessLangFile_x64(u8 *data, u32 size, u32 *outSize) {
+	u32 newSizeEstimated = (u32)(size * 1.3);
+	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	uint32_t newSize = convert_lang_file(dst, data, size);
+	u32 newSize = convert_lang_file(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
 		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a lang file, size %d newsize %d", size, newSize);
