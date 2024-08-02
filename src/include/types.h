@@ -3348,8 +3348,8 @@ struct handlerdata_checkbox {
 };
 
 struct handlerdata_dropdown {
-	u32 value;
-	u32 unk04;
+	uintptr_t value;
+	uintptr_t unk04;
 };
 
 struct handlerdata_keyboard {
@@ -3390,8 +3390,8 @@ struct menuitemrenderdata {
 struct handlerdata_type19 {
 	Gfx *gdl;
 	union {
-		s32 unk04;
-		u32 unk04u32;
+		intptr_t unk04;
+		uintptr_t unk04u32;
 	};
 	struct menuitemrenderdata *renderdata2;
 	s32 unk0c;
