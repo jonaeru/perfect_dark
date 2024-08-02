@@ -60,7 +60,11 @@ void mp3Init(ALHeap *heap)
 
 	var8009c6d8 = alHeapAlloc(heap, 256 * sizeof(var8009c6d8[0]), 1);
 	var8009c6dc = alHeapAlloc(heap, 256 * sizeof(var8009c6dc[0]), 1);
+#ifdef PLATFORM_64BIT
+	var8009c640 = alHeapAlloc(heap, 2*10500 * sizeof(struct mp3decfourbytes), 1);
+#else
 	var8009c640 = alHeapAlloc(heap, 10500 * sizeof(struct mp3decfourbytes), 1);
+#endif
 	var8009c644 = alHeapAlloc(heap, 8192 * sizeof(var8009c644[0]), 1);
 
 	mp3mainInit();

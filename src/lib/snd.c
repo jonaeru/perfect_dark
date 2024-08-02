@@ -1460,7 +1460,7 @@ void sndInit(void)
 #endif
 
 #ifdef PLATFORM_64BIT
-	heaplen = 1024 * 661;
+	heaplen = 1024 * 745;
 #endif
 
 	g_Vars.langfilteron = false;
