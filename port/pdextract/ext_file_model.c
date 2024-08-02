@@ -29,9 +29,9 @@ enum contenttype {
 };
 
 struct marker {
-	uint32_t src_offset;
-	uint32_t dst_offset;
-	uint32_t parent_src_offset;
+	u32 src_offset;
+	u32 dst_offset;
+	u32 parent_src_offset;
 	enum contenttype type;
 };
 
@@ -90,40 +90,40 @@ int m_NumMarkers;
 #define MODELNODETYPE_0200         0x0200
 
 struct src_modeldef {
-	uint32_t ptr_rootnode;
-	uint32_t ptr_skel;
-	uint32_t ptr_parts;
-	int16_t numparts;
-	int16_t nummatrices;
-	uint32_t scale;
-	uint16_t rwdatalen;
-	uint16_t numtexconfigs;
-	uint32_t ptr_texconfigs;
+	u32 ptr_rootnode;
+	u32 ptr_skel;
+	u32 ptr_parts;
+	s16 numparts;
+	s16 nummatrices;
+	u32 scale;
+	u16 rwdatalen;
+	u16 numtexconfigs;
+	u32 ptr_texconfigs;
 };
 
 struct dst_modeldef {
 	uintptr_t ptr_rootnode;
 	uintptr_t ptr_skel;
 	uintptr_t ptr_parts;
-	int16_t numparts;
-	int16_t nummatrices;
-	uint32_t scale;
-	uint16_t rwdatalen;
-	uint16_t numtexconfigs;
+	s16 numparts;
+	s16 nummatrices;
+	u32 scale;
+	u16 rwdatalen;
+	u16 numtexconfigs;
 	uintptr_t ptr_texconfigs;
 };
 
 struct src_modelnode {
-	uint16_t type;
-	uint32_t ptr_rodata;
-	uint32_t ptr_parent;
-	uint32_t ptr_next;
-	uint32_t ptr_prev;
-	uint32_t ptr_child;
+	u16 type;
+	u32 ptr_rodata;
+	u32 ptr_parent;
+	u32 ptr_next;
+	u32 ptr_prev;
+	u32 ptr_child;
 };
 
 struct dst_modelnode {
-	uint16_t type;
+	u16 type;
 	uintptr_t ptr_rodata;
 	uintptr_t ptr_parent;
 	uintptr_t ptr_next;
@@ -132,26 +132,26 @@ struct dst_modelnode {
 };
 
 struct generic_rodata_chrinfo {
-	uint16_t animpart;
-	int16_t mtxindex;
-	uint32_t unk04;
-	uint16_t rwdataindex;
+	u16 animpart;
+	s16 mtxindex;
+	u32 unk04;
+	u16 rwdataindex;
 };
 
 struct generic_rodata_position {
-	uint32_t pos[3];
-	uint16_t part;
-	int16_t mtxindexes[3];
-	uint32_t drawdist;
+	u32 pos[3];
+	u16 part;
+	s16 mtxindexes[3];
+	u32 drawdist;
 };
 
 struct src_rodata_gundl {
-	uint32_t ptr_opagdl;
-	uint32_t ptr_xlugdl;
-	uint32_t ptr_baseaddr;
-	uint32_t ptr_vertices;
-	int16_t numvertices;
-	int16_t unk12;
+	u32 ptr_opagdl;
+	u32 ptr_xlugdl;
+	u32 ptr_baseaddr;
+	u32 ptr_vertices;
+	s16 numvertices;
+	s16 unk12;
 };
 
 struct dst_rodata_gundl {
@@ -159,130 +159,130 @@ struct dst_rodata_gundl {
 	uintptr_t ptr_xlugdl;
 	uintptr_t ptr_baseaddr;
 	uintptr_t ptr_vertices;
-	int16_t numvertices;
-	int16_t unk12;
+	s16 numvertices;
+	s16 unk12;
 };
 
 struct src_rodata_distance {
-	uint32_t near;
-	uint32_t far;
-	uint32_t ptr_target;
-	uint16_t rwdataindex;
+	u32 near;
+	u32 far;
+	u32 ptr_target;
+	u16 rwdataindex;
 };
 
 struct dst_rodata_distance {
-	uint32_t near;
-	uint32_t far;
+	u32 near;
+	u32 far;
 	uintptr_t ptr_target;
-	uint16_t rwdataindex;
+	u16 rwdataindex;
 };
 
 struct src_rodata_reorder {
-	uint32_t unk00;
-	uint32_t unk04;
-	uint32_t unk08;
-	uint32_t unk0c[3];
-	uint32_t ptr_node_unk18;
-	uint32_t ptr_node_unk1c;
-	int16_t side;
-	uint16_t rwdataindex;
+	u32 unk00;
+	u32 unk04;
+	u32 unk08;
+	u32 unk0c[3];
+	u32 ptr_node_unk18;
+	u32 ptr_node_unk1c;
+	s16 side;
+	u16 rwdataindex;
 };
 
 struct dst_rodata_reorder {
-	uint32_t unk00;
-	uint32_t unk04;
-	uint32_t unk08;
-	uint32_t unk0c[3];
+	u32 unk00;
+	u32 unk04;
+	u32 unk08;
+	u32 unk0c[3];
 	uintptr_t ptr_node_unk18;
 	uintptr_t ptr_node_unk1c;
-	int16_t side;
-	uint16_t rwdataindex;
+	s16 side;
+	u16 rwdataindex;
 };
 
 struct generic_rodata_bbox {
-	int32_t hitpart;
-	uint32_t bbox[6];
+	s32 hitpart;
+	u32 bbox[6];
 };
 
 struct src_rodata_chrgunfire {
-	uint32_t pos[3];
-	uint32_t dim[3];
-	uint32_t ptr_texture;
-	uint32_t unk1c;
-	uint16_t rwdataindex;
-	uint32_t ptr_baseaddr;
+	u32 pos[3];
+	u32 dim[3];
+	u32 ptr_texture;
+	u32 unk1c;
+	u16 rwdataindex;
+	u32 ptr_baseaddr;
 };
 
 struct dst_rodata_chrgunfire {
-	uint32_t pos[3];
-	uint32_t dim[3];
+	u32 pos[3];
+	u32 dim[3];
 	uintptr_t ptr_texture;
-	uint32_t unk1c;
-	uint16_t rwdataindex;
+	u32 unk1c;
+	u16 rwdataindex;
 	uintptr_t ptr_baseaddr;
 };
 
 struct src_rodata_type11 {
-	uint32_t unk00;
-	uint32_t unk04;
-	uint32_t unk08;
-	uint32_t unk0c;
-	uint32_t unk10;
-	uint32_t ptr_unk14;
+	u32 unk00;
+	u32 unk04;
+	u32 unk08;
+	u32 unk0c;
+	u32 unk10;
+	u32 ptr_unk14;
 };
 
 struct dst_rodata_type11 {
-	uint32_t unk00;
-	uint32_t unk04;
-	uint32_t unk08;
-	uint32_t unk0c;
-	uint32_t unk10;
+	u32 unk00;
+	u32 unk04;
+	u32 unk08;
+	u32 unk0c;
+	u32 unk10;
 	uintptr_t ptr_unk14;
 };
 
 struct src_rodata_toggle {
-	uint32_t ptr_target;
-	uint16_t rwdataindex;
+	u32 ptr_target;
+	u16 rwdataindex;
 };
 
 struct dst_rodata_toggle {
 	uintptr_t ptr_target;
-	uint16_t rwdataindex;
+	u16 rwdataindex;
 };
 
 struct generic_rodata_positionheld {
-	uint32_t pos[3];
-	int16_t mtxindex;
-	uint32_t unk10;
+	u32 pos[3];
+	s16 mtxindex;
+	u32 unk10;
 };
 
 struct src_rodata_stargunfire {
-	uint32_t unk00;
-	uint32_t ptr_vertices;
-	uint32_t ptr_gdl;
-	uint32_t ptr_baseaddr;
+	u32 unk00;
+	u32 ptr_vertices;
+	u32 ptr_gdl;
+	u32 ptr_baseaddr;
 };
 
 struct dst_rodata_stargunfire {
-	uint32_t unk00;
+	u32 unk00;
 	uintptr_t ptr_vertices;
 	uintptr_t ptr_gdl;
 	uintptr_t ptr_baseaddr;
 };
 
 struct generic_rodata_headspot {
-	uint16_t rwdataindex;
+	u16 rwdataindex;
 };
 
 struct src_rodata_dl {
-	uint32_t ptr_opagdl;
-	uint32_t ptr_xlugdl;
-	uint32_t ptr_colours;
-	uint32_t ptr_vertices; // colours follow this array
-	int16_t numvertices;
-	int16_t mcount;
-	uint16_t rwdataindex;
-	uint16_t numcolours;
+	u32 ptr_opagdl;
+	u32 ptr_xlugdl;
+	u32 ptr_colours;
+	u32 ptr_vertices; // colours follow this array
+	s16 numvertices;
+	s16 mcount;
+	u16 rwdataindex;
+	u16 numcolours;
 };
 
 struct dst_rodata_dl {
@@ -290,42 +290,42 @@ struct dst_rodata_dl {
 	uintptr_t ptr_xlugdl;
 	uintptr_t ptr_colours;
 	uintptr_t ptr_vertices; // colours follow this array
-	int16_t numvertices;
-	int16_t mcount;
-	uint16_t rwdataindex;
-	uint16_t numcolours;
+	s16 numvertices;
+	s16 mcount;
+	u16 rwdataindex;
+	u16 numcolours;
 };
 
 struct generic_rodata_type19 {
-	uint32_t numvertices;
-	uint32_t vertices[3];
+	u32 numvertices;
+	u32 vertices[3];
 };
 
 struct src_texconfig {
-	uint32_t ptr;
-	uint8_t width;
-	uint8_t height;
-	uint8_t level;
-	uint8_t format;
-	uint8_t depth;
-	uint8_t s;
-	uint8_t t;
-	uint8_t unk0b;
+	u32 ptr;
+	u8 width;
+	u8 height;
+	u8 level;
+	u8 format;
+	u8 depth;
+	u8 s;
+	u8 t;
+	u8 unk0b;
 };
 
 struct dst_texconfig {
 	uintptr_t ptr;
-	uint8_t width;
-	uint8_t height;
-	uint8_t level;
-	uint8_t format;
-	uint8_t depth;
-	uint8_t s;
-	uint8_t t;
-	uint8_t unk0b;
+	u8 width;
+	u8 height;
+	u8 level;
+	u8 format;
+	u8 depth;
+	u8 s;
+	u8 t;
+	u8 unk0b;
 };
 
-static struct marker *find_marker(uint32_t src_offset)
+static struct marker *find_marker(u32 src_offset)
 {
 	for (int i = 0; i < m_NumMarkers; i++) {
 		if (m_Markers[i].src_offset == src_offset) {
@@ -336,7 +336,7 @@ static struct marker *find_marker(uint32_t src_offset)
 	return NULL;
 }
 
-static void set_marker(uint32_t src_offset, enum contenttype type, uint32_t parent_src_offset)
+static void set_marker(u32 src_offset, enum contenttype type, u32 parent_src_offset)
 {
 	if (src_offset == 0) {
 		return;
@@ -388,7 +388,7 @@ enum contenttype m_NodeTypeToContentType[] = {
 	/*0x19*/ CT_RODATA_19,
 };
 
-static void populate_markers(uint8_t *src)
+static void populate_markers(u8 *src)
 {
 	m_NumMarkers = 0;
 
@@ -398,13 +398,13 @@ static void populate_markers(uint8_t *src)
 		struct marker *marker = &m_Markers[i];
 		void *src_thing = &src[marker->src_offset];
 		int numvtx = 0;
-		uint32_t colstart = 0;
+		u32 colstart = 0;
 
 		switch (marker->type) {
 		case CT_MODELDEF:
 			struct src_modeldef *src_modeldef = src_thing;
 			int num_texconfigs = srctoh16(src_modeldef->numtexconfigs);
-			uint32_t texconfigpos = srctoh32(src_modeldef->ptr_texconfigs);
+			u32 texconfigpos = srctoh32(src_modeldef->ptr_texconfigs);
 			set_marker(srctoh32(src_modeldef->ptr_rootnode), CT_NODE, marker->src_offset);
 			set_marker(srctoh32(src_modeldef->ptr_parts), CT_PARTS, marker->src_offset);
 
@@ -414,7 +414,7 @@ static void populate_markers(uint8_t *src)
 			break;
 		case CT_NODE:
 			struct src_modelnode *src_node = src_thing;
-			uint32_t node_type = srctoh16(src_node->type) & 0xff;
+			u32 node_type = srctoh16(src_node->type) & 0xff;
 			set_marker(srctoh32(src_node->ptr_rodata), m_NodeTypeToContentType[node_type], marker->src_offset);
 			set_marker(srctoh32(src_node->ptr_parent), CT_NODE, marker->src_offset);
 			set_marker(srctoh32(src_node->ptr_next), CT_NODE, marker->src_offset);
@@ -429,7 +429,7 @@ static void populate_markers(uint8_t *src)
 			break;
 		case CT_PARTS:
 			struct src_modeldef *src_modeldef2 = (struct src_modeldef *) src;
-			uint32_t *src_parts = (uint32_t *) src_thing;
+			u32 *src_parts = (u32 *) src_thing;
 			int num_parts = srctoh16(src_modeldef2->numparts);
 
 			for (int i = 0; i < num_parts; i++) {
@@ -503,7 +503,7 @@ static void populate_markers(uint8_t *src)
 static void sort_markers(void)
 {
 	for (int i = 0; i < m_NumMarkers - 1; i++) {
-		uint32_t min_offset = 0xffffffff;
+		u32 min_offset = 0xffffffff;
 		int min_index = -1;
 
 		for (int j = i + 1; j < m_NumMarkers; j++) {
@@ -521,15 +521,15 @@ static void sort_markers(void)
 	}
 }
 
-static uint32_t convert_content(uint8_t *dst, uint8_t *src, uint32_t src_file_len)
+static u32 convert_content(u8 *dst, u8 *src, u32 src_file_len)
 {
-	uint32_t dstpos = 0;
+	u32 dstpos = 0;
 
 	for (int i = 0; i < m_NumMarkers; i++) {
 		struct marker *marker = &m_Markers[i];
 		void *src_thing = &src[marker->src_offset];
-		uint32_t src_end = i < m_NumMarkers - 1 ? m_Markers[i + 1].src_offset : src_file_len;
-		uint32_t src_len = src_end - marker->src_offset;
+		u32 src_end = i < m_NumMarkers - 1 ? m_Markers[i + 1].src_offset : src_file_len;
+		u32 src_len = src_end - marker->src_offset;
 
 		dstpos = ALIGN(dstpos, m_AlignConfigs[marker->type].before);
 
@@ -584,16 +584,16 @@ static uint32_t convert_content(uint8_t *dst, uint8_t *src, uint32_t src_file_le
 			break;
 		case CT_PARTS:
 			struct src_modeldef *src_modeldef2 = (struct src_modeldef *) src;
-			uint32_t *src_parts = (uint32_t *) src_thing;
+			u32 *src_parts = (u32 *) src_thing;
 			uintptr_t *dst_parts = (uintptr_t *) dst_thing;
 			int num_parts = srctoh16(src_modeldef2->numparts);
-			uint16_t *src_nums = (uint16_t *) &src_parts[num_parts];
-			uint16_t *dst_nums = (uint16_t *) &dst_parts[num_parts];
+			u16 *src_nums = (u16 *) &src_parts[num_parts];
+			u16 *dst_nums = (u16 *) &dst_parts[num_parts];
 
 			for (int i = 0; i < num_parts; i++) {
 				dst_nums[i] = srctodst16(src_nums[i]);
 			}
-			dstpos += num_parts * sizeof(uintptr_t) + num_parts * sizeof(uint16_t);
+			dstpos += num_parts * sizeof(uintptr_t) + num_parts * sizeof(u16);
 			if (num_parts) {
 				dstpos = ALIGN8(dstpos);
 			}
@@ -604,8 +604,8 @@ static uint32_t convert_content(uint8_t *dst, uint8_t *src, uint32_t src_file_le
 			break;
 		case CT_GDL:
 			struct marker *parent = find_marker(marker->parent_src_offset);
-			uint32_t src_vtx;
-			uint32_t dst_vtx;
+			u32 src_vtx;
+			u32 dst_vtx;
 
 			if (parent->type == CT_RODATA_GUNDL) {
 				struct src_rodata_gundl *src_rodata = (struct src_rodata_gundl *) &src[parent->src_offset];
@@ -754,18 +754,18 @@ static uint32_t convert_content(uint8_t *dst, uint8_t *src, uint32_t src_file_le
 		case CT_RODATA_19:
 			struct generic_rodata_type19 *src_type19 = src_thing;
 			struct generic_rodata_type19 *dst_type19 = dst_thing;
-			uint32_t *src_vertices = src_thing + sizeof(uint32_t);
-			uint32_t *dst_vertices = dst_thing + sizeof(uint32_t);
+			u32 *src_vertices = src_thing + sizeof(u32);
+			u32 *dst_vertices = dst_thing + sizeof(u32);
 			int num_vertices = srctoh32(src_type19->numvertices);
 
 			dst_type19->numvertices = htodst32(num_vertices);
-			dstpos += sizeof(uint32_t);
+			dstpos += sizeof(u32);
 
 			for (int i = 0; i < num_vertices; i++) {
 				dst_vertices[i * 3 + 0] = srctodst32(src_vertices[i * 3 + 0]);
 				dst_vertices[i * 3 + 1] = srctodst32(src_vertices[i * 3 + 1]);
 				dst_vertices[i * 3 + 2] = srctodst32(src_vertices[i * 3 + 2]);
-				dstpos += sizeof(uint32_t) * 3;
+				dstpos += sizeof(u32) * 3;
 			}
 			break;
 		}
@@ -776,7 +776,7 @@ static uint32_t convert_content(uint8_t *dst, uint8_t *src, uint32_t src_file_le
 	return dstpos;
 }
 
-static uint32_t resolve_pointer(uint32_t src_offset)
+static u32 resolve_pointer(u32 src_offset)
 {
 	if (src_offset == 0) {
 		return 0;
@@ -786,7 +786,7 @@ static uint32_t resolve_pointer(uint32_t src_offset)
 	return marker ? (0x05000000 | marker->dst_offset) : 0;
 }
 
-static void relink_pointers(uint8_t *dst, uint8_t *src)
+static void relink_pointers(u8 *dst, u8 *src)
 {
 	for (int i = 0; i < m_NumMarkers; i++) {
 		struct marker *marker = &m_Markers[i];
@@ -820,7 +820,7 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 			break;
 		case CT_PARTS:
 			struct src_modeldef *src_modeldef2 = (struct src_modeldef *) src;
-			uint32_t *src_parts = (uint32_t *) src_thing;
+			u32 *src_parts = (u32 *) src_thing;
 			uintptr_t *dst_parts = (uintptr_t *) dst_thing;
 			int num_parts = srctoh16(src_modeldef2->numparts);
 
@@ -918,9 +918,9 @@ static void relink_pointers(uint8_t *dst, uint8_t *src)
 	}
 }
 
-static int convert_model(uint8_t *dst, uint8_t *src, uint32_t srclen)
+static int convert_model(u8 *dst, u8 *src, u32 srclen)
 {
-	uint32_t dstpos;
+	u32 dstpos;
 
 	populate_markers(src);
 	sort_markers();
@@ -931,14 +931,14 @@ static int convert_model(uint8_t *dst, uint8_t *src, uint32_t srclen)
 	return dstpos;
 }
 
-uint8_t *preprocessModelFile_x64(uint8_t *data, uint32_t size, uint32_t *outSize)
+u8 *preprocessModelFile_x64(u8 *data, u32 size, u32 *outSize)
 {
 	gbi_reset();
 
-	uint32_t newSizeEstimated = (uint32_t)(size * 1.7);
-	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated);
+	u32 newSizeEstimated = (u32)(size * 1.7);
+	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	uint32_t newSize = convert_model(dst, data, size);
+	u32 newSize = convert_model(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
 		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess model, size %d newsize %d", size, newSize);

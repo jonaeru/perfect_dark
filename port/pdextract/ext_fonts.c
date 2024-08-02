@@ -7,44 +7,44 @@
 #include "system.h"
 
 struct n64fontchar {
-	uint8_t index;
-	int8_t baseline;
-	uint8_t height;
-	uint8_t width;
-	int32_t kerningindex;
-	uint32_t pixeldata;
+	u8 index;
+	s8 baseline;
+	u8 height;
+	u8 width;
+	s32 kerningindex;
+	u32 pixeldata;
 };
 
 struct hostfontchar {
-	uint8_t index;
-	int8_t baseline;
-	uint8_t height;
-	uint8_t width;
-	int32_t kerningindex;
+	u8 index;
+	s8 baseline;
+	u8 height;
+	u8 width;
+	s32 kerningindex;
 	uintptr_t pixeldata;
 };
 
 struct n64fontcharjpn {
-	uint16_t index;
-	int8_t baseline;
-	uint8_t height;
-	uint8_t width;
-	int16_t kerningindex;
-	uint32_t pixeldata;
+	u16 index;
+	s8 baseline;
+	u8 height;
+	u8 width;
+	s16 kerningindex;
+	u32 pixeldata;
 };
 
 struct hostfontcharjpn {
-	uint16_t index;
-	int8_t baseline;
-	uint8_t height;
-	uint8_t width;
-	int16_t kerningindex;
+	u16 index;
+	s8 baseline;
+	u8 height;
+	u8 width;
+	s16 kerningindex;
 	uintptr_t pixeldata;
 };
 
 struct fontdef {
 	const char *name;
-	uint32_t offsets[3];
+	u32 offsets[3];
 	int pal_extra_chars;
 };
 
@@ -64,24 +64,24 @@ u8* preprocessFont_x64(u8 *src, u32 srclen, u32 *outSize)
 #endif
 
 	size_t dstlen = srclen - (num_chars * sizeof(struct n64fontchar)) + (num_chars * sizeof(struct hostfontchar)) + 0x20;
-	uint8_t* dst = sysMemZeroAlloc(dstlen);
+	u8* dst = sysMemZeroAlloc(dstlen);
 
 	// Kerning table
-	int32_t *src_kerning_table = (int32_t *)src;
-	int32_t *dst_kerning_table = (int32_t *)dst;
+	s32 *src_kerning_table = (s32 *)src;
+	s32 *dst_kerning_table = (s32 *)dst;
 
 	for (int i = 0; i < 13 * 13; i++) {
 		dst_kerning_table[i] = srctodst32(src_kerning_table[i]);
 	}
 
-	uint32_t src_offset = ALIGN(13 * 13 * 4, sizeof(uint32_t));
-	uint32_t dst_offset = ALIGN(13 * 13 * 4, sizeof(uintptr_t));
+	u32 src_offset = ALIGN(13 * 13 * 4, sizeof(u32));
+	u32 dst_offset = ALIGN(13 * 13 * 4, sizeof(uintptr_t));
 
 	// Character table
 #if VERSION == VERSION_JPN_FINAL
 		struct n64fontcharjpn *src_char_table = (struct n64fontcharjpn *) &src[src_offset];
 		struct hostfontcharjpn *dst_char_table = (struct hostfontcharjpn *) &dst[dst_offset];
-		uint32_t diff = (dst_offset + num_chars * sizeof(struct hostfontcharjpn)) - (src_offset + num_chars * sizeof(struct n64fontcharjpn));
+		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontcharjpn)) - (src_offset + num_chars * sizeof(struct n64fontcharjpn));
 
 		for (int i = 0; i < num_chars; i++) {
 			dst_char_table[i].index = srctodst16(src_char_table[i].index);
@@ -97,7 +97,7 @@ u8* preprocessFont_x64(u8 *src, u32 srclen, u32 *outSize)
 #else
 		struct n64fontchar *src_char_table = (struct n64fontchar *) &src[src_offset];
 		struct hostfontchar *dst_char_table = (struct hostfontchar *) &dst[dst_offset];
-		uint32_t diff = (dst_offset + num_chars * sizeof(struct hostfontchar)) - (src_offset + num_chars * sizeof(struct n64fontchar));
+		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontchar)) - (src_offset + num_chars * sizeof(struct n64fontchar));
 
 		for (int i = 0; i < num_chars; i++) {
 			dst_char_table[i].index = src_char_table[i].index;

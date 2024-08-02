@@ -7,7 +7,7 @@
 #include "platform.h"
 
 struct ptrmarker {
-	uint32_t ptr_src;
+	u32 ptr_src;
 	uintptr_t ptr_host;
 };
 
@@ -16,7 +16,7 @@ struct ptrmarker m_PtrMarkers[2048];
 int m_NumPtrMarkers;
 int m_SizeGDLs;
 
-static void add_marker(uint32_t ptr_src, uintptr_t ptr_host)
+static void add_marker(u32 ptr_src, uintptr_t ptr_host)
 {
 	if (m_NumPtrMarkers >= ARRAYCOUNT(m_PtrMarkers)) {
 		sysLogPrintf(LOG_ERROR, "[BG] Marker limit exceeded");
@@ -77,23 +77,23 @@ static void reset_markers()
  */
 
 struct fileheader {
-	uint32_t primary_infsize;
-	uint32_t section1_cmpsize;
-	uint32_t primary_cmpsize;
+	u32 primary_infsize;
+	u32 section1_cmpsize;
+	u32 primary_cmpsize;
 };
 
 struct sectionheader {
-	uint16_t infsize;
-	uint16_t cmpsize;
+	u16 infsize;
+	u16 cmpsize;
 };
 
 struct n64_primaryheader {
-	uint32_t unused1;
-	uint32_t ptr_rooms;
-	uint32_t ptr_portals;
-	uint32_t ptr_bgcmds;
-	uint32_t ptr_lights;
-	uint32_t unused2;
+	u32 unused1;
+	u32 ptr_rooms;
+	u32 ptr_portals;
+	u32 ptr_bgcmds;
+	u32 ptr_lights;
+	u32 unused2;
 };
 
 struct host_primaryheader {
@@ -106,63 +106,63 @@ struct host_primaryheader {
 };
 
 struct n64_room {
-	uint32_t ptr_gfxdata;
-	uint32_t pos[3];
-	uint8_t br_light_min;
-	uint8_t br_light_max;
+	u32 ptr_gfxdata;
+	u32 pos[3];
+	u8 br_light_min;
+	u8 br_light_max;
 };
 
 struct host_room {
 	uintptr_t ptr_gfxdata;
-	uint32_t pos[3];
-	uint8_t br_light_min;
-	uint8_t br_light_max;
+	u32 pos[3];
+	u8 br_light_min;
+	u8 br_light_max;
 };
 
 struct portal {
-	uint16_t verticesoffset;
-	int16_t roomnum1;
-	int16_t roomnum2;
-	uint8_t flags;
+	u16 verticesoffset;
+	s16 roomnum1;
+	s16 roomnum2;
+	u8 flags;
 };
 
 struct portalvertices {
-	uint8_t count;
-	uint32_t vertices[1][3];
+	u8 count;
+	u32 vertices[1][3];
 };
 
 struct bgcmd {
-	uint8_t type;
-	uint8_t len;
-	int32_t param;
+	u8 type;
+	u8 len;
+	s32 param;
 };
 
 struct light {
-	uint16_t roomnum;
-	uint16_t colour;
-	uint8_t brightness;
-	uint8_t sparkable : 1;
-	uint8_t healthy : 1;
-	uint8_t on : 1;
-	uint8_t sparking : 1;
-	uint8_t vulnerable : 1;
-	uint8_t brightnessmult;
-	int8_t dirx;
-	int8_t diry;
-	int8_t dirz;
-	int16_t bbox[4][3];
+	u16 roomnum;
+	u16 colour;
+	u8 brightness;
+	u8 sparkable : 1;
+	u8 healthy : 1;
+	u8 on : 1;
+	u8 sparking : 1;
+	u8 vulnerable : 1;
+	u8 brightnessmult;
+	s8 dirx;
+	s8 diry;
+	s8 dirz;
+	s16 bbox[4][3];
 };
 
 struct n64_roomblock {
-	uint8_t type;
-	uint32_t ptr_next;
-	uint32_t ptr_gdl;
-	uint32_t ptr_vertices;
-	uint32_t ptr_colours;
+	u8 type;
+	u32 ptr_next;
+	u32 ptr_gdl;
+	u32 ptr_vertices;
+	u32 ptr_colours;
 };
 
 struct host_roomblock {
-	uint8_t type;
+	u8 type;
 	uintptr_t ptr_next;
 	uintptr_t ptr_gdl;
 	uintptr_t ptr_vertices;
@@ -170,14 +170,14 @@ struct host_roomblock {
 };
 
 struct n64_roomgfxdata {
-	uint32_t ptr_vertices;
-	uint32_t ptr_colours;
-	uint32_t ptr_opablocks;
-	uint32_t ptr_xlublocks;
-	int16_t lightsindex;
-	int16_t numlights;
-	int16_t numvertices;
-	int16_t numcolours;
+	u32 ptr_vertices;
+	u32 ptr_colours;
+	u32 ptr_opablocks;
+	u32 ptr_xlublocks;
+	s16 lightsindex;
+	s16 numlights;
+	s16 numvertices;
+	s16 numcolours;
 	// roomblocks[]
 };
 
@@ -186,26 +186,26 @@ struct host_roomgfxdata {
 	uintptr_t ptr_colours;
 	uintptr_t ptr_opablocks;
 	uintptr_t ptr_xlublocks;
-	int16_t lightsindex;
-	int16_t numlights;
-	int16_t numvertices;
-	int16_t numcolours;
+	s16 lightsindex;
+	s16 numlights;
+	s16 numvertices;
+	s16 numcolours;
 	// roomblocks[]
 };
 
 struct vtx {
-	int16_t coord[3];
-	uint8_t flag;
-	uint8_t color;
-	uint16_t s;
-	uint16_t t;
+	s16 coord[3];
+	u8 flag;
+	u8 color;
+	u16 s;
+	u16 t;
 };
 
 int m_NumRooms;
 
-uint32_t m_AllocSizes[512];
+u32 m_AllocSizes[512];
 
-static void convert_primary_rooms(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos)
+static void convert_primary_rooms(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 {
 	struct n64_room *n64_rooms = (struct n64_room *) &src[*srcpos];
 	struct host_room *host_rooms = (struct host_room *) &dst[*dstpos];
@@ -229,7 +229,7 @@ static void convert_primary_rooms(uint8_t *dst, uint32_t *dstpos, uint8_t *src, 
 	*dstpos += sizeof(*host_rooms) * (m_NumRooms +2);
 }
 
-static void convert_primary_portals(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos, uint32_t *src_portalvtxs, uint32_t *dst_portalvtxs)
+static void convert_primary_portals(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 *src_portalvtxs, u32 *dst_portalvtxs)
 {
 	struct portal *n64_portals = (struct portal *) &src[*srcpos];
 	struct portal *host_portals = (struct portal *) &dst[*dstpos];
@@ -274,7 +274,7 @@ static void convert_primary_portals(uint8_t *dst, uint32_t *dstpos, uint8_t *src
 	}
 }
 
-static void convert_primary_bgcmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t dst_portalvtxs, uint32_t src_portalvtxs)
+static void convert_primary_bgcmds(u8 *dst, u32 *dstpos, u8 *src, u32 dst_portalvtxs, u32 src_portalvtxs)
 {
 	struct bgcmd *n64_cmds = (struct bgcmd *) src;
 	struct bgcmd *host_cmds = (struct bgcmd *) &dst[*dstpos];
@@ -292,7 +292,7 @@ static void convert_primary_bgcmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src,
 		host_cmds[i].param = srctodst32(n64_cmds[i].param);
 
 		if (host_cmds[i].type == 0x64) {
-			uint32_t offset = host_cmds[i].param - src_portalvtxs;
+			u32 offset = host_cmds[i].param - src_portalvtxs;
 			host_cmds[i].param = dst_portalvtxs + offset;
 		}
 	}
@@ -300,7 +300,7 @@ static void convert_primary_bgcmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src,
 	*dstpos += sizeof(*host_cmds) * num_cmds;
 }
 
-static void convert_primary_lights(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos, uint32_t end)
+static void convert_primary_lights(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 end)
 {
 	struct light *n64_lights = (struct light *) &src[*srcpos];
 	struct light *host_lights = (struct light *) &dst[*dstpos];
@@ -347,11 +347,11 @@ void relink_ptr(uintptr_t** ptr)
 	*ptr = marker->ptr_host;
 }
 
-static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint8_t *src, uint32_t infsize, uint32_t src_ofs)
+static u32 convert_section1_roomgfxdata(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 {
 	reset_markers();
 
-	uint32_t dst_roomoffset = src_ofs;
+	u32 dst_roomoffset = src_ofs;
 
 	uintptr_t gdls_addr[64];
 	int numgdls = 0;
@@ -407,8 +407,8 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint8_t *src, uint32_
 
 	// block coords
 	for (size_t i = 0; i < ncoords; i++) {
-		uint32_t *src_coord = (uint32_t*)(src + curpos_src);
-		uint32_t *dst_coord = (uint32_t*)(dst + curpos_dst);
+		u32 *src_coord = (u32*)(src + curpos_src);
+		u32 *dst_coord = (u32*)(dst + curpos_dst);
 
 		dst_coord[0] = srctoh32(src_coord[0]);
 		dst_coord[1] = srctoh32(src_coord[1]);
@@ -420,8 +420,8 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint8_t *src, uint32_
 
 		add_marker(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
-		curpos_src += 6 * sizeof(uint32_t);
-		curpos_dst += 6 * sizeof(uint32_t);
+		curpos_src += 6 * sizeof(u32);
+		curpos_dst += 6 * sizeof(u32);
 	}
 
 	curpos_dst = ALIGN8(curpos_dst);
@@ -492,8 +492,8 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint8_t *src, uint32_
 
 		if (block->type == BLOCK_LEAF) {
 			relink_ptr(&block->ptr_gdl);
-			uint32_t offset_vtx = block->ptr_vertices - ptr_src_vertices - src_ofs;
-			uint32_t offset_col = block->ptr_colours - ptr_src_colors - src_ofs;
+			u32 offset_vtx = block->ptr_vertices - ptr_src_vertices - src_ofs;
+			u32 offset_col = block->ptr_colours - ptr_src_colors - src_ofs;
 
 			block->ptr_vertices = ptr_dst_vertices + offset_vtx;
 			block->ptr_colours = ptr_dst_colors + offset_col;
@@ -513,17 +513,17 @@ static uint32_t convert_section1_roomgfxdata(uint8_t *dst, uint8_t *src, uint32_
 	return curpos_dst;
 }
 
-static uint32_t convert_section1(uint8_t *dst, uint8_t *src, uint32_t ofs)
+static u32 convert_section1(u8 *dst, u8 *src, u32 ofs)
 {
 	// Convert primary
-	uint32_t srcpos = 0;
-	uint32_t dstpos = 0;
+	u32 srcpos = 0;
+	u32 dstpos = 0;
 	struct host_primaryheader *host_primary_header = (struct host_primaryheader *) dst;
 	struct n64_primaryheader *n64_primary_header = (struct n64_primaryheader *) src;
 	srcpos += sizeof(struct n64_primaryheader);
 	dstpos += sizeof(*host_primary_header);
 
-	uint32_t src_bgcmds = srctodst32(n64_primary_header->ptr_bgcmds) - ofs;
+	u32 src_bgcmds = srctodst32(n64_primary_header->ptr_bgcmds) - ofs;
 
 	host_primary_header->unused1 = 0;
 	host_primary_header->unused2 = 0;
@@ -539,7 +539,7 @@ static uint32_t convert_section1(uint8_t *dst, uint8_t *src, uint32_t ofs)
 
 	host_primary_header->ptr_portals = dstpos + ofs;
 	srcpos = srctodst32(n64_primary_header->ptr_portals) - ofs;
-	uint32_t src_portalvtxs, dst_portalvtxs;
+	u32 src_portalvtxs, dst_portalvtxs;
 	convert_primary_portals(dst, &dstpos, src, &srcpos, &src_portalvtxs, &dst_portalvtxs);
 
 	host_primary_header->ptr_bgcmds = dstpos + ofs;
@@ -548,11 +548,11 @@ static uint32_t convert_section1(uint8_t *dst, uint8_t *src, uint32_t ofs)
 	return dstpos;
 }
 
-static void convert_section2_texturenums(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos, uint32_t srclen)
+static void convert_section2_texturenums(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 srclen)
 {
-	uint16_t *src_ids = (uint16_t *) &src[*srcpos];
-	uint16_t *dst_ids = (uint16_t *) &dst[*dstpos];
-	int count = srclen / sizeof(uint16_t);
+	u16 *src_ids = (u16 *) &src[*srcpos];
+	u16 *dst_ids = (u16 *) &dst[*dstpos];
+	int count = srclen / sizeof(u16);
 
 	for (int i = 0; i < count; i++) {
 		dst_ids[i] = srctodst16(src_ids[i]);
@@ -562,10 +562,10 @@ static void convert_section2_texturenums(uint8_t *dst, uint32_t *dstpos, uint8_t
 	*dstpos += srclen;
 }
 
-static void convert_section3_bboxes(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos)
+static void convert_section3_bboxes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 {
-	int16_t *src_bboxes = (int16_t *) &src[*srcpos];
-	int16_t *dst_bboxes = (int16_t *) &dst[*dstpos];
+	s16 *src_bboxes = (s16 *) &src[*srcpos];
+	s16 *dst_bboxes = (s16 *) &dst[*dstpos];
 
 	for (int i = 0; i < m_NumRooms; i++) {
 		dst_bboxes[i * 6 + 0] = srctodst16(src_bboxes[i * 6 + 0]);
@@ -576,23 +576,23 @@ static void convert_section3_bboxes(uint8_t *dst, uint32_t *dstpos, uint8_t *src
 		dst_bboxes[i * 6 + 5] = srctodst16(src_bboxes[i * 6 + 5]);
 	}
 
-	*srcpos += sizeof(int16_t) * 6 * (m_NumRooms - 1);
-	*dstpos += sizeof(int16_t) * 6 * (m_NumRooms - 1);
+	*srcpos += sizeof(s16) * 6 * (m_NumRooms - 1);
+	*dstpos += sizeof(s16) * 6 * (m_NumRooms - 1);
 }
 
-static void convert_section3_allocsizes(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos)
+static void convert_section3_allocsizes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 {
-	uint16_t *dst_sizes = (uint16_t *) &dst[*dstpos];
+	u16 *dst_sizes = (u16 *) &dst[*dstpos];
 
 	for (int i = 0; i < m_NumRooms; i++) {
 		dst_sizes[i] = (m_AllocSizes[i] - 0x100) / 0x10;
 	}
 
-	*srcpos += sizeof(uint16_t) * (m_NumRooms - 1);
-	*dstpos += sizeof(uint16_t) * (m_NumRooms - 1);
+	*srcpos += sizeof(u16) * (m_NumRooms - 1);
+	*dstpos += sizeof(u16) * (m_NumRooms - 1);
 }
 
-static void convert_section3_lightcounts(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t *srcpos)
+static void convert_section3_lightcounts(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 {
 	memcpy(&dst[*dstpos], &src[*srcpos], m_NumRooms);
 
@@ -601,11 +601,11 @@ static void convert_section3_lightcounts(uint8_t *dst, uint32_t *dstpos, uint8_t
 }
 
 #ifdef PLATFORM_64BIT
-void preprocessBgSection1(uint8_t *data, uint32_t size, uint32_t ofs)
+void preprocessBgSection1(u8 *data, u32 size, u32 ofs)
 {
-	uint8_t *dst = sysMemZeroAlloc(size);
+	u8 *dst = sysMemZeroAlloc(size);
 
-	uint32_t newSize = convert_section1(dst, data, ofs);
+	u32 newSize = convert_section1(dst, data, ofs);
 
 	if (newSize > size) {
 		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a bg file, size %d newsize %d", size, newSize);
@@ -616,11 +616,11 @@ void preprocessBgSection1(uint8_t *data, uint32_t size, uint32_t ofs)
 	sysMemFree(dst);
 }
 
-uint32_t preprocessBgRoom(uint8_t *data, uint32_t size, uint32_t room_ofs)
+u32 preprocessBgRoom(u8 *data, u32 size, u32 room_ofs)
 {
 	size *= 2;
-	uint8_t *dst = sysMemZeroAlloc(size);
-	uint32_t newSize = convert_section1_roomgfxdata(dst, data, size, room_ofs);
+	u8 *dst = sysMemZeroAlloc(size);
+	u32 newSize = convert_section1_roomgfxdata(dst, data, size, room_ofs);
 
 	if (newSize > size) {
 		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a bg room, size %d newsize %d", size, newSize);
