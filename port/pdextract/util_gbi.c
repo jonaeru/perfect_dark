@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "common.h"
+#include "gbi.h"
 
 #ifdef FORCE_BE32
 #define HOST_DWORDS_PER_CMD 1
@@ -117,7 +118,7 @@ void gbi_convert_vtx(u8 *dst, u32 offset, int count)
  * Segment 5 is the start of the model file. The data in these files shifts
  * depending on the pointer size, so this function adjusts the offset accordingly.
  */
-static uint64_t gbi_rewrite_addr(uint64_t cmd, u8 opcode)
+static u64 gbi_rewrite_addr(u64 cmd, u8 opcode)
 {
 	u8 segment = (cmd & 0x0f000000) >> 24;
 	u32 offset = cmd & 0x00ffffff;
@@ -143,34 +144,42 @@ void gbi_gdl_rewrite_addrs(u8 *dst, u32 offset)
 {
 	if (!offset) return;
 
-	uint64_t *cmds = (uint64_t*)(dst + (offset & 0x00ffffff));
+	u64 *cmds = (u64 *)(dst + (offset & 0x00ffffff));
 	if (!cmds) return;
 
-	uint64_t cmd;
+	u64 cmd;
 
 	do {
 		cmd = *cmds;
+		Gfx* gfxcmd = cmds;
+		int idx = 0;
+		u8 opcode = (cmd >> 24) & 0xff;
 
-		if (CMD_HAS_ADDR((cmd << 32))) {
-			u8 opcode = (cmd >> 24) & 0xff;
-			cmds[1] = gbi_rewrite_addr(cmds[1], opcode);
+#if HOST_DWORDS_PER_CMD == 2
+		idx = 1;
+		opcode = (cmd >> 24) & 0xff;
+#endif
+		cmd = (u64)opcode << 56;
+
+		if (CMD_HAS_ADDR(cmd)) {
+			cmds[idx] = gbi_rewrite_addr(cmds[idx], opcode);
 		}
 
-		if (CMD_IS_SEGMENTED((cmd << 32))) {
-			cmds[1] |= 1;
+		if (CMD_IS_SEGMENTED(cmd)) {
+			gfxcmd->words.w1 |= 1;
 		}
 
-		cmds += 2;
-	} while (!CMD_IS_ENDDL((cmd << 32)));
+		cmds += HOST_DWORDS_PER_CMD;
+	} while (!CMD_IS_ENDDL(cmd));
 }
 
 u32 gbi_convert_gdl(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int segment_cmds)
 {
 	dstpos = ALIGN8(dstpos);
 
-	uint64_t *n64_cmd = (uint64_t*)&src[srcpos];
-	uint64_t *host_cmd = (uint64_t*)&dst[dstpos];
-	uint64_t cmd;
+	u64 *n64_cmd = (u64*)&src[srcpos];
+	u64 *host_cmd = (u64*)&dst[dstpos];
+	u64 cmd;
 
 	do {
 		cmd = srctoh64(*n64_cmd);
@@ -183,10 +192,11 @@ u32 gbi_convert_gdl(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int segment_cmds)
 			host_cmd[1] |= 1;
 		}
 #else
-		host_cmd[0] = htodst64(cmd);
+		host_cmd[0] = (cmd >> 32) | ((cmd & 0xffffffff) << 32);
 
 		if (segment_cmds && CMD_IS_SEGMENTED(cmd)) {
-			host_cmd[0] |= 1;
+			Gfx* gfxcmd = (Gfx*)host_cmd;
+			gfxcmd->words.w1 |= 1;
 		}
 #endif
 
