@@ -254,7 +254,7 @@ u32 convert_props(u8* dst, u8* src)
 				struct n64_doorscaleobj* srcobj = (struct n64_doorscaleobj*)cmd;
 				struct doorscaleobj* dstobj = (struct doorscaleobj*)dst;
 
-				dstobj->unk00 = htobe32(srcobj->unk00);
+				conv_default_obj_hdr((struct defaultobj*)dstobj, cmd);
 				PD_CONV_VAL(dstobj->scale, srcobj->scale);
 
 				dst += sizeof(struct doorscaleobj);
