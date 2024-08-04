@@ -6,43 +6,7 @@
 #include "system.h"
 #include "platform.h"
 
-struct ptrmarker {
-	u32 ptr_src;
-	uintptr_t ptr_host;
-};
-
-
-struct ptrmarker m_PtrMarkers[2048];
-int m_NumPtrMarkers;
 int m_SizeGDLs;
-
-static void add_marker(u32 ptr_src, uintptr_t ptr_host)
-{
-	if (m_NumPtrMarkers >= ARRAYCOUNT(m_PtrMarkers)) {
-		sysLogPrintf(LOG_ERROR, "[BG] Marker limit exceeded");
-		exit(EXIT_FAILURE);
-	}
-
-	m_PtrMarkers[m_NumPtrMarkers].ptr_src = ptr_src;
-	m_PtrMarkers[m_NumPtrMarkers].ptr_host = ptr_host;
-	m_NumPtrMarkers++;
-}
-
-static struct ptrmarker* find_marker(uintptr_t ptr_src)
-{
-	for (int i = 0; i < m_NumPtrMarkers; i++) {
-		if (m_PtrMarkers[i].ptr_src == ptr_src) {
-			return &m_PtrMarkers[i];
-		}
-	}
-
-	return NULL;
-}
-
-static void reset_markers()
-{
-	m_NumPtrMarkers = 0;
-}
 
 /**
  * 4 bytes decompressed size of primary data

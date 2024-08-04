@@ -77,4 +77,13 @@ void gbi_convert_vtx(uint8_t* dst, uint32_t dstpos, int count);
 void gbi_gdl_rewrite_addrs(uint8_t* dst, uint32_t offset);
 void gbi_add_tex_addr(uint32_t src_offset, uint32_t dst_offset);
 
+struct ptrmarker {
+	u32 ptr_src;
+	uintptr_t ptr_host;
+};
+
+void add_marker(u32 ptr_src, uintptr_t ptr_host);
+struct ptrmarker* find_marker(uintptr_t ptr_src);
+void reset_markers();
+
 #endif
