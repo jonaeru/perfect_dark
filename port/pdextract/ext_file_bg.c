@@ -302,7 +302,7 @@ void relink_ptr(uintptr_t** ptr)
 {
 	if (!*ptr) return;
 
-	struct ptrmarker* marker = find_marker(*ptr);
+	struct ptrmarker* marker = find_ptr_marker(*ptr);
 	if (!marker) {
 		fprintf(stderr, "[BG] WARNING: Unable to relink pointer: %p\n", ptr);
 		exit(EXIT_FAILURE);

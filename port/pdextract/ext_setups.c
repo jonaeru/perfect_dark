@@ -1126,7 +1126,7 @@ static u32 convert_lists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 		ailist->ptr_list = (u8*)dstpos;
 
 		// multiple ailists can point to the same list, so we need to check if it was already copied
-		struct ptrmarker *marker = find_marker(src_ptr_list);
+		struct ptrmarker *marker = find_ptr_marker(src_ptr_list);
 		if (marker) {
 			ailist->ptr_list = marker->ptr_host;
 			continue;

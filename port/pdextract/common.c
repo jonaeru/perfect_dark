@@ -16,7 +16,7 @@ void add_marker(u32 ptr_src, uintptr_t ptr_host)
 	m_NumPtrMarkers++;
 }
 
-struct ptrmarker* find_marker(uintptr_t ptr_src)
+struct ptrmarker* find_ptr_marker(uintptr_t ptr_src)
 {
 	for (int i = 0; i < m_NumPtrMarkers; i++) {
 		if (m_PtrMarkers[i].ptr_src == ptr_src) {

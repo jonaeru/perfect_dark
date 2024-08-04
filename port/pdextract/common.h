@@ -83,7 +83,7 @@ struct ptrmarker {
 };
 
 void add_marker(u32 ptr_src, uintptr_t ptr_host);
-struct ptrmarker* find_marker(uintptr_t ptr_src);
+struct ptrmarker* find_ptr_marker(uintptr_t ptr_src);
 void reset_markers();
 
 #endif
