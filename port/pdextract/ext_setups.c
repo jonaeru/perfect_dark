@@ -655,7 +655,7 @@ u32 convert_props(u8* dst, u8* src)
 
 				conv_default_obj(&dstobj->base, cmd);
 
-				dstobj->ailist = (u8*)srcobj->ptr_ailist;
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -678,7 +678,7 @@ u32 convert_props(u8* dst, u8* src)
 
 				conv_default_obj(&dstobj->base, cmd);
 
-				dstobj->ailist = (u8*)srcobj->ptr_ailist;
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->rotoryrot, srcobj->rotoryrot);
@@ -898,7 +898,7 @@ u32 convert_props(u8* dst, u8* src)
 
 				conv_default_obj(&dstobj->base, cmd);
 
-				dstobj->ailist = (u8*)srcobj->ptr_ailist;
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -939,7 +939,7 @@ u32 convert_props(u8* dst, u8* src)
 
 				conv_default_obj(&dstobj->base, cmd);
 
-				dstobj->ailist = (u8*)srcobj->ptr_ailist;
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -1002,14 +1002,13 @@ u32 convert_props(u8* dst, u8* src)
 	}
 
 	*(u32*)(dst) = htobe32(OBJTYPE_END);
-	dst += sizeof(int);
+	dst += sizeof(u32);
 
 	return (u32)(dst - start);
 }
 
 static uintptr_t convert_intro(u8 *dst, u8 *src)
 {
-	u8* start = dst;
 	u8 cmd_size[] = {
 		3, // INTROCMD_SPAWN
 		4, // INTROCMD_WEAPON
@@ -1023,7 +1022,7 @@ static uintptr_t convert_intro(u8 *dst, u8 *src)
 		3, // INTROCMD_CASE
 		3, // INTROCMD_CASERESPAWN
 		2, // INTROCMD_HILL
-		1, // INTROCMD_END
+		1, // the INTROCMD_END constant itself
 	};
 
 	s32* dstintro = (s32*)dst;
@@ -1042,13 +1041,11 @@ static uintptr_t convert_intro(u8 *dst, u8 *src)
 		if (cmd == INTROCMD_END) break;
 	}
 
-	return (u32)((u8*)dstintro - start);
+	return (u32)((u8*)dstintro - dst);
 }
 
-static uintptr_t convert_paths(u8 *dst, u8 *src)
+static u32 convert_paths(u8 *dst, u8 *src)
 {
-	u8* start = dst;
-
 	struct n64_path* srcpath = (struct n64_path*)src;
 	struct path* dstpath = (struct path*)dst;
 
@@ -1058,21 +1055,20 @@ static uintptr_t convert_paths(u8 *dst, u8 *src)
 		PD_CONV_VAL(dstpath->flags, srcpath->flags);
 		PD_CONV_VAL(dstpath->len, srcpath->len);
 
-		dstpath++;
-
 		if (srcpath->ptr_pads == 0) break;
 
-		srcpath ++;
+		dstpath++;
+		srcpath++;
 	}
 
-	return (u32)((u8*)dstpath - start);
+	// extra pointer for the end marker
+	return (u32)((u8*)dstpath - dst + sizeof(uintptr_t));
 }
 
-static int convert_pads(struct path *dstpaths, u8 *dst, u8 *src, uintptr_t dstpos)
+static u32 convert_pads(struct path *dstpaths, u8 *dst, u8 *src, u32 dstpos)
 {
-	uintptr_t start = dstpos;
-	s32* dstpads = (s32*)&dst[dstpos];
-	s32 i = 0;
+	u32 start = dstpos;
+	s32 *dstpads = (s32*)&dst[dstpos];
 	while (dstpaths->pads) {
 		s32 *pads = (s32*)&src[(uintptr_t)dstpaths->pads];
 		dstpaths->pads = (s32*)dstpos;
@@ -1087,70 +1083,65 @@ static int convert_pads(struct path *dstpaths, u8 *dst, u8 *src, uintptr_t dstpo
 		dstpaths++;
 	}
 	
-	dstpaths->pads = 0;
 	return dstpos - start;
 }
 
-static uintptr_t convert_ailists(u8* dst, u8* src)
+static u32 convert_ailists(u8* dst, u8* src)
 {
-	u8* start = dst;
-
 	struct n64_ailist* srcailist = (struct n64_ailist*)src;
-	struct ailist* dstailist = (struct path*)dst;
+	struct ailist* dstailist = (struct ailist*)dst;
 
 	while (true) {
 		// at this point these fields are already converted, so we just assign
 		dstailist->list = srcailist->ptr_list;
 		dstailist->id = srcailist->id;
 
-		dstailist++;
 
 		if (srcailist->ptr_list == 0) break;
 
+		dstailist++;
 		srcailist++;
 	}
 
-	return (u32)((u8*)dstailist - start);
+	return (u32)((u8*)dstailist - dst + sizeof(uintptr_t));
 }
 
-static int convert_lists(uintptr_t ofs_ailists, u8 *dst, u8 *src, uintptr_t dstpos)
+u32 chraiGetAilistLength(u8 *list);
+
+static u32 convert_lists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 {
-	struct n64_ailist* ailists = (struct n64_ailist*)&src[ofs_ailists];
+	reset_markers();
+	struct n64_ailist *src_ailists = (struct n64_ailist*)&src[src_ofs];
 
 	// count the lists and pre-convert the fields
 	int nlists = 0;
-	for (struct n64_ailist* tmp = ailists; tmp->ptr_list; tmp++, nlists++) {
+	for (struct n64_ailist *tmp = src_ailists; tmp->ptr_list; tmp++, nlists++) {
 		tmp->ptr_list = srctodst32(tmp->ptr_list);
 		tmp->id = srctodst32(tmp->id);
 	}
 
-	// sort ailists by the list addr
-	for (int i = 0; i < nlists; i++) {
-		uintptr_t minidx = i;
+	for (struct n64_ailist *ailist = src_ailists; ailist->ptr_list; ailist++) {
+		// update the src list pointers here
+		uintptr_t src_ptr_list = (uintptr_t) ailist->ptr_list;
+		ailist->ptr_list = (u8*)dstpos;
 
-		for (int j = i + 1; j < nlists; j++)
-			if (ailists[j].ptr_list < ailists[minidx].ptr_list) minidx = j;
+		// multiple ailists can point to the same list, so we need to check if it was already copied
+		struct ptrmarker *marker = find_marker(src_ptr_list);
+		if (marker) {
+			ailist->ptr_list = marker->ptr_host;
+			continue;
+		}
 
-		struct n64_ailist tmp = ailists[i];
-		ailists[i] = ailists[minidx];
-		ailists[minidx] = tmp;
+		add_marker(src_ptr_list, dstpos);
+
+		u8 *list = &src[src_ptr_list];
+		u32 listsize = chraiGetAilistLength(list);
+		memcpy(dst + dstpos, list, listsize);
+
+		// align to the next multiple of 4
+		dstpos += ((listsize + 3) >> 2) << 2;
 	}
-
-	for (int i = 0; i < nlists; i++) {
-		u8* start = (u8*)&src[(uintptr_t)ailists[i].ptr_list];
-		u8* end = (i == nlists - 1) ? &src[ofs_ailists] : &src[(uintptr_t)ailists[i + 1].ptr_list];
-
-		size_t size = end - start;
-
-		// update the src list pointers as we go
-		ailists[i].ptr_list = (u8*)dstpos;
-
-		if (size > 0)
-			memcpy(dst + dstpos, start, size);
-
-		dstpos += size;
-
-	}
+	
 	return dstpos;
 }
 
@@ -1172,66 +1163,23 @@ static int convert_setup(u8 *dst, u8 *src, u32 srclen)
 	dstpos += convert_props(&dst[dstpos], &src[srcpos]);
 
 	srcpos = src_header->ptr_intro;
-	dst_header->intro = (u32*) dstpos;
+	dst_header->intro = (s32*)dstpos;
 	dstpos += convert_intro(&dst[dstpos], &src[srcpos]);
+	
+	// write the lists bytecodes before the ailists entries
+	dstpos = convert_lists(dst, src, dstpos, src_header->ptr_ailists);
+
+	srcpos = src_header->ptr_ailists;
+	dst_header->ailists = (struct ailist*)dstpos;
+	dstpos += convert_ailists(&dst[dstpos], &src[srcpos]);
 
 	srcpos = src_header->ptr_paths;
 	dst_header->paths = (struct path*) dstpos;
 	dstpos += convert_paths(&dst[dstpos], &src[srcpos]);
 
-	// write the lists bytecodes before the ailists entries
-	dstpos += convert_lists(src_header->ptr_ailists, dst, src, dstpos);
-
-	srcpos = src_header->ptr_ailists;
-	dst_header->ailists = (struct ailist*) dstpos;
-	dstpos += convert_ailists(&dst[dstpos], &src[srcpos]);
-
 	dstpos += convert_pads(&dst[(uintptr_t)dst_header->paths], dst, src, dstpos);
 
 	return dstpos;
-}
-
-
-void test_conv_functions()
-{
-	f32 dst0;
-	f32 src0 = 3.141592;
-	PD_CONV_VAL(dst0, src0);
-
-	u32 dst1;
-	u32 src1 = 0xaabbccdd;
-	PD_CONV_VAL(dst1, src1);
-
-	s32 dst2;
-	s32 src2 = 0xaabbccdd;
-	PD_CONV_VAL(dst2, src2);
-
-	u16 dst3;
-	u16 src3 = 0xaabb;
-	PD_CONV_VAL(dst3, src3);
-
-	s16 dst4;
-	s16 src4 = 0xaabb;
-	PD_CONV_VAL(dst4, src4);
-
-	struct coord dst5;
-	struct n64_coord src5 = { 1.0f, 2.0f, 3.0f };
-	PD_CONV_VAL(dst5, src5);
-
-	s32* dst6;
-	s32* src6 = (s32*)0xcafebaca;
-	PD_CONV_PTR(dst6, src6);
-
-	s32 dst7[3];
-	s32 src7[3] = { 0xaabbccdd, 0x11223344, 0xddbbccaa };
-	PD_CONV_ARRAY(dst7, src7);
-
-	s32 dst8[2][2];
-	s32 src8[2][2] = {
-		{ 0xaabbccdd, 0x11223344 },
-		{ 0xffeeddcc, 0x55667788 }
-	};
-	PD_CONV_ARRAY2D(dst8, src8);
 }
 
 u8 *preprocessSetupFile_x64(u8 *data, u32 size, u32 *outSize) { 
