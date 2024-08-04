@@ -4283,11 +4283,7 @@ u32 fileGetInflatedSize(s32 filenum, FileType filetype)
 	}
 
 	if (rzipIs1173(ptr)) {
-#ifdef PLATFORM_N64
-		return (ptr[2] << 16) | (ptr[3] << 8) | ptr[4];
-#else
 		return romdataGetEstimatedFileSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], filetype);
-#endif
 	}
 
 #if VERSION < VERSION_NTSC_1_0
