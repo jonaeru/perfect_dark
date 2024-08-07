@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "types.h"
+#include "gbi.h"
+#include "game/texdecompress.h"
+
 #include "common.h"
 #include "romdata.h"
 #include "system.h"
@@ -28,6 +32,7 @@ enum contenttype {
 	/*18*/ CT_RODATA_HEADSPOT,
 	/*19*/ CT_RODATA_DL,
 	/*20*/ CT_RODATA_19,
+	/*21*/ CT_VTXCOL4,	// CT_VTXCOL but aligned to 4 bytes instead of 8
 };
 
 struct marker {
@@ -46,50 +51,29 @@ struct alignconfig m_AlignConfigs[] = {
 	/* 0*/ { 16, 4 },
 	/* 1*/ { 4,  4 },
 	/* 2*/ { 4,  4 },
-	/* 3*/ { 8,  8 },
+	/* 3*/ { 8,  8 }, // CT_TEXDATA
 	/* 4*/ { 4,  4 },
-	/* 5*/ { 8,  8 },
-	/* 6*/ { 8,  8 },
+	/* 5*/ { 8,  4 }, // CT_VTXCOL
+	/* 6*/ { 8,  8 }, // CT_GDL
 	/* 7*/ { 4,  4 },
 	/* 8*/ { 4,  4 },
-	/* 9*/ { 8,  4 },
-	/*10*/ { 4,  8 },
+	/* 9*/ { 8,  4 }, // CT_GUNDL
+	/*10*/ { 4,  4 },
 	/*11*/ { 4,  4 },
 	/*12*/ { 4,  4 },
 	/*13*/ { 4,  4 },
 	/*14*/ { 4,  4 },
 	/*15*/ { 4,  4 },
 	/*16*/ { 4,  4 },
-	/*17*/ { 8,  8 },
+	/*17*/ { 8,  4 }, // CT_STARGUNFIRE
 	/*18*/ { 4,  4 },
-	/*19*/ { 8,  8 },
+	/*19*/ { 8,  4 }, // CT_RODATA_DL
 	/*20*/ { 4,  4 },
+	/*21*/ { 4,  4 },
 };
 
 struct marker m_Markers[1024];
 int m_NumMarkers;
-
-#define MODELNODETYPE_CHRINFO      0x01
-#define MODELNODETYPE_POSITION     0x02
-#define MODELNODETYPE_GUNDL        0x04
-#define MODELNODETYPE_05           0x05
-#define MODELNODETYPE_DISTANCE     0x08
-#define MODELNODETYPE_REORDER      0x09
-#define MODELNODETYPE_BBOX         0x0a
-#define MODELNODETYPE_0B           0x0b
-#define MODELNODETYPE_CHRGUNFIRE   0x0c
-#define MODELNODETYPE_0D           0x0d
-#define MODELNODETYPE_0E           0x0e
-#define MODELNODETYPE_0F           0x0f
-#define MODELNODETYPE_11           0x11
-#define MODELNODETYPE_TOGGLE       0x12
-#define MODELNODETYPE_POSITIONHELD 0x15
-#define MODELNODETYPE_STARGUNFIRE  0x16
-#define MODELNODETYPE_HEADSPOT     0x17
-#define MODELNODETYPE_DL           0x18
-#define MODELNODETYPE_19           0x19
-#define MODELNODETYPE_0100         0x0100
-#define MODELNODETYPE_0200         0x0200
 
 struct src_modeldef {
 	u32 ptr_rootnode;
@@ -230,7 +214,9 @@ struct src_rodata_type11 {
 	u32 unk08;
 	u32 unk0c;
 	u32 unk10;
-	u32 ptr_unk14;
+	u32 ptr_unk14; // not used
+	u32 extra1;
+	u32 extra2;
 };
 
 struct dst_rodata_type11 {
@@ -239,7 +225,9 @@ struct dst_rodata_type11 {
 	u32 unk08;
 	u32 unk0c;
 	u32 unk10;
-	uintptr_t ptr_unk14;
+	u32 unk14;
+	u32 extra1;
+	u32 extra2;
 };
 
 struct src_rodata_toggle {
@@ -326,6 +314,18 @@ struct dst_texconfig {
 	u8 t;
 	u8 unk0b;
 };
+
+#define PD_PTR_BASE(x, b) (void *)((u8 *)b + (uintptr_t)x)
+#define PD_PTR_BASEOFS(x, b, d) (void *)((u8 *)b - d + (uintptr_t)x)
+
+
+static inline void *minPtr(void *a, void *b) {
+	return (a && (a < b || !b)) ? a : b;
+}
+
+static inline void *minPtr3(void *a, void *b, void *c) {
+	return minPtr(minPtr(a, b), c);
+}
 
 static struct marker *find_marker(u32 src_offset)
 {
@@ -444,14 +444,9 @@ static void populate_markers(u8 *src)
 			break;
 		case CT_RODATA_GUNDL:
 			struct src_rodata_gundl *src_gundl = src_thing;
-			numvtx = srctoh16(src_gundl->numvertices);
-			colstart = srctoh32(src_gundl->ptr_vertices) + numvtx * 12;
-			colstart = ALIGN(colstart, m_AlignConfigs[marker->type].before);
-
 			set_marker(srctoh32(src_gundl->ptr_opagdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_gundl->ptr_xlugdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_gundl->ptr_vertices), CT_VTXCOL, marker->src_offset);
-			set_marker(colstart, CT_VTXCOL, marker->src_offset);
 			break;
 		case CT_RODATA_DISTANCE:
 			struct src_rodata_distance *src_dist = src_thing;
@@ -472,18 +467,16 @@ static void populate_markers(u8 *src)
 			break;
 		case CT_RODATA_STARGUNFIRE:
 			struct src_rodata_stargunfire *src_stargunfire = src_thing;
-			numvtx = srctoh16(src_stargunfire->unk00);
+			colstart = srctoh32(src_stargunfire->unk00)*4*12;
+			u32 vtxstart = srctoh32(src_stargunfire->ptr_vertices);
+			colstart = ALIGN(vtxstart + colstart, 8);
 
-			set_marker(srctoh32(src_stargunfire->ptr_vertices), CT_VTXCOL, marker->src_offset);
-			set_marker(srctoh32(src_stargunfire->ptr_vertices) + numvtx * 12, CT_VTXCOL, marker->src_offset);
+			set_marker(srctoh32(src_stargunfire->ptr_vertices), CT_VTXCOL4, marker->src_offset);
+			set_marker(colstart, CT_VTXCOL4, marker->src_offset);
 			set_marker(srctoh32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
 			break;
 		case CT_RODATA_DL:
 			struct src_rodata_dl *src_dl = src_thing;
-			numvtx = srctoh16(src_dl->numvertices);
-			colstart = srctoh32(src_dl->ptr_vertices) + numvtx * 12;
-			colstart = ALIGN(colstart, 8);
-
 			set_marker(srctoh32(src_dl->ptr_opagdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_dl->ptr_xlugdl), CT_GDL, marker->src_offset);
 			set_marker(srctoh32(src_dl->ptr_colours), CT_VTXCOL, marker->src_offset);
@@ -601,6 +594,7 @@ static u32 convert_content(u8 *dst, u8 *src, u32 src_file_len)
 			}
 			break;
 		case CT_VTXCOL:
+		case CT_VTXCOL4:
 			memcpy(dst_thing, src_thing, src_len);
 			dstpos += src_len;
 			break;
@@ -713,7 +707,8 @@ static u32 convert_content(u8 *dst, u8 *src, u32 src_file_len)
 			dst_type11->unk08 = srctodst32(src_type11->unk08);
 			dst_type11->unk0c = srctodst32(src_type11->unk0c);
 			dst_type11->unk10 = srctodst32(src_type11->unk10);
-			dst_type11->ptr_unk14 = srctodst32(src_type11->ptr_unk14); // Not read by game engine
+			dst_type11->extra1 = srctodst32(src_type11->extra1);
+			dst_type11->extra2 = srctodst32(src_type11->extra2);
 			dstpos += sizeof(*dst_type11);
 			break;
 		case CT_RODATA_TOGGLE:
@@ -788,12 +783,16 @@ static u32 resolve_pointer(u32 src_offset)
 	return marker ? (0x05000000 | marker->dst_offset) : 0;
 }
 
-static void relink_pointers(u8 *dst, u8 *src)
+static u8 *relink_pointers(u8 *dst, u8 *src)
 {
+	u8 *textures_end = 0;
+
 	for (int i = 0; i < m_NumMarkers; i++) {
 		struct marker *marker = &m_Markers[i];
 		void *src_thing = &src[marker->src_offset];
 		void *dst_thing = &dst[marker->dst_offset];
+		
+		u8 *lowestptr = 0;
 
 		switch (marker->type) {
 		case CT_MODELDEF:
@@ -811,6 +810,8 @@ static void relink_pointers(u8 *dst, u8 *src)
 			dst_node->ptr_next = htodst32(resolve_pointer(srctoh32(src_node->ptr_next)));
 			dst_node->ptr_prev = htodst32(resolve_pointer(srctoh32(src_node->ptr_prev)));
 			dst_node->ptr_child = htodst32(resolve_pointer(srctoh32(src_node->ptr_child)));
+
+			lowestptr = dst_node->ptr_rodata;
 			break;
 		case CT_TEXCONFIG:
 			struct src_texconfig *src_texconfig = src_thing;
@@ -851,6 +852,8 @@ static void relink_pointers(u8 *dst, u8 *src)
 
 			if (dst_gundl->ptr_opagdl) dst_gundl->ptr_opagdl |= 1;
 			if (dst_gundl->ptr_xlugdl) dst_gundl->ptr_xlugdl |= 1;
+
+			lowestptr = minPtr3(dst_gundl->ptr_opagdl, dst_gundl->ptr_xlugdl, dst_gundl->ptr_vertices);
 			break;
 		case CT_RODATA_DISTANCE:
 			struct src_rodata_distance *src_dist = src_thing;
@@ -882,12 +885,14 @@ static void relink_pointers(u8 *dst, u8 *src)
 			dst_stargunfire->ptr_vertices = htodst32(resolve_pointer(srctoh32(src_stargunfire->ptr_vertices)));
 			dst_stargunfire->ptr_gdl = htodst32(resolve_pointer(srctoh32(src_stargunfire->ptr_gdl)));
 
-			gbi_convert_vtx(dst, dst_stargunfire->ptr_vertices & 0x00ffffff, dst_stargunfire->unk00);
+			gbi_convert_vtx(dst, dst_stargunfire->ptr_vertices & 0x00ffffff, dst_stargunfire->unk00*4);
 
 			gbi_set_vtx(srctoh32(src_stargunfire->ptr_vertices), dst_stargunfire->ptr_vertices);
 			gbi_set_segment(0x04, dst_stargunfire->ptr_vertices);
 			gbi_gdl_rewrite_addrs(dst, dst_stargunfire->ptr_gdl);
 			if (dst_stargunfire->ptr_gdl) dst_stargunfire->ptr_gdl |= 1;
+
+			lowestptr = minPtr(dst_stargunfire->ptr_gdl, dst_stargunfire->ptr_vertices);
 			break;
 		case CT_RODATA_DL:
 			struct src_rodata_dl *src_dl = src_thing;
@@ -906,6 +911,9 @@ static void relink_pointers(u8 *dst, u8 *src)
 			
 			if (dst_dl->ptr_opagdl) dst_dl->ptr_opagdl |= 1;
 			if (dst_dl->ptr_xlugdl) dst_dl->ptr_xlugdl |= 1;
+
+			lowestptr = minPtr3(dst_dl->ptr_opagdl, dst_dl->ptr_xlugdl, dst_dl->ptr_colours);
+			lowestptr = minPtr(lowestptr, dst_dl->ptr_vertices);
 			break;
 		case CT_TEXDATA:
 		case CT_VTXCOL:
@@ -917,7 +925,11 @@ static void relink_pointers(u8 *dst, u8 *src)
 		case CT_RODATA_19:
 			break;
 		}
+
+		textures_end = minPtr(textures_end, lowestptr);
 	}
+
+	return textures_end;
 }
 
 static int convert_model(u8 *dst, u8 *src, u32 srclen)
@@ -928,17 +940,74 @@ static int convert_model(u8 *dst, u8 *src, u32 srclen)
 	sort_markers();
 
 	dstpos = convert_content(dst, src, srclen);
-	relink_pointers(dst, src);
+	u8 *tex_end = relink_pointers(dst, src);
+	preprocess_textures(dst, tex_end);
 
 	return dstpos;
 }
 
-u8 *preprocessModelFile_x64(u8 *data, u32 size, u32 *outSize)
+void preprocessTextureRGBA32Embedded(u32* dest, u32 size_bytes)
+{
+	for (uint32_t i = 0; i < size_bytes; i += 4, ++dest) {
+		*dest = PD_BE32(*dest);
+	}
+}
+
+void preprocess_textures(u8 *base, u8 *textures_end)
+{
+	struct modeldef* mdl = (struct modeldef*)base;
+	if (!mdl->texconfigs) return;
+
+	u32 ofs = 0x5000000;
+	struct textureconfig* texconfigs = PD_PTR_BASEOFS(mdl->texconfigs, base, ofs);
+	for (s16 i = 0; i < mdl->numtexconfigs; ++i) {
+		if ((texconfigs[i].texturenum & 0xf000000) == 0x5000000) {
+			// embedded texture; we need to unswizzle this
+			u8* texdata = PD_PTR_BASEOFS(texconfigs[i].textureptr, base, ofs);
+			// figure out the max possible size the texture can have, because sometimes the texconfig is wrong
+			const u32 maxSize = (textures_end > texconfigs[i].textureptr) ? (textures_end - texconfigs[i].textureptr) : 0;
+			// figure out the format and unswizzle
+			const s32 format = texConfigToFormat(&texconfigs[i]);
+			texSwizzleInternal(texdata, texconfigs[i].width, texconfigs[i].height, format, maxSize);
+
+			if (format == TEXFORMAT_RGBA32) {
+				// for some reason, RGBA32 embedded textures don't need to be byte-swapped,
+				// so we byte-swap them here, which will be undone when the renderer imports it
+				u32 size_bytes = texconfigs[i].width * texconfigs[i].height * 4;
+				preprocessTextureRGBA32Embedded((u32*)texdata, size_bytes);
+			}
+		}
+	}
+}
+
+u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize)
 {
 	gbi_reset();
 
 	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_MODEL);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
+
+	u32 newSize = convert_model(dst, data, size);
+
+	if (newSize > newSizeEstimated) {
+		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess model, size %d newsize %d", size, newSize);
+		exit(EXIT_FAILURE);
+	}
+	
+	memcpy(data, dst, newSize);
+	sysMemFree(dst);
+
+	*outSize = newSize;
+
+	return 0;
+}
+
+u8 *preprocessGunFile(u8 *data, u32 size, u32 *outSize)
+{
+	gbi_reset();
+
+	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_MODEL);
+	u8 *dst = sysMemZeroAlloc(newSizeEstimated+128);
 
 	u32 newSize = convert_model(dst, data, size);
 
@@ -954,3 +1023,6 @@ u8 *preprocessModelFile_x64(u8 *data, u32 size, u32 *outSize)
 
 	return 0;
 }
+
+#undef PD_PTR_BASE
+#undef PD_PTR_BASEOFS
