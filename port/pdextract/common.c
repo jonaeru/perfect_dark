@@ -1,13 +1,13 @@
 #include "common.h"
 #include "system.h"
 
-struct ptrmarker m_PtrMarkers[2048];
+struct ptrmarker m_PtrMarkers[1024*8];
 int m_NumPtrMarkers;
 
 void add_marker(u32 ptr_src, uintptr_t ptr_host)
 {
 	if (m_NumPtrMarkers >= ARRAYCOUNT(m_PtrMarkers)) {
-		sysLogPrintf(LOG_ERROR, "[BG] Marker limit exceeded");
+		sysLogPrintf(LOG_ERROR, "Marker limit exceeded");
 		exit(EXIT_FAILURE);
 	}
 

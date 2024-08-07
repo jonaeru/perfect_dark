@@ -66,17 +66,21 @@
 #define srctodst64(value) htodst64(srctoh64(value))
 
 #ifdef FORCE_BE32
-#define uintptr_t uint32_t
+#define uintptr_t u32
 #endif
 
-void gbi_reset(void);
-void gbi_set_segment(int segment, uint32_t offset);
-void gbi_set_vtx(uint32_t src_offset, uint32_t dst_offset);
-uint32_t gbi_convert_gdl(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, int segment_cmds);
-void gbi_convert_vtx(uint8_t* dst, uint32_t dstpos, int count);
-void gbi_gdl_rewrite_addrs(uint8_t* dst, uint32_t offset);
-void gbi_add_tex_addr(uint32_t src_offset, uint32_t dst_offset);
+#define ALIGN(val, size)	((val + (size - 1)) & ~(size - 1))
 
+// gbi related functions
+void gbi_reset(void);
+void gbi_set_segment(int segment, u32 offset);
+void gbi_set_vtx(u32 src_offset, u32 dst_offset);
+u32 gbi_convert_gdl(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int segment_cmds);
+void gbi_convert_vtx(u8* dst, u32 dstpos, int count);
+void gbi_gdl_rewrite_addrs(u8* dst, u32 offset);
+void gbi_add_tex_addr(u32 src_offset, u32 dst_offset);
+
+// ptr marker functions
 struct ptrmarker {
 	u32 ptr_src;
 	uintptr_t ptr_host;

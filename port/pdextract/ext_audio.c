@@ -170,6 +170,17 @@ struct host_bankfile {
 	uintptr_t bankArray[1]; // ptr to struct host_bank
 };
 
+// only proceeds to convert the next item if it's not already converted
+#define AL_NEXT_ITEM(field, func) { \
+	struct ptrmarker *marker = find_ptr_marker(srcpos); \
+	if (marker == NULL) { \
+		field = htodst32(dstpos); \
+		add_marker(srcpos, field); \
+		dstpos = func(dst, dstpos, src, srcpos); \
+	} else { \
+		field = marker->ptr_host; } \
+}
+
 static int convert_audio_envelope(u8 *dst, int dstpos, u8 *src, int srcpos)
 {
 	struct generic_envelope *n64_envelope = (struct generic_envelope *) &src[srcpos];
@@ -266,25 +277,22 @@ static int convert_audio_wavetable(u8 *dst, int dstpos, u8 *src, int srcpos)
 
 	if (host_wavetable->type == AL_ADPCM_WAVE) {
 		if (n64_wavetable->waveInfo.adpcmWave.loop) {
-			host_wavetable->waveInfo.adpcmWave.loop = htodst32(dstpos);
 			srcpos = srctoh32(n64_wavetable->waveInfo.adpcmWave.loop);
-			dstpos = convert_audio_adpcm_loop(dst, dstpos, src, srcpos);
+			AL_NEXT_ITEM(host_wavetable->waveInfo.adpcmWave.loop, convert_audio_adpcm_loop);
 		} else {
 			host_wavetable->waveInfo.adpcmWave.loop = 0;
 		}
 
 		if (n64_wavetable->waveInfo.adpcmWave.book) {
-			host_wavetable->waveInfo.adpcmWave.book = htodst32(dstpos);
 			srcpos = srctoh32(n64_wavetable->waveInfo.adpcmWave.book);
-			dstpos = convert_audio_adpcm_book(dst, dstpos, src, srcpos);
+			AL_NEXT_ITEM(host_wavetable->waveInfo.adpcmWave.book, convert_audio_adpcm_book);
 		} else {
 			host_wavetable->waveInfo.adpcmWave.book = 0;
 		}
 	} else if (host_wavetable->type == AL_RAW16_WAVE) {
 		if (n64_wavetable->waveInfo.rawWave.loop) {
-			host_wavetable->waveInfo.rawWave.loop = htodst32(dstpos);
 			srcpos = srctoh32(n64_wavetable->waveInfo.rawWave.loop);
-			dstpos = convert_audio_raw_loop(dst, dstpos, src, srcpos);
+			AL_NEXT_ITEM(host_wavetable->waveInfo.rawWave.loop, convert_audio_raw_loop);
 		} else {
 			host_wavetable->waveInfo.rawWave.loop = 0;
 		}
@@ -301,25 +309,22 @@ static int convert_audio_sound(u8 *dst, int dstpos, u8 *src, int srcpos)
 	dstpos += sizeof(struct host_sound);
 
 	if (n64_sound->envelope) {
-		host_sound->envelope = htodst32(dstpos);
 		srcpos = srctoh32(n64_sound->envelope);
-		dstpos = convert_audio_envelope(dst, dstpos, src, srcpos);
+		AL_NEXT_ITEM(host_sound->envelope, convert_audio_envelope);
 	} else {
 		host_sound->envelope = 0;
 	}
 
 	if (n64_sound->keyMap) {
-		host_sound->keyMap = htodst32(dstpos);
 		srcpos = srctoh32(n64_sound->keyMap);
-		dstpos = convert_audio_keymap(dst, dstpos, src, srcpos);
+		AL_NEXT_ITEM(host_sound->keyMap, convert_audio_keymap);
 	} else {
 		host_sound->keyMap = 0;
 	}
 
 	if (n64_sound->wavetable) {
-		host_sound->wavetable = htodst32(dstpos);
 		srcpos = srctoh32(n64_sound->wavetable);
-		dstpos = convert_audio_wavetable(dst, dstpos, src, srcpos);
+		AL_NEXT_ITEM(host_sound->wavetable, convert_audio_wavetable);
 	} else {
 		host_sound->wavetable = 0;
 	}
@@ -355,9 +360,8 @@ static int convert_audio_instrument(u8 *dst, int dstpos, u8 *src, int srcpos)
 	dstpos = dstpos + sizeof(struct host_instrument) + sizeof(uintptr_t) * (soundCount - 1);
 
 	for (int i = 0; i < soundCount; i++) {
-		host_instrument->soundArray[i] = htodst32(dstpos);
 		srcpos = srctoh32(n64_instrument->soundArray[i]);
-		dstpos = convert_audio_sound(dst, dstpos, src, srcpos);
+		AL_NEXT_ITEM(host_instrument->soundArray[i], convert_audio_sound);
 	}
 
 	return dstpos;
@@ -377,17 +381,15 @@ static int convert_audio_bank(u8 *dst, int dstpos, u8 *src, int srcpos)
 	dstpos = dstpos + sizeof(struct host_bank) + sizeof(uintptr_t) * (instCount - 1);
 
 	if (n64_bank->percussion) {
-		host_bank->percussion = htodst32(dstpos);
 		srcpos = srctoh32(n64_bank->percussion);
-		dstpos = convert_audio_instrument(dst, dstpos, src, srcpos);
+		AL_NEXT_ITEM(host_bank->percussion, convert_audio_instrument);
 	} else {
 		host_bank->percussion = 0;
 	}
 
 	for (int i = 0; i < instCount; i++) {
-		host_bank->instArray[i] = htodst32(dstpos);
 		srcpos = srctoh32(n64_bank->instArray[i]);
-		dstpos = convert_audio_instrument(dst, dstpos, src, srcpos);
+		AL_NEXT_ITEM(host_bank->instArray[i], convert_audio_instrument);
 	}
 
 	return dstpos;
@@ -416,8 +418,9 @@ static int convert_audio_bankfile(u8 *dst, u8 *src)
 
 u8 *preprocessALBankFile_x64(u8 *src, u32 size, u32 *outSize)
 {
-	u32 dstlen = size * 4;
-	u8* dst = sysMemZeroAlloc(dstlen);
+	reset_markers();
+	u32 dstlen = size * 3;
+	u8 *dst = sysMemZeroAlloc(dstlen);
 
 	*outSize = convert_audio_bankfile(dst, src);
 	*outSize = ALIGN16(*outSize);
