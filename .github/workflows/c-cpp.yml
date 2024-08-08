@@ -23,6 +23,7 @@ jobs:
             git
             make
             mingw-w64-i686-toolchain
+            mingw-w64-i686-python
             mingw-w64-i686-SDL2
             mingw-w64-i686-zlib
       - name: Checkout repository
