@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ "port" ]
+    branches: [ "port-x64" ]
   pull_request:
-    branches: [ "port" ]
+    branches: [ "port-x64" ]
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW32
+          msystem: MINGW64
           update: true
           install: >-
             git
@@ -39,12 +39,12 @@ jobs:
           cp build/ntsc-final-port/pd.exe bin/
           cp build/pal-final-port/pd.pal.exe bin/
           cp build/jpn-final-port/pd.jpn.exe bin/
-          cp /mingw32/bin/{SDL2.dll,zlib1.dll,libgcc_s_dw2-1.dll,libwinpthread-1.dll} bin/
+          cp /mingw64/bin/{SDL2.dll,zlib1.dll,libgcc_s_dw2-1.dll,libwinpthread-1.dll} bin/
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pd-i686-windows
+          name: pd-i686-windows-x64
           path: bin/
           retention-days: 0
 
@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo dpkg --add-architecture i386
+          sudo dpkg --add-architecture amd64
           sudo apt-get update
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-dev:i386 zlib1g-dev:i386
       - name: Checkout repository
@@ -74,13 +74,13 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pd-i686-linux
+          name: pd-i686-linux-x64
           path: bin/
           retention-days: 0
 
   publish-latest-build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/port'
+    if: github.ref == 'refs/heads/port-x64'
     needs: [build-i686-windows, build-i686-linux]
     permissions:
       contents: write
@@ -95,9 +95,9 @@ jobs:
         run: |
           mkdir ci-release
           pushd ci-artifacts
-          tar czf ../ci-release/pd-i686-linux.tar.gz pd-i686-linux
-          zip -r ../ci-release/pd-i686-windows.zip pd-i686-windows
+          tar czf ../ci-release/pd-i686-linux-x64.tar.gz pd-i686-linux-x64
+          zip -r ../ci-release/pd-i686-windows-x64.zip pd-i686-windows-x64
           popd
-          git tag --force ci-dev-build port
-          git push --force origin ci-dev-build
-          gh release upload --clobber ci-dev-build ci-release/*
+          git tag --force ci-dev-build-x64 port
+          git push --force origin ci-dev-build-x64
+          gh release upload --clobber ci-dev-build-x64 ci-release/*
