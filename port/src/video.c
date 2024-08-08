@@ -218,6 +218,7 @@ void videoSetMaximizeWindow(s32 fs)
 void videoSetTextureFilter(u32 filter)
 {
 	if (filter > FILTER_THREE_POINT) filter = FILTER_THREE_POINT;
+	if (texFilter == filter) return;
 	texFilter = filter;
 	gfx_set_texture_filter((enum FilteringMode)filter);
 }
