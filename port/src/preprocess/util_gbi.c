@@ -151,7 +151,7 @@ void gbiGdlRewriteAddrs(u8 *dst, u32 offset)
 
 	do {
 		cmd = *cmds;
-		Gfx* gfxcmd = cmds;
+		Gfx* gfxcmd = (Gfx *)cmds;
 		int idx = 0;
 		u8 opcode = (cmd >> 24) & 0xff;
 
