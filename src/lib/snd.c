@@ -1450,13 +1450,13 @@ void sndInit(void)
 #endif
 
 #if VERSION >= VERSION_JPN_FINAL
-	u32 heaplen = 1024 * 441;
+	u32 heaplen = 1024 * 528;
 #elif VERSION >= VERSION_PAL_BETA
-	u32 heaplen = 1024 * 446;
+	u32 heaplen = 1024 * 533;
 #elif VERSION >= VERSION_NTSC_1_0
-	u32 heaplen = 1024 * 441;
+	u32 heaplen = 1024 * 528;
 #else
-	u32 heaplen = 1024 * 438;
+	u32 heaplen = 1024 * 525;
 #endif
 
 #ifdef PLATFORM_64BIT

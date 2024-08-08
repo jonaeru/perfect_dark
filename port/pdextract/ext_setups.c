@@ -1182,7 +1182,7 @@ static int convert_setup(u8 *dst, u8 *src, u32 srclen)
 	return dstpos;
 }
 
-u8 *preprocessSetupFile_x64(u8 *data, u32 size, u32 *outSize) { 
+u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize) { 
 	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_SETUP);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 

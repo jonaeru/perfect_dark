@@ -48,7 +48,7 @@ struct fontdef {
 	int pal_extra_chars;
 };
 
-u8* preprocessFont_x64(u8 *src, u32 srclen, u32 *outSize)
+u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 {
 	int num_chars = 94;
 #if VERSION == VERSION_PAL_FINAL

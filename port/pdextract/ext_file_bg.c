@@ -564,7 +564,6 @@ static void convert_section3_lightcounts(u8 *dst, u32 *dstpos, u8 *src, u32 *src
 	*dstpos += (m_NumRooms - 1);
 }
 
-#ifdef PLATFORM_64BIT
 void preprocessBgSection1(u8 *data, u32 size, u32 ofs)
 {
 	u8 *dst = sysMemZeroAlloc(size);
@@ -596,4 +595,3 @@ u32 preprocessBgRoom(u8 *data, u32 size, u32 room_ofs)
 
 	return newSize;
 }
-#endif

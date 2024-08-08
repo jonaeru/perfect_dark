@@ -310,7 +310,7 @@ static int convert_pads_file(u8 *dst, u8 *src)
 	return dstpos;
 }
 
-u8* preprocessPadsFile_x64(u8 *data, u32 size, u32 *outSize) {
+u8* preprocessPadsFile(u8 *data, u32 size, u32 *outSize) {
 	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_PADS);
 	u8* dst = sysMemZeroAlloc(newSizeEstimated);
 

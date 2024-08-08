@@ -86,7 +86,7 @@ u32 convert_tiles(u8 *dst, u8 *src, size_t srclen)
 	return ALIGN16(cur_dst_offset);
 }
 
-u8 *preprocessTilesFile_x64(u8 *data, u32 size, u32 *outSize)
+u8 *preprocessTilesFile(u8 *data, u32 size, u32 *outSize)
 {
 	u32 newSizeEstimated = romdataGetEstimatedFileSize(size, FT_TILES);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);

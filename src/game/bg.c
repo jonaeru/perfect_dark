@@ -2003,11 +2003,6 @@ void bgBuildTables(s32 stagenum)
 			numlightsptr++;
 		}
 
-// in x64, lights are already pre-processed at this point (TEMP)
-#if !defined(PLATFORM_N64) && !defined(PLATFORM_64BIT)
-		preprocessBgLights(g_BgLightsFileData, 0);
-#endif
-
 		// Free the section 3 allocation
 		mempRealloc(section3, 0, MEMPOOL_STAGE);
 

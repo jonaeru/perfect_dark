@@ -28,13 +28,4 @@ u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessGunFile(u8 *data, u32 size, u32 *outSize);
 
-// these are in pdextract
-u8 *preprocessFont_x64(u8*, u32, u32*);
-u8 *preprocessALBankFile_x64(u8*, u32, u32*);
-u8 *preprocessModelFile_x64(u8*, u32, u32*);
-u8 *preprocessTilesFile_x64(u8*, u32, u32*);
-u8 *preprocessSetupFile_x64(u8*, u32, u32*);
-u8 *preprocessPadsFile_x64(u8*, u32, u32*);
-u8 *preprocessLangFile_x64(u8*, u32, u32*);
-
 #endif

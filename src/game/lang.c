@@ -425,11 +425,7 @@ char *langGet(s32 textid)
 	uintptr_t addr;
 
 	if (bank && bank[textindex]) {
-#ifdef PLATFORM_64BIT
 		addr = (uintptr_t)bank + bank[textindex];
-#else
-		addr = (uintptr_t)bank + PD_BE32(bank[textindex]);
-#endif
 	} else {
 		addr = 0;
 	}

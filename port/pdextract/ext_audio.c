@@ -416,7 +416,7 @@ static int convert_audio_bankfile(u8 *dst, u8 *src)
 	return dstpos;
 }
 
-u8 *preprocessALBankFile_x64(u8 *src, u32 size, u32 *outSize)
+u8 *preprocessALBankFile(u8 *src, u32 size, u32 *outSize)
 {
 	reset_markers();
 	u32 dstlen = size * 3;
