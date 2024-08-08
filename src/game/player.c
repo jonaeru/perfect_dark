@@ -1100,6 +1100,15 @@ void playerSpawn(void)
 			}
 		} else {
 #ifndef PLATFORM_N64
+			if (cheatIsActive(CHEAT_CLOAKINGDEVICE)) {
+				invGiveSingleWeapon(WEAPON_CLOAKINGDEVICE);
+#if VERSION >= VERSION_PAL_FINAL
+				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, TICKS(7200));
+#else
+				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, 7200);
+#endif
+			}
+
 			if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
 				invGiveSingleWeapon(WEAPON_NIGHTVISION);
 			}

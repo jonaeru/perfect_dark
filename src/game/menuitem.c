@@ -2607,11 +2607,17 @@ Gfx *menuitemCarouselRender(Gfx *gdl, struct menurendercontext *context)
 		colour = colourBlend(colourBlend(colour, 0x000000ff, 127), colour1, weight);
 	}
 
+#ifdef PLATFORM_N64
+	s16 chevronOffset = 0;
+#else 
+	s16 chevronOffset = 3;
+#endif
+
 	// Left arrow
-	gdl = menugfxDrawCarouselChevron(gdl, context->x, context->y + context->height / 2, 8, 1, -1, colour);
+	gdl = menugfxDrawCarouselChevron(gdl, context->x + chevronOffset, context->y + context->height / 2, 8, 1, -1, colour);
 
 	// Right arrow
-	gdl = menugfxDrawCarouselChevron(gdl, context->x + context->width, context->y + context->height / 2, 8, 3, -1, colour);
+	gdl = menugfxDrawCarouselChevron(gdl, context->x + context->width - chevronOffset, context->y + context->height / 2, 8, 3, -1, colour);
 
 	// This part of the function is unused because param2 is always zero.
 	// Setting it to 0x7b causes a crash.

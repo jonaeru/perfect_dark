@@ -195,6 +195,7 @@
 #define G_COPYFB_EXT            0x41
 #define G_IMAGERECT_EXT         0x42
 #define G_RDPFLUSH_EXT          0x43
+#define G_CLEAR_DEPTH_EXT       0x44
 
 /* G_EXTRAGEOMETRYMODE flags */
 
@@ -299,6 +300,8 @@
 #define gSPTextureRectangleFlipEXT(p, xl, yl, xh, yh, tile, s, t, ds, dt) gSPTextureRectangleWideEXT(p, xl, yl, xh, yh, tile, s, t, ds, dt, G_ON)
 
 #define gDPFlushEXT(pkt) gDPNoParam(pkt, G_RDPFLUSH_EXT)
+
+#define gDPClearDepthEXT(pkt) gDPNoParam(pkt, G_CLEAR_DEPTH_EXT)
 
 #undef gDPFillRectangleScaled
 #define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1) * g_ScaleX, y1, (x2) * g_ScaleX, y2)
