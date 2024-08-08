@@ -23,3 +23,4 @@ src/generated
 tools/mkrom/mkrom
 /.vs
 CppProperties.json
+.idea

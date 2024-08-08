@@ -4283,7 +4283,7 @@ u32 fileGetInflatedSize(s32 filenum, FileType filetype)
 	}
 
 	if (rzipIs1173(ptr)) {
-		return romdataGetEstimatedFileSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], filetype);
+		return romdataFileGetEstimatedSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], filetype);
 	}
 
 #if VERSION < VERSION_NTSC_1_0

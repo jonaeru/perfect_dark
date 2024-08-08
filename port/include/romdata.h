@@ -30,6 +30,6 @@ s32 romdataFileGetNumForName(const char *name);
 u8 *romdataSegGetData(const char *segName);
 u8 *romdataSegGetDataEnd(const char *segName);
 u32 romdataSegGetSize(const char *segName);
-u32 romdataGetEstimatedFileSize(u32 size, FileType filetype);
+u32 romdataFileGetEstimatedSize(u32 size, FileType filetype);
 
 #endif
