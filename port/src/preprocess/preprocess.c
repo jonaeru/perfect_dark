@@ -14,30 +14,7 @@
 #include "romdata.h"
 #include "mod.h"
 #include "system.h"
-
-static inline f32 swapF32(f32 x) { *(u32 *)&x = PD_BE32(*(u32 *)&x); return x; }
-static inline u32 swapU32(u32 x) { return PD_BE32(x); }
-static inline s32 swapS32(s32 x) { return PD_BE32(x); }
-static inline u16 swapU16(u16 x) { return PD_BE16(x); }
-static inline s16 swapS16(s16 x) { return PD_BE16(x); }
-static inline void *swapPtr(void **x) { return (void *)PD_BEPTR((uintptr_t)x); }
-static inline struct coord swapCrd(struct coord crd) { crd.x = swapF32(crd.x); crd.y = swapF32(crd.y); crd.z = swapF32(crd.z); return crd; }
-static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
-
-#define PD_SWAP_VAL(x) x = _Generic((x), \
-	f32: swapF32, \
-	u32: swapU32, \
-	s32: swapS32, \
-	u16: swapU16, \
-	s16: swapS16, \
-	struct coord: swapCrd, \
-	default: swapUnk	\
-)(x)
-
-#define PD_SWAP_PTR(x) x = swapPtr((void *)(x))
-
-#define PD_PTR_BASE(x, b) (void *)((u8 *)b + (uintptr_t)x)
-#define PD_PTR_BASEOFS(x, b, d) (void *)((u8 *)b - d + (uintptr_t)x)
+#include "common.h"
 
 // HACK: to prevent double-swapping stuff, flag swapped offsets in a bitmap
 
@@ -274,78 +251,4 @@ u8* preprocessTexturesList(u8* data, u32 size, u32* outSize)
 		tex->surfacetype = tmp;
 	}
 	return 0;
-}
-
-void preprocessBgSection1Header(u8 *data, u32 size)
-{
-	u32 *header = (u32 *)data;
-	PD_SWAP_VAL(header[0]); // inflatedsize
-	PD_SWAP_VAL(header[1]); // section1size
-	PD_SWAP_VAL(header[2]); // primcompsize
-}
-
-void preprocessBgSection2Header(u8 *data, u32 size)
-{
-	u16 *header = (u16 *)data;
-	PD_SWAP_VAL(header[0]); // inflatedsize
-	PD_SWAP_VAL(header[1]); // section2compsize
-}
-
-void preprocessBgSection2(u8 *data, u32 size)
-{
-	// section2 is a texture id list
-	u16 *section2 = (u16 *)data;
-	for (s32 i = 0; i < size; ++i) {
-		PD_SWAP_VAL(section2[i]);
-	}
-}
-
-void preprocessBgSection3Header(u8 *data, u32 size)
-{
-	u16 *header = (u16 *)data;
-	PD_SWAP_VAL(header[0]);
-	PD_SWAP_VAL(header[1]);
-}
-
-void preprocessBgSection3(u8 *data, u32 size)
-{
-	// room bounding boxes, 6x s16 per room
-	s16 *bbox = (s16 *)data;
-	for (s32 i = 1; i < g_Vars.roomcount; ++i) {
-		PD_SWAP_VAL(*bbox); ++bbox;
-		PD_SWAP_VAL(*bbox); ++bbox;
-		PD_SWAP_VAL(*bbox); ++bbox;
-		PD_SWAP_VAL(*bbox); ++bbox;
-		PD_SWAP_VAL(*bbox); ++bbox;
-		PD_SWAP_VAL(*bbox); ++bbox;
-	}
-
-	// gfxdatalen list
-	u16 *gfxdatalen = (u16 *)bbox;
-	for (s32 i = 1; i < g_Vars.roomcount; ++i) {
-		PD_SWAP_VAL(*gfxdatalen); ++gfxdatalen;
-	}
-}
-
-void preprocessBgLights(u8 *data, u32 ofs)
-{
-	struct light *lbase = (void *)data;
-	if (!lbase) {
-		return;
-	}
-
-	for (s32 i = 0; i < g_Vars.roomcount; ++i) {
-		if (g_Rooms[i].numlights) {
-			struct light *lit = &lbase[g_Rooms[i].lightindex];
-			for (s32 j = 0; j < g_Rooms[i].numlights; ++j, ++lit) {
-				PD_SWAP_VAL(lit->colour);
-				PD_SWAP_VAL(lit->roomnum);
-				for (s32 k = 0; k < ARRAYCOUNT(lit->bbox); ++k) {
-					PD_SWAP_VAL(lit->bbox[k].x);
-					PD_SWAP_VAL(lit->bbox[k].y);
-					PD_SWAP_VAL(lit->bbox[k].z);
-				}
-			}
-		}
-	}
 }
