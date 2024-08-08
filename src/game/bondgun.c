@@ -4192,7 +4192,7 @@ void bgunTickMasterLoad(void)
 								modelInit(&hand->handmodel, player->gunctrl.handmodeldef, hand->handsavedata, false);
 							}
 
-							hand->unk0dcc = (s32 *) player->gunctrl.memloadptr;
+							hand->unk0dcc = (uintptr_t *) player->gunctrl.memloadptr;
 
 							value = bgunCreateModelCmdList(&hand->gunmodel, player->gunctrl.gunmodeldef->rootnode, (uintptr_t *) player->gunctrl.memloadptr);
 

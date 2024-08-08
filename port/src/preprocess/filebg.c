@@ -300,7 +300,7 @@ static void convertPrimaryLights(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32
 #define BLOCK_LEAF 0
 #define BLOCK_PARENT 1
 
-void relinkPtr(uintptr_t** ptr)
+void relinkPtr(uintptr_t* ptr)
 {
 	if (!*ptr) return;
 
@@ -455,10 +455,10 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 	for (size_t i = 0; i < numblocks; i++) {
 		struct host_roomblock *block = (struct host_roomblock*)&ptr_dst_roomblocks[i];
 		
-		relinkPtr(&block->ptr_next);
+		relinkPtr((uintptr_t*)&block->ptr_next);
 
 		if (block->type == BLOCK_LEAF) {
-			relinkPtr(&block->ptr_gdl);
+			relinkPtr((uintptr_t*)&block->ptr_gdl);
 			u32 offset_vtx = block->ptr_vertices - ptr_src_vertices - src_ofs;
 			u32 offset_col = block->ptr_colours - ptr_src_colors - src_ofs;
 
@@ -466,16 +466,16 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 			block->ptr_colours = ptr_dst_colors + offset_col;
 		}
 		else {
-			relinkPtr(&block->ptr_gdl); // child
-			relinkPtr(&block->ptr_vertices); // coord
+			relinkPtr((uintptr_t*)&block->ptr_gdl); // child
+			relinkPtr((uintptr_t*)&block->ptr_vertices); // coord
 		}
 	}
 	
 	// relink ptrs: header
-	relinkPtr(&dst_header->ptr_vertices);
-	relinkPtr(&dst_header->ptr_colours);
-	relinkPtr(&dst_header->ptr_opablocks);
-	relinkPtr(&dst_header->ptr_xlublocks);
+	relinkPtr((uintptr_t*)&dst_header->ptr_vertices);
+	relinkPtr((uintptr_t*)&dst_header->ptr_colours);
+	relinkPtr((uintptr_t*)&dst_header->ptr_opablocks);
+	relinkPtr((uintptr_t*)&dst_header->ptr_xlublocks);
 
 	return curpos_dst;
 }

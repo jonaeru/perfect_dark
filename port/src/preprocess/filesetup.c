@@ -1138,8 +1138,7 @@ static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 		u32 listsize = chraiGetAilistLength(list);
 		memcpy(dst + dstpos, list, listsize);
 
-		// align to the next multiple of 4
-		dstpos += ((listsize + 3) >> 2) << 2;
+		dstpos += ALIGN(listsize, 4);
 	}
 	
 	return dstpos;
@@ -1177,7 +1176,7 @@ static int convertSetup(u8 *dst, u8 *src, u32 srclen)
 	dst_header->paths = (struct path*) dstpos;
 	dstpos += convertPaths(&dst[dstpos], &src[srcpos]);
 
-	dstpos += convertPads(&dst[(uintptr_t)dst_header->paths], dst, src, dstpos);
+	dstpos += convertPads((struct path*)&dst[(uintptr_t)dst_header->paths], dst, src, dstpos);
 
 	return dstpos;
 }
