@@ -4,11 +4,21 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include "platform.h"
+
+#ifdef PLATFORM_WIN32
 
 #include <winsock2.h>
 // this BS comes from windows.h
 #undef near
 #undef far
+
+#else
+
+#include <arpa/inet.h>
+
+#endif
 
 #include <sys/param.h>
 

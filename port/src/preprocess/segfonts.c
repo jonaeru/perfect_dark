@@ -59,7 +59,7 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 	if (src == _fonthandelgothicsmSegmentRomStart
 		|| src == _fonthandelgothicxsSegmentRomStart
 		|| src == _fonthandelgothicmdSegmentRomStart) {
-		numchars = 135;
+		num_chars = 135;
 	}
 #endif
 

@@ -20,7 +20,7 @@ static inline void convU16(u16 *dst, u32 src) { *dst = srctoh16(src); }
 static inline void convS16(s16 *dst, s32 src) { *dst = srctoh16(src); }
 static inline void cpyByte(u8 *dst, u8 src) { *dst = src; }
 static inline void convCoord(struct coord* dst, struct n64_coord src) { convF32(&dst->x, src.x); convF32(&dst->y, src.y); convF32(&dst->z, src.z); }
-static u32 convUnk(void* x, u32 y) { __debugbreak(); }
+static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
 
 #define PD_CONV_VAL(dst, src) _Generic((dst), \
 	f32: convF32, \
@@ -40,7 +40,7 @@ static u32 convUnk(void* x, u32 y) { __debugbreak(); }
 		for (int j = 0; j < ARRAYCOUNT(dst); j++) PD_CONV_VAL(dst[i][j], src[i][j]); \
 }
 
-#define PD_CONV_PTR(dst, src) dst = srctoh32(src)
+#define PD_CONV_PTR(dst, src, type) dst = (type)srctoh32(src)
 
 static u32 obj_size(struct n64_defaultobj *obj)
 {
@@ -109,10 +109,10 @@ static u32 obj_size(struct n64_defaultobj *obj)
 
 void conv_tvscreen(struct tvscreen* dstobj, struct n64_tvscreen* srcobj)
 {
-	PD_CONV_PTR(dstobj->cmdlist, srcobj->ptr_cmdlist);
+	PD_CONV_PTR(dstobj->cmdlist, srcobj->ptr_cmdlist, u32*);
 	PD_CONV_VAL(dstobj->offset, srcobj->offset);
 	PD_CONV_VAL(dstobj->pause60, srcobj->pause60);
-	PD_CONV_PTR(dstobj->tconfig, srcobj->ptr_tconfig);
+	PD_CONV_PTR(dstobj->tconfig, srcobj->ptr_tconfig, struct textureconfig*);
 	PD_CONV_VAL(dstobj->rot, srcobj->rot);
 	PD_CONV_VAL(dstobj->xscale, srcobj->xscale);
 	PD_CONV_VAL(dstobj->xscalefrac, srcobj->xscalefrac);
@@ -180,12 +180,11 @@ void convertDefaultObj(struct defaultobj* dstobj, struct n64_defaultobj* srcobj)
 	PD_CONV_VAL(dstobj->flags, srcobj->flags);
 	PD_CONV_VAL(dstobj->flags2, srcobj->flags2);
 	PD_CONV_VAL(dstobj->flags3, srcobj->flags3);
-	PD_CONV_PTR(dstobj->prop, srcobj->ptr_prop);
-	PD_CONV_PTR(dstobj->model, srcobj->ptr_model);
+	PD_CONV_PTR(dstobj->prop, srcobj->ptr_prop, struct prop*);
+	PD_CONV_PTR(dstobj->model, srcobj->ptr_model, struct model*);
 	PD_CONV_ARRAY2D(dstobj->realrot, srcobj->realrot);
 	PD_CONV_VAL(dstobj->hidden, srcobj->hidden);
-	PD_CONV_PTR(dstobj->unkgeo, srcobj->ptr_unkgeo);
-	PD_CONV_PTR(dstobj->embedment, srcobj->ptr_embedment);
+	PD_CONV_PTR(dstobj->unkgeo, srcobj->ptr_unkgeo, struct geocyl*);
 	PD_CONV_VAL(dstobj->damage, srcobj->damage);
 	PD_CONV_VAL(dstobj->maxdamage, srcobj->maxdamage);
 	PD_CONV_ARRAY(dstobj->shadecol, srcobj->shadecol);
@@ -230,7 +229,7 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->opadist, srcobj->opadist);
 				PD_CONV_VAL(dstobj->startpos, srcobj->startpos);
 				PD_CONV_ARRAY2D(dstobj->mtx98, srcobj->mtx98);
-				PD_CONV_PTR(dstobj->sibling, srcobj->ptr_sibling);
+				PD_CONV_PTR(dstobj->sibling, srcobj->ptr_sibling, struct doorobj*);
 				PD_CONV_VAL(dstobj->lastopen60, srcobj->lastopen60);
 				PD_CONV_VAL(dstobj->portalnum, srcobj->portalnum);
 				PD_CONV_VAL(dstobj->soundtype, srcobj->soundtype);
@@ -337,7 +336,7 @@ u32 convertProps(u8* dst, u8* src)
 
 				PD_CONV_VAL(dstobj->team, srcobj->team);
 
-				PD_CONV_PTR(dstobj->dualweapon, srcobj->ptr_dualweapon);
+				PD_CONV_PTR(dstobj->dualweapon, srcobj->ptr_dualweapon, struct weaponobj*);
 
 				dst += sizeof(struct weaponobj);
 				break;
@@ -428,9 +427,9 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->lastseebond60, srcobj->lastseebond60);
 				PD_CONV_VAL(dstobj->lastaimbond60, srcobj->lastaimbond60);
 				PD_CONV_VAL(dstobj->allowsoundframe, srcobj->allowsoundframe);
-				PD_CONV_PTR(dstobj->beam, srcobj->ptr_beam);
+				PD_CONV_PTR(dstobj->beam, srcobj->ptr_beam, struct beam*);
 				PD_CONV_VAL(dstobj->shotbondsum, srcobj->shotbondsum);
-				PD_CONV_PTR(dstobj->target, srcobj->ptr_target);
+				PD_CONV_PTR(dstobj->target, srcobj->ptr_target, struct prop*);
 				PD_CONV_VAL(dstobj->targetteam, srcobj->targetteam);
 				PD_CONV_VAL(dstobj->ammoquantity, srcobj->ammoquantity);
 				PD_CONV_VAL(dstobj->nextchrtest, srcobj->nextchrtest);
@@ -468,9 +467,9 @@ u32 convertProps(u8* dst, u8* src)
 				struct linkliftdoorobj* dstobj = (struct linkliftdoorobj*)dst;
 
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
-				PD_CONV_PTR(dstobj->door, srcobj->ptr_door);
-				PD_CONV_PTR(dstobj->lift, srcobj->ptr_lift);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->door, srcobj->ptr_door, struct prop*);
+				PD_CONV_PTR(dstobj->lift, srcobj->ptr_lift, struct prop*);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct linkliftdoorobj*);
 				PD_CONV_VAL(dstobj->stopnum, srcobj->stopnum);
 
 				dst += sizeof(struct linkliftdoorobj);
@@ -513,8 +512,8 @@ u32 convertProps(u8* dst, u8* src)
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
 				PD_CONV_VAL(dstobj->tagnum, srcobj->tagnum);
 				PD_CONV_VAL(dstobj->cmdoffset, srcobj->cmdoffset);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
-				PD_CONV_PTR(dstobj->obj, srcobj->ptr_obj);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct tag*);
+				PD_CONV_PTR(dstobj->obj, srcobj->ptr_obj, struct defaultobj*);
 
 				dst += sizeof(struct tag);
 				break;
@@ -572,7 +571,7 @@ u32 convertProps(u8* dst, u8* src)
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
 				PD_CONV_VAL(dstobj->obj, srcobj->obj);
 				PD_CONV_VAL(dstobj->status, srcobj->status);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct criteria_holograph*);
 
 				dst += sizeof(struct criteria_holograph);
 				break;
@@ -585,7 +584,7 @@ u32 convertProps(u8* dst, u8* src)
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
 				PD_CONV_VAL(dstobj->pad, srcobj->pad);
 				PD_CONV_VAL(dstobj->status, srcobj->status);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct criteria_roomentered*);
 
 				dst += sizeof(struct criteria_roomentered);
 				break;
@@ -598,7 +597,7 @@ u32 convertProps(u8* dst, u8* src)
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
 				PD_CONV_VAL(dstobj->pad, srcobj->pad);
 				PD_CONV_VAL(dstobj->status, srcobj->status);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct criteria_throwinroom*);
 
 				dst += sizeof(struct criteria_throwinroom);
 				break;
@@ -611,7 +610,7 @@ u32 convertProps(u8* dst, u8* src)
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
 				PD_CONV_VAL(dstobj->type, srcobj->type);
 				PD_CONV_VAL(dstobj->text, srcobj->text);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct briefingobj*);
 
 				dst += sizeof(struct briefingobj);
 				break;
@@ -629,8 +628,8 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->inventorytext, srcobj->inventorytext);
 				PD_CONV_VAL(dstobj->inventory2text, srcobj->inventory2text);
 				PD_CONV_VAL(dstobj->pickuptext, srcobj->pickuptext);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
-				PD_CONV_PTR(dstobj->obj, srcobj->ptr_obj);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct textoverride*);
+				PD_CONV_PTR(dstobj->obj, srcobj->ptr_obj, struct defaultobj*);
 
 				dst += sizeof(struct textoverride);
 				break;
@@ -641,9 +640,9 @@ u32 convertProps(u8* dst, u8* src)
 				struct padlockeddoorobj* dstobj = (struct padlockeddoorobj*)dst;
 
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
-				PD_CONV_PTR(dstobj->door, srcobj->ptr_door);
-				PD_CONV_PTR(dstobj->lock, srcobj->ptr_lock);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->door, srcobj->ptr_door, struct doorobj*);
+				PD_CONV_PTR(dstobj->lock, srcobj->ptr_lock, struct defaultobj*);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct padlockeddoorobj*);
 
 				dst += sizeof(struct padlockeddoorobj);
 				break;
@@ -655,7 +654,7 @@ u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -665,7 +664,7 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->speedtime60, srcobj->speedtime60);
 				PD_CONV_VAL(dstobj->turnrot60, srcobj->turnrot60);
 				PD_CONV_VAL(dstobj->roty, srcobj->roty);
-				PD_CONV_PTR(dstobj->path, srcobj->ptr_path);
+				PD_CONV_PTR(dstobj->path, srcobj->ptr_path, struct path*);
 				PD_CONV_VAL(dstobj->nextstep, srcobj->nextstep);
 
 				dst += sizeof(struct truckobj);
@@ -678,7 +677,7 @@ u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->rotoryrot, srcobj->rotoryrot);
@@ -689,7 +688,7 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->speedaim, srcobj->speedaim);
 				PD_CONV_VAL(dstobj->speedtime60, srcobj->speedtime60);
 				PD_CONV_VAL(dstobj->yrot, srcobj->yrot);
-				PD_CONV_PTR(dstobj->path, srcobj->ptr_path);
+				PD_CONV_PTR(dstobj->path, srcobj->ptr_path, struct path*);
 				PD_CONV_VAL(dstobj->nextstep, srcobj->nextstep);
 
 				dst += sizeof(struct heliobj);
@@ -712,10 +711,10 @@ u32 convertProps(u8* dst, u8* src)
 				struct safeitemobj* dstobj = (struct safeitemobj*)dst;
 
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
-				PD_CONV_PTR(dstobj->item, srcobj->ptr_item);
-				PD_CONV_PTR(dstobj->safe, srcobj->ptr_safe);
-				PD_CONV_PTR(dstobj->door, srcobj->ptr_door);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->item, srcobj->ptr_item, struct defaultobj*);
+				PD_CONV_PTR(dstobj->safe, srcobj->ptr_safe, struct safeobj*);
+				PD_CONV_PTR(dstobj->door, srcobj->ptr_door, struct doorobj*);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct safeitemobj*);
 
 				dst += sizeof(struct safeitemobj);
 				break;
@@ -766,7 +765,7 @@ u32 convertProps(u8* dst, u8* src)
 
 				PD_CONV_ARRAY(dstobj->pads, srcobj->pads);
 				for (int k = 0; k < 4; k++)
-					PD_CONV_PTR(dstobj->doors[k], srcobj->ptr_doors[k]);
+					PD_CONV_PTR(dstobj->doors[k], srcobj->ptr_doors[k], struct doorobj*);
 				PD_CONV_VAL(dstobj->dist, srcobj->dist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
 				PD_CONV_VAL(dstobj->accel, srcobj->accel);
@@ -785,10 +784,10 @@ u32 convertProps(u8* dst, u8* src)
 				struct linksceneryobj* dstobj = (struct linksceneryobj*)dst;
 
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
-				PD_CONV_PTR(dstobj->trigger, srcobj->ptr_trigger);
-				PD_CONV_PTR(dstobj->unexp, srcobj->ptr_unexp);
-				PD_CONV_PTR(dstobj->exp, srcobj->ptr_exp);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->trigger, srcobj->ptr_trigger, struct defaultobj*);
+				PD_CONV_PTR(dstobj->unexp, srcobj->ptr_unexp, struct defaultobj*);
+				PD_CONV_PTR(dstobj->exp, srcobj->ptr_exp, struct defaultobj*);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct linksceneryobj*);
 
 				dst += sizeof(struct linksceneryobj);
 				break;
@@ -799,10 +798,10 @@ u32 convertProps(u8* dst, u8* src)
 				struct blockedpathobj* dstobj = (struct blockedpathobj*)dst;
 
 				convertDefaultObjHdr((struct defaultobj*)dstobj, cmd);
-				PD_CONV_PTR(dstobj->blocker, srcobj->ptr_blocker);
+				PD_CONV_PTR(dstobj->blocker, srcobj->ptr_blocker, struct defaultobj*);
 				PD_CONV_VAL(dstobj->waypoint1, srcobj->waypoint1);
 				PD_CONV_VAL(dstobj->waypoint2, srcobj->waypoint2);
-				PD_CONV_PTR(dstobj->next, srcobj->ptr_next);
+				PD_CONV_PTR(dstobj->next, srcobj->ptr_next, struct blockedpathobj*);
 
 				dst += sizeof(struct blockedpathobj);
 				break;
@@ -898,7 +897,7 @@ u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -910,7 +909,7 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->roty, srcobj->roty);
 				PD_CONV_VAL(dstobj->rotx, srcobj->rotx);
 				PD_CONV_VAL(dstobj->rotz, srcobj->rotz);
-				PD_CONV_PTR(dstobj->path, srcobj->ptr_path);
+				PD_CONV_PTR(dstobj->path, srcobj->ptr_path, struct path*);
 				PD_CONV_VAL(dstobj->nextstep, srcobj->nextstep);
 				PD_CONV_VAL(dstobj->status, srcobj->status);
 				PD_CONV_VAL(dstobj->dead, srcobj->dead);
@@ -939,7 +938,7 @@ u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -951,7 +950,7 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->roty, srcobj->roty);
 				PD_CONV_VAL(dstobj->rotx, srcobj->rotx);
 				PD_CONV_VAL(dstobj->rotz, srcobj->rotz);
-				PD_CONV_PTR(dstobj->path, srcobj->ptr_path);
+				PD_CONV_PTR(dstobj->path, srcobj->ptr_path, struct path*);
 				PD_CONV_VAL(dstobj->nextstep, srcobj->nextstep);
 				PD_CONV_VAL(dstobj->weaponsarmed, srcobj->weaponsarmed);
 				PD_CONV_VAL(dstobj->ontarget, srcobj->ontarget);
@@ -976,7 +975,7 @@ u32 convertProps(u8* dst, u8* src)
 				PD_CONV_VAL(dstobj->gunrotx, srcobj->gunrotx);
 				PD_CONV_VAL(dstobj->barrelrotspeed, srcobj->barrelrotspeed);
 				PD_CONV_VAL(dstobj->barrelrot, srcobj->barrelrot);
-				PD_CONV_PTR(dstobj->fireslotthing, srcobj->ptr_fireslotthing);
+				PD_CONV_PTR(dstobj->fireslotthing, srcobj->ptr_fireslotthing, struct fireslotthing*);
 				PD_CONV_VAL(dstobj->dead, srcobj->dead);
 
 				dst += sizeof(struct chopperobj);
@@ -1050,7 +1049,7 @@ static u32 convertPaths(u8 *dst, u8 *src)
 	struct path* dstpath = (struct path*)dst;
 
 	while (true) {
-		PD_CONV_PTR(dstpath->pads, srcpath->ptr_pads);
+		PD_CONV_PTR(dstpath->pads, srcpath->ptr_pads, s32*);
 		PD_CONV_VAL(dstpath->id, srcpath->id);
 		PD_CONV_VAL(dstpath->flags, srcpath->flags);
 		PD_CONV_VAL(dstpath->len, srcpath->len);
@@ -1093,7 +1092,7 @@ static u32 convertAiLists(u8* dst, u8* src)
 
 	while (true) {
 		// at this point these fields are already converted, so we just assign
-		dstailist->list = srcailist->ptr_list;
+		dstailist->list = (u8*)srcailist->ptr_list;
 		dstailist->id = srcailist->id;
 
 
@@ -1123,7 +1122,7 @@ static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 	for (struct n64_ailist *ailist = src_ailists; ailist->ptr_list; ailist++) {
 		// update the src list pointers here
 		uintptr_t src_ptr_list = (uintptr_t) ailist->ptr_list;
-		ailist->ptr_list = (u8*)dstpos;
+		ailist->ptr_list = dstpos;
 
 		// multiple ailists can point to the same list, so we need to check if it was already copied
 		struct ptrmarker *marker = findPtrMarker(src_ptr_list);

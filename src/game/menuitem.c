@@ -799,7 +799,7 @@ bool menuitemListTick(struct menuitem *item, struct menuinputs *inputs, u32 tick
 
 void menuitemDropdownInit(struct menuitem *item, union menuitemdata *data)
 {
-	s32 (*handler)(s32 operation, struct menuitem *item, union handlerdata *data);
+	uintptr_t (*handler)(s32 operation, struct menuitem *item, union handlerdata *data);
 	union handlerdata handlerdata;
 	union handlerdata handlerdata2;
 

@@ -22,6 +22,7 @@
 
 #include <PR/ultratypes.h>
 #include "gbiex.h"
+#include <stdint.h>
 
 #ifndef PLATFORM_N64
 #include "platform.h"

@@ -315,11 +315,11 @@ struct dst_texconfig {
 	u8 unk0b;
 };
 
-static inline void *minPtr(void *a, void *b) {
+static inline uintptr_t minPtr(uintptr_t a, uintptr_t b) {
 	return (a && (a < b || !b)) ? a : b;
 }
 
-static inline void *minPtr3(void *a, void *b, void *c) {
+static inline uintptr_t minPtr3(uintptr_t a, uintptr_t b, uintptr_t c) {
 	return minPtr(minPtr(a, b), c);
 }
 
@@ -781,14 +781,14 @@ static u32 resolvePointer(u32 src_offset)
 
 static u8 *relinkPointers(u8 *dst, u8 *src)
 {
-	u8 *textures_end = 0;
+	uintptr_t textures_end = 0;
 
 	for (int i = 0; i < m_NumMarkers; i++) {
 		struct marker *marker = &m_Markers[i];
 		void *src_thing = &src[marker->src_offset];
 		void *dst_thing = &dst[marker->dst_offset];
 		
-		u8 *lowestptr = 0;
+		uintptr_t lowestptr = 0;
 
 		switch (marker->type) {
 		case CT_MODELDEF:
@@ -913,6 +913,7 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 			break;
 		case CT_TEXDATA:
 		case CT_VTXCOL:
+		case CT_VTXCOL4:
 		case CT_GDL:
 		case CT_RODATA_BBOX:
 		case CT_RODATA_11:
@@ -925,31 +926,17 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 		textures_end = minPtr(textures_end, lowestptr);
 	}
 
-	return textures_end;
+	return (u8*)textures_end;
 }
 
-static int convertModel(u8 *dst, u8 *src, u32 srclen)
-{
-	u32 dstpos;
-
-	populateMarkers(src);
-	sortMarkers();
-
-	dstpos = convertContent(dst, src, srclen);
-	u8 *tex_end = relinkPointers(dst, src);
-	preprocessModelTextures(dst, tex_end);
-
-	return dstpos;
-}
-
-void preprocessTextureRGBA32Embedded(u32* dest, u32 size_bytes)
+static void preprocessTextureRGBA32Embedded(u32* dest, u32 size_bytes)
 {
 	for (uint32_t i = 0; i < size_bytes; i += 4, ++dest) {
 		*dest = PD_BE32(*dest);
 	}
 }
 
-void preprocessModelTextures(u8 *base, u8 *textures_end)
+static void preprocessModelTextures(u8 *base, u8 *textures_end)
 {
 	struct modeldef* mdl = (struct modeldef*)base;
 	if (!mdl->texconfigs) return;
@@ -974,6 +961,20 @@ void preprocessModelTextures(u8 *base, u8 *textures_end)
 			}
 		}
 	}
+}
+
+static int convertModel(u8* dst, u8* src, u32 srclen)
+{
+	u32 dstpos;
+
+	populateMarkers(src);
+	sortMarkers();
+
+	dstpos = convertContent(dst, src, srclen);
+	u8* tex_end = relinkPointers(dst, src);
+	preprocessModelTextures(dst, tex_end);
+
+	return dstpos;
 }
 
 u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize)

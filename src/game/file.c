@@ -4259,7 +4259,7 @@ u32 fileGetInflatedSize(s32 filenum, FileType filetype)
 {
 	u8 *ptr;
 	u8 buffer[0x50];
-	u32 *romaddrptr;
+	uintptr_t *romaddrptr;
 #if VERSION < VERSION_NTSC_1_0
 	char message[128];
 #endif
