@@ -14,13 +14,14 @@ void preprocessALCMidiHdr(u8 *data, u32 size);
 u8* preprocessSequences(u8 *data, u32 size, u32 *outSize);
 u8* preprocessTexturesList(u8 *data, u32 size, u32 *outSize);
 
-void preprocessBgSection1(u8* data, u32 size);
+void preprocessBgSection1(u8* data, u32 size, u32 ofs);
 void preprocessBgSection2(u8 *data, u32 size);
 void preprocessBgSection3(u8* data, u32 size);
 void preprocessBgSection1Header(u8 *data, u32 size);
 void preprocessBgSection2Header(u8 *data, u32 size);
 void preprocessBgSection3Header(u8 *data, u32 size);
 void preprocessBgLights(u8 *data, u32 ofs);
+u32 preprocessBgRoom(u8* data, u32 size, u32 room_ofs);
 
 u8 *preprocessLangFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessPadsFile(u8 *data, u32 size, u32 *outSize);

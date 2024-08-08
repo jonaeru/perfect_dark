@@ -515,7 +515,7 @@ static u32 convertSection1(u8 *dst, u8 *src, u32 ofs)
 	return dstpos;
 }
 
-static void convert_section2_texturenums(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 srclen)
+static void convertSection2TextureNums(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 srclen)
 {
 	u16 *src_ids = (u16 *) &src[*srcpos];
 	u16 *dst_ids = (u16 *) &dst[*dstpos];
@@ -529,7 +529,7 @@ static void convert_section2_texturenums(u8 *dst, u32 *dstpos, u8 *src, u32 *src
 	*dstpos += srclen;
 }
 
-static void convert_section3_bboxes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
+static void convertSection3Bboxes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 {
 	s16 *src_bboxes = (s16 *) &src[*srcpos];
 	s16 *dst_bboxes = (s16 *) &dst[*dstpos];
@@ -545,26 +545,6 @@ static void convert_section3_bboxes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 
 	*srcpos += sizeof(s16) * 6 * (m_NumRooms - 1);
 	*dstpos += sizeof(s16) * 6 * (m_NumRooms - 1);
-}
-
-static void convert_section3_allocsizes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
-{
-	u16 *dst_sizes = (u16 *) &dst[*dstpos];
-
-	for (int i = 0; i < m_NumRooms; i++) {
-		dst_sizes[i] = (m_AllocSizes[i] - 0x100) / 0x10;
-	}
-
-	*srcpos += sizeof(u16) * (m_NumRooms - 1);
-	*dstpos += sizeof(u16) * (m_NumRooms - 1);
-}
-
-static void convert_section3_lightcounts(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
-{
-	memcpy(&dst[*dstpos], &src[*srcpos], m_NumRooms);
-
-	*srcpos += (m_NumRooms - 1);
-	*dstpos += (m_NumRooms - 1);
 }
 
 void preprocessBgSection1(u8 *data, u32 size, u32 ofs)
