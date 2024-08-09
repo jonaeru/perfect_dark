@@ -56,7 +56,7 @@ jobs:
         run: |
           sudo dpkg --add-architecture amd64
           sudo apt-get update
-          sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-dev:i386 zlib1g-dev:i386
+          sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-2.0-0:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build pd.exe
