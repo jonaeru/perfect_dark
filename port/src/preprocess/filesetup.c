@@ -20,7 +20,7 @@ static inline void convU16(u16 *dst, u32 src) { *dst = srctoh16(src); }
 static inline void convS16(s16 *dst, s32 src) { *dst = srctoh16(src); }
 static inline void cpyByte(u8 *dst, u8 src) { *dst = src; }
 static inline void convCoord(struct coord* dst, struct n64_coord src) { convF32(&dst->x, src.x); convF32(&dst->y, src.y); convF32(&dst->z, src.z); }
-static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
+static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
 
 #define PD_CONV_VAL(dst, src) _Generic((dst), \
 	f32: convF32, \
