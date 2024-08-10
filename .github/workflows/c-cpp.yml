@@ -99,6 +99,6 @@ jobs:
           tar czf ../ci-release/pd-x86_64-linux.tar.gz pd-x86_64-linux
           zip -r ../ci-release/pd-x86_64-windows.zip pd-x86_64-windows
           popd
-          git tag --force ci-dev-build-x64 port
+          git tag --force ci-dev-build-x64 port-x64
           git push --force origin ci-dev-build-x64
           gh release upload --clobber ci-dev-build-x64 ci-release/*
