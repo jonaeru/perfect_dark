@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-i686-windows:
+  build-x86_64-windows:
     runs-on: windows-latest
     defaults:
       run:
@@ -45,11 +45,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pd-i686-windows-x64
+          name: pd-x86_64-windows
           path: bin/
           retention-days: 0
 
-  build-i686-linux:
+  build-x86_64-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Install dependencies
@@ -60,11 +60,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build pd.exe
-        run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2
+        run: make -f Makefile.port TARGET_PLATFORM=x86_64-linux -j2
       - name: Build pd.pal.exe
-        run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2 ROMID=pal-final
+        run: make -f Makefile.port TARGET_PLATFORM=x86_64-linux -j2 ROMID=pal-final
       - name: Build pd.jpn.exe
-        run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2 ROMID=jpn-final
+        run: make -f Makefile.port TARGET_PLATFORM=x86_64-linux -j2 ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
@@ -75,14 +75,14 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pd-i686-linux-x64
+          name: pd-x86_64-linux
           path: bin/
           retention-days: 0
 
   publish-latest-build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/port-x64'
-    needs: [build-i686-windows, build-i686-linux]
+    needs: [build-x86_64-windows, build-x86_64-linux]
     permissions:
       contents: write
     steps:
@@ -96,8 +96,8 @@ jobs:
         run: |
           mkdir ci-release
           pushd ci-artifacts
-          tar czf ../ci-release/pd-i686-linux-x64.tar.gz pd-i686-linux-x64
-          zip -r ../ci-release/pd-i686-windows-x64.zip pd-i686-windows-x64
+          tar czf ../ci-release/pd-x86_64-linux.tar.gz pd-x86_64-linux
+          zip -r ../ci-release/pd-x86_64-windows.zip pd-x86_64-windows
           popd
           git tag --force ci-dev-build-x64 port
           git push --force origin ci-dev-build-x64
