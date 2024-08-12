@@ -5235,7 +5235,7 @@ struct mplockinfo {
 
 struct boltbeam {
 	union {
-		s32 unk00;
+		intptr_t unk00;
 		struct prop *unk00_prop;
 	};
 
