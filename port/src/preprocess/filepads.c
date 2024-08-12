@@ -80,7 +80,6 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 	dstpos += num_pads * sizeof(u16);
 
 	for (int i = 0; i < num_pads; i++) {
-		dstpos = ALIGN4(dstpos);
 		srcpos = srctoh16(src_offsets[i]);
 
 		dst_offsets[i] = htodst16(dstpos);
