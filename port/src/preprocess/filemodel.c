@@ -33,6 +33,7 @@ enum contenttype {
 	/*19*/ CT_RODATA_DL,
 	/*20*/ CT_RODATA_19,
 	/*21*/ CT_VTXCOL4,	// CT_VTXCOL but aligned to 4 bytes instead of 8
+	/*22*/ CT_SKIP,	// to skip padding data
 };
 
 struct marker {
@@ -70,6 +71,7 @@ struct alignconfig m_AlignConfigs[] = {
 	/*19*/ { 8,  4 }, // CT_RODATA_DL
 	/*20*/ { 4,  4 },
 	/*21*/ { 4,  4 },
+	/*22*/ { 4,  4 }
 };
 
 struct marker m_Markers[1024];
@@ -463,12 +465,15 @@ static void populateMarkers(u8 *src)
 			break;
 		case CT_RODATA_STARGUNFIRE:
 			struct src_rodata_stargunfire *src_stargunfire = src_thing;
-			colstart = srctoh32(src_stargunfire->unk00)*4*12;
+			colstart = srctoh32(src_stargunfire->unk00)*4*(sizeof(s16) * 6);
 			u32 vtxstart = srctoh32(src_stargunfire->ptr_vertices);
-			colstart = ALIGN(vtxstart + colstart, 8);
-
-			set_marker(srctoh32(src_stargunfire->ptr_vertices), CT_VTXCOL4, marker->src_offset);
-			set_marker(colstart, CT_VTXCOL4, marker->src_offset);
+			u32 vtxend = vtxstart + colstart;
+			colstart = ALIGN8(vtxstart + colstart);
+			set_marker(vtxstart, CT_VTXCOL4, marker->src_offset);
+			if (vtxend != colstart) { 
+				set_marker(vtxend, CT_SKIP, marker->src_offset);
+			}
+			set_marker(colstart, CT_VTXCOL, marker->src_offset);
 			set_marker(srctoh32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
 			break;
 		case CT_RODATA_DL:
@@ -760,6 +765,8 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 				dst_vertices[i * 3 + 2] = srctodst32(src_vertices[i * 3 + 2]);
 				dstpos += sizeof(u32) * 3;
 			}
+			break;
+		case CT_SKIP: 
 			break;
 		}
 
