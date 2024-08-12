@@ -28,6 +28,7 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#include "platform.h"
 
 const char var7f1a78e0[] = "LIGHTS : Hit occured on light %d in room %d\n";
 const char var7f1a7910[] = "L2(%d) -> ";

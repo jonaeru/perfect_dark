@@ -51,6 +51,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
+#include "platform.h"
 #define BLUR_OFS 10
 #else
 #define BLUR_OFS 30

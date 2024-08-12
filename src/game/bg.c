@@ -47,6 +47,7 @@
 #include "preprocess.h"
 #include "system.h"
 #include "video.h"
+#include "platform.h"
 #endif
 
 #define BGCMD_END                               0x00

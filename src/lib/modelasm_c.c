@@ -5,6 +5,7 @@
 #include "lib/model.h"
 #include "lib/mtx.h"
 #include "types.h"
+#include "platform.h"
 
 struct t0slot {
 	u16 unk00;

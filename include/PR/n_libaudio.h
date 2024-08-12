@@ -28,6 +28,7 @@ extern "C" {
 
 #include <PR/ultratypes.h>
 #include <PR/mbi.h>
+#include "platform.h"
 
 struct var8009c340 {
 	u8 surround;

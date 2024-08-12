@@ -8,6 +8,7 @@
 #include "gbiex.h"
 #include "textures.h"
 #include "types.h"
+#include "platform.h"
 
 #define TXMODE_WRAP   0
 #define TXMODE_CLAMP  1

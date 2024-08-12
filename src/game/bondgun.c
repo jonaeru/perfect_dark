@@ -56,6 +56,7 @@
 #ifndef PLATFORM_N64
 #include "game/stagetable.h"
 #include "video.h"
+#include "platform.h"
 #endif
 
 #define GUNLOADSTATE_FLUX     0

@@ -24,6 +24,7 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#include "platform.h"
 
 s16 var8009cb00;
 s32 var8009cb04;

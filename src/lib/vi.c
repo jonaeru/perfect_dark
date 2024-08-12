@@ -16,6 +16,7 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "video.h"
+#include "platform.h"
 #endif
 
 #define TO_U16_A(x) ((u16)(x))

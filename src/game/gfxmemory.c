@@ -11,6 +11,7 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+#include "platform.h"
 
 /**
  * This file handles memory usage for graphics related tasks.

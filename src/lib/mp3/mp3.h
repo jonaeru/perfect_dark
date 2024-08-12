@@ -2,6 +2,7 @@
 #define _IN_LIB_MP3_MP3_H
 #include <ultra64.h>
 #include "types.h"
+#include "platform.h"
 
 struct mp3decfourbytes {
 	u8 bytes[2];

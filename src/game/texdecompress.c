@@ -12,6 +12,7 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "mod.h"
+#include "platform.h"
 #endif
 
 struct texture *g_Textures;

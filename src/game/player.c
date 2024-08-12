@@ -73,6 +73,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
+#include "platform.h"
 #endif
 
 s32 g_DefaultWeapons[2];
