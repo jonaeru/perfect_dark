@@ -6,6 +6,7 @@
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
+#include "platform.h"
 
 extern u8 *g_LangBuffer;
 extern s32 g_LangBufferSize;
@@ -44,6 +45,10 @@ void langReset(s32 stagenum)
 			size = 68000;
 		}
 	}
+
+#ifdef PLATFORM_64BIT
+	size *= 2;
+#endif
 
 	g_LangBuffer = mempAlloc(ALIGN16(size), MEMPOOL_STAGE);
 	g_LangBufferSize = size;

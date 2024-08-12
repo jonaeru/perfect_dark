@@ -377,7 +377,7 @@ s32 langGetFileId(s32 bank)
 void langLoad(s32 bank)
 {
 #if VERSION >= VERSION_PAL_BETA
-	s32 len = fileGetInflatedSize(langGetFileId(bank), LOADTYPE_LANG);
+	s32 len = fileGetInflatedSize(langGetFileId(bank), FT_LANG);
 
 	if ((uintptr_t)g_LangBuffer + len + g_LangBufferSize - (uintptr_t)g_LangBufferPos >= 0) {
 		s32 len2 = (uintptr_t)g_LangBuffer + g_LangBufferSize - (uintptr_t)g_LangBufferPos;
