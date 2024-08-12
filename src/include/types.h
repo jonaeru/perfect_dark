@@ -5367,7 +5367,7 @@ struct guncmd {
 	u8 type;
 	u8 unk01;
 	u16 unk02;
-	uintptr_t unk04;
+	intptr_t unk04;
 };
 
 struct pakthing {
