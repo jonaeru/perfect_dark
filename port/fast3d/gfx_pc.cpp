@@ -125,8 +125,6 @@ static struct RSP {
     float aspect_ofs;
     float aspect_scale;
 
-    float depth_zfar;
-
     struct {
         // U0.16
         uint16_t s, t;
@@ -197,9 +195,7 @@ static struct RDP {
 } rdp;
 
 static struct RenderingState {
-    uint8_t depth_test_and_mask; // 1: depth test, 2: depth mask
-    float depth_zfar;
-    bool decal_mode;
+    uint8_t depth_mode;
     bool alpha_blend;
     bool modulate;
     struct XYWidthHeight viewport, scissor;
@@ -523,7 +519,7 @@ static bool gfx_texture_cache_lookup(int i, const TextureCacheKey& key) {
     TextureCacheNode** n = &rendering_state.textures[i];
 
     if (it != gfx_texture_cache.map.end()) {
-        gfx_rapi->select_texture(i, it->second.texture_id);
+        gfx_rapi->select_texture(i, it->second.texture_id, it->second.linear_filter);
         *n = &*it;
         gfx_texture_cache.lru.splice(gfx_texture_cache.lru.end(), gfx_texture_cache.lru,
                                      it->second.lru_location); // move to back
@@ -551,7 +547,7 @@ static bool gfx_texture_cache_lookup(int i, const TextureCacheKey& key) {
     node->second.texture_id = texture_id;
     node->second.lru_location = gfx_texture_cache.lru.insert(gfx_texture_cache.lru.end(), { it });
 
-    gfx_rapi->select_texture(i, texture_id);
+    gfx_rapi->select_texture(i, texture_id, false);
     gfx_rapi->set_sampler_parameters(i, false, 0, 0);
     *n = node;
     return false;
@@ -1240,25 +1236,18 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
         }
     }
 
-    bool depth_test = (rsp.geometry_mode & G_ZBUFFER) == G_ZBUFFER;
-    bool depth_mask = (rdp.other_mode_l & Z_UPD) == Z_UPD;
-    uint8_t depth_test_and_mask = (depth_test ? 1 : 0) | (depth_mask ? 2 : 0);
-    if (depth_test_and_mask != rendering_state.depth_test_and_mask) {
-        gfx_flush();
-        gfx_rapi->set_depth_test_and_mask(depth_test, depth_mask);
-        rendering_state.depth_test_and_mask = depth_test_and_mask;
-    }
-    if (rsp.depth_zfar != rendering_state.depth_zfar) {
-        gfx_flush();
-        gfx_rapi->set_depth_range(0.0f, rsp.depth_zfar);
-        rendering_state.depth_zfar = rsp.depth_zfar;
-    }
+    bool depth_test = ((rsp.geometry_mode & G_ZBUFFER) == G_ZBUFFER || (rdp.other_mode_l & G_ZS_PRIM) == G_ZS_PRIM) &&
+                      ((rdp.other_mode_h & G_CYC_1CYCLE) == G_CYC_1CYCLE || (rdp.other_mode_h & G_CYC_2CYCLE) == G_CYC_2CYCLE);
+    bool depth_update = (rdp.other_mode_l & Z_UPD) == Z_UPD;
+    bool depth_compare = (rdp.other_mode_l & Z_CMP) == Z_CMP;
+    bool depth_source_prim = (rdp.other_mode_l & G_ZS_PRIM) == G_ZS_PRIM /* && gDP.primDepth.z == 1.0f */;
+    uint16_t zmode = rdp.other_mode_l & ZMODE_DEC;
+    uint8_t depth_mode = (depth_test ? 1 : 0) | (depth_update ? 2 : 0) | (depth_compare ? 4 : 0) | (depth_source_prim ? 8 : 0) | (zmode >> 6);
 
-    bool zmode_decal = (rdp.other_mode_l & ZMODE_DEC) == ZMODE_DEC;
-    if (zmode_decal != rendering_state.decal_mode) {
+    if (depth_mode != rendering_state.depth_mode) {
         gfx_flush();
-        gfx_rapi->set_zmode_decal(zmode_decal);
-        rendering_state.decal_mode = zmode_decal;
+        gfx_rapi->set_depth_mode(depth_test, depth_update, depth_compare, depth_source_prim, zmode);
+        rendering_state.depth_mode = depth_mode;
     }
 
     if (rdp.viewport_or_scissor_changed) {
@@ -1732,18 +1721,6 @@ static void gfx_sp_moveword(uint8_t index, uint16_t offset, uintptr_t data) {
             break;
         case G_MW_SEGMENT:
             segmentPointers[(offset >> 2) & 0xff] = data;
-            break;
-        case G_MW_PERSPNORM:
-            // the default z range is around [100, 10000]
-            // data is 2 / (znear + zfar) represented as a 0.16 fixed point
-            // => (znear + zfar) = (2 / (data / 65536)) = 131072 / data
-            constexpr float full_range_mul = 1.f / 11000.f; // that's around the biggest value I got when testing
-            if (data == 0) {
-                rsp.depth_zfar = 1.f;
-            } else {
-                // sometimes this will overshoot 1 but GL can handle that
-                rsp.depth_zfar =((131072.f * full_range_mul) / (float)data);
-            }
             break;
     }
 }
@@ -2504,6 +2481,10 @@ static void gfx_run_dl(Gfx* cmd) {
             case G_RDPFLUSH_EXT:
                 gfx_flush();
                 break;
+            case G_CLEAR_DEPTH_EXT:
+                gfx_flush();
+                gfx_rapi->clear_framebuffer(false, true);
+                break;
             case G_RDPPIPESYNC:
             case G_RDPFULLSYNC:
             case G_RDPLOADSYNC:
@@ -2553,8 +2534,6 @@ extern "C" void gfx_init(const GfxInitSettings *settings) {
         int max_tex_size = std::min(8192, gfx_rapi->get_max_texture_size());
         tex_upload_buffer = (uint8_t*)malloc(max_tex_size * max_tex_size * 4);
     }
-
-    rsp.depth_zfar = 1.0f;
 
     rsp.lookat[0].dir[0] = rsp.lookat[1].dir[1] = 0x7F;
     rsp.current_lookat_coeffs[0][0] = rsp.current_lookat_coeffs[1][1] = 1.f;
@@ -2661,7 +2640,7 @@ extern "C" void gfx_run(Gfx* commands) {
     gfx_rapi->start_frame();
     gfx_rapi->start_draw_to_framebuffer(game_renders_to_framebuffer ? game_framebuffer : 0,
                                         (float)gfx_current_dimensions.height / SCREEN_HEIGHT);
-    gfx_rapi->clear_framebuffer();
+    gfx_rapi->clear_framebuffer(true, false);
     rdp.viewport_or_scissor_changed = true;
     rendering_state.viewport = {};
     rendering_state.scissor = {};
@@ -2671,7 +2650,7 @@ extern "C" void gfx_run(Gfx* commands) {
 
     if (game_renders_to_framebuffer) {
         gfx_rapi->start_draw_to_framebuffer(0, 1);
-        gfx_rapi->clear_framebuffer();
+        gfx_rapi->clear_framebuffer(true, true);
 
         if (gfx_msaa_level > 1) {
             bool different_size = gfx_current_dimensions.width != gfx_current_game_window_viewport.width ||
@@ -2701,6 +2680,18 @@ extern "C" void gfx_end_frame(void) {
 
 extern "C" void gfx_set_target_fps(int fps) {
     gfx_wapi->set_target_fps(fps);
+}
+
+extern "C" void gfx_set_texture_filter(enum FilteringMode mode) {
+    gfx_texture_cache_clear();
+    if (rendering_state.shader_program) {
+        gfx_rapi->unload_shader(rendering_state.shader_program);
+        rendering_state.shader_program = nullptr;
+    }
+    gfx_rapi->clear_shaders();
+    color_combiner_pool.clear();
+    prev_combiner = color_combiner_pool.end();
+    gfx_rapi->set_texture_filter(mode);
 }
 
 extern "C" int gfx_create_framebuffer(uint32_t width, uint32_t height, int upscale, int autoresize) {
@@ -2734,7 +2725,7 @@ extern "C" void gfx_resize_framebuffer(int fb, uint32_t width, uint32_t height, 
 
 extern "C" void gfx_set_framebuffer(int fb, float noise_scale) {
     gfx_rapi->start_draw_to_framebuffer(fb, noise_scale);
-    gfx_rapi->clear_framebuffer();
+    gfx_rapi->clear_framebuffer(true, true);
 }
 
 extern "C" void gfx_copy_framebuffer(int fb_dst, int fb_src, int left, int top, int use_back) {

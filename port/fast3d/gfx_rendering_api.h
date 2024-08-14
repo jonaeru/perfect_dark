@@ -23,13 +23,13 @@ struct GfxRenderingAPI {
     struct ShaderProgram* (*create_and_load_new_shader)(uint64_t shader_id0, uint32_t shader_id1);
     struct ShaderProgram* (*lookup_shader)(uint64_t shader_id0, uint32_t shader_id1);
     void (*shader_get_info)(struct ShaderProgram* prg, uint8_t* num_inputs, bool used_textures[2]);
+    void (*clear_shaders)(void);
     uint32_t (*new_texture)(void);
-    void (*select_texture)(int tile, uint32_t texture_id);
+    void (*select_texture)(int tile, uint32_t texture_id, bool linear_filter);
     void (*upload_texture)(const uint8_t* rgba32_buf, uint32_t width, uint32_t height);
     void (*set_sampler_parameters)(int sampler, bool linear_filter, uint32_t cms, uint32_t cmt);
-    void (*set_depth_test_and_mask)(bool depth_test, bool z_upd);
+    void (*set_depth_mode)(bool depth_test, bool depth_update, bool depth_compare, bool depth_source_prim, uint16_t zmode);
     void (*set_depth_range)(float znear, float zfar);
-    void (*set_zmode_decal)(bool zmode_decal);
     void (*set_viewport)(int x, int y, int width, int height);
     void (*set_scissor)(int x, int y, int width, int height);
     void (*set_use_alpha)(bool use_alpha, bool modulate);
@@ -45,7 +45,7 @@ struct GfxRenderingAPI {
                                           bool can_extract_depth);
     bool (*start_draw_to_framebuffer)(int fb_id, float noise_scale);
     void (*copy_framebuffer)(int fb_dst, int fb_src, int left, int top, bool flip_y, bool use_back);
-    void (*clear_framebuffer)(void);
+    void (*clear_framebuffer)(bool clear_color, bool clear_depth);
     void (*resolve_msaa_color_buffer)(int fb_id_target, int fb_id_source);
     void* (*get_framebuffer_texture_id)(int fb_id);
     void (*select_texture_fb)(int fb_id);
