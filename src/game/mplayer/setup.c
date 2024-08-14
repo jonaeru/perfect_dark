@@ -115,15 +115,21 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_CARPARK,    MPFEATURE_STAGE_CARPARK,    L_MPMENU_132 },
 	{ STAGE_MP_TEMPLE,     MPFEATURE_STAGE_TEMPLE,     L_MPMENU_133 },
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
-	{ STAGE_TEST_MP6,      0,                          L_MPMENU_411 }, // Custom: PD Plus Caves
-	{ STAGE_TEST_MP2,      0,                          L_MPMENU_129 }, // Custom: PD Plus Stack
+#ifndef PLATFORM_N64 // PD Plus Mod
+	{ STAGE_TEST_MP6,      0,                          L_MPMENU_411 }, // Caves
+	{ STAGE_TEST_MP2,      0,                          L_MPMENU_129 }, // Stack
+#endif
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
 };
 
 s32 mpGetNumStages(void)
 {
-	return 19; // Custom: PD Plus
+#ifdef PLATFORM_N64
+	return 17;
+#else // PD Plus Mod
+	return 19;
+#endif
 }
 
 s16 mpChooseRandomStage(void)
@@ -132,7 +138,11 @@ s16 mpChooseRandomStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
-	for (i = 0; i < 18; i++) { // Custom: PD Plus
+#ifdef PLATFORM_N64
+	for (i = 0; i < 16; i++) {
+#else // PD Plus Mod
+	for (i = 0; i < 18; i++) { // PD Plus Mod
+#endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
@@ -140,7 +150,11 @@ s16 mpChooseRandomStage(void)
 
 	index = random() % numchallengescomplete;
 
-	for (i = 0; i < 18; i++) { // Custom: PD Plus
+#ifdef PLATFORM_N64
+	for (i = 0; i < 16; i++) {
+#else // PD Plus Mod
+	for (i = 0; i < 18; i++) { // PD Plus Mod
+#endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
@@ -158,7 +172,11 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 	struct optiongroup groups[] = {
 		{ 0,  L_MPMENU_116 }, // "Dark"
 		{ 13, L_MPMENU_117 }, // "Classic"
-		{ 18, L_MPMENU_118 }, // "Random" // Custom: PD Plus
+#ifdef PLATFORM_N64
+		{ 16, L_MPMENU_118 }, // "Random"
+#else // PD Plus Mod
+		{ 18, L_MPMENU_118 }, // "Random"
+#endif
 	};
 
 	s32 i;

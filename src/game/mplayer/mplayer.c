@@ -1768,7 +1768,9 @@ struct mphead g_MpHeads[] = {
 	{ /*0x49*/ HEAD_MOTO,         0                          },
 #endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
-	{ /*0x4b*/ HEAD_GREY,         0                          }, // Custom: PD Plus Joanna (JP version)
+#ifndef PLATFORM_N64 // PD Plus Mod
+	{ /*0x4b*/ HEAD_GREY,         0                          }, // Joanna (JP version)
+#endif
 };
 
 u32 g_BotHeads[] = {
@@ -1865,7 +1867,11 @@ struct mpbody g_MpBodies[] = {
 	/*0x09*/ { BODY_DARKSNOW,         L_OPTIONS_023,   HEAD_DARK_SNOW,   MPFEATURE_CHR_DARKSNOW     },
 	/*0x0a*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_DARK_COMBAT, MPFEATURE_CHR_INFILTRATION },
 	/*0x0b*/ { BODY_THEKING,          L_OPTIONS_025,   HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        },
-	/*0x0c*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        }, // Custom: PD Plus Maian Solidier
+#ifdef PLATFORM_N64
+	/*0x0c*/ { BODY_ELVIS1,           L_OPTIONS_026,   HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        },
+#else // PD Plus Mod
+	/*0x0c*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        }, // Maian Solidier
+#endif
 	/*0x0d*/ { BODY_ELVISWAISTCOAT,   L_MPWEAPONS_158, HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        },
 	/*0x0e*/ { BODY_CARRINGTON,       L_OPTIONS_027,   HEAD_CARRINGTON,  0                          },
 	/*0x0f*/ { BODY_CARREVENINGSUIT,  L_OPTIONS_028,   HEAD_CARRINGTON,  MPFEATURE_CHR_CI           },
@@ -1907,9 +1913,15 @@ struct mpbody g_MpBodies[] = {
 	/*0x33*/ { BODY_PRESIDENT,        L_OPTIONS_064,   HEAD_PRESIDENT,   MPFEATURE_CHR_CI           },
 	/*0x34*/ { BODY_NSA_LACKEY,       L_OPTIONS_065,   1000,             MPFEATURE_CHR_NSALACKEY    },
 	/*0x35*/ { BODY_PRES_SECURITY,    L_OPTIONS_066,   1000,             MPFEATURE_CHR_PRESSECURITY },
-	/*0x36*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             0                          }, // Custom: PD Plus Pelagic II Guard
-	/*0x37*/ { BODY_PRESIDENT_CLONE,  L_OPTIONS_356,   1000,             0                          }, // Custom: PD Plus Skedar
-	/*0x38*/ { BODY_TESTCHR,          L_OPTIONS_355,   1000,             0                          }, // Custom: PD Plus Dr. Caroll
+#ifdef PLATFORM_N64
+	/*0x36*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_PRESIDENT,   MPFEATURE_CHR_PRESCLONE    },
+	/*0x37*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             MPFEATURE_CHR_PELAGIC      },
+	/*0x38*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        },
+#else // PD Plus Mod
+	/*0x36*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             0                          }, // Pelagic II Guard
+	/*0x37*/ { BODY_PRESIDENT_CLONE,  L_OPTIONS_356,   1000,             0                          }, // Skedar
+	/*0x38*/ { BODY_TESTCHR,          L_OPTIONS_355,   1000,             0                          }, // Dr. Caroll
+#endif
 	/*0x39*/ { BODY_CONNERY,          L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3a*/ { BODY_MOORE,            L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3b*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
