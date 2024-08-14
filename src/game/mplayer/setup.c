@@ -102,6 +102,7 @@ struct mparena g_MpArenas[] = {
 	// Stage, unlock, name
 	{ STAGE_MP_SKEDAR,     0,                          L_MPMENU_119 },
 	{ STAGE_MP_PIPES,      0,                          L_MPMENU_120 },
+#ifdef PLATFORM_N64
 	{ STAGE_MP_RAVINE,     MPFEATURE_STAGE_RAVINE,     L_MPMENU_121 },
 	{ STAGE_MP_G5BUILDING, MPFEATURE_STAGE_G5BUILDING, L_MPMENU_122 },
 	{ STAGE_MP_SEWERS,     MPFEATURE_STAGE_SEWERS,     L_MPMENU_123 },
@@ -115,11 +116,39 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_CARPARK,    MPFEATURE_STAGE_CARPARK,    L_MPMENU_132 },
 	{ STAGE_MP_TEMPLE,     MPFEATURE_STAGE_TEMPLE,     L_MPMENU_133 },
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
-#ifndef PLATFORM_N64 // PD Plus Mod
-	{ STAGE_TEST_MP6,      0,                          L_MPMENU_411 }, // Caves
-	{ STAGE_TEST_MP2,      0,                          L_MPMENU_129 }, // Stack
-#endif
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
+#else // All Solos in Multi Mod
+	{ STAGE_MP_RAVINE,     0, L_MPMENU_121  },
+	{ STAGE_MP_G5BUILDING, 0, L_MPMENU_122  },
+	{ STAGE_MP_SEWERS,     0, L_MPMENU_123  },
+	{ STAGE_MP_WAREHOUSE,  0, L_MPMENU_124  },
+	{ STAGE_MP_GRID,       0, L_MPMENU_125  },
+	{ STAGE_MP_RUINS,      0, L_MPMENU_126  },
+	{ STAGE_MP_AREA52,     0, L_MPMENU_127  },
+	{ STAGE_MP_BASE,       0, L_MPMENU_128  },
+	{ STAGE_MP_FORTRESS,   0, L_MPMENU_130  },
+	{ STAGE_MP_VILLA,      0, L_MPMENU_131  },
+	{ STAGE_MP_CARPARK,    0, L_MPMENU_132  },
+	{ STAGE_DEFECTION,     0, L_OPTIONS_133 }, // dataDyne Central
+	{ STAGE_INVESTIGATION, 0, L_OPTIONS_135 }, // dataDyne Research
+	{ STAGE_VILLA,         0, L_OPTIONS_139 }, // Carrington Villa
+	{ STAGE_CHICAGO,       0, L_OPTIONS_141 }, // Chicago
+	{ STAGE_G5BUILDING,    0, L_OPTIONS_143 }, // G5 Building
+	{ STAGE_INFILTRATION,  0, L_OPTIONS_145 }, // Area 51
+	{ STAGE_AIRBASE,       0, L_OPTIONS_151 }, // Air Base
+	{ STAGE_AIRFORCEONE,   0, L_OPTIONS_153 }, // Air Force One
+	{ STAGE_CRASHSITE,     0, L_OPTIONS_155 }, // Crash Site
+	{ STAGE_PELAGIC,       0, L_OPTIONS_157 }, // Pelagic II
+	{ STAGE_DEEPSEA,       0, L_OPTIONS_159 }, // Deep Sea
+	{ STAGE_DEFENSE,       0, L_OPTIONS_161 }, // Carrington Institute
+	{ STAGE_ATTACKSHIP,    0, L_OPTIONS_163 }, // Attack Ship
+	{ STAGE_SKEDARRUINS,   0, L_OPTIONS_165 }, // Skedar Ruins
+	{ STAGE_MP_TEMPLE,     0, L_MPMENU_133  }, // Temple
+	{ STAGE_MP_COMPLEX,    0, L_MPMENU_134  }, // Complex
+	{ STAGE_TEST_MP6,      0, L_MPMENU_411  }, // Caves (PD Plus)
+	{ STAGE_TEST_MP2,      0, L_MPMENU_129  }, // Stack (PD Plus)
+	{ STAGE_MP_FELICITY,   0, L_MPMENU_135  }, // Felicity
+#endif
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
 };
 
@@ -127,8 +156,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // PD Plus Mod
-	return 19;
+#else // All Solos in Multi Mod
+	return 33;
 #endif
 }
 
@@ -140,8 +169,8 @@ s16 mpChooseRandomStage(void)
 
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
-#else // PD Plus Mod
-	for (i = 0; i < 18; i++) { // PD Plus Mod
+#else // All Solos in Multi Mod
+	for (i = 0; i < 32; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -152,8 +181,8 @@ s16 mpChooseRandomStage(void)
 
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
-#else // PD Plus Mod
-	for (i = 0; i < 18; i++) { // PD Plus Mod
+#else // All Solos in Multi Mod
+	for (i = 0; i < 32; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -171,11 +200,13 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 {
 	struct optiongroup groups[] = {
 		{ 0,  L_MPMENU_116 }, // "Dark"
-		{ 13, L_MPMENU_117 }, // "Classic"
 #ifdef PLATFORM_N64
+		{ 13, L_MPMENU_117 }, // "Classic"
 		{ 16, L_MPMENU_118 }, // "Random"
-#else // PD Plus Mod
-		{ 18, L_MPMENU_118 }, // "Random"
+#else // All Solos in Multi Mod
+		{ 13, L_OPTIONS_117 }, // "Solo Missions"
+		{ 27, L_MPMENU_117  }, // "Classic"
+		{ 32, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -229,33 +260,43 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		}
 		break;
 	case MENUOP_GETOPTGROUPCOUNT:
+#ifdef PLATFORM_N64
 		data->list.value = 3;
+#else // All Solos in Multi Mod
+		data->list.value = 4;
+#endif
 
+#ifdef PLATFORM_N64 // All Solos in Multi Mod
 		if (!challengeIsFeatureUnlocked(MPFEATURE_STAGE_COMPLEX)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_TEMPLE)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_FELICITY)) {
 			data->list.value--;
 		}
+#endif
 		break;
 	case MENUOP_GETOPTGROUPTEXT:
 		count = data->list.value;
 
+#ifdef PLATFORM_N64 // All Solos in Multi Mod
 		if (!challengeIsFeatureUnlocked(MPFEATURE_STAGE_COMPLEX)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_TEMPLE)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_FELICITY)
 				&& count > 0) {
 			count++;
 		}
+#endif
 		return (s32)langGet(groups[count].name);
 	case MENUOP_GETGROUPSTARTINDEX:
 		groupindex = data->list.value;
 
+#ifdef PLATFORM_N64 // All Solos in Multi Mod
 		if (!challengeIsFeatureUnlocked(MPFEATURE_STAGE_COMPLEX)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_TEMPLE)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_FELICITY)
 				&& groupindex == 1) {
 			groupindex++;
 		}
+#endif
 
 		for (i = 0; i < groups[groupindex].offset; i++) {
 			if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
