@@ -2650,10 +2650,10 @@
 #define MPBODY_PRESIDENT_CLONE2 0x36
 #define MPBODY_PELAGIC_GUARD    0x37
 #define MPBODY_MAIAN_SOLDIER    0x38
-#define MPBODY_CONNERY          0x39
-#define MPBODY_MOORE            0x3a
-#define MPBODY_DALTON           0x3b
-#define MPBODY_DJBOND           0x3c
+#define MPBODY_CONNERY          0x3b // PD Plus Mod
+#define MPBODY_MOORE            0x3c // PD Plus Mod
+#define MPBODY_DALTON           0x3d // PD Plus Mod
+#define MPBODY_DJBOND           0x3e // PD Plus Mod
 
 #define MPCONFIG_TEMPLE      0x00
 #define MPCONFIG_PISTOLS     0x01
