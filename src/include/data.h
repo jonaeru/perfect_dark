@@ -499,13 +499,13 @@ extern struct mpweapon g_MpWeapons[NUM_MPWEAPONS];
 #ifdef PLATFORM_N64
 extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 74 : 75];
 #else // PD Plus Mod
-extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 75 : 76]; // PD Plus Mod
+extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 75 : 76];
 #endif
 extern struct botprofile g_BotProfiles[18];
 #ifdef PLATFORM_N64
 extern struct mpbody g_MpBodies[61];
 #else // PD Plus Mod
-extern struct mpbody g_MpBodies[63]; // PD Plus Mod
+extern struct mpbody g_MpBodies[63];
 #endif
 extern struct mppreset g_MpPresets[];
 extern u32 g_TeamColours[];
