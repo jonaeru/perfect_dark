@@ -118,36 +118,38 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
 #else // All Solos in Multi Mod
-	{ STAGE_MP_RAVINE,     0, L_MPMENU_121  },
-	{ STAGE_MP_G5BUILDING, 0, L_MPMENU_122  },
-	{ STAGE_MP_SEWERS,     0, L_MPMENU_123  },
-	{ STAGE_MP_WAREHOUSE,  0, L_MPMENU_124  },
-	{ STAGE_MP_GRID,       0, L_MPMENU_125  },
-	{ STAGE_MP_RUINS,      0, L_MPMENU_126  },
-	{ STAGE_MP_AREA52,     0, L_MPMENU_127  },
-	{ STAGE_MP_BASE,       0, L_MPMENU_128  },
-	{ STAGE_MP_FORTRESS,   0, L_MPMENU_130  },
-	{ STAGE_MP_VILLA,      0, L_MPMENU_131  },
-	{ STAGE_MP_CARPARK,    0, L_MPMENU_132  },
-	{ STAGE_DEFECTION,     0, L_OPTIONS_133 }, // dataDyne Central
-	{ STAGE_INVESTIGATION, 0, L_OPTIONS_135 }, // dataDyne Research
-	{ STAGE_VILLA,         0, L_OPTIONS_139 }, // Carrington Villa
-	{ STAGE_CHICAGO,       0, L_OPTIONS_141 }, // Chicago
-	{ STAGE_G5BUILDING,    0, L_OPTIONS_143 }, // G5 Building
-	{ STAGE_INFILTRATION,  0, L_OPTIONS_145 }, // Area 51
-	{ STAGE_AIRBASE,       0, L_OPTIONS_151 }, // Air Base
-	{ STAGE_AIRFORCEONE,   0, L_OPTIONS_153 }, // Air Force One
-	{ STAGE_CRASHSITE,     0, L_OPTIONS_155 }, // Crash Site
-	{ STAGE_PELAGIC,       0, L_OPTIONS_157 }, // Pelagic II
-	{ STAGE_DEEPSEA,       0, L_OPTIONS_159 }, // Deep Sea
-	{ STAGE_DEFENSE,       0, L_OPTIONS_161 }, // Carrington Institute
-	{ STAGE_ATTACKSHIP,    0, L_OPTIONS_163 }, // Attack Ship
-	{ STAGE_SKEDARRUINS,   0, L_OPTIONS_165 }, // Skedar Ruins
-	{ STAGE_MP_TEMPLE,     0, L_MPMENU_133  }, // Temple
-	{ STAGE_MP_COMPLEX,    0, L_MPMENU_134  }, // Complex
-	{ STAGE_TEST_MP6,      0, L_MPMENU_411  }, // Caves (PD Plus)
-	{ STAGE_TEST_MP2,      0, L_MPMENU_129  }, // Stack (PD Plus)
-	{ STAGE_MP_FELICITY,   0, L_MPMENU_135  }, // Felicity
+	{ STAGE_MP_RAVINE,       0, L_MPMENU_121  },
+	{ STAGE_MP_G5BUILDING,   0, L_MPMENU_122  },
+	{ STAGE_MP_SEWERS,       0, L_MPMENU_123  },
+	{ STAGE_MP_WAREHOUSE,    0, L_MPMENU_124  },
+	{ STAGE_MP_GRID,         0, L_MPMENU_125  },
+	{ STAGE_MP_RUINS,        0, L_MPMENU_126  },
+	{ STAGE_MP_AREA52,       0, L_MPMENU_127  },
+	{ STAGE_MP_BASE,         0, L_MPMENU_128  },
+	{ STAGE_MP_FORTRESS,     0, L_MPMENU_130  },
+	{ STAGE_MP_VILLA,        0, L_MPMENU_131  },
+	{ STAGE_MP_CARPARK,      0, L_MPMENU_132  },
+	{ STAGE_DEFECTION,       0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_134 : L_OPTIONS_133) }, // dataDyne Central
+	{ STAGE_INVESTIGATION,   0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_136 : L_OPTIONS_135) }, // dataDyne Research
+	{ STAGE_VILLA,           0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_140 : L_OPTIONS_139) }, // Carrington Villa
+	{ STAGE_CHICAGO,         0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_142 : L_OPTIONS_141) }, // Chicago
+	{ STAGE_G5BUILDING,      0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_144 : L_OPTIONS_143) }, // G5 Building
+	{ STAGE_INFILTRATION,    0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_146 : L_OPTIONS_145) }, // Area 51
+	{ STAGE_AIRBASE,         0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_152 : L_OPTIONS_151) }, // Air Base
+	{ STAGE_AIRFORCEONE,     0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_154 : L_OPTIONS_153) }, // Air Force One
+	{ STAGE_CRASHSITE,       0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_156 : L_OPTIONS_155) }, // Crash Site
+	{ STAGE_PELAGIC,         0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_158 : L_OPTIONS_157) }, // Pelagic II
+	{ STAGE_DEEPSEA,         0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_160 : L_OPTIONS_159) }, // Deep Sea
+	{ STAGE_DEFENSE,         0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_162 : L_OPTIONS_161) }, // Carrington Institute
+	{ STAGE_ATTACKSHIP,      0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_164 : L_OPTIONS_163) }, // Attack Ship
+	{ STAGE_SKEDARRUINS,     0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_166 : L_OPTIONS_165) }, // Skedar Ruins
+	{ STAGE_MP_TEMPLE,       0, L_MPMENU_133  }, // Temple
+	{ STAGE_MP_COMPLEX,      0, L_MPMENU_134  }, // Complex
+	{ STAGE_TEST_MP6,        0, L_MPMENU_411  }, // Caves (PD Plus)
+	{ STAGE_TEST_MP2,        0, L_MPMENU_129  }, // Stack (PD Plus)
+	{ STAGE_MP_FELICITY,     0, L_MPMENU_135  }, // Felicity
+	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294  }, // Random Multi
+	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295  }, // Random Solo
 #endif
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
 };
@@ -195,6 +197,63 @@ s16 mpChooseRandomStage(void)
 
 	return STAGE_MP_SKEDAR;
 }
+
+#ifndef PLATFORM_N64 // All Solos in Multi Mod
+s16 mpChooseRandomMultiStage(void)
+{
+	s32 i;
+	s32 numchallengescomplete = 0;
+	s32 index;
+
+	for (i = 0; i < 32; i++) {
+		if ((i <= 12 || i >= 27) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+			numchallengescomplete++;
+		}
+	}
+
+	index = random() % numchallengescomplete;
+
+	for (i = 0; i < 32; i++) {
+		if ((i <= 12 || i >= 27) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+			if (index == 0) {
+				return g_MpArenas[i].stagenum;
+			}
+
+			index--;
+		}
+	}
+
+	return STAGE_MP_SKEDAR;
+}
+
+s16 mpChooseRandomSoloStage(void)
+{
+	s32 i;
+	s32 numchallengescomplete = 0;
+	s32 index;
+
+	for (i = 0; i < 32; i++) {
+		if ((i >= 13 && i <= 26) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+			numchallengescomplete++;
+		}
+	}
+
+	index = random() % numchallengescomplete;
+
+	for (i = 0; i < 32; i++) {
+		if ((i >= 13 && i <= 26) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+			if (index == 0) {
+				return g_MpArenas[i].stagenum;
+			}
+
+			index--;
+		}
+	}
+
+	return STAGE_DEFECTION;
+}
+#endif
+
 
 MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
 {

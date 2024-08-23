@@ -6,6 +6,10 @@
 
 char *mpGetCurrentPlayerName(struct menuitem *item);
 s16 mpChooseRandomStage(void);
+#ifndef PLATFORM_N64 // All Solos in Multi Mod
+s16 mpChooseRandomMultiStage(void);
+s16 mpChooseRandomSoloStage(void);
+#endif
 MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data);
 char *mpMenuTextWeaponNameForSlot(struct menuitem *item);
 char *mpMenuTextSetupName(struct menuitem *item);

@@ -214,6 +214,13 @@ void mpStartMatch(void)
 	if (g_MpSetup.stagenum == STAGE_MP_RANDOM) {
 		stagenum = mpChooseRandomStage();
 	}
+#ifndef PLATFORM_N64 // All Solos in Multi Mod
+	else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_MULTI) {
+		stagenum = mpChooseRandomMultiStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_SOLO) {
+		stagenum = mpChooseRandomSoloStage();
+	}
+#endif
 
 	titleSetNextStage(stagenum);
 	mainChangeToStage(stagenum);
