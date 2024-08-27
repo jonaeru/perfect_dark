@@ -28,6 +28,7 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#include "system.h"
 
 // bss
 struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];
@@ -220,6 +221,15 @@ void mpStartMatch(void)
 	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_SOLO) {
 		stagenum = mpChooseRandomSoloStage();
 	}
+
+	// GoldenEye X Mod Switch
+	if (stagenum >= 0x60) {
+		isGexMod = true;
+		stagenum = stagenum - 0x60;
+	} else {
+		isGexMod = false;
+	}
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, isGexMod: %s", stagenum, isGexMod ? "true" : "false");
 #endif
 
 	titleSetNextStage(stagenum);
@@ -2492,6 +2502,10 @@ void mpEndMatch(void)
 			mpApplyWeaponSet();
 		}
 	}
+
+	// GoldenEye X Mod Switch
+	isGexMod = false;
+	sysLogPrintf(LOG_NOTE, "isGexMod: %s", isGexMod ? "true" : "false"); // DEBUG
 #endif
 
 	func0f0f820c(NULL, -6);

@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #include <PR/ultratypes.h>
 #include "config.h"
 #include "system.h"
@@ -19,6 +20,8 @@ static char modDir[FS_MAXPATH + 1];  // replaces $M
 static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
+static char gexModDir[FS_MAXPATH + 1];  // GoldenEye X Mod
+bool isGexMod;
 
 static s32 fsPathIsWritable(const char *path)
 {
@@ -80,8 +83,14 @@ const char *fsFullPath(const char *relPath)
 	}
 
 	// path relative to mod or base dir; this will be a read request, so check where the file actually is
-	if (modDir[0]) {
+	if (modDir[0] && isGexMod == false) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
+		if (fsFileSize(pathBuf) >= 0) {
+			return pathBuf;
+		}
+	}
+	if (gexModDir[0] && isGexMod) {
+		snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
 		if (fsFileSize(pathBuf) >= 0) {
 			return pathBuf;
 		}
@@ -143,6 +152,31 @@ s32 fsInit(void)
 		}
 	}
 
+	// get path to mod dir and expand it if needed
+	// mod directory is overlaid on top of base directory
+	path = sysArgGetString("--gexmoddir");
+	if (path) {
+		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
+			// path is explicit; check as-is
+			if (fsFileSize(path) >= 0) {
+				strncpy(gexModDir, fsFullPath(path), FS_MAXPATH);
+			}
+		} else {
+			// path is relative to workdir; try to find it
+			const char *priority[] = { ".", "$E", "$H" };
+			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
+				char *tmp = strFmt("%s/%s", priority[i], path);
+				if (fsFileSize(tmp) >= 0) {
+					strncpy(gexModDir, fsFullPath(tmp), FS_MAXPATH);
+					break;
+				}
+			}
+		}
+		if (!gexModDir[0]) {
+			sysLogPrintf(LOG_WARNING, "could not find specified gexmoddir `%s`", path);
+		}
+	}
+
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
 	if (!path) {
@@ -173,6 +207,9 @@ s32 fsInit(void)
 	if (modDir[0]) {
 		sysLogPrintf(LOG_NOTE, " mod dir: %s", modDir);
 	}
+	if (gexModDir[0]) {
+		sysLogPrintf(LOG_NOTE, " gex mod dir: %s", gexModDir);
+	}
 	sysLogPrintf(LOG_NOTE, "base dir: %s", baseDir);
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
 
@@ -181,7 +218,11 @@ s32 fsInit(void)
 
 const char *fsGetModDir(void)
 {
-	return modDir[0] ? modDir : NULL;
+	if (isGexMod) {
+		return gexModDir[0] ? gexModDir : NULL;
+	} else {
+		return modDir[0] ? modDir : NULL;
+	}
 }
 
 s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
