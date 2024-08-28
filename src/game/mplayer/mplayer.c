@@ -234,6 +234,27 @@ void mpStartMatch(void)
 	}
 	sysLogPrintf(LOG_NOTE, "stagenum: %02x, isGexMod: %s", stagenum, isGexMod ? "true" : "false");
 	modConfigLoad(MOD_CONFIG_FNAME);
+	if (isGexMod) {
+		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073f].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0740].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0741].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0745].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0746].surfacetype = SURFACETYPE_SHALLOWWATER;
+	} else {
+		g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073f].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0740].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0741].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0745].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0746].surfacetype = SURFACETYPE_DEFAULT;
+	}
 #endif
 
 	titleSetNextStage(stagenum);
@@ -2511,6 +2532,15 @@ void mpEndMatch(void)
 	isGexMod = false;
 	sysLogPrintf(LOG_NOTE, "isGexMod: %s", isGexMod ? "true" : "false");
 	modConfigLoad(MOD_CONFIG_FNAME);
+	g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
+	g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
+	g_Textures[0x073e].soundsurfacetype = SURFACETYPE_DEFAULT;
+	g_Textures[0x073f].soundsurfacetype = SURFACETYPE_DEFAULT;
+	g_Textures[0x0740].soundsurfacetype = SURFACETYPE_DEFAULT;
+	g_Textures[0x0741].soundsurfacetype = SURFACETYPE_DEFAULT;
+	g_Textures[0x0745].surfacetype = SURFACETYPE_METAL;
+	g_Textures[0x0746].soundsurfacetype = SURFACETYPE_DEFAULT;
+	g_Textures[0x0746].surfacetype = SURFACETYPE_DEFAULT;
 #endif
 
 	func0f0f820c(NULL, -6);

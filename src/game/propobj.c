@@ -2074,7 +2074,11 @@ struct prop *objInit(struct defaultobj *obj, struct modeldef *modeldef, struct p
 		obj->model->obj = obj;
 		obj->model->unk01 = 0;
 
+#ifdef PLATFORM_N64
 		modelSetScale(obj->model, g_ModelStates[obj->modelnum].scale * (1.0f / 4096.0f));
+#else // GoldenEye X Mod
+		modelSetScale(obj->model, (isGexMod ? g_GexModelStates[obj->modelnum].scale : g_ModelStates[obj->modelnum].scale) * (1.0f / 4096.0f));
+#endif
 
 		prop->type = PROPTYPE_OBJ;
 		prop->obj = obj;
@@ -14771,7 +14775,13 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, s32 playernum)
 	if (obj->damage > obj->maxdamage || objGetDestroyedLevel(obj)) {
 		struct prop *prop = obj->prop;
 		struct prop *rootprop = prop;
+
+#ifdef PLATFORM_N64
 		s16 exptype = g_PropExplosionTypes[8 + obj->modelnum];
+#else // GoldenEye X Mod
+		s16 exptype = isGexMod ? g_GexPropExplosionTypes[8 + obj->modelnum] : g_PropExplosionTypes[8 + obj->modelnum];
+#endif
+
 		RoomNum rooms[8];
 
 		// If in Deep Sea outro

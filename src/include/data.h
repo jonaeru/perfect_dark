@@ -571,6 +571,8 @@ extern s32 g_FileAutoSelect;
 
 // GoldenEye X Mod Switch
 extern bool isGexMod;
+extern struct modelstate g_GexModelStates[NUM_MODELS];
+extern s8 g_GexPropExplosionTypes[];
 
 #else // PLATFORM_N64
 
