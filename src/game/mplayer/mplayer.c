@@ -29,6 +29,9 @@
 #include "data.h"
 #include "types.h"
 #include "system.h"
+#ifndef PLATFORM_N64
+#include "mod.h"
+#endif
 
 // bss
 struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];
@@ -230,6 +233,7 @@ void mpStartMatch(void)
 		isGexMod = false;
 	}
 	sysLogPrintf(LOG_NOTE, "stagenum: %02x, isGexMod: %s", stagenum, isGexMod ? "true" : "false");
+	modConfigLoad(MOD_CONFIG_FNAME);
 #endif
 
 	titleSetNextStage(stagenum);
@@ -2505,7 +2509,8 @@ void mpEndMatch(void)
 
 	// GoldenEye X Mod Switch
 	isGexMod = false;
-	sysLogPrintf(LOG_NOTE, "isGexMod: %s", isGexMod ? "true" : "false"); // DEBUG
+	sysLogPrintf(LOG_NOTE, "isGexMod: %s", isGexMod ? "true" : "false");
+	modConfigLoad(MOD_CONFIG_FNAME);
 #endif
 
 	func0f0f820c(NULL, -6);

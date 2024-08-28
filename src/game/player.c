@@ -1614,7 +1614,16 @@ void playersBeginMpSwirl(void)
 	g_MpSwirlForwardSpeed = 0;
 	g_MpSwirlDistance = 80;
 
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	envChooseAndApply(mainGetStageNum(), false);
+#else
+	s32 stagenum;
+	stagenum = mainGetStageNum();
+	if (isGexMod) {
+		stagenum += 0x60;
+	}
+	envChooseAndApply(stagenum, false);
+#endif
 }
 
 void playerTickMpSwirl(void)

@@ -92,8 +92,9 @@ static const struct romfilepatch filePatches[] = {
 	{ 0x92b0, 1, "\x6c", "\x99" },
 };
 
-static struct romfile fileSlots[ROMDATA_MAX_FILES] = {
-	[FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 },
+static struct romfile fileSlots[2][ROMDATA_MAX_FILES] = {
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
 };
 
 #define ROMSEG_START(n) _ ## n ## SegmentRomStart
@@ -316,7 +317,7 @@ static inline s32 romdataLoadExternalFileList(void)
 			if (*p) {
 				*p++ = '\0';
 			}
-			fileSlots[n++].name = start;
+			fileSlots[isGexMod ? 1 : 0][n++].name = start;
 		}
 	}
 
@@ -340,10 +341,15 @@ static inline void romdataInitFiles(void)
 		if (offsets + i + 1 < (u32 *)(romDataSeg + romDataSegSize)) {
 			const u32 nextofs = PD_BE32(offsets[i + 1]);
 			const u32 ofs = PD_BE32(offsets[i]);
-			fileSlots[i].data = g_RomFile + ofs;
-			fileSlots[i].size = nextofs - ofs;
-			fileSlots[i].source = SRC_UNLOADED;
-			fileSlots[i].preprocessed = 0;
+			fileSlots[0][i].data = g_RomFile + ofs;
+			fileSlots[0][i].size = nextofs - ofs;
+			fileSlots[0][i].source = SRC_UNLOADED;
+			fileSlots[0][i].preprocessed = 0;
+			// GoldenEye X
+			fileSlots[1][i].data = g_RomFile + ofs;
+			fileSlots[1][i].size = nextofs - ofs;
+			fileSlots[1][i].source = SRC_UNLOADED;
+			fileSlots[1][i].preprocessed = 0;
 		}
 	}
 
@@ -351,7 +357,9 @@ static inline void romdataInitFiles(void)
 	const u32 *nameOffsets = (u32 *)(g_RomFile + PD_BE32(offsets[i - 1]));
 	for (i = 1; nameOffsets[i]; ++i) {
 		const u32 ofs = PD_BE32(nameOffsets[i]);
-		fileSlots[i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
+		fileSlots[0][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
+		// GoldenEye X
+		fileSlots[1][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 	}
 }
 
@@ -395,7 +403,7 @@ s32 romdataFileGetSize(s32 fileNum)
 
 	// ensure any external files are loaded and we use their size
 	if (romdataFileLoad(fileNum, NULL)) {
-		return fileSlots[fileNum].size;
+		return fileSlots[isGexMod ? 1 : 0][fileNum].size;
 	}
 
 	sysLogPrintf(LOG_ERROR, "romdataFileGetSize: could not load file num %d", fileNum);
@@ -417,31 +425,34 @@ u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
 	u8 *out = NULL;
 
 	// try to load external file
-	if (fileSlots[fileNum].source == SRC_UNLOADED) {
+	if (fileSlots[isGexMod ? 1 : 0][fileNum].source == SRC_UNLOADED) {
 		char tmp[FS_MAXPATH] = { 0 };
-		snprintf(tmp, sizeof(tmp), ROMDATA_FILEDIR "/%s", fileSlots[fileNum].name);
+		snprintf(tmp, sizeof(tmp), ROMDATA_FILEDIR "/%s", fileSlots[isGexMod ? 1 : 0][fileNum].name);
 		if (fsFileSize(tmp) > 0) {
 			u32 size = 0;
 			out = fsFileLoad(tmp, &size);
 			if (out && size) {
-				sysLogPrintf(LOG_NOTE, "file %d (%s) loaded externally", fileNum, fileSlots[fileNum].name);
-				fileSlots[fileNum].data = out;
-				fileSlots[fileNum].size = size;
-				fileSlots[fileNum].source = SRC_EXTERNAL;
+				sysLogPrintf(LOG_NOTE, "file %d (%s) loaded externally%s", fileNum, fileSlots[isGexMod ? 1 : 0][fileNum].name, isGexMod ? " (GEX)" : "");
+				fileSlots[isGexMod ? 1 : 0][fileNum].data = out;
+				fileSlots[isGexMod ? 1 : 0][fileNum].size = size;
+				fileSlots[isGexMod ? 1 : 0][fileNum].source = SRC_EXTERNAL;
 				// external file; do not apply patches to this
-				fileSlots[fileNum].numpatches = 0;
+				fileSlots[isGexMod ? 1 : 0][fileNum].numpatches = 0;
 			}
 		}
-		// tried and failed, fall back to ROM
-		fileSlots[fileNum].source = SRC_ROM;
+
+		if (fileSlots[isGexMod ? 1 : 0][fileNum].source == SRC_UNLOADED) {
+			// tried and failed, fall back to ROM
+			fileSlots[isGexMod ? 1 : 0][fileNum].source = SRC_ROM;
+		}
 	}
 
 	if (!out) {
-		out = fileSlots[fileNum].data;
+		out = fileSlots[isGexMod ? 1 : 0][fileNum].data;
 	}
 
 	if (out && outSize) {
-		*outSize = fileSlots[fileNum].size;
+		*outSize = fileSlots[isGexMod ? 1 : 0][fileNum].size;
 	}
 
 	return out;
@@ -454,19 +465,19 @@ void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size)
 		return;
 	}
 
-	if (data && size /* && !fileSlots[fileNum].preprocessed*/) {
+	if (data && size /* && !fileSlots[isGexMod ? 1 : 0][fileNum].preprocessed*/) {
 		if (loadType && loadType < (u32)ARRAYCOUNT(filePreprocFuncs) && filePreprocFuncs[loadType]) {
 			// apply patches
-			for (u32 i = 0; i < fileSlots[fileNum].numpatches; ++i) {
-				const struct romfilepatch *p = &fileSlots[fileNum].patches[i];
+			for (u32 i = 0; i < fileSlots[isGexMod ? 1 : 0][fileNum].numpatches; ++i) {
+				const struct romfilepatch *p = &fileSlots[isGexMod ? 1 : 0][fileNum].patches[i];
 				if (!memcmp(data + p->ofs, p->src, p->len)) {
 					memcpy(data + p->ofs, p->dst, p->len);
-					sysLogPrintf(LOG_NOTE, "file %d (%s) patched at offset 0x%x", fileNum, fileSlots[fileNum].name, p->ofs);
+					sysLogPrintf(LOG_NOTE, "file %d (%s) patched at offset 0x%x", fileNum, fileSlots[isGexMod ? 1 : 0][fileNum].name, p->ofs);
 				}
 			}
 			// then preprocess
 			filePreprocFuncs[loadType](data, size);
-			// fileSlots[fileNum].preprocessed = 1;
+			// fileSlots[isGexMod ? 1 : 0][fileNum].preprocessed = 1;
 		}
 	}
 }
@@ -478,12 +489,12 @@ void romdataFileFree(s32 fileNum)
 		return;
 	}
 
-	if (fileSlots[fileNum].source == SRC_EXTERNAL) {
-		sysMemFree(fileSlots[fileNum].data);
-		fileSlots[fileNum].data = NULL;
+	if (fileSlots[isGexMod ? 1 : 0][fileNum].source == SRC_EXTERNAL) {
+		sysMemFree(fileSlots[isGexMod ? 1 : 0][fileNum].data);
+		fileSlots[isGexMod ? 1 : 0][fileNum].data = NULL;
 	}
 
-	fileSlots[fileNum].source = SRC_UNLOADED;
+	fileSlots[isGexMod ? 1 : 0][fileNum].source = SRC_UNLOADED;
 }
 
 const char *romdataFileGetName(s32 fileNum)
@@ -491,7 +502,7 @@ const char *romdataFileGetName(s32 fileNum)
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		return NULL;
 	}
-	return fileSlots[fileNum].name;
+	return fileSlots[isGexMod ? 1 : 0][fileNum].name;
 }
 
 s32 romdataFileGetNumForName(const char *name)
@@ -501,7 +512,7 @@ s32 romdataFileGetNumForName(const char *name)
 	}
 
 	for (s32 i = 0; i < ROMDATA_MAX_FILES; ++i) {
-		if (fileSlots[i].name && !strcmp(fileSlots[i].name, name)) {
+		if (fileSlots[isGexMod ? 1 : 0][i].name && !strcmp(fileSlots[isGexMod ? 1 : 0][i].name, name)) {
 			return i;
 		}
 	}

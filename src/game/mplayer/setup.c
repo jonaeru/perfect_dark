@@ -148,6 +148,29 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP6,        0, L_MPMENU_411  }, // Caves (PD Plus)
 	{ STAGE_TEST_MP2,        0, L_MPMENU_129  }, // Stack (PD Plus)
 	{ STAGE_MP_FELICITY,     0, L_MPMENU_135  }, // Felicity
+	// GoldenEye X
+	{ STAGE_MP_SKEDAR + 0x60,     0, L_MPMENU_133 }, // Tample
+	{ STAGE_MP_COMPLEX + 0x60,    0, L_MPMENU_134 }, // Complex
+	{ STAGE_MP_AREA52 + 0x60,     0, L_MPMENU_127 }, // Caves
+	{ STAGE_MP_WAREHOUSE + 0x60,  0, L_MPMENU_124 }, // Library
+	{ STAGE_MP_SEWERS + 0x60,     0, L_MPMENU_123 }, // Basement
+	{ STAGE_MP_FORTRESS + 0x60,   0, L_MPMENU_130 }, // Stack
+	{ STAGE_MP_CARPARK + 0x60,    0, L_MPMENU_132 }, // Facility
+	{ STAGE_TEST_MP6 + 0x60,      0, L_MPMENU_121 }, // Bunker
+	{ STAGE_MP_TEMPLE + 0x60,     0, L_MPMENU_120 }, // Archives
+	{ STAGE_MP_RUINS + 0x60,      0, L_MPMENU_126 }, // Caverns
+	{ STAGE_MP_FELICITY + 0x60,   0, L_MPMENU_135 }, // Egyptian
+	{ STAGE_TEST_MP17 + 0x60,     0, L_MPMENU_128 }, // Fac Backzone
+	{ STAGE_MP_RAVINE + 0x60,     0, L_MPMENU_119 }, // Frigate
+	{ STAGE_TEST_MP16 + 0x60,     0, L_MPMENU_409 }, // Archives 1F
+	{ STAGE_TEST_MP14 + 0x60,     0, L_MPMENU_410 }, // Streets
+	{ STAGE_MP_G5BUILDING + 0x60, 0, L_MPMENU_131 }, // Train
+	{ STAGE_TEST_MP18 + 0x60,     0, L_MPMENU_125 }, // Cradle
+	{ STAGE_MP_PIPES + 0x60,      0, L_MPMENU_408 }, // Aztec
+	{ STAGE_TEST_MP20 + 0x60,     0, L_MPMENU_129 }, // Citadel
+	{ STAGE_TEST_MP19 + 0x60,     0, L_MPMENU_122 }, // Labyrinth
+	{ STAGE_TEST_MP2 + 0x60,      0, L_MPMENU_371 }, // Icicle Pyramid
+	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294  }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295  }, // Random Solo
 #endif
@@ -265,7 +288,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #else // All Solos in Multi Mod
 		{ 13, L_OPTIONS_117 }, // "Solo Missions"
 		{ 27, L_MPMENU_117  }, // "Classic"
-		{ 32, L_MPMENU_118  }, // "Random"
+		{ 32, L_MPMENU_119  }, // "Classic"
+		{ 53, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -322,7 +346,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #ifdef PLATFORM_N64
 		data->list.value = 3;
 #else // All Solos in Multi Mod
-		data->list.value = 4;
+		data->list.value = 5;
 #endif
 
 #ifdef PLATFORM_N64 // All Solos in Multi Mod
