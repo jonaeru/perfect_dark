@@ -3067,7 +3067,6 @@ MenuItemHandlerResult mpBotDifficultyMenuHandler(s32 operation, struct menuitem 
 
 	return 0;
 }
-
 MenuItemHandlerResult menuhandlerMpDeleteSimulant(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -3077,6 +3076,25 @@ MenuItemHandlerResult menuhandlerMpDeleteSimulant(s32 operation, struct menuitem
 
 	return 0;
 }
+
+#ifndef PLATFORM_N64
+MenuItemHandlerResult menuhandlerMpCopySimulant(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_SET:
+		mpCopySimulant(g_Menus[g_MpPlayerNum].mpsetup.slotindex);
+		menuPopDialog();
+		break;
+	case MENUOP_CHECKDISABLED:
+		if (mpHasUnusedBotSlots() == 0) {
+			return true;
+		}
+	}
+
+	return 0;
+}
+#endif
+
 
 char *mpMenuTitleEditSimulant(struct menudialogdef *dialogdef)
 {
@@ -3296,6 +3314,16 @@ struct menuitem g_MpEditSimulantMenuItems[] = {
 		0,
 		NULL,
 	},
+#ifndef PLATFORM_N64
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Copy Simulant\n",
+		0,
+		menuhandlerMpCopySimulant,
+	},
+#endif
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
