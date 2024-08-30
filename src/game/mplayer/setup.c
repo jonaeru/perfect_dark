@@ -3095,7 +3095,6 @@ MenuItemHandlerResult menuhandlerMpCopySimulant(s32 operation, struct menuitem *
 }
 #endif
 
-
 char *mpMenuTitleEditSimulant(struct menudialogdef *dialogdef)
 {
 	sprintf(g_StringPointer, "%s", &g_BotConfigsArray[g_Menus[g_MpPlayerNum].mpsetup.slotindex].base.name);
