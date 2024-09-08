@@ -21,7 +21,7 @@ static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
 static char gexModDir[FS_MAXPATH + 1];  // GoldenEye X Mod
-bool isGexMod;
+bool g_IsGexMod;
 
 static s32 fsPathIsWritable(const char *path)
 {
@@ -83,13 +83,13 @@ const char *fsFullPath(const char *relPath)
 	}
 
 	// path relative to mod or base dir; this will be a read request, so check where the file actually is
-	if (modDir[0] && isGexMod == false) {
+	if (modDir[0] && g_IsGexMod == false) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
 		if (fsFileSize(pathBuf) >= 0) {
 			return pathBuf;
 		}
 	}
-	if (gexModDir[0] && isGexMod) {
+	if (gexModDir[0] && g_IsGexMod) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
 		if (fsFileSize(pathBuf) >= 0) {
 			return pathBuf;
@@ -218,7 +218,7 @@ s32 fsInit(void)
 
 const char *fsGetModDir(void)
 {
-	if (isGexMod) {
+	if (g_IsGexMod) {
 		return gexModDir[0] ? gexModDir : NULL;
 	} else {
 		return modDir[0] ? modDir : NULL;

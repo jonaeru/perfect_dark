@@ -153,7 +153,7 @@ int main(int argc, const char **argv)
 	mainProc();
 
 	// GoldenEye X Mod Switch
-	isGexMod = false;
+	g_IsGexMod = false;
 
 	return 0;
 }

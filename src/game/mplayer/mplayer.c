@@ -227,14 +227,14 @@ void mpStartMatch(void)
 
 	// GoldenEye X Mod Switch
 	if (stagenum >= 0x60) {
-		isGexMod = true;
+		g_IsGexMod = true;
 		stagenum = stagenum - 0x60;
 	} else {
-		isGexMod = false;
+		g_IsGexMod = false;
 	}
-	sysLogPrintf(LOG_NOTE, "stagenum: %02x, isGexMod: %s", stagenum, isGexMod ? "true" : "false");
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_IsGexMod: %s", stagenum, g_IsGexMod ? "true" : "false");
 	modConfigLoad(MOD_CONFIG_FNAME);
-	if (isGexMod) {
+	if (g_IsGexMod) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;

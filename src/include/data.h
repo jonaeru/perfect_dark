@@ -570,7 +570,7 @@ extern s32 g_FileAutoSelect;
 #define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
 
 // GoldenEye X Mod Switch
-extern bool isGexMod;
+extern bool g_IsGexMod;
 extern struct modelstate g_GexModelStates[NUM_MODELS];
 extern s8 g_GexPropExplosionTypes[];
 
