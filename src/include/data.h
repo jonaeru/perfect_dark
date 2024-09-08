@@ -573,6 +573,7 @@ extern s32 g_FileAutoSelect;
 extern bool g_IsGexMod;
 extern struct modelstate g_GexModelStates[NUM_MODELS];
 extern s8 g_GexPropExplosionTypes[];
+extern bool g_NotLoadMod; // All Solos in Multi Mod
 
 #else // PLATFORM_N64
 
