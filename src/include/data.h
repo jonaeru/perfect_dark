@@ -569,6 +569,8 @@ extern s32 g_FileAutoSelect;
 #define TEX_FILTER_2D g_TexFilter2D
 #define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
 
+extern bool g_NotLoadMod; // All Solos in Multi Mod
+
 #else // PLATFORM_N64
 
 #define TEX_FILTER_2D G_TF_BILERP
