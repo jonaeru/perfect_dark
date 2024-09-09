@@ -171,8 +171,9 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP19 + 0x60,     0, L_MPMENU_301 }, // Labyrinth
 	{ STAGE_TEST_MP2 + 0x60,      0, L_MPMENU_316 }, // Icicle Pyramid
 	// Random
-	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294  }, // Random Multi
-	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295  }, // Random Solo
+	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
+	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
+	{ STAGE_MP_RANDOM_GEX,   0, L_MPMENU_317 }, // Random GoldenEye X
 #endif
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
 };
@@ -182,7 +183,7 @@ s32 mpGetNumStages(void)
 #ifdef PLATFORM_N64
 	return 17;
 #else // All Solos in Multi Mod
-	return 56;
+	return 58;
 #endif
 }
 
@@ -255,7 +256,7 @@ s16 mpChooseRandomSoloStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < 27; i++) {
 		if ((i >= 13 && i <= 26) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
@@ -263,7 +264,7 @@ s16 mpChooseRandomSoloStage(void)
 
 	index = random() % numchallengescomplete;
 
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < 27; i++) {
 		if ((i >= 13 && i <= 26) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
@@ -274,6 +275,33 @@ s16 mpChooseRandomSoloStage(void)
 	}
 
 	return STAGE_DEFECTION;
+}
+
+s16 mpChooseRandomGexStage(void)
+{
+	s32 i;
+	s32 numchallengescomplete = 0;
+	s32 index;
+
+	for (i = 0; i < 53; i++) {
+		if (i >= 32 && i <= 52 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+			numchallengescomplete++;
+		}
+	}
+
+	index = random() % numchallengescomplete;
+
+	for (i = 0; i < 53; i++) {
+		if (i >= 32 && i <= 52 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+			if (index == 0) {
+				return g_MpArenas[i].stagenum;
+			}
+
+			index--;
+		}
+	}
+
+	return STAGE_MP_SKEDAR + 0x60;
 }
 #endif
 

@@ -223,6 +223,8 @@ void mpStartMatch(void)
 		stagenum = mpChooseRandomMultiStage();
 	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_SOLO) {
 		stagenum = mpChooseRandomSoloStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_GEX) {
+		stagenum = mpChooseRandomGexStage();
 	}
 
 	// GoldenEye X Mod Switch
