@@ -33,6 +33,7 @@ There are minor graphics- and gameplay-related issues, and possibly occasional c
 * experimental high framerate support (up to 240 FPS):
   * set `Game.TickRateDivisor` to `0` in `pd.ini` to activate;
   * in practice the game will have issues running faster than ~165 FPS, so use VSync or `Video.FramerateLimit` to cap it.
+* emulate the Transfer Pak functionality the game has on the Nintendo 64 to unlock some cheats automatically.
 
 Currently only 32-bit platforms are supported, namely x86 Windows and Linux.  
 Note that 32-bit binaries will still work on 64-bit versions of those platforms,
@@ -57,6 +58,8 @@ You must already have a Perfect Dark ROM to run the game, as specified above.
 If you want to use a PAL or JPN ROM instead, put them into the `data` directory and run the appropriate executable:
 * PAL: ROM name `pd.pal-final.z64`, EXE name `pd.pal.exe`.
 * JPN: ROM name `pd.jpn-final.z64`, EXE name `pd.jpn.exe`.
+
+Optionally, you can also put your Perfect Dark for GameBoy Color ROM named `pd.gbc` in the `data` directory if you want to emulate having the Nintendo 64's Transfer Pak and unlock some cheats automatically.
 
 Additional information can be found in the [wiki](https://github.com/fgsfdsfgs/perfect_dark/wiki).
 
@@ -134,5 +137,6 @@ It might be possible to build a 32-bit ARM executable, but this has not been tes
 * [Ship of Harkinian team](https://github.com/Kenix3/libultraship/tree/main/src/graphic/Fast3D), Emill and MaikelChan for the libultraship version of fast3d that this port uses;
 * lieff for [minimp3](https://github.com/lieff/minimp3);
 * Mouse Injector and 1964GEPD authors for some of the 60FPS- and mouselook-related fixes;
+* NicNamSam for the icon;
 * everyone who has submitted pull requests and issues to this repository and tested the port;
 * probably more I'm forgetting.
