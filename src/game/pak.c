@@ -234,7 +234,7 @@ struct pak g_Paks[5]; // controller paks + EEPROM
 u32 var800a317c;
 #endif
 
-OSPfs g_Pfses[MAX_PLAYERS];
+OSPfs g_Pfses[MAX_LOCAL_PLAYERS];
 u32 var800a3320;
 u32 var800a3324;
 u32 var800a3328;
@@ -327,6 +327,10 @@ u8 g_PaksPlugged = 0;
 
 #if VERSION >= VERSION_NTSC_1_0
 bool var80075d14 = true;
+#endif
+
+#ifndef PLATFORM_N64
+bool g_ValidGbcRomFound = false;
 #endif
 
 u32 pakGetBlockSize(s8 device)
@@ -4421,7 +4425,7 @@ void pak0f11c6d0(void)
 {
 	s32 i;
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		switch (g_Paks[i].state) {
 		case PAKSTATE_PROBE:
 		case PAKSTATE_MEM_DISPATCH:
@@ -5437,14 +5441,14 @@ void pakDisableRumbleForAllPlayers(void)
 	s32 i;
 
 #if VERSION >= VERSION_NTSC_1_0
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		if (g_Paks[i].type == PAKTYPE_RUMBLE) {
 			g_Paks[i].rumblestate = RUMBLESTATE_DISABLED_STOPPING;
 			joyStopRumble(i, true);
 		}
 	}
 #else
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		pakDisableRumbleForPlayer(i);
 	}
 #endif
@@ -5455,13 +5459,13 @@ void pakEnableRumbleForAllPlayers(void)
 	s32 i;
 
 #if VERSION >= VERSION_NTSC_FINAL
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		if (g_Paks[i].type == PAKTYPE_RUMBLE && g_Paks[i].rumblestate == RUMBLESTATE_DISABLED_STOPPED) {
 			g_Paks[i].rumblestate = RUMBLESTATE_ENABLING;
 		}
 	}
 #else
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		pakEnableRumbleForPlayer(i);
 	}
 #endif
@@ -5982,15 +5986,19 @@ s32 pak0f11e750(s8 device)
 
 bool gbpakIsAnyPerfectDark(void)
 {
+#ifdef PLATFORM_N64
 	s8 i;
 
-	for (i = 0; i < MAX_PLAYERS; i++) {
+	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 		if (gbpakIdentifyGame(i) == GBGAME_PD) {
 			return true;
 		}
 	}
 
 	return false;
+#else
+	return g_ValidGbcRomFound;
+#endif
 }
 
 /**

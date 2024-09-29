@@ -1016,7 +1016,7 @@ void eyespyProcessInput(bool allowbuttons)
 		// Make eyespy look horizontally
 		if (domovecentre) {
 			if (g_Vars.currentplayer->eyespy->verta > 0.0f && forwardspeed != 0) {
-				if (controlmode != CONTROLMODE_PC) {
+				if (controlmode < CONTROLMODE_PC) {
 					if (g_Vars.currentplayer->eyespy->verta < 180.0f) {
 						tmp = g_Vars.currentplayer->eyespy->verta;
 

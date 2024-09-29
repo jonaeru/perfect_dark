@@ -5,6 +5,7 @@
 
 extern u8 *g_RomFile;
 extern u32 g_RomFileSize;
+extern const char *g_RomName;
 
 s32 romdataInit(void);
 
@@ -21,5 +22,7 @@ s32 romdataFileGetNumForName(const char *name);
 u8 *romdataSegGetData(const char *segName);
 u8 *romdataSegGetDataEnd(const char *segName);
 u32 romdataSegGetSize(const char *segName);
+
+s32 romdataCheckGbcRom(void);
 
 #endif

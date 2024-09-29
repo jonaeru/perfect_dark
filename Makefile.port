@@ -151,7 +151,7 @@ G_DIR := src/generated/$(ROMID)
 
 ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
   TARGET_CFLAGS := $(shell pkg-config sdl2 --cflags-only-I)
-  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -ldbghelp
+  TARGET_LDFLAGS := $(shell pkg-config sdl2 --libs) -lz -lopengl32 -lws2_32 -lwinmm -ldbghelp
   # on windows/mingw we need this to be built with a 32-bit compiler so it finds the correct libs
   TOOLCHAIN ?= i686-w64-mingw32-
   # on GCC link libstdc++ statically
@@ -230,6 +230,10 @@ CXX_O_FILES := $(patsubst %.cpp, $(B_DIR)/%.o, $(CXX_FILES))
 
 O_FILES := $(C_O_FILES) $(CXX_O_FILES)
 
+ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
+  O_FILES += $(B_DIR)/icon.res
+endif
+
 INCLUDES = \
   -I include \
   -I include/PR \
@@ -247,7 +251,7 @@ else
   LD := $(CC)
 endif
 
-$(C_O_FILES): OPT_LVL := $(GCC_OPT_LVL)
+$(O_FILES): OPT_LVL := $(GCC_OPT_LVL)
 
 COMMON_CFLAGS := $(C_DEFINES) -DAVOID_UB=1 $(INCLUDES) $(TARGET_CFLAGS) -g \
   -fno-inline-functions \
@@ -321,6 +325,9 @@ $(B_DIR)/%.o: %.c $(JSON_HEADERS)
 $(B_DIR)/%.o: %.cpp $(JSON_HEADERS)
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) $(OPT_LVL) -o $@ $<
+
+$(B_DIR)/%.res: dist/windows/%.rc
+	windres $< -O coff -o $@
 
 ################################################################################
 # Clean rules

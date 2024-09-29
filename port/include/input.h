@@ -19,9 +19,29 @@
 enum virtkey {
 	/* same order as SDL scancodes */
 	VK_KEYBOARD_BEGIN = 0,
+	VK_A = 4,
+	VK_Z = 29,
+	VK_1 = 30,
+	VK_9 = 38,
+	VK_0 = 39,
 	VK_RETURN = 40,
 	VK_ESCAPE = 41,
+	VK_BACKSPACE = 42,
+	VK_SPACE = 44,
+	VK_MINUS = 45,
+	VK_LEFTBRACKET = 47,
+	VK_RIGHTBRACKET = 48,
+	VK_SEMICOLON = 51,
+	VK_GRAVE = 53,
+	VK_COMMA = 54,
+	VK_PERIOD = 55,
+	VK_F1 = 58,
+	VK_F9 = 66,
 	VK_DELETE = 76,
+	VK_LCTRL = 224,
+	VK_LSHIFT = 225,
+	VK_RCTRL = 228,
+	VK_RSHIFT = 229,
 
 	/* same order as SDL mouse buttons */
 	VK_MOUSE_BEGIN = 512,
@@ -216,5 +236,16 @@ s32 inputAutoLockMouse(s32 wantlock);
 
 // show/hide mouse cursor; if mouse lock is on the cursor is always hidden
 void inputMouseShowCursor(s32 show);
+
+void inputStartTextInput(void);
+void inputStopTextInput(void);
+
+void inputClearLastTextChar(void);
+char inputGetLastTextChar(void);
+
+s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol);
+
+void inputClearClipboard(void);
+const char *inputGetClipboard(void);
 
 #endif

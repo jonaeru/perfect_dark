@@ -76,7 +76,7 @@ struct modeldef *bgunGetCartModeldef(void);
 void bgun0f09ebcc(struct defaultobj *obj, struct coord *coord, RoomNum *rooms, Mtxf *matrix1, struct coord *velocity, Mtxf *matrix2, struct prop *prop, struct coord *pos);
 void bgun0f09ed2c(struct defaultobj *obj, struct coord *coord, Mtxf *arg2, struct coord *velocity, Mtxf *arg4);
 struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset *gset, struct coord *pos, RoomNum *rooms, Mtxf *arg4, struct coord *velocity);
-void bgunCreateThrownProjectile(s32 handnum, struct gset *gset);
+struct defaultobj *bgunCreateThrownProjectile(s32 handnum, struct gset *gset);
 void bgunUpdateHeldRocket(s32 handnum);
 void bgunCreateHeldRocket(s32 handnum, struct weaponfunc_shootprojectile *func);
 void bgunFreeHeldRocket(s32 handnum);
