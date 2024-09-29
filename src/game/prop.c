@@ -39,6 +39,10 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "net/net.h"
+#include "net/netmsg.h"
+#endif
 
 s16 *g_RoomPropListChunkIndexes;
 struct roomproplistchunk *g_RoomPropListChunks;
@@ -167,6 +171,10 @@ struct prop *propAllocate(void)
 		prop->propupdate60err = 2;
 		prop->opawallhits = NULL;
 		prop->xluwallhits = NULL;
+#ifndef PLATFORM_N64
+		// NOTE: this will be automatically overwritten at the start of the stage for the setup props
+		prop->syncid = (g_NetMode == NETMODE_SERVER) ? g_NetNextSyncId++ : 0;
+#endif
 		g_Vars.propstates[prop->propstateindex].propcount++;
 
 		g_Vars.allocstateindex++;
@@ -199,6 +207,9 @@ void propFree(struct prop *prop)
 	prop->prev = NULL;
 	prop->chr = NULL;
 	prop->rooms[0] = -1;
+#ifndef PLATFORM_N64
+	prop->syncid = 0;
+#endif
 	g_Vars.freeprops = prop;
 }
 
@@ -1615,6 +1626,13 @@ bool currentPlayerInteract(bool eyespy)
 	prop = propFindForInteract(eyespy);
 
 	if (prop) {
+#ifndef PLATFORM_N64
+		// if we aren't the authority, don't do anything
+		if (g_NetMode == NETMODE_CLIENT) {
+			return false;
+		}
+#endif
+
 		switch (prop->type) {
 		case PROPTYPE_OBJ:
 		case PROPTYPE_WEAPON:
@@ -1632,6 +1650,12 @@ bool currentPlayerInteract(bool eyespy)
 		}
 
 		propExecuteTickOperation(prop, op);
+
+#ifndef PLATFORM_N64
+		if (g_NetMode == NETMODE_SERVER) {
+			netmsgSvcPropUseWrite(&g_NetMsgRel, prop, g_Vars.currentplayer->client, op);
+		}
+#endif
 
 		return false;
 	}
@@ -2449,7 +2473,8 @@ void propsTestForPickup(void)
 
 	if (g_Vars.currentplayer->bondmovemode != MOVEMODE_CUTSCENE
 			&& !g_PlayerInvincible
-			&& g_Vars.currentplayer != g_Vars.anti) {
+			&& PLAYER_IS_NOT_ANTI(g_Vars.currentplayer)
+			) {
 		roomsCopy(g_Vars.currentplayer->prop->rooms, allrooms);
 
 		for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {

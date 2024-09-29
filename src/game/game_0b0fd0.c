@@ -167,7 +167,7 @@ f32 func0f0b131c(s32 hand)
 		weapon = weaponFindById(bgunGetWeaponNum2(0));
 		x = weapon->posx;
 
-		if (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+		if (LOCALPLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
 			x -= 3.5f;
 
 			if (g_Vars.currentplayernum == 0) {
@@ -178,7 +178,7 @@ f32 func0f0b131c(s32 hand)
 		weapon = weaponFindById(bgunGetWeaponNum2(1));
 		x = -weapon->posx;
 
-		if (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+		if (LOCALPLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
 			x += 3.5f;
 
 			if (g_Vars.currentplayernum == 0) {

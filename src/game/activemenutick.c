@@ -22,7 +22,7 @@ void amTick(void)
 	s32 prevplayernum = g_Vars.currentplayernum;
 	s32 i;
 
-	for (i = 0; i < PLAYERCOUNT(); i++) {
+	for (i = 0; i < LOCALPLAYERCOUNT(); i++) {
 		setCurrentPlayerNum(i);
 		g_AmIndex = g_Vars.currentplayernum;
 

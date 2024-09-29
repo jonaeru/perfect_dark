@@ -7,10 +7,14 @@ extern "C" {
 
 #include <PR/ultratypes.h>
 
-enum LogLevel {
-  LOG_NOTE,
-  LOG_WARNING,
-  LOG_ERROR,
+#define LOGFLAG_NOCON (1 << 6)
+#define LOGFLAG_SHOWMSG (1 << 7)
+
+enum loglevel {
+  LOG_NOTE = 0,
+  LOG_CHAT = 0 | LOGFLAG_SHOWMSG,
+  LOG_WARNING = 1 | LOGFLAG_SHOWMSG,
+  LOG_ERROR = 2 | LOGFLAG_SHOWMSG,
 };
 
 void sysInitArgs(s32 argc, const char **argv);
@@ -21,6 +25,7 @@ const char *sysArgGetString(const char *arg);
 s32 sysArgGetInt(const char *arg, s32 defval);
 
 u64 sysGetMicroseconds(void);
+f32 sysGetSeconds(void);
 
 void sysFatalError(const char *fmt, ...) __attribute__((noreturn));
 

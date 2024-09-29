@@ -204,7 +204,7 @@ void viReset(s32 stagenum)
 			? FBALLOC_WIDTH_LO * FBALLOC_HEIGHT_LO * NUM_FRAMEBUFFERS
 			: FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
 
-		if (IS4MB() && PLAYERCOUNT() == 2) {
+		if (IS4MB() && LOCALPLAYERCOUNT() == 2) {
 			// 4MB 2-player: The viewports are 110px tall
 #if VERSION >= VERSION_NTSC_1_0
 			fbsize = FBALLOC_WIDTH_LO * (FBALLOC_HEIGHT_LO / 2) * NUM_FRAMEBUFFERS;
@@ -212,7 +212,7 @@ void viReset(s32 stagenum)
 			fbsize = SCREEN_320 * (SCREEN_240 / 2) * NUM_FRAMEBUFFERS;
 #endif
 			g_Vars.fourmeg2player = true;
-		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
+		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && LOCALPLAYERCOUNT() == 2) {
 			// PAL is using its correct size
 			fbsize = SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO * NUM_FRAMEBUFFERS;
 		}
@@ -676,11 +676,11 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 	gDPSetFillColor(gdl++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
 
 #if VERSION >= VERSION_NTSC_1_0
-	if (PLAYERCOUNT() == 1
+	if (LOCALPLAYERCOUNT() == 1
 			|| ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 				&& playerHasSharedViewport() && g_Vars.currentplayernum == 0))
 #else
-	if (PLAYERCOUNT() == 1
+	if (LOCALPLAYERCOUNT() == 1
 			|| ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 				&& (
 					(g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE
@@ -707,10 +707,10 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 			s32 bottomplayernum = 0;
 			s32 tmpplayernum = 0;
 
-			if (PLAYERCOUNT() == 2) {
+			if (LOCALPLAYERCOUNT() == 2) {
 				bottomplayernum = 1;
 				tmpplayernum = 1;
-			} else if (PLAYERCOUNT() >= 3) {
+			} else if (LOCALPLAYERCOUNT() >= 3) {
 				bottomplayernum = 2;
 				tmpplayernum = 2;
 			}
@@ -735,9 +735,9 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 					viGetWidth() - 1, g_Vars.players[tmpplayernum]->viewtop - 1);
 			gDPPipeSync(gdl++);
 
-			if (PLAYERCOUNT() >= 3 ||
-					(PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player))) {
-				if (PLAYERCOUNT() == 2) {
+			if (LOCALPLAYERCOUNT() >= 3 ||
+					(LOCALPLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player))) {
+				if (LOCALPLAYERCOUNT() == 2) {
 					tmpplayernum = 0;
 				}
 
@@ -748,7 +748,7 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 				gDPPipeSync(gdl++);
 			}
 
-			if (PLAYERCOUNT() == 3) {
+			if (LOCALPLAYERCOUNT() == 3) {
 				// Blank square in P4 spot
 				gDPFillRectangle(gdl++,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth + 1, g_Vars.players[tmpplayernum]->viewtop,

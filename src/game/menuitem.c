@@ -2607,11 +2607,17 @@ Gfx *menuitemCarouselRender(Gfx *gdl, struct menurendercontext *context)
 		colour = colourBlend(colourBlend(colour, 0x000000ff, 127), colour1, weight);
 	}
 
+#ifdef PLATFORM_N64
+	s16 chevronOffset = 0;
+#else 
+	s16 chevronOffset = 3;
+#endif
+
 	// Left arrow
-	gdl = menugfxDrawCarouselChevron(gdl, context->x, context->y + context->height / 2, 8, 1, -1, colour);
+	gdl = menugfxDrawCarouselChevron(gdl, context->x + chevronOffset, context->y + context->height / 2, 8, 1, -1, colour);
 
 	// Right arrow
-	gdl = menugfxDrawCarouselChevron(gdl, context->x + context->width, context->y + context->height / 2, 8, 3, -1, colour);
+	gdl = menugfxDrawCarouselChevron(gdl, context->x + context->width - chevronOffset, context->y + context->height / 2, 8, 3, -1, colour);
 
 	// This part of the function is unused because param2 is always zero.
 	// Setting it to 0x7b causes a crash.
@@ -4209,7 +4215,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, s32 curmode, struct menurendercontex
 			// during development the second player in the 2.x styles had to
 			// choose their control style separately to player 1, in which case
 			// there would have been 2.5, 2.6, 2.7 and 2.8 for player 2.
-			if (curmode > CONTROLMODE_24 && curmode != CONTROLMODE_PC) {
+			if (curmode > CONTROLMODE_24 && curmode < CONTROLMODE_PC) {
 				if (textnum == menuitemControllerGetButtonAction(prevmode + 4, i)) {
 					colour = labelcolour;
 				}
@@ -4294,7 +4300,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 			data->prevmode = -1;
 		}
 	} else {
-		if (g_Menus[g_MpPlayerNum].main.controlmode >= CONTROLMODE_21 && g_Menus[g_MpPlayerNum].main.controlmode != CONTROLMODE_PC) {
+		if (g_Menus[g_MpPlayerNum].main.controlmode >= CONTROLMODE_21 && g_Menus[g_MpPlayerNum].main.controlmode < CONTROLMODE_PC) {
 			data->controlgroup = 1;
 			data->contfadetimer = 0;
 			data->prevmode = -1;

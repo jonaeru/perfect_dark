@@ -106,5 +106,16 @@ void playerSetCamPropertiesWithRoom(struct coord *pos, struct coord *up, struct 
 void playerSetCamPropertiesWithoutRoom(struct coord *pos, struct coord *up, struct coord *look, s32 room);
 void playerSetCamProperties(struct coord *pos, struct coord *up, struct coord *look, s32 room);
 void playerClearMemCamRoom(void);
+struct sndstate *playerSndStart(s32 arg0, s16 sound, struct sndstate **handle, s32 playernum, f32 pitch, s32 fxbus, s32 fxmix);
+
+#if MAX_PLAYERS > 4
+s32 playerGetCount(void);
+s32 playerGetLocalCount(void);
+#endif
+
+#ifndef PLATFORM_N64
+f32 playerGetDefaultFovY(s32 playernum);
+f32 playerGetZoomFovMult(s32 playernum);
+#endif
 
 #endif

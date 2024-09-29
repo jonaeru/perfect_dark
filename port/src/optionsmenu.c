@@ -702,12 +702,23 @@ static MenuItemHandlerResult menuhandlerMaximizeWindow(s32 operation, struct men
 
 static MenuItemHandlerResult menuhandlerTexFilter(s32 operation, struct menuitem *item, union handlerdata *data)
 {
+	static const char *opts[] = {
+		"Nearest",
+		"Bilinear",
+		"Three Point"
+	};
+
 	switch (operation) {
-	case MENUOP_GET:
-		return (videoGetTextureFilter() != 0);
-	case MENUOP_SET:
-		videoSetTextureFilter(data->checkbox.value);
+	case MENUOP_GETOPTIONCOUNT:
+		data->dropdown.value = ARRAYCOUNT(opts);
 		break;
+	case MENUOP_GETOPTIONTEXT:
+		return (intptr_t)opts[data->dropdown.value];
+	case MENUOP_SET:
+		videoSetTextureFilter(data->dropdown.value);
+		break;
+	case MENUOP_GETSELECTEDINDEX:
+		data->dropdown.value = videoGetTextureFilter();
 	}
 
 	return 0;
@@ -826,7 +837,7 @@ struct menuitem g_ExtendedVideoMenuItems[] = {
 		menuhandlerTexDetail,
 	},
 	{
-		MENUITEMTYPE_CHECKBOX,
+		MENUITEMTYPE_DROPDOWN,
 		0,
 		MENUITEMFLAG_LITERAL_TEXT,
 		(uintptr_t)"Texture Filtering",

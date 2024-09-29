@@ -319,7 +319,7 @@ Gfx *nbombCreateGdl(void)
 	Gfx *gdl;
 	s32 index = 0;
 
-	if (PLAYERCOUNT() >= 2) {
+	if (LOCALPLAYERCOUNT() >= 2) {
 		index = 1;
 	}
 

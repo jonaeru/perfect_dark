@@ -12,7 +12,17 @@ void roomsReset(void)
 {
 	s32 i;
 
+#if MAX_PLAYERS > 4
+	if (PLAYERCOUNT() > 4) {
+		g_RoomMtxNumSlots = 400;
+	} else if (PLAYERCOUNT() > 2) {
+		g_RoomMtxNumSlots = 200;
+	} else {
+		g_RoomMtxNumSlots = 120;
+	}
+#else
 	g_RoomMtxNumSlots = PLAYERCOUNT() >= 2 ? 200 : 120;
+#endif
 
 	g_RoomMtxAges = mempAlloc(ALIGN16(g_RoomMtxNumSlots), MEMPOOL_STAGE);
 	g_RoomMtxLinkedRooms = mempAlloc(ALIGN16(g_RoomMtxNumSlots * sizeof(*g_RoomMtxLinkedRooms)), MEMPOOL_STAGE);

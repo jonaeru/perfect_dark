@@ -51,6 +51,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
+#include "net/net.h"
 #define BLUR_OFS 10
 #else
 #define BLUR_OFS 30
@@ -2262,7 +2263,21 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				gdl = func0f0d49c8(gdl);
 				gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
-				f32 aspect = (f32) (g_MenuScissorX2 - g_MenuScissorX1) / (f32) (g_MenuScissorY2 - g_MenuScissorY1);
+#ifdef PLATFORM_N64
+				s32 x1 = g_MenuScissorX1;
+				s32 x2 = g_MenuScissorX2;
+#else
+				s32 halfScreenWidth = SCREEN_WIDTH_LO >> 1;
+				f32 scale = SCREEN_ASPECT / videoGetAspect();
+				f32 width = (g_MenuScissorX2 - g_MenuScissorX1) * scale;
+				f32 center = (g_MenuScissorX1 + g_MenuScissorX2) * 0.5f;
+				center = ((center - halfScreenWidth) * scale) + halfScreenWidth;
+
+				s32 x1 = (s32)(center - width * 0.5f);
+				s32 x2 = (s32)(center + width * 0.5f);
+#endif
+
+				f32 aspect = (f32) (x2 - x1) / (f32) (g_MenuScissorY2 - g_MenuScissorY1);
 
 				static u32 znear = 10;
 				static u32 zfar = 300;
@@ -2272,8 +2287,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 				gdl = func0f0d49c8(gdl);
 
-				viSetViewPosition(g_MenuScissorX1 * g_ScaleX, g_MenuScissorY1);
-				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (g_MenuScissorX2 - g_MenuScissorX1) * g_ScaleX, g_MenuScissorY2 - g_MenuScissorY1);
+				viSetViewPosition(x1 * g_ScaleX, g_MenuScissorY1);
+				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1) * g_ScaleX, g_MenuScissorY2 - g_MenuScissorY1);
 
 				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
 				gdl = vi0000aca4(gdl, znear, zfar);
@@ -3494,7 +3509,7 @@ void menuClose(void)
 void func0f0f8120(void)
 {
 #ifdef AVOID_UB
-	u32 mpindex = g_MpPlayerNum % MAX_PLAYERS;
+	u32 mpindex = g_MpPlayerNum % MAX_LOCAL_PLAYERS;
 	struct menudialog *prev = g_Menus[mpindex].curdialog;
 	s32 i;
 #else
@@ -3509,9 +3524,6 @@ void func0f0f8120(void)
 	}
 
 #ifdef AVOID_UB
-	mpindex = g_MpPlayerNum;
-	if (mpindex >= MAX_PLAYERS)
-		mpindex -= MAX_PLAYERS;
 	if (g_Menus[mpindex].curdialog == prev) {
 		while (g_Menus[mpindex].depth > 0) {
 			menuPopDialog();
@@ -5456,7 +5468,7 @@ Gfx *menuRender(Gfx *gdl)
 		} else {
 			s32 i;
 
-			for (i = 0; i < MAX_PLAYERS; i++) {
+			for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 				g_MpPlayerNum = i;
 				gdl = menuRenderDialogs(gdl);
 			}
@@ -5489,7 +5501,20 @@ Gfx *menuRender(Gfx *gdl)
 
 			gdl = text0f153628(gdl);
 
-			for (i = 0; i < MAX_PLAYERS; i++) {
+#ifndef PLATFORM_N64
+			if (g_NetMode) {
+				if (g_NetMode == NETMODE_SERVER) {
+					sprintf(text, "Server: %d/%d %04x", g_NetNumClients, g_NetMaxClients, g_MpSetup.chrslots);
+				} else {
+					sprintf(text, "Client: ID %u", g_NetLocalClient->id);
+				}
+				x = viewleft + 2;
+				y = viewbottom - 9;
+				colour = 0x00ff00ff;
+				gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
+			} else
+#endif
+			for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
 				// Figure out what text will be displayed. The text calculated
 				// here is for measuring purposes only and isn't rendered.
 				// Amusingly, there's a %d placeholder in the text which isn't

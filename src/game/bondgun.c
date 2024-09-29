@@ -56,6 +56,8 @@
 #ifndef PLATFORM_N64
 #include "game/stagetable.h"
 #include "video.h"
+#include "net/net.h"
+#include "net/netmsg.h"
 #endif
 
 #define GUNLOADSTATE_FLUX     0
@@ -4472,7 +4474,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
  * 2 = fumbling grenade from right hand (due to nbomb)
  * 3 = fumbling grenade from left hand (actually not possible)
  */
-void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
+struct defaultobj *bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 {
 	struct coord velocity = {0, 0, 0};
 	Mtxf sp1f4;
@@ -4501,6 +4503,13 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 	f32 sp48[4];
 	struct trainingdata *data;
 	u32 stack;
+
+#ifndef PLATFORM_N64
+	// don't do anything if we're not the authority
+	if (g_NetMode == NETMODE_CLIENT) {
+		return NULL;
+	}
+#endif
 
 	if (handnum >= 2) {
 		droppinggrenade = true;
@@ -4667,7 +4676,16 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 				weapon->base.hidden |= OBJHFLAG_THROWNKNIFE;
 			}
 		}
+
+#ifndef PLATFORM_N64
+		if (obj && g_NetMode == NETMODE_SERVER) {
+			netmsgSvcPropSpawnWrite(&g_NetMsgRel, obj->prop);
+			netmsgSvcPropMoveWrite(&g_NetMsgRel, obj->prop, NULL);
+		}
+#endif
 	}
+
+	return obj;
 }
 
 void bgunUpdateHeldRocket(s32 handnum)
@@ -4770,6 +4788,12 @@ void bgunCreateFiredProjectile(s32 handnum)
 	f32 spe4[4];
 	f32 spd4[4];
 	f32 spc4[4];
+
+#ifndef PLATFORM_N64
+	if (g_NetMode == NETMODE_CLIENT) {
+		return;
+	}
+#endif
 
 	hand = g_Vars.currentplayer->hands + handnum;
 
@@ -4983,6 +5007,12 @@ void bgunCreateFiredProjectile(s32 handnum)
 					weapon->base.prop = NULL;
 					weapon->base.model = NULL;
 				}
+#ifndef PLATFORM_N64
+				else if (g_NetMode == NETMODE_SERVER) {
+					netmsgSvcPropSpawnWrite(&g_NetMsgRel, weapon->base.prop);
+					netmsgSvcPropMoveWrite(&g_NetMsgRel, weapon->base.prop, NULL);
+				}
+#endif
 #else
 				// NTSC beta doesn't have any of the failure checks
 				Mtxf sp78;
@@ -6313,6 +6343,13 @@ void bgunDisarm(struct prop *attackerprop)
 	s32 modelnum;
 	s32 i;
 	bool drop;
+	struct defaultobj *obj;
+#ifndef PLATFORM_N64
+	// don't do anything if we're not the authority
+	if (g_NetMode == NETMODE_CLIENT) {
+		return;
+	}
+#endif
 
 	if (!weaponHasFlag(weaponnum, WEAPONFLAG_UNDROPPABLE) && weaponnum <= WEAPON_RCP45) {
 #if VERSION >= VERSION_NTSC_1_0
@@ -6329,6 +6366,12 @@ void bgunDisarm(struct prop *attackerprop)
 		if (weaponnum <= WEAPON_UNARMED || player->gunctrl.switchtoweaponnum != -1) {
 			return;
 		}
+
+#ifndef PLATFORM_N64
+		if (g_NetMode == NETMODE_SERVER) {
+			netmsgSvcChrDisarmWrite(&g_NetMsgRel, player->prop->chr, attackerprop, weaponnum, 0.f, NULL);
+		}
+#endif
 
 		chr = player->prop->chr;
 		drop = true;
@@ -6358,7 +6401,7 @@ void bgunDisarm(struct prop *attackerprop)
 						&& player->hands[i].stateminor == HANDSTATEMINOR_ATTACK_THROW_0) {
 #endif
 					drop = false;
-					bgunCreateThrownProjectile(i + 2, &player->hands[i].gset);
+					obj = bgunCreateThrownProjectile(i + 2, &player->hands[i].gset);
 				}
 			}
 		}
@@ -6382,6 +6425,13 @@ void bgunDisarm(struct prop *attackerprop)
 				}
 
 				objDrop(prop2, true);
+
+#ifndef PLATFORM_N64
+				if (g_NetMode == NETMODE_SERVER) {
+					netmsgSvcPropSpawnWrite(&g_NetMsgRel, prop2);
+					netmsgSvcPropMoveWrite(&g_NetMsgRel, prop2, NULL);
+				}
+#endif
 			}
 		}
 
@@ -10933,7 +10983,6 @@ void bgunRender(Gfx **gdlptr)
 	struct modelrenderdata renderdata = {NULL, true, 3}; // 10c
 	struct player *player;
 	s32 i;
-	const u32 wnorm = mtx00016dcc(0, 300);
 
 	static bool renderhand = true; // var800702dc
 
@@ -10999,7 +11048,7 @@ void bgunRender(Gfx **gdlptr)
 				gSPLookAt(gdl++, camGetLookAt());
 			}
 
-			gSPPerspNormalize(gdl++, wnorm);
+			gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
 
 			// There is support for guns having a TV screen on them
 			// but no guns have this model part so it's not used.
@@ -11174,17 +11223,7 @@ void bgunRender(Gfx **gdlptr)
 		}
 	}
 
-#ifndef PLATFORM_N64
-	// put the casings into the same Z range as the gun
-	gSPPerspNormalize(gdl++, wnorm);
-#endif
-
 	casingsRender(&gdl);
-
-#ifndef PLATFORM_N64
-	gSPPerspNormalize(gdl++, viGetPerspScale());
-#endif
-
 	zbufSwap();
 
 	gdl = zbufConfigureRdp(gdl);
@@ -11734,7 +11773,7 @@ void bgunSetTriggerOn(s32 handnum, bool on)
 s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromactivemenu, bool fromdedicatedbutton)
 {
 #ifndef PLATFORM_N64
-	const bool extcontrols = PLAYER_EXTCFG().extcontrols;
+	const bool extcontrols = PLAYER_EXTCFG().extcontrols || g_Vars.currentplayer->isremote;
 	bool docontinue;
 #endif
 	switch (bgunGetWeaponNum(HAND_RIGHT)) {
@@ -11853,7 +11892,7 @@ void bgun0f0a8c50(void)
 	case WEAPON_LAPTOPGUN:
 	case WEAPON_DRAGON:
 	case WEAPON_REMOTEMINE:
-		if (PLAYER_EXTCFG().extcontrols) {
+		if (PLAYER_EXTCFG().extcontrols || g_Vars.currentplayer->isremote) {
 			return;
 		}
 		break;
@@ -12756,7 +12795,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 {
 	struct player *player = g_Vars.currentplayer;
 	s32 bottom = viGetViewTop() + viGetViewHeight() - 13;
-	s32 playercount = PLAYERCOUNT();
+	s32 playercount = LOCALPLAYERCOUNT();
 	s32 playernum = g_Vars.currentplayernum;
 	struct gunctrl *ctrl;
 	s32 secs60;

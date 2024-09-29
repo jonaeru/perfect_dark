@@ -77,7 +77,7 @@ s32 videoInit(void)
 	}
 
 	wmAPI->set_target_fps(vidFramerateLimit); // disabled because vsync is on
-	renderingAPI->set_texture_filter((enum FilteringMode)texFilter);
+	gfx_set_texture_filter((enum FilteringMode)texFilter);
 
 	initDone = true;
 	return 0;
@@ -218,8 +218,9 @@ void videoSetMaximizeWindow(s32 fs)
 void videoSetTextureFilter(u32 filter)
 {
 	if (filter > FILTER_THREE_POINT) filter = FILTER_THREE_POINT;
+	if (texFilter == filter) return;
 	texFilter = filter;
-	renderingAPI->set_texture_filter((enum FilteringMode)filter);
+	gfx_set_texture_filter((enum FilteringMode)filter);
 }
 
 void videoSetTextureFilter2D(s32 filter)
@@ -231,6 +232,14 @@ void videoSetDetailTextures(s32 detail)
 {
 	texDetail = !!detail;
 	gfx_detail_textures_enabled = (bool)texDetail;
+}
+
+void videoCapFramerate(s32 limit)
+{
+	if (vidFramerateLimit > 0 && vidFramerateLimit < limit) {
+		limit = vidFramerateLimit;
+	}
+	wmAPI->set_target_fps(limit ? limit : vidFramerateLimit);
 }
 
 s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize)
