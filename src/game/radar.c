@@ -336,6 +336,9 @@ Gfx *radarRender(Gfx *gdl)
 	gdl = func0f153134(gdl);
 
 	// Draw dots for human players
+#ifndef PLATFORM_N64
+	if (!(g_MpSetup.options & MPOPTION_NOPLAYERONRADAR)) {
+#endif
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		if (i != playernum) {
 			if (g_Vars.players[i]->isdead == false
@@ -356,6 +359,9 @@ Gfx *radarRender(Gfx *gdl)
 			}
 		}
 	}
+#ifndef PLATFORM_N64
+	}
+#endif
 
 	// Draw dots for coop AI buddies
 	if (!g_Vars.normmplayerisrunning && g_MissionConfig.iscoop) {
@@ -377,7 +383,11 @@ Gfx *radarRender(Gfx *gdl)
 	}
 
 	// Draw dots for MP simulants
+#ifdef PLATFORM_N64
 	if (g_Vars.normmplayerisrunning) {
+#else
+	if (g_Vars.normmplayerisrunning && !(g_MpSetup.options & MPOPTION_NOPLAYERONRADAR)) {
+#endif
 		for (i = 0; i < g_BotCount; i++) {
 			if (!chrIsDead(g_MpBotChrPtrs[i])
 					&& (g_MpBotChrPtrs[i]->hidden & CHRHFLAG_CLOAKED) == 0

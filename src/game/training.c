@@ -2818,6 +2818,9 @@ void dtTick(void)
 				g_DtData.completed = true;
 				g_DtData.timeleft = 1;
 				g_DtData.finished = true;
+#ifndef PLATFORM_N64
+				filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
+#endif
 			}
 		} else if (g_DtData.finished) {
 			if (g_DtData.timeleft <= 0) {
@@ -3105,6 +3108,9 @@ void htTick(void)
 				g_HtData.completed = true;
 				g_HtData.timeleft = 1;
 				g_HtData.finished = true;
+#ifndef PLATFORM_N64
+				filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
+#endif
 			}
 		} else if (g_HtData.finished) {
 			if (g_HtData.timeleft <= 0) {

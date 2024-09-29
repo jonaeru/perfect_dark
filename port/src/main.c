@@ -113,6 +113,8 @@ int main(int argc, const char **argv)
 	romdataInit();
 	netInit();
 
+	g_ValidGbcRomFound = romdataCheckGbcRom();
+
 	gameInit();
 
 	if (fsGetModDir()) {

@@ -80,6 +80,14 @@ struct menuitem g_MpCombatOptionsMenuItems[] = {
 		MPOPTION_FRIENDLYFIRE,
 		menuhandlerMpDisplayTeam,
 	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"No Player on Radar",
+		MPOPTION_NOPLAYERONRADAR,
+		menuhandlerMpCheckboxOption,
+	},
 #endif
 	{
 		MENUITEMTYPE_SEPARATOR,

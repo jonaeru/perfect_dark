@@ -144,6 +144,9 @@ MenuDialogHandlerResult menudialogMpSimulant(s32 operation, struct menudialogdef
 MenuItemHandlerResult menuhandlerMpSimulantHead(s32 operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpSimulantBody(s32 operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpDeleteSimulant(s32 operation, struct menuitem *item, union handlerdata *data);
+#ifndef PLATFORM_N64
+MenuItemHandlerResult menuhandlerMpCopySimulant(s32 operation, struct menuitem *item, union handlerdata *data);
+#endif
 MenuItemHandlerResult menuhandlerMpChangeSimulantType(s32 operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpClearAllSimulants(s32 operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpAddSimulant(s32 operation, struct menuitem *item, union handlerdata *data);

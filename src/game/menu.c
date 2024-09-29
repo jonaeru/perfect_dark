@@ -2263,7 +2263,21 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				gdl = func0f0d49c8(gdl);
 				gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
-				f32 aspect = (f32) (g_MenuScissorX2 - g_MenuScissorX1) / (f32) (g_MenuScissorY2 - g_MenuScissorY1);
+#ifdef PLATFORM_N64
+				s32 x1 = g_MenuScissorX1;
+				s32 x2 = g_MenuScissorX2;
+#else
+				s32 halfScreenWidth = SCREEN_WIDTH_LO >> 1;
+				f32 scale = SCREEN_ASPECT / videoGetAspect();
+				f32 width = (g_MenuScissorX2 - g_MenuScissorX1) * scale;
+				f32 center = (g_MenuScissorX1 + g_MenuScissorX2) * 0.5f;
+				center = ((center - halfScreenWidth) * scale) + halfScreenWidth;
+
+				s32 x1 = (s32)(center - width * 0.5f);
+				s32 x2 = (s32)(center + width * 0.5f);
+#endif
+
+				f32 aspect = (f32) (x2 - x1) / (f32) (g_MenuScissorY2 - g_MenuScissorY1);
 
 				static u32 znear = 10;
 				static u32 zfar = 300;
@@ -2273,8 +2287,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 				gdl = func0f0d49c8(gdl);
 
-				viSetViewPosition(g_MenuScissorX1 * g_ScaleX, g_MenuScissorY1);
-				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (g_MenuScissorX2 - g_MenuScissorX1) * g_ScaleX, g_MenuScissorY2 - g_MenuScissorY1);
+				viSetViewPosition(x1 * g_ScaleX, g_MenuScissorY1);
+				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1) * g_ScaleX, g_MenuScissorY2 - g_MenuScissorY1);
 
 				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
 				gdl = vi0000aca4(gdl, znear, zfar);
@@ -3474,9 +3488,7 @@ void menuClose(void)
 	g_Menus[g_MpPlayerNum].openinhibit = 10;
 
 #ifndef PLATFORM_N64
-	if (inputMouseIsEnabled()) {
-		inputLockMouse(true);
-	}
+	inputAutoLockMouse(true);
 #endif
 
 	if (g_MenuData.root == MENUROOT_MPPAUSE) {
@@ -3587,9 +3599,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	g_PlayersWithControl[g_Menus[g_MpPlayerNum].playernum] = false;
 
 #ifndef PLATFORM_N64
-	if (inputMouseIsEnabled()) {
-		inputLockMouse(false);
-	}
+	inputAutoLockMouse(false);
 #endif
 
 	func0f0f1494();

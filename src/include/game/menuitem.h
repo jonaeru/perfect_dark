@@ -83,4 +83,8 @@ bool menuitemTick(struct menuitem *item, struct menudialog *dialog, struct menui
 void menuitemInit(struct menuitem *item, union menuitemdata *data);
 Gfx *menuitemOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menuitem *item, struct menudialog *dialog, union menuitemdata *data);
 
+#ifndef PLATFORM_N64
+s32 menuitemGetTop(struct menuitem *item, struct menudialog *dialog);
+#endif
+
 #endif

@@ -126,7 +126,6 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
 Gfx *zbufClear(Gfx *gdl)
 {
 #ifdef PLATFORM_N64
-	// no reason to do a Z clear on PC, we already do it at frame start
 	s32 left;
 	s32 right;
 
@@ -150,6 +149,8 @@ Gfx *zbufClear(Gfx *gdl)
 
 	gDPFillRectangle(gdl++, left, 0, right, playerGetFbHeight() - 1);
 	gDPPipeSync(gdl++);
+#else
+	gDPClearDepthEXT(gdl++);
 #endif
 
 	return gdl;

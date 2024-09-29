@@ -329,6 +329,10 @@ u8 g_PaksPlugged = 0;
 bool var80075d14 = true;
 #endif
 
+#ifndef PLATFORM_N64
+bool g_ValidGbcRomFound = false;
+#endif
+
 u32 pakGetBlockSize(s8 device)
 {
 	return device == SAVEDEVICE_GAMEPAK ? 0x10 : 0x20;
@@ -5982,6 +5986,7 @@ s32 pak0f11e750(s8 device)
 
 bool gbpakIsAnyPerfectDark(void)
 {
+#ifdef PLATFORM_N64
 	s8 i;
 
 	for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
@@ -5991,6 +5996,9 @@ bool gbpakIsAnyPerfectDark(void)
 	}
 
 	return false;
+#else
+	return g_ValidGbcRomFound;
+#endif
 }
 
 /**

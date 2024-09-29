@@ -230,6 +230,10 @@ CXX_O_FILES := $(patsubst %.cpp, $(B_DIR)/%.o, $(CXX_FILES))
 
 O_FILES := $(C_O_FILES) $(CXX_O_FILES)
 
+ifneq (,$(findstring windows,$(TARGET_PLATFORM)))
+  O_FILES += $(B_DIR)/icon.res
+endif
+
 INCLUDES = \
   -I include \
   -I include/PR \
@@ -247,7 +251,7 @@ else
   LD := $(CC)
 endif
 
-$(C_O_FILES): OPT_LVL := $(GCC_OPT_LVL)
+$(O_FILES): OPT_LVL := $(GCC_OPT_LVL)
 
 COMMON_CFLAGS := $(C_DEFINES) -DAVOID_UB=1 $(INCLUDES) $(TARGET_CFLAGS) -g \
   -fno-inline-functions \
@@ -321,6 +325,9 @@ $(B_DIR)/%.o: %.c $(JSON_HEADERS)
 $(B_DIR)/%.o: %.cpp $(JSON_HEADERS)
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) $(OPT_LVL) -o $@ $<
+
+$(B_DIR)/%.res: dist/windows/%.rc
+	windres $< -O coff -o $@
 
 ################################################################################
 # Clean rules

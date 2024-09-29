@@ -51,6 +51,9 @@
 
 #define ROMDATA_MAX_FILES 2048
 
+#define GBC_ROM_NAME "pd.gbc"
+#define GBC_ROM_SIZE 4194304
+
 u8 *g_RomFile;
 u32 g_RomFileSize;
 const char *g_RomName = ROMDATA_ROM_NAME;
@@ -384,6 +387,53 @@ s32 romdataInit(void)
 	sysLogPrintf(LOG_NOTE, "romdataInit: loaded rom, size = %u", g_RomFileSize);
 
 	return 0;
+}
+
+static inline bool romdataCheckGbcRomContents(const u8 *gbcRomFile, const u32 gbcRomSize)
+{
+	if (gbcRomSize != GBC_ROM_SIZE) {
+		return false;
+	}
+
+	// ROM title
+	if (memcmp(gbcRomFile + 0x134, "PerfDark   VPDE", 15) != 0) {
+		return false;
+	}
+
+	// Licensee code
+	if (memcmp(gbcRomFile + 0x144, "4Y", 2) != 0) {
+		return false;
+	}
+
+	// Header and global checksums
+	if (gbcRomFile[0x14D] != 0xA1 || gbcRomFile[0x14E] != 0xAD || gbcRomFile[0x14F] != 0x0F) {
+		return false;
+	}
+
+	return true;
+}
+
+s32 romdataCheckGbcRom(void)
+{
+	if (fsFileSize(GBC_ROM_NAME) < 0) {
+		// bail early if it doesn't exist to avoid generating error messages
+		return false;
+	}
+
+	u32 gbcRomSize = 0;
+	u8 *gbcRomFile = fsFileLoad(GBC_ROM_NAME, &gbcRomSize);
+	if (!gbcRomFile) {
+		return false;
+	}
+
+	const bool ret = romdataCheckGbcRomContents(gbcRomFile, gbcRomSize);
+	sysMemFree(gbcRomFile);
+
+	if (ret) {
+		sysLogPrintf(LOG_NOTE, "romdataCheckGbcRom: valid GBC rom found");
+	}
+
+	return ret;
 }
 
 s32 romdataFileGetSize(s32 fileNum)

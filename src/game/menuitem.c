@@ -1372,7 +1372,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 		if (dialog && g_MenuUsingMouse && !inputs->leftright && !inputs->updown) {
 			const s32 dleft = dialog->x + 4;
 			const s32 dright = dleft + 12 * 10;
-			const s32 dtop = dialog->y + 13 + 12;
+			const s32 dtop = menuitemGetTop(item, dialog) + 12;
 			const s32 dbottom = dtop + 11 * 5;
 			const s32 mx = inputs->mousex;
 			const s32 my = inputs->mousey;
@@ -2607,11 +2607,17 @@ Gfx *menuitemCarouselRender(Gfx *gdl, struct menurendercontext *context)
 		colour = colourBlend(colourBlend(colour, 0x000000ff, 127), colour1, weight);
 	}
 
+#ifdef PLATFORM_N64
+	s16 chevronOffset = 0;
+#else 
+	s16 chevronOffset = 3;
+#endif
+
 	// Left arrow
-	gdl = menugfxDrawCarouselChevron(gdl, context->x, context->y + context->height / 2, 8, 1, -1, colour);
+	gdl = menugfxDrawCarouselChevron(gdl, context->x + chevronOffset, context->y + context->height / 2, 8, 1, -1, colour);
 
 	// Right arrow
-	gdl = menugfxDrawCarouselChevron(gdl, context->x + context->width, context->y + context->height / 2, 8, 3, -1, colour);
+	gdl = menugfxDrawCarouselChevron(gdl, context->x + context->width - chevronOffset, context->y + context->height / 2, 8, 3, -1, colour);
 
 	// This part of the function is unused because param2 is always zero.
 	// Setting it to 0x7b causes a crash.
@@ -4514,3 +4520,28 @@ Gfx *menuitemOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menuitem *it
 
 	return gdl;
 }
+
+#ifndef PLATFORM_N64
+
+s32 menuitemGetTop(struct menuitem *item, struct menudialog *dialog)
+{
+	struct menu *menu = &g_Menus[g_MpPlayerNum];
+	s32 dtop = dialog->y + LINEHEIGHT + 1;
+
+	for (s32 i = 0; i < dialog->numcols; ++i) {
+		const s32 colindex = i + dialog->colstart;
+
+		for (s32 j = 0; j < menu->cols[colindex].numrows; ++j) {
+			const s32 rowindex = j + menu->cols[colindex].rowstart;
+			struct menuitem *pitem = &dialog->definition->items[menu->rows[rowindex].itemindex];
+			if (pitem == item) {
+				return dtop;
+			}
+			dtop += menu->rows[rowindex].height;
+		}
+	}
+
+	return dtop;
+}
+
+#endif
