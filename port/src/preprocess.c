@@ -1042,6 +1042,10 @@ void preprocessMpConfigs(u8 *data, u32 size)
 		PD_SWAP_VAL(cfg->setup.options);
 		PD_SWAP_VAL(cfg->setup.teamscorelimit);
 		PD_SWAP_VAL(cfg->setup.chrslots);
+#if MAX_PLAYERS > 4
+		// make space for the extra players
+		cfg->setup.chrslots = (cfg->setup.chrslots & 0x000f) | ((cfg->setup.chrslots & 0x0ff0) << 4);
+#endif
 		// TODO: are these required or are they always 0?
 		PD_SWAP_VAL(cfg->setup.fileguid.deviceserial);
 		PD_SWAP_VAL(cfg->setup.fileguid.fileid);

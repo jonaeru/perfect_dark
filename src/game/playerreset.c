@@ -148,6 +148,12 @@ void playerReset(void)
 	g_PlayersWithControl[1] = true;
 	g_PlayersWithControl[2] = true;
 	g_PlayersWithControl[3] = true;
+#if MAX_PLAYERS > 4
+	g_PlayersWithControl[4] = true;
+	g_PlayersWithControl[5] = true;
+	g_PlayersWithControl[6] = true;
+	g_PlayersWithControl[7] = true;
+#endif
 	g_PlayerInvincible = false;
 
 	playerSetTickMode(TICKMODE_GE_FADEIN);
@@ -180,7 +186,8 @@ void playerReset(void)
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 8);
 				break;
 			case INTROCMD_WEAPON:
-				if (cmd->param3 == 0 && g_Vars.currentplayer != g_Vars.anti) {
+				if (cmd->param3 == 0 && PLAYER_IS_NOT_ANTI(g_Vars.currentplayer)) {
+
 					modelmgrLoadProjectileModeldefs(cmd->param1);
 
 					if (cmd->param2 >= 0) {
@@ -207,7 +214,7 @@ void playerReset(void)
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 16);
 				break;
 			case INTROCMD_AMMO:
-				if (cmd->param3 == 0 && g_Vars.currentplayer != g_Vars.anti) {
+				if (cmd->param3 == 0 && PLAYER_IS_NOT_ANTI(g_Vars.currentplayer)) {
 					bgunSetAmmoQuantity(cmd->param1, cmd->param2);
 				}
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 16);
