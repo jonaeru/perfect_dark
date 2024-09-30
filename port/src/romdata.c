@@ -365,10 +365,10 @@ static inline void romdataResetFile(s32 fileNum)
 	if (offsets + fileNum + 1 < (u32 *)(romDataSeg + romDataSegSize)) {
 		const u32 nextofs = PD_BE32(offsets[fileNum + 1]);
 		const u32 ofs = PD_BE32(offsets[fileNum]);
-		fileSlots[g_IsGexMod ? 1 : 0][fileNum].data = g_RomFile + ofs;
-		fileSlots[g_IsGexMod ? 1 : 0][fileNum].size = nextofs - ofs;
-		fileSlots[g_IsGexMod ? 1 : 0][fileNum].source = SRC_UNLOADED;
-		fileSlots[g_IsGexMod ? 1 : 0][fileNum].preprocessed = 0;
+		fileSlots[fileNum].data = g_RomFile + ofs;
+		fileSlots[fileNum].size = nextofs - ofs;
+		fileSlots[fileNum].source = SRC_UNLOADED;
+		fileSlots[fileNum].preprocessed = 0;
 	}
 }
 
