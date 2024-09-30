@@ -1802,6 +1802,9 @@ struct mphead g_MpHeads[] = {
 	{ /*0x49*/ HEAD_MOTO,         0                          },
 #endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
+#ifndef PLATFORM_N64 // PD Plus Mod
+	{ /*0x4b*/ HEAD_GREY,         0                          }, // Joanna (JP version)
+#endif
 };
 
 u32 g_BotHeads[] = {
@@ -1943,6 +1946,10 @@ struct mpbody g_MpBodies[] = {
 	/*0x36*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_PRESIDENT,   MPFEATURE_CHR_PRESCLONE    },
 	/*0x37*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             MPFEATURE_CHR_PELAGIC      },
 	/*0x38*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        },
+#ifndef PLATFORM_N64 // PD Plus Mod
+	/*0x39*/ { BODY_PRESIDENT_CLONE,  L_OPTIONS_356,   1000,             0                          }, // Skedar
+	/*0x3a*/ { BODY_TESTCHR,          L_OPTIONS_355,   1000,             0                          }, // Dr. Caroll
+#endif
 	/*0x39*/ { BODY_CONNERY,          L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3a*/ { BODY_MOORE,            L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3b*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
