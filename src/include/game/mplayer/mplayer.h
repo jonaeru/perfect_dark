@@ -90,6 +90,9 @@ void mpCreateBotFromProfile(s32 botnum, u8 difficulty);
 void mpSetBotDifficulty(s32 botnum, s32 difficulty);
 s32 mpGetSlotForNewBot(void);
 void mpRemoveSimulant(s32 index);
+#ifndef PLATFORM_N64
+void mpCopySimulant(s32 index);
+#endif
 bool mpHasSimulants(void);
 bool mpHasUnusedBotSlots(void);
 bool mpIsSimSlotEnabled(s32 slot);
