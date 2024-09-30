@@ -358,6 +358,20 @@ static inline void romdataInitFiles(void)
 	}
 }
 
+static inline void romdataResetFile(s32 fileNum)
+{
+	// the file offset table is in the data seg
+	const u32 *offsets = (u32 *)(romDataSeg + ROMDATA_FILES_OFS);
+	if (offsets + fileNum + 1 < (u32 *)(romDataSeg + romDataSegSize)) {
+		const u32 nextofs = PD_BE32(offsets[fileNum + 1]);
+		const u32 ofs = PD_BE32(offsets[fileNum]);
+		fileSlots[fileNum].data = g_RomFile + ofs;
+		fileSlots[fileNum].size = nextofs - ofs;
+		fileSlots[fileNum].source = SRC_UNLOADED;
+		fileSlots[fileNum].preprocessed = 0;
+	}
+}
+
 static inline struct romfile *romdataGetSeg(const char *name)
 {
 	struct romfile *seg = romSegs;
@@ -470,7 +484,9 @@ u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
 	if (fileSlots[fileNum].source == SRC_UNLOADED) {
 		char tmp[FS_MAXPATH] = { 0 };
 		snprintf(tmp, sizeof(tmp), ROMDATA_FILEDIR "/%s", fileSlots[fileNum].name);
-		if (fsFileSize(tmp) > 0) {
+
+		// All Solos in Multi Mod: do not load in solo, coop, counter-op (excluding playable skedar model)
+		if (fsFileSize(tmp) > 0 && (!g_NotLoadMod || fileNum == 0x756 || fileNum == 0x0bf )) {
 			u32 size = 0;
 			out = fsFileLoad(tmp, &size);
 			if (out && size) {
@@ -534,6 +550,53 @@ void romdataFileFree(s32 fileNum)
 	}
 
 	fileSlots[fileNum].source = SRC_UNLOADED;
+}
+
+void romdataFileFreeForSolo(void)
+{
+	// All Solos in Multi Mod: reset mod files for solo (bg, clipping, pads)
+	romdataResetFile(0x009); // bgdata/bg_azt.seg
+	romdataResetFile(0x00a); // bgdata/bg_pete.seg
+	romdataResetFile(0x00b); // bgdata/bg_depo.seg
+	romdataResetFile(0x00e); // bgdata/bg_dam.seg
+	romdataResetFile(0x014); // bgdata/bg_cave.seg
+	romdataResetFile(0x017); // bgdata/bg_sho.seg
+	romdataResetFile(0x018); // bgdata/bg_eld.seg
+	romdataResetFile(0x019); // bgdata/bg_imp.seg
+	romdataResetFile(0x01b); // bgdata/bg_lue.seg
+	romdataResetFile(0x01c); // bgdata/bg_ame.seg
+	romdataResetFile(0x01d); // bgdata/bg_rit.seg
+	romdataResetFile(0x01f); // bgdata/bg_ear.seg
+	romdataResetFile(0x020); // bgdata/bg_lee.seg
+	romdataResetFile(0x024); // bgdata/bg_pam.seg
+	romdataResetFile(0x14b); // bgdata/bg_ame_padsZ
+	romdataResetFile(0x14c); // bgdata/bg_ame_tilesZ
+	romdataResetFile(0x155); // bgdata/bg_azt_padsZ
+	romdataResetFile(0x156); // bgdata/bg_azt_tilesZ
+	romdataResetFile(0x159); // bgdata/bg_cave_padsZ
+	romdataResetFile(0x15a); // bgdata/bg_cave_tilesZ
+	romdataResetFile(0x15f); // bgdata/bg_dam_padsZ
+	romdataResetFile(0x160); // bgdata/bg_dam_tilesZ
+	romdataResetFile(0x161); // bgdata/bg_depo_padsZ
+	romdataResetFile(0x162); // bgdata/bg_depo_tilesZ
+	romdataResetFile(0x167); // bgdata/bg_ear_padsZ
+	romdataResetFile(0x168); // bgdata/bg_ear_tilesZ
+	romdataResetFile(0x169); // bgdata/bg_eld_padsZ
+	romdataResetFile(0x16a); // bgdata/bg_eld_tilesZ
+	romdataResetFile(0x16b); // bgdata/bg_imp_padsZ
+	romdataResetFile(0x16c); // bgdata/bg_imp_tilesZ
+	romdataResetFile(0x16f); // bgdata/bg_lee_padsZ
+	romdataResetFile(0x170); // bgdata/bg_lee_tilesZ
+	romdataResetFile(0x175); // bgdata/bg_lue_padsZ
+	romdataResetFile(0x176); // bgdata/bg_lue_tilesZ
+	romdataResetFile(0x179); // bgdata/bg_pam_padsZ
+	romdataResetFile(0x17a); // bgdata/bg_pam_tilesZ
+	romdataResetFile(0x17b); // bgdata/bg_pete_padsZ
+	romdataResetFile(0x17c); // bgdata/bg_pete_tilesZ
+	romdataResetFile(0x17f); // bgdata/bg_rit_padsZ
+	romdataResetFile(0x180); // bgdata/bg_rit_tilesZ
+	romdataResetFile(0x189); // bgdata/bg_sho_padsZ
+	romdataResetFile(0x18a); // bgdata/bg_sho_tilesZ
 }
 
 const char *romdataFileGetName(s32 fileNum)
