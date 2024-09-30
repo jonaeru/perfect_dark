@@ -203,6 +203,7 @@ bool chrAdjustPosForSpawn(f32 chrradius, struct coord *pos, RoomNum *rooms, f32 
 
 struct prop *chrSpawnAtCoord(s32 body, s32 head, struct coord *pos, RoomNum *room, f32 angle, u8 *ailist, u32 spawnflags);
 bool chrIsPropPresetBlockingSightToTarget(struct chrdata *chr);
+bool chrSetPos(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 angle, bool findground);
 bool chrMoveToPos(struct chrdata *chr, struct coord *pos, RoomNum *room, f32 angle, bool ignorebg);
 bool chrCheckCoverOutOfSight(struct chrdata *chr, s32 covernum, bool soft);
 s32 chrAssignCoverByCriteria(struct chrdata *chr, u16 arg1, s32 arg2);

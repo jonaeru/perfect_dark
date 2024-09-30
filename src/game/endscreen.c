@@ -292,6 +292,27 @@ char *endscreenMenuTextAccuracy(struct menuitem *item)
 	return g_StringPointer;
 }
 
+#if MAX_COOPCHRS > 2
+static bool enscreenAnyAntiAborted(void) {
+	size_t num;
+
+	if (g_Vars.antiplayernum < 0) {
+		return false;
+	}
+
+	for (num = 0; num < PLAYERCOUNT(); num++) {
+		if (PLAYERNUM_IS_ANTI(num) && g_Vars.players[num] && g_Vars.players[num]->aborted) {
+			return true;
+		}
+	}
+
+	return false;
+}
+#define ANTI_ABORTED() (enscreenAnyAntiAborted())
+#else
+#define ANTI_ABORTED() (g_Vars.anti->aborted)
+#endif
+
 char *endscreenMenuTextMissionStatus(struct menuitem *item)
 {
 	if (g_CheatsActiveBank0 || g_CheatsActiveBank1) {
@@ -312,7 +333,7 @@ char *endscreenMenuTextMissionStatus(struct menuitem *item)
 				return langGet(L_OPTIONS_295); // "Aborted"
 			}
 
-			if (g_Vars.anti->aborted) {
+			if (ANTI_ABORTED()) {
 				return langGet(L_OPTIONS_295); // "Aborted"
 			}
 
@@ -320,7 +341,7 @@ char *endscreenMenuTextMissionStatus(struct menuitem *item)
 				return langGet(L_OPTIONS_293); // "Failed"
 			}
 		} else {
-			if (g_Vars.anti->aborted) {
+			if (ANTI_ABORTED()) {
 				return langGet(L_OPTIONS_295); // "Aborted"
 			}
 
@@ -1700,14 +1721,22 @@ void endscreenPushCoop(void)
 #endif
 	{
 		// Failed or aborted
-		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
+#ifndef PLATFORM_N64
+			|| LOCALPLAYERCOUNT() >= 3
+#endif
+		) {
 			menuPushRootDialog(&g_2PMissionEndscreenFailedVMenuDialog, MENUROOT_MPENDSCREEN);
 		} else {
 			menuPushRootDialog(&g_2PMissionEndscreenFailedHMenuDialog, MENUROOT_MPENDSCREEN);
 		}
 	} else {
 		// Completed
-		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
+#ifndef PLATFORM_N64
+			|| LOCALPLAYERCOUNT() >= 3
+#endif
+		) {
 			menuPushRootDialog(&g_2PMissionEndscreenCompletedVMenuDialog, MENUROOT_MPENDSCREEN);
 		} else {
 			menuPushRootDialog(&g_2PMissionEndscreenCompletedHMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1787,20 +1816,28 @@ void endscreenPushAnti(void)
 
 	if (g_Vars.currentplayer == g_Vars.bond) {
 #if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
+		if (!ANTI_ABORTED() && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
 #else
-		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()))
+		if (!ANTI_ABORTED() && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()))
 #endif
 		{
 			// Bond - failed or aborted
-			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
+#ifndef PLATFORM_N64
+				|| LOCALPLAYERCOUNT() >= 3
+#endif
+			) {
 				menuPushRootDialog(&g_2PMissionEndscreenFailedVMenuDialog, MENUROOT_MPENDSCREEN);
 			} else {
 				menuPushRootDialog(&g_2PMissionEndscreenFailedHMenuDialog, MENUROOT_MPENDSCREEN);
 			}
 		} else {
 			// Bond - completed
-			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
+#ifndef PLATFORM_N64
+				|| LOCALPLAYERCOUNT() >= 3
+#endif
+			) {
 				menuPushRootDialog(&g_2PMissionEndscreenCompletedVMenuDialog, MENUROOT_MPENDSCREEN);
 			} else {
 				menuPushRootDialog(&g_2PMissionEndscreenCompletedHMenuDialog, MENUROOT_MPENDSCREEN);
@@ -1810,20 +1847,28 @@ void endscreenPushAnti(void)
 		filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
 	} else {
 #if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
+		if (!ANTI_ABORTED() && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
 #else
-		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()))
+		if (!ANTI_ABORTED() && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()))
 #endif
 		{
 			// Anti - completed
-			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
+#ifndef PLATFORM_N64
+				|| LOCALPLAYERCOUNT() >= 3
+#endif
+			) {
 				menuPushRootDialog(&g_2PMissionEndscreenCompletedVMenuDialog, MENUROOT_MPENDSCREEN);
 			} else {
 				menuPushRootDialog(&g_2PMissionEndscreenCompletedHMenuDialog, MENUROOT_MPENDSCREEN);
 			}
 		} else {
 			// Anti - failed or aborted
-			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
+#ifndef PLATFORM_N64
+				|| LOCALPLAYERCOUNT() >= 3
+#endif
+			) {
 				menuPushRootDialog(&g_2PMissionEndscreenFailedVMenuDialog, MENUROOT_MPENDSCREEN);
 			} else {
 				menuPushRootDialog(&g_2PMissionEndscreenFailedHMenuDialog, MENUROOT_MPENDSCREEN);

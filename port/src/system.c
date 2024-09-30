@@ -12,6 +12,7 @@
 #include <SDL.h>
 #include <PR/ultratypes.h>
 #include "platform.h"
+#include "console.h"
 #include "system.h"
 
 #ifdef PLATFORM_WIN32
@@ -157,6 +158,12 @@ u64 sysGetMicroseconds(void)
 	return ((u64)tv.tv_sec * USEC_IN_SEC + (u64)tv.tv_usec) - startTick;
 }
 
+float sysGetSeconds(void)
+{
+	u64 t = sysGetMicroseconds();
+	return (f32)t / 1000000.f;
+}
+
 s32 sysLogIsOpen(void)
 {
 	return (logPath[0] != '\0');
@@ -183,8 +190,13 @@ void sysLogPrintf(s32 level, const char *fmt, ...)
 		}
 	}
 
-	FILE *fout = (level == LOG_NOTE) ? stdout : stderr;
-	fprintf(fout, "%s%s\n", prefix[level], logmsg);
+	FILE *fout = ((level & 0x0f) == LOG_NOTE) ? stdout : stderr;
+	fprintf(fout, "%s%s\n", prefix[level & 0x0f], logmsg);
+	fflush(fout);
+
+	if ((level & LOGFLAG_NOCON) == 0) {
+		conPrintLn((level & LOGFLAG_SHOWMSG) != 0, logmsg);
+	}
 }
 
 void sysFatalError(const char *fmt, ...)

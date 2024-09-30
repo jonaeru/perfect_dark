@@ -15,6 +15,7 @@
 #define bool s32
 #define ubool u32
 
+extern s32 g_StageNum;
 extern u8 *g_StackLeftAddrs[NUM_THREADS];
 extern u8 *g_StackRightAddrs[NUM_THREADS];
 extern u8 *g_StackAllocatedPos;
@@ -303,7 +304,7 @@ extern struct menudialogdef g_MpConfirmChallenge4MbMenuDialog;
 extern struct menudialogdef g_MainMenu4MbMenuDialog;
 extern struct menudialogdef g_MpEditSimulant4MbMenuDialog;
 extern struct menudialogdef g_AdvancedSetup4MbMenuDialog;
-extern struct filelist *g_FileLists[MAX_PLAYERS];
+extern struct filelist *g_FileLists[MAX_LOCAL_PLAYERS];
 extern bool var80075bd0[];
 extern struct headanim g_HeadAnims[2];
 extern s32 var80075d60;
@@ -520,6 +521,8 @@ extern u8 g_ChrBioSlot;
 extern u8 g_HangarBioSlot;
 extern u8 g_DtSlot;
 extern u8 var80088bb4;
+extern u64 g_RngSeed;
+extern u64 g_Rng2Seed;
 extern struct vtxstoretype g_VtxstoreTypes[4];
 extern struct menudialogdef g_FrWeaponListMenuDialog;
 extern struct menudialogdef g_FrTrainingInfoInGameMenuDialog;
@@ -539,7 +542,7 @@ extern struct menudialogdef g_HangarListMenuDialog;
 
 #ifndef PLATFORM_N64
 
-extern struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS];
+extern struct extplayerconfig g_PlayerExtCfg[MAX_LOCAL_PLAYERS];
 
 extern struct weathercfg g_WeatherConfig[WEATHERCFG_MAX_STAGES];
 extern const struct weathercfg g_DefaultWeatherConfig;
@@ -563,11 +566,16 @@ extern s32 g_MusicDisableMpDeath;
 extern s32 g_BgunGeMuzzleFlashes;
 extern s32 g_FileAutoSelect;
 
+extern s32 g_NetMode;
+
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
-#define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)
+#define PLAYER_DEFAULT_FOV playerGetDefaultFovY(g_Vars.currentplayerstats->mpindex)
+#define ADJUST_ZOOM_FOV(x) ((x) * playerGetZoomFovMult(g_Vars.currentplayerstats->mpindex))
 
 #define TEX_FILTER_2D g_TexFilter2D
-#define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
+
+s32 playerGetCount(void);
+s32 playerGetLocalCount(void);
 
 extern bool g_NotLoadMod; // All Solos in Multi Mod
 
