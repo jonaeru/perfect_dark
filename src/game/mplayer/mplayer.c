@@ -28,8 +28,10 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#include "system.h"
 #ifndef PLATFORM_N64
 #include "net/net.h"
+#include "mod.h"
 #endif
 
 // bss
@@ -240,6 +242,46 @@ void mpStartMatch(void)
 	if (g_MpSetup.stagenum == STAGE_MP_RANDOM) {
 		stagenum = mpChooseRandomStage();
 	}
+#ifndef PLATFORM_N64 // All Solos in Multi Mod
+	else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_MULTI) {
+		stagenum = mpChooseRandomMultiStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_SOLO) {
+		stagenum = mpChooseRandomSoloStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_GEX) {
+		stagenum = mpChooseRandomGexStage();
+	}
+
+	// GoldenEye X Mod Switch
+	if (stagenum >= 0x60) {
+		g_IsGexMod = true;
+		stagenum = stagenum - 0x60;
+	} else {
+		g_IsGexMod = false;
+	}
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_IsGexMod: %s", stagenum, g_IsGexMod ? "true" : "false");
+	modConfigLoad(MOD_CONFIG_FNAME);
+	if (g_IsGexMod) {
+		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073f].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0740].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0741].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0745].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0746].surfacetype = SURFACETYPE_SHALLOWWATER;
+	} else {
+		g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073f].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0740].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0741].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0745].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0746].surfacetype = SURFACETYPE_DEFAULT;
+	}
+#endif
 
 	titleSetNextStage(stagenum);
 	mainChangeToStage(stagenum);
@@ -1802,6 +1844,9 @@ struct mphead g_MpHeads[] = {
 	{ /*0x49*/ HEAD_MOTO,         0                          },
 #endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
+#ifndef PLATFORM_N64 // PD Plus Mod
+	{ /*0x4b*/ HEAD_GREY,         0                          }, // Joanna (JP version)
+#endif
 };
 
 u32 g_BotHeads[] = {
@@ -1943,6 +1988,10 @@ struct mpbody g_MpBodies[] = {
 	/*0x36*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_PRESIDENT,   MPFEATURE_CHR_PRESCLONE    },
 	/*0x37*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             MPFEATURE_CHR_PELAGIC      },
 	/*0x38*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        },
+#ifndef PLATFORM_N64 // PD Plus Mod
+	/*0x39*/ { BODY_PRESIDENT_CLONE,  L_OPTIONS_356,   1000,             0                          }, // Skedar
+	/*0x3a*/ { BODY_TESTCHR,          L_OPTIONS_355,   1000,             0                          }, // Dr. Caroll
+#endif
 	/*0x39*/ { BODY_CONNERY,          L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3a*/ { BODY_MOORE,            L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3b*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },

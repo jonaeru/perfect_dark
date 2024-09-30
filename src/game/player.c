@@ -900,7 +900,11 @@ bool playerSpawnAnti(struct chrdata *hostchr, bool force)
 
 		if (hostchr->bodynum == BODY_SKEDAR) {
 			g_Vars.antiheadnum = HEAD_MRBLONDE;
+#ifdef PLATFORM_N64
 			g_Vars.antibodynum = BODY_MRBLONDE;
+#else // PD Plus Mod
+			g_Vars.antibodynum = BODY_PRESIDENT_CLONE; // Skedar
+#endif
 		} else {
 			g_Vars.antiheadnum = hostchr->headnum;
 			g_Vars.antibodynum = hostchr->bodynum;
@@ -1621,7 +1625,16 @@ void playersBeginMpSwirl(void)
 	g_MpSwirlForwardSpeed = 0;
 	g_MpSwirlDistance = 80;
 
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	envChooseAndApply(mainGetStageNum(), false);
+#else
+	s32 stagenum;
+	stagenum = mainGetStageNum();
+	if (g_IsGexMod) {
+		stagenum += 0x60;
+	}
+	envChooseAndApply(stagenum, false);
+#endif
 }
 
 void playerTickMpSwirl(void)

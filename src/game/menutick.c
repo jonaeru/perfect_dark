@@ -29,6 +29,8 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "net/net.h"
+#include "system.h"
+#include "mod.h"
 #endif
 
 u8 g_FileState = 0;
@@ -696,6 +698,24 @@ void menuTick(void)
 						titleSetNextMode(TITLEMODE_SKIP);
 						mainChangeToStage(STAGE_4MBMENU);
 					}
+
+#ifndef PLATFORM_N64 // GoldenEye X Mod
+					// GoldenEye X Mod Switch
+					if (g_IsGexMod) {
+						g_IsGexMod = false;
+						sysLogPrintf(LOG_NOTE, "g_IsGexMod: %s", g_IsGexMod ? "true" : "false");
+						modConfigLoad(MOD_CONFIG_FNAME);
+						g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
+						g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
+						g_Textures[0x073e].soundsurfacetype = SURFACETYPE_DEFAULT;
+						g_Textures[0x073f].soundsurfacetype = SURFACETYPE_DEFAULT;
+						g_Textures[0x0740].soundsurfacetype = SURFACETYPE_DEFAULT;
+						g_Textures[0x0741].soundsurfacetype = SURFACETYPE_DEFAULT;
+						g_Textures[0x0745].surfacetype = SURFACETYPE_METAL;
+						g_Textures[0x0746].soundsurfacetype = SURFACETYPE_DEFAULT;
+						g_Textures[0x0746].surfacetype = SURFACETYPE_DEFAULT;
+					}
+#endif
 				}
 				break;
 			case MENUROOT_COOPCONTINUE:
