@@ -3153,6 +3153,21 @@ void mpRemoveSimulant(s32 index)
 	mpGenerateBotNames();
 }
 
+#ifndef PLATFORM_N64
+void mpCopySimulant(s32 index)
+{
+	s32 dest = mpGetSlotForNewBot();
+
+	g_MpSetup.chrslots |= 1 << (dest + 4);
+	g_BotConfigsArray[dest].base.name[0] = g_BotConfigsArray[index].base.name[0];
+	g_BotConfigsArray[dest].base.mpheadnum = g_BotConfigsArray[index].base.mpheadnum;
+	g_BotConfigsArray[dest].base.mpbodynum = g_BotConfigsArray[index].base.mpbodynum;
+	g_BotConfigsArray[dest].type = g_BotConfigsArray[index].type;
+	g_BotConfigsArray[dest].difficulty = g_BotConfigsArray[index].difficulty;
+	mpGenerateBotNames();
+}
+#endif
+
 bool mpHasSimulants(void)
 {
 	if ((g_MpSetup.chrslots & 0xfff0) != 0) {
