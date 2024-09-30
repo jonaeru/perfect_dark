@@ -3095,6 +3095,7 @@ MenuItemHandlerResult mpBotDifficultyMenuHandler(s32 operation, struct menuitem 
 
 	return 0;
 }
+
 MenuItemHandlerResult menuhandlerMpDeleteSimulant(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
