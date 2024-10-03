@@ -32,4 +32,6 @@ u8 *romdataSegGetDataEnd(const char *segName);
 u32 romdataSegGetSize(const char *segName);
 u32 romdataFileGetEstimatedSize(u32 size, FileType filetype);
 
+s32 romdataCheckGbcRom(void);
+
 #endif

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Perfect Dark
+Comment=Modern source port of Perfect Dark
+Exec=pd
+Icon=io.github.fgsfdsfgs.perfect_dark
+Terminal=false
+Type=Application
+Categories=Game;ActionGame;
+StartupNotify=false
