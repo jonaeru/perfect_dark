@@ -519,35 +519,35 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 
 	// Draw the lines that span most of the viewport
 	if (PLAYERCOUNT() == 1) {
-		gDPHudRectangle(gdl++, viewleft + 48, y, x - radius + 2, y);
-		gDPHudRectangle(gdl++, x + radius - 2, y, viewright - 49, y);
-		gDPHudRectangle(gdl++, x, viewtop + 10, x, y - radius + 2);
-		gDPHudRectangle(gdl++, x, y + radius - 2, x, viewbottom - 10);
+		gDPHudRectangleCentered(gdl++, viewleft + 48, y, x - radius + 2, y);
+		gDPHudRectangleCentered(gdl++, x + radius - 2, y, viewright - 49, y);
+		gDPHudRectangleCentered(gdl++, x, viewtop + 10, x, y - radius + 2);
+		gDPHudRectangleCentered(gdl++, x, y + radius - 2, x, viewbottom - 10);
 	} else {
-		gDPHudRectangle(gdl++, viewleft, y, x - radius + 2, y);
-		gDPHudRectangle(gdl++, x + radius - 2, y, viewright, y);
-		gDPHudRectangle(gdl++, x, viewtop, x, y - radius + 2);
-		gDPHudRectangle(gdl++, x, y + radius - 2, x, viewbottom);
+		gDPHudRectangleCentered(gdl++, viewleft, y, x - radius + 2, y);
+		gDPHudRectangleCentered(gdl++, x + radius - 2, y, viewright, y);
+		gDPHudRectangleCentered(gdl++, x, viewtop, x, y - radius + 2);
+		gDPHudRectangleCentered(gdl++, x, y + radius - 2, x, viewbottom);
 	}
 
 	gdl = text0f153838(gdl);
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Draw the box
-	gDPHudRectangle(gdl++, x - radius, y - radius, x - radius, y + radius);
-	gDPHudRectangle(gdl++, x + radius, y - radius, x + radius, y + radius);
-	gDPHudRectangle(gdl++, x - radius, y - radius, x + radius, y - radius);
-	gDPHudRectangle(gdl++, x - radius, y + radius, x + radius, y + radius);
+	gDPHudRectangleCentered(gdl++, x - radius, y - radius, x - radius, y + radius);
+	gDPHudRectangleCentered(gdl++, x + radius, y - radius, x + radius, y + radius);
+	gDPHudRectangleCentered(gdl++, x - radius, y - radius, x + radius, y - radius);
+	gDPHudRectangleCentered(gdl++, x - radius, y + radius, x + radius, y + radius);
 
 	// Go over the corners a second time
-	gDPHudRectangle(gdl++, x - radius, y - radius, x - radius, y - cornergap);
-	gDPHudRectangle(gdl++, x - radius, y + cornergap, x - radius, y + radius);
-	gDPHudRectangle(gdl++, x + radius, y - radius, x + radius, y - cornergap);
-	gDPHudRectangle(gdl++, x + radius, y + cornergap, x + radius, y + radius);
-	gDPHudRectangle(gdl++, x - radius, y - radius, x - cornergap, y - radius);
-	gDPHudRectangle(gdl++, x + cornergap, y - radius, x + radius, y - radius);
-	gDPHudRectangle(gdl++, x - radius, y + radius, x - cornergap, y + radius);
-	gDPHudRectangle(gdl++, x + cornergap, y + radius, x + radius, y + radius);
+	gDPHudRectangleCentered(gdl++, x - radius, y - radius, x - radius, y - cornergap);
+	gDPHudRectangleCentered(gdl++, x - radius, y + cornergap, x - radius, y + radius);
+	gDPHudRectangleCentered(gdl++, x + radius, y - radius, x + radius, y - cornergap);
+	gDPHudRectangleCentered(gdl++, x + radius, y + cornergap, x + radius, y + radius);
+	gDPHudRectangleCentered(gdl++, x - radius, y - radius, x - cornergap, y - radius);
+	gDPHudRectangleCentered(gdl++, x + cornergap, y - radius, x + radius, y - radius);
+	gDPHudRectangleCentered(gdl++, x - radius, y + radius, x - cornergap, y + radius);
+	gDPHudRectangleCentered(gdl++, x + cornergap, y + radius, x + radius, y + radius);
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -908,7 +908,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	f32 spc4[2];
 	f32 spbc[2];
 	s32 x = g_Vars.currentplayer->crosspos[0];
-	s32 y = g_Vars.currentplayer->crosspos[1];
+	s32 y = g_Vars.currentplayer->crosspos[1] + 1; // Plus one, to align with the laser sight.
 	s32 x1;
 	s32 x2;
 	s32 y1;
@@ -1331,6 +1331,14 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 		marginbottom = viewhalfheight - availablebelow * frac;
 		margintop = viewhalfheight - availableabove * frac;
 
+		// Center-align the zoom range.
+		if (frac != 1.0f) {
+			viewleft += 1;
+			viewright += 1;
+			viewbottom += 1;
+			viewtop += 1;
+		}
+
 #define BOXLEFT   (viewleft + marginleft)
 #define BOXRIGHT  (viewright - marginright)
 #define BOXBOTTOM (viewbottom - marginbottom)
@@ -1349,40 +1357,40 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 #endif
 
 		// Top left
-		gDPHudRectangle(gdl++, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight - 1);
+		gDPHudRectangleCentered(gdl++, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
+		gDPHudRectangleCentered(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight - 1);
 
 		// Top right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth + 2, BOXTOP, BOXRIGHT - 1, BOXTOP);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight - 1);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT - cornerwidth + 2, BOXTOP, BOXRIGHT - 1, BOXTOP);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight - 1);
 
 		// Bottom left
-		gDPHudRectangle(gdl++, BOXLEFT + 1, BOXBOTTOM, BOXLEFT + cornerwidth - 1, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXBOTTOM - cornerheight + 1, BOXLEFT, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXLEFT + 1, BOXBOTTOM, BOXLEFT + cornerwidth - 1, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXLEFT, BOXBOTTOM - cornerheight + 1, BOXLEFT, BOXBOTTOM);
 
 		// Bottom right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth + 2, BOXBOTTOM, BOXRIGHT - 1, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight + 1, BOXRIGHT, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT - cornerwidth + 2, BOXBOTTOM, BOXRIGHT - 1, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight + 1, BOXRIGHT, BOXBOTTOM);
 
 		// Draw over the corners again, but only half as wide/high
 		cornerwidth >>= 1;
 		cornerheight >>= 1;
 
 		// Top left
-		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT + cornerwidth, BOXTOP);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight);
+		gDPHudRectangleCentered(gdl++, BOXLEFT, BOXTOP, BOXLEFT + cornerwidth, BOXTOP);
+		gDPHudRectangleCentered(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight);
 
 		// Top right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth, BOXTOP, BOXRIGHT, BOXTOP);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT - cornerwidth, BOXTOP, BOXRIGHT, BOXTOP);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight);
 
 		// Bottom left
-		gDPHudRectangle(gdl++, BOXLEFT, BOXBOTTOM, BOXLEFT + cornerwidth, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXBOTTOM - cornerheight, BOXLEFT, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXLEFT, BOXBOTTOM, BOXLEFT + cornerwidth, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXLEFT, BOXBOTTOM - cornerheight, BOXLEFT, BOXBOTTOM);
 
 		// Bottom right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth, BOXBOTTOM, BOXRIGHT, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight, BOXRIGHT, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT - cornerwidth, BOXBOTTOM, BOXRIGHT, BOXBOTTOM);
+		gDPHudRectangleCentered(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight, BOXRIGHT, BOXBOTTOM);
 
 
 #ifndef PLATFORM_N64
@@ -1490,10 +1498,10 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
 	// Draw border over inner points
-	gDPHudRectangle(gdl++, x - 4, y - 4, x - 4, y + 4); // left
-	gDPHudRectangle(gdl++, x + 4, y - 4, x + 4, y + 4); // right
-	gDPHudRectangle(gdl++, x - 4, y - 4, x + 4, y - 4); // top
-	gDPHudRectangle(gdl++, x - 4, y + 4, x + 4, y + 4); // bottom
+	gDPHudRectangleCentered(gdl++, x - 4, y - 4, x - 4, y + 4); // left
+	gDPHudRectangleCentered(gdl++, x + 4, y - 4, x + 4, y + 4); // right
+	gDPHudRectangleCentered(gdl++, x - 4, y - 4, x + 4, y - 4); // top
+	gDPHudRectangleCentered(gdl++, x - 4, y + 4, x + 4, y + 4); // bottom
 
 	gdl = text0f153838(gdl);
 
@@ -1521,18 +1529,18 @@ Gfx *sightDrawTarget(Gfx *gdl)
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	if (SIGHT_SCALE == 0) {
 		// Draw single rectangle to preserve intended opacity
-		gDPHudRectangle(gdl++, x, y, x, y);
+		gDPHudRectangleCentered(gdl++, x, y, x, y);
 	} else
 #endif
 	{
-		gDPHudRectangle(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x - 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x - 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 3 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 2 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y - 3 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y - 2 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x - 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x - 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 3 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 2 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x + 0 * SIGHT_SCALE, y - 3 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
+		gDPHudRectangleCentered(gdl++, x + 0 * SIGHT_SCALE, y - 2 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
 	}
 
 #ifndef PLATFORM_N64

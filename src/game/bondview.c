@@ -1109,14 +1109,14 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		s32 x = viewleft + (viewwidth >> 1);
 		s32 y = viewtop + (viewheight >> 1);
 
-		gDPFillRectangle(gdl++, x + 2, y + 0, x + 7, y + 1);
-		gDPFillRectangle(gdl++, x + 2, y + 0, x + 5, y + 1);
-		gDPFillRectangle(gdl++, x - 6, y + 0, x - 1, y + 1);
-		gDPFillRectangle(gdl++, x - 4, y + 0, x - 1, y + 1);
-		gDPFillRectangle(gdl++, x + 0, y + 2, x + 1, y + 7);
-		gDPFillRectangle(gdl++, x + 0, y + 2, x + 1, y + 5);
-		gDPFillRectangle(gdl++, x + 0, y - 6, x + 1, y - 1);
-		gDPFillRectangle(gdl++, x + 0, y - 4, x + 1, y - 1);
+		gDPFillRectangleCenteredEXT(gdl++, x + 2, y + 0, x + 7, y + 1);
+		gDPFillRectangleCenteredEXT(gdl++, x + 2, y + 0, x + 5, y + 1);
+		gDPFillRectangleCenteredEXT(gdl++, x - 6, y + 0, x - 1, y + 1);
+		gDPFillRectangleCenteredEXT(gdl++, x - 4, y + 0, x - 1, y + 1);
+		gDPFillRectangleCenteredEXT(gdl++, x + 0, y + 2, x + 1, y + 7);
+		gDPFillRectangleCenteredEXT(gdl++, x + 0, y + 2, x + 1, y + 5);
+		gDPFillRectangleCenteredEXT(gdl++, x + 0, y - 6, x + 1, y - 1);
+		gDPFillRectangleCenteredEXT(gdl++, x + 0, y - 4, x + 1, y - 1);
 	}
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {

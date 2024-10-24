@@ -1573,7 +1573,7 @@ static inline void gfx_sp_tri4(Gfx *cmd) {
     uint8_t x = C1(0, 4);
     uint8_t y = C1(4, 4);
     uint8_t z = C0(0, 4);
-    
+
     if(x || y || z) {
         gfx_sp_tri1(x, y, z, false);
     }
@@ -2148,10 +2148,10 @@ static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
     rdp.combine_mode = saved_combine_mode;
 }
 
-static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
+static int gfx_dp_fill_rectangle_common(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry, uint64_t *saved_combine_mode) {
     if (rdp.color_image_address == rdp.z_buf_address) {
         // Don't clear Z buffer here since we already did it with glClear
-        return;
+        return 1;
     }
     uint32_t mode = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE));
 
@@ -2174,14 +2174,39 @@ static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t
         v->color = rdp.fill_color;
     }
 
-    uint64_t saved_combine_mode = rdp.combine_mode;
+    *saved_combine_mode = rdp.combine_mode;
 
     if (mode == G_CYC_FILL) {
         gfx_dp_set_combine_mode(color_comb(0, 0, 0, G_CCMUX_SHADE), alpha_comb(0, 0, 0, G_ACMUX_SHADE), 0, 0);
     }
 
-    gfx_draw_rectangle(ulx, uly, lrx, lry);
-    rdp.combine_mode = saved_combine_mode;
+    return 0;
+}
+
+static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
+    uint64_t saved_combine_mode;
+    if (gfx_dp_fill_rectangle_common(ulx, uly, lrx, lry, &saved_combine_mode) == 0) {
+        gfx_draw_rectangle(ulx, uly, lrx, lry);
+        rdp.combine_mode = saved_combine_mode;
+    }
+}
+
+static void gfx_dp_fill_rectangle_centered(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
+    uint64_t saved_combine_mode;
+    if (gfx_dp_fill_rectangle_common(ulx, uly, lrx, lry, &saved_combine_mode) == 0) {
+        // The coordinates of the rect are usually quantized to the default N64
+        // resolution (320x220), but adding the rect to the graphics display
+        // list scales it by four. So, a single pixel at 320x220 becomes four
+        // pixels at 1280x880. Since the crosshair was misaligned by half a
+        // native pixel, we need to shift the crosshair by two scaled pixels.
+        ulx -= 2;
+        lrx -= 2;
+        uly -= 2;
+        lry -= 2;
+
+        gfx_draw_rectangle(ulx, uly, lrx, lry);
+        rdp.combine_mode = saved_combine_mode;
+    }
 }
 
 static void gfx_dp_set_z_image(void* z_buf_address) {
@@ -2390,6 +2415,16 @@ static void gfx_run_dl(Gfx* cmd) {
                 ulx = (int32_t)(C0(0, 24) << 8) >> 8;
                 uly = (int32_t)(C1(0, 24) << 8) >> 8;
                 gfx_dp_fill_rectangle(ulx, uly, lrx, lry);
+                break;
+            }
+            case G_FILLRECT_CENTERED_WIDE_EXT: {
+                int32_t lrx, lry, ulx, uly;
+                lrx = (int32_t)(C0(0, 24) << 8) >> 8;
+                lry = (int32_t)(C1(0, 24) << 8) >> 8;
+                ++cmd;
+                ulx = (int32_t)(C0(0, 24) << 8) >> 8;
+                uly = (int32_t)(C1(0, 24) << 8) >> 8;
+                gfx_dp_fill_rectangle_centered(ulx, uly, lrx, lry);
                 break;
             }
             case G_TEXRECT_WIDE_EXT: {
