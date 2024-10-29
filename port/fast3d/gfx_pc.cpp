@@ -192,6 +192,9 @@ static struct RDP {
     bool viewport_or_scissor_changed;
     void* z_buf_address;
     void* color_image_address;
+
+    int16_t subpixel_ofs_x;
+    int16_t subpixel_ofs_y;
 } rdp;
 
 static struct RenderingState {
@@ -1969,6 +1972,11 @@ static void gfx_dp_set_fill_color(uint32_t packed_color) {
     rdp.fill_color.a = a * 255;
 }
 
+static void gfx_dp_set_subpixel_offset(int16_t x, int16_t y) {
+    rdp.subpixel_ofs_x = x;
+    rdp.subpixel_ofs_y = y;
+}
+
 static void gfx_draw_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
     uint32_t saved_other_mode_h = rdp.other_mode_h;
     uint32_t cycle_type = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE));
@@ -2148,10 +2156,10 @@ static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
     rdp.combine_mode = saved_combine_mode;
 }
 
-static int gfx_dp_fill_rectangle_common(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry, uint64_t *saved_combine_mode) {
+static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
     if (rdp.color_image_address == rdp.z_buf_address) {
         // Don't clear Z buffer here since we already did it with glClear
-        return 1;
+        return;
     }
     uint32_t mode = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE));
 
@@ -2174,39 +2182,19 @@ static int gfx_dp_fill_rectangle_common(int32_t ulx, int32_t uly, int32_t lrx, i
         v->color = rdp.fill_color;
     }
 
-    *saved_combine_mode = rdp.combine_mode;
+    uint64_t saved_combine_mode = rdp.combine_mode;
 
     if (mode == G_CYC_FILL) {
         gfx_dp_set_combine_mode(color_comb(0, 0, 0, G_CCMUX_SHADE), alpha_comb(0, 0, 0, G_ACMUX_SHADE), 0, 0);
     }
 
-    return 0;
-}
+    ulx += rdp.subpixel_ofs_x;
+    lrx += rdp.subpixel_ofs_x;
+    uly += rdp.subpixel_ofs_y;
+    lry += rdp.subpixel_ofs_y;
 
-static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
-    uint64_t saved_combine_mode;
-    if (gfx_dp_fill_rectangle_common(ulx, uly, lrx, lry, &saved_combine_mode) == 0) {
-        gfx_draw_rectangle(ulx, uly, lrx, lry);
-        rdp.combine_mode = saved_combine_mode;
-    }
-}
-
-static void gfx_dp_fill_rectangle_centered(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
-    uint64_t saved_combine_mode;
-    if (gfx_dp_fill_rectangle_common(ulx, uly, lrx, lry, &saved_combine_mode) == 0) {
-        // The coordinates of the rect are usually quantized to the default N64
-        // resolution (320x220), but adding the rect to the graphics display
-        // list scales it by four. So, a single pixel at 320x220 becomes four
-        // pixels at 1280x880. Since the crosshair was misaligned by half a
-        // native pixel, we need to shift the crosshair by two scaled pixels.
-        ulx -= 2;
-        lrx -= 2;
-        uly -= 2;
-        lry -= 2;
-
-        gfx_draw_rectangle(ulx, uly, lrx, lry);
-        rdp.combine_mode = saved_combine_mode;
-    }
+    gfx_draw_rectangle(ulx, uly, lrx, lry);
+    rdp.combine_mode = saved_combine_mode;
 }
 
 static void gfx_dp_set_z_image(void* z_buf_address) {
@@ -2386,6 +2374,10 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             // G_SETPRIMCOLOR, G_CCMUX_PRIMITIVE, G_ACMUX_PRIMITIVE, is used by Goddard
             // G_CCMUX_TEXEL1, LOD_FRACTION is used in Bowser room 1
+            case G_SETSUBPIXELOFFSET_EXT: {
+                gfx_dp_set_subpixel_offset(C0(0, 16), C1(0, 16));
+                break;
+            }
             case G_TEXRECT:
             case G_TEXRECTFLIP: {
                 int32_t lrx, lry, tile, ulx, uly;
@@ -2415,16 +2407,6 @@ static void gfx_run_dl(Gfx* cmd) {
                 ulx = (int32_t)(C0(0, 24) << 8) >> 8;
                 uly = (int32_t)(C1(0, 24) << 8) >> 8;
                 gfx_dp_fill_rectangle(ulx, uly, lrx, lry);
-                break;
-            }
-            case G_FILLRECT_CENTERED_WIDE_EXT: {
-                int32_t lrx, lry, ulx, uly;
-                lrx = (int32_t)(C0(0, 24) << 8) >> 8;
-                lry = (int32_t)(C1(0, 24) << 8) >> 8;
-                ++cmd;
-                ulx = (int32_t)(C0(0, 24) << 8) >> 8;
-                uly = (int32_t)(C1(0, 24) << 8) >> 8;
-                gfx_dp_fill_rectangle_centered(ulx, uly, lrx, lry);
                 break;
             }
             case G_TEXRECT_WIDE_EXT: {
