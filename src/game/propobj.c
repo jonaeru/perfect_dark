@@ -2077,7 +2077,7 @@ struct prop *objInit(struct defaultobj *obj, struct modeldef *modeldef, struct p
 #ifdef PLATFORM_N64
 		modelSetScale(obj->model, g_ModelStates[obj->modelnum].scale * (1.0f / 4096.0f));
 #else // GoldenEye X Mod
-		modelSetScale(obj->model, (g_IsGexMod ? g_GexModelStates[obj->modelnum].scale : g_ModelStates[obj->modelnum].scale) * (1.0f / 4096.0f));
+		modelSetScale(obj->model, (g_ModIndex == MOD_GEX ? g_GexModelStates[obj->modelnum].scale : g_ModelStates[obj->modelnum].scale) * (1.0f / 4096.0f));
 #endif
 
 		prop->type = PROPTYPE_OBJ;
@@ -14779,7 +14779,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, s32 playernum)
 #ifdef PLATFORM_N64
 		s16 exptype = g_PropExplosionTypes[8 + obj->modelnum];
 #else // GoldenEye X Mod
-		s16 exptype = g_IsGexMod ? g_GexPropExplosionTypes[8 + obj->modelnum] : g_PropExplosionTypes[8 + obj->modelnum];
+		s16 exptype = g_ModIndex == MOD_GEX ? g_GexPropExplosionTypes[8 + obj->modelnum] : g_PropExplosionTypes[8 + obj->modelnum];
 #endif
 
 		RoomNum rooms[8];

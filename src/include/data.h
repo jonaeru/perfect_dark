@@ -569,11 +569,16 @@ extern s32 g_FileAutoSelect;
 #define TEX_FILTER_2D g_TexFilter2D
 #define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
 
-// GoldenEye X Mod Switch
-extern bool g_IsGexMod;
+// Mod Switch
+// 0: Normal
+// 1: GoldenEye X Mod
+// 2: Kakariko Village Mod
+extern s32 g_ModIndex;
+// GoldenEye X Mod
 extern struct modelstate g_GexModelStates[NUM_MODELS];
 extern s8 g_GexPropExplosionTypes[];
-extern bool g_NotLoadMod; // All Solos in Multi Mod
+// All Solos in Multi Mod
+extern bool g_NotLoadMod;
 
 #else // PLATFORM_N64
 

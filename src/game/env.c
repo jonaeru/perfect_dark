@@ -54,7 +54,11 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ STAGE_PELAGIC,          15, 15000, 3333, 4444, 600, 995, 1000, RGB(0x2d3e60), NO_SUNS,              1,  5000,    0, RGB(0xf0f0f0), 0, -2000, 0, RGB(0x14212b), 0  },
 	{ STAGE_VILLA,            15, 20000,    0,    0,   0, 981, 1047, RGB(0x46a0ff), SUNS(suns_villa),     1,  5000,    0, RGB(0xffffff), 0, -1850, 1, RGB(0x00ffff), 0  },
 	{ STAGE_PELAGIC + 900,    30, 15000, 3333, 4444, 600, 995, 1000, RGB(0x103060), NO_SUNS,              1,  5000,    0, RGB(0xffffff), 0, -1000, 0, RGB(0x000000), 0  },
+#ifdef PLATFORM_N64
 	{ STAGE_24,                2, 25000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              1, 10000,    0, RGB(0xffffff), 0,     0, 1, RGB(0x00ffff), 7  },
+#else // Kakariko Village Mod
+	{ STAGE_24,               10, 10000, 4000, 7200,  10, 996, 1000, RGB(0x45454f), NO_SUNS,              1,  5000,    0, RGB(0xb7bda5), 0,     0, 0, RGB(0x000000), 0  }, // Stormy
+#endif
 	{ STAGE_2B,                2,  2000, 2500, 3055, 750, 957, 1000, RGB(0x201010), NO_SUNS,              1,  5000,    0, RGB(0x3a1100), 0, -1000, 1, RGB(0x00ffff), 20 },
 	{ STAGE_2B + 900,          2,  8000, 6000, 8000, 800, 991, 1000, RGB(0x201010), NO_SUNS,              1,  5000,    0, RGB(0x3a1100), 0, -1000, 1, RGB(0x00ffff), 0  },
 	{ 238,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x181818), NO_SUNS,              1, 10000,    0, RGB(0x787878), 0,  -500, 0, RGB(0x000000), 0  },

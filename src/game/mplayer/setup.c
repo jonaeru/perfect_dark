@@ -148,7 +148,7 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP6,        0, L_MPMENU_411  }, // Caves (PD Plus)
 	{ STAGE_TEST_MP2,        0, L_MPMENU_129  }, // Stack (PD Plus)
 	{ STAGE_MP_FELICITY,     0, L_MPMENU_135  }, // Felicity
-	// GoldenEye X
+	// GoldenEye X Mod
 	{ STAGE_MP_SKEDAR + 0x60,     0, L_MPMENU_133 }, // Tample
 	{ STAGE_MP_COMPLEX + 0x60,    0, L_MPMENU_134 }, // Complex
 	{ STAGE_MP_AREA52 + 0x60,     0, L_MPMENU_306 }, // Caves
@@ -170,6 +170,8 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP20 + 0x60,     0, L_MPMENU_308 }, // Citadel
 	{ STAGE_TEST_MP19 + 0x60,     0, L_MPMENU_301 }, // Labyrinth
 	{ STAGE_TEST_MP2 + 0x60,      0, L_MPMENU_316 }, // Icicle Pyramid
+	// Kakariko Village Mod
+	{ STAGE_24,                   0, L_MPMENU_319 }, // Kakariko Village (Stormy)
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -182,8 +184,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (53 Stage + 4 Random)
-	return 57;
+#else // All Solos in Multi Mod (54 Stage + 4 Random)
+	return 58;
 #endif
 }
 
@@ -196,7 +198,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 53; i++) {
+	for (i = 0; i < 54; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -208,7 +210,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 53; i++) {
+	for (i = 0; i < 54; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -318,7 +320,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 27, L_MPMENU_117  }, // "Classic"
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
-		{ 53, L_MPMENU_118  }, // "Random"
+		{ 53, L_MPMENU_318  }, // "Zelda"
+		{ 54, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -375,7 +378,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #ifdef PLATFORM_N64
 		data->list.value = 3;
 #else // All Solos in Multi Mod
-		data->list.value = 6;
+		data->list.value = 7;
 #endif
 
 #ifdef PLATFORM_N64 // All Solos in Multi Mod

@@ -1619,7 +1619,7 @@ void playersBeginMpSwirl(void)
 #else
 	s32 stagenum;
 	stagenum = mainGetStageNum();
-	if (g_IsGexMod) {
+	if (g_ModIndex == MOD_GEX) {
 		stagenum += 0x60;
 	}
 	envChooseAndApply(stagenum, false);

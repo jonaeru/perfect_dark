@@ -227,16 +227,18 @@ void mpStartMatch(void)
 		stagenum = mpChooseRandomGexStage();
 	}
 
-	// GoldenEye X Mod Switch
+	// Mod Switch (MP Start)
 	if (stagenum >= 0x60) {
-		g_IsGexMod = true;
+		g_ModIndex = MOD_GEX;
 		stagenum = stagenum - 0x60;
+	} else if (stagenum == STAGE_24) {
+		g_ModIndex = MOD_KAKARIKO;
 	} else {
-		g_IsGexMod = false;
+		g_ModIndex = MOD_NORMAL;
 	}
-	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_IsGexMod: %s", stagenum, g_IsGexMod ? "true" : "false");
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModIndex: %d", stagenum, g_ModIndex);
 	modConfigLoad(MOD_CONFIG_FNAME);
-	if (g_IsGexMod) {
+	if (g_ModIndex == MOD_GEX) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;
@@ -246,6 +248,99 @@ void mpStartMatch(void)
 		g_Textures[0x0745].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
 		g_Textures[0x0746].surfacetype = SURFACETYPE_SHALLOWWATER;
+	} else if (g_ModIndex == MOD_KAKARIKO) {
+		g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3c].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3d].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3e].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c42].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c43].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c45].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c48].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c49].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c4a].soundsurfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c4b].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0c4c].soundsurfacetype = SURFACETYPE_DEEPWATER;
+		g_Textures[0x0c63].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c64].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c65].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c67].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c68].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c69].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6a].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c6b].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6c].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c6e].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c6f].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c73].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c74].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c75].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c77].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c78].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c79].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7a].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7b].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7c].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7e].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c7f].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c81].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c82].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c83].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c84].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c86].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c8a].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8b].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8c].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8d].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8f].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c31].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3b].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3c].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3d].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3e].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c42].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c43].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c45].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c48].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c49].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c4a].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c4b].surfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0c4c].surfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0c63].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c64].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c65].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c67].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c68].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c69].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6a].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c6b].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6c].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c6e].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c6f].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c73].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c74].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c75].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c77].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c78].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c79].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7a].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7b].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7c].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7e].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c7f].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c81].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c82].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c83].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c84].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c86].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c88].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c8a].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8b].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8c].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8d].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8e].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c8f].surfacetype = SURFACETYPE_DIRT;
 	} else {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;

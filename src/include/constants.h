@@ -4763,6 +4763,11 @@ enum weaponnum {
 
 #define EXTRA_SLEEP_TIME 1000LL // 100us
 
+// Mod
+#define MOD_NORMAL 0
+#define MOD_GEX 1
+#define MOD_KAKARIKO 2
+
 #endif
 
 #endif
