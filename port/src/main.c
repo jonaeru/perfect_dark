@@ -155,7 +155,7 @@ int main(int argc, const char **argv)
 	mainProc();
 
 	// Mod Switch
-	g_ModIndex = 0;
+	g_ModNum = 0;
 
 	return 0;
 }

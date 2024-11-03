@@ -24,7 +24,7 @@ static char exeDir[FS_MAXPATH + 1];  // replaces $E
 static char gexModDir[FS_MAXPATH + 1];  // GoldenEye X Mod
 static char kakarikoModDir[FS_MAXPATH + 1];  // Kakariko Village Mod
 
-u32 g_ModIndex = 0;
+u32 g_ModNum = 0;
 
 static s32 fsPathIsWritable(const char *path)
 {
@@ -86,12 +86,12 @@ const char *fsFullPath(const char *relPath)
 	}
 
 	// path relative to mod or base dir; this will be a read request, so check where the file actually is
-	if (gexModDir[0] && g_ModIndex == MOD_GEX) {
+	if (gexModDir[0] && g_ModNum == MOD_GEX) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
 		if (fsFileSize(pathBuf) >= 0) {
 			return pathBuf;
 		}
-	} else if (kakarikoModDir[0] && g_ModIndex == MOD_KAKARIKO) {
+	} else if (kakarikoModDir[0] && g_ModNum == MOD_KAKARIKO) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", kakarikoModDir, relPath);
 		if (fsFileSize(pathBuf) >= 0) {
 			return pathBuf;
@@ -252,9 +252,9 @@ s32 fsInit(void)
 
 const char *fsGetModDir(void)
 {
-	if (g_ModIndex == MOD_GEX) {
+	if (g_ModNum == MOD_GEX) {
 		return gexModDir[0] ? gexModDir : NULL;
-	} else if (g_ModIndex == MOD_KAKARIKO) {
+	} else if (g_ModNum == MOD_KAKARIKO) {
 		return kakarikoModDir[0] ? kakarikoModDir : NULL;
 	} else {
 		return modDir[0] ? modDir : NULL;

@@ -199,7 +199,7 @@ struct headorbody g_HeadsAndBodies[] = {
 #ifdef PLATFORM_N64
 	{ /*0x0070*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CTESTCHR,         1,    1,                0, 0                          },
 #else // PD Plus Mod
-	{ /*0x0070*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     132, FILE_CTESTCHR,         1,    1,                0, FILE_PCHRFLASHBANG         }, // Dr. Caroll
+	{ /*0x0070*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     132, FILE_CDRCARROLL2,      1,    1,                0, FILE_GHAND_DRCARROLL       }, // Dr. Caroll
 #endif
 	{ /*0x0071*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     155, FILE_CBIOTECH,         1,    0.93896716833115, 0, FILE_GHAND_DDBIO           },
 	{ /*0x0072*/ 1, 0, 1, HEADBODYTYPE_DEFAULT,     159, FILE_CFBIGUY,          1,    0.93896716833115, 0, FILE_GHAND_FBIARM          },
@@ -223,7 +223,7 @@ struct headorbody g_HeadsAndBodies[] = {
 #ifdef PLATFORM_N64
 	{ /*0x0084*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CPRESIDENT_CLONE, 1,    0.93896716833115, 0, FILE_GCOMBATHANDSLOD       },
 #else // PD Plus Mod
-	{ /*0x0084*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     169, FILE_PTTB_BOX        , 1,    1               , 0, FILE_PDOORCONSOLE          }, // Skedar
+	{ /*0x0084*/ 1, 1, 0, HEADBODYTYPE_DEFAULT,     169, FILE_CSKEDAR2        , 1,    1               , 0, FILE_GHAND_SKEDAR          }, // Skedar
 #endif
 	{ /*0x0085*/ 1, 0, 0, HEADBODYTYPE_DEFAULT,     159, FILE_CPRESIDENT_CLONE, 1,    0.93896716833115, 0, FILE_GHAND_PRESIDENT       },
 	{ /*0x0086*/ 0, 0, 0, HEADBODYTYPE_FEMALE,      159, FILE_CDARK_AF1,        1,    0.95305162668228, 0, FILE_GHAND_JOPILOT         },

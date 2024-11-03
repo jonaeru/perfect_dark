@@ -573,7 +573,7 @@ extern s32 g_FileAutoSelect;
 // 0: Normal
 // 1: GoldenEye X Mod
 // 2: Kakariko Village Mod
-extern s32 g_ModIndex;
+extern s32 g_ModNum;
 // GoldenEye X Mod
 extern struct modelstate g_GexModelStates[NUM_MODELS];
 extern s8 g_GexPropExplosionTypes[];

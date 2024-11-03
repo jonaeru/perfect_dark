@@ -229,16 +229,16 @@ void mpStartMatch(void)
 
 	// Mod Switch (MP Start)
 	if (stagenum >= 0x60) {
-		g_ModIndex = MOD_GEX;
+		g_ModNum = MOD_GEX;
 		stagenum = stagenum - 0x60;
 	} else if (stagenum == STAGE_24) {
-		g_ModIndex = MOD_KAKARIKO;
+		g_ModNum = MOD_KAKARIKO;
 	} else {
-		g_ModIndex = MOD_NORMAL;
+		g_ModNum = MOD_NORMAL;
 	}
-	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModIndex: %d", stagenum, g_ModIndex);
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
 	modConfigLoad(MOD_CONFIG_FNAME);
-	if (g_ModIndex == MOD_GEX) {
+	if (g_ModNum == MOD_GEX) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;
@@ -248,7 +248,7 @@ void mpStartMatch(void)
 		g_Textures[0x0745].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
 		g_Textures[0x0746].surfacetype = SURFACETYPE_SHALLOWWATER;
-	} else if (g_ModIndex == MOD_KAKARIKO) {
+	} else if (g_ModNum == MOD_KAKARIKO) {
 		g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DIRT;
 		g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_MUD;
 		g_Textures[0x0c3c].soundsurfacetype = SURFACETYPE_MUD;
