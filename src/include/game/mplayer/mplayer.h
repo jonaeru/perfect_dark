@@ -25,7 +25,11 @@ s32 mpGetTeamRankings(struct ranking *rankings);
 s32 func0f188bcc(void);
 s32 mpGetNumWeaponOptions(void);
 char *mpGetWeaponLabel(s32 weaponnum);
+#ifdef PLATFORM_N64
 void mpSetWeaponSlot(s32 slot, s32 mpweaponnum);
+#else
+void mpSetWeaponSlot(s32 slot, s32 mpweaponnum, bool randomchoice);
+#endif
 s32 mpGetWeaponSlot(s32 slot);
 struct mpweapon *mpGetMpWeaponByLocation(s32 locationindex);
 s32 mpCountWeaponSetThing(s32 weaponsetindex);

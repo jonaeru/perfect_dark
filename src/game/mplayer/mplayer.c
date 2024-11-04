@@ -52,6 +52,13 @@ struct modeldef *var800acc28[18];
 struct mpweaponset g_MpWeaponSets[12];
 s32 g_MpWeaponSetNum;
 
+#ifndef PLATFORM_N64
+// MP Weapon Random Choice
+bool g_UseMpWeaponRandomChoice;
+u8 g_MpWeaponRandomChoice[NUM_MPWEAPONS];
+s32 g_MpWeaponRandomChoiceNum;
+#endif
+
 #if VERSION >= VERSION_NTSC_1_0
 const char var7f1b8a00[] = "||||||||||||| Starting game... players %d\n";
 #endif
@@ -1112,7 +1119,11 @@ const char var7f1b8a5c[] = "Gun index %d -> slot %d = gun %d\n\n";
 const char var7f1b8a80[] = "HOLDER: selecting weapon set %d\n";
 #endif
 
+#ifdef PLATFORM_N64
 void mpSetWeaponSlot(s32 slot, s32 mpweaponnum)
+#else
+void mpSetWeaponSlot(s32 slot, s32 mpweaponnum, bool randomchoice)
+#endif
 {
 	s32 optionindex = mpweaponnum;
 	s32 i;
@@ -1124,6 +1135,13 @@ void mpSetWeaponSlot(s32 slot, s32 mpweaponnum)
 
 		optionindex = mpweaponnum;
 	}
+
+#ifndef PLATFORM_N64
+		// Random Choice (modconfig)
+		if (randomchoice) {
+			optionindex = g_MpWeaponRandomChoice[mpweaponnum];
+		}
+#endif
 
 	g_MpSetup.weapons[slot] = optionindex;
 }
@@ -1339,17 +1357,40 @@ void mpApplyWeaponSet(void)
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOM) {
 		s32 numoptions = mpGetNumWeaponOptions();
 
+#ifdef PLATFORM_N64
 		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 			mpSetWeaponSlot(i, random() % numoptions);
 		}
+#else
+		// Random Choice (modconfig)
+		if (g_UseMpWeaponRandomChoice) {
+			numoptions = g_MpWeaponRandomChoiceNum;
+		}
+		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
+			mpSetWeaponSlot(i, random() % numoptions, g_UseMpWeaponRandomChoice);
+		}
+#endif
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
 		s32 numoptions = mpGetNumWeaponOptions() - 2;
 
+#ifdef PLATFORM_N64
 		for (i = 0; i < 5; i++) {
 			mpSetWeaponSlot(i, random() % numoptions + 1);
 		}
 
 		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
+#else
+		// Random Choice (modconfig)
+		if (g_UseMpWeaponRandomChoice) {
+			numoptions = g_MpWeaponRandomChoiceNum;
+		}
+		for (i = 0; i < 5; i++) {
+			mpSetWeaponSlot(i, g_UseMpWeaponRandomChoice ? random() % numoptions : random() % numoptions + 1, g_UseMpWeaponRandomChoice);
+		}
+
+		// Always set "Disabled"
+		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1, false);
+#endif
 	}
 }
 

@@ -466,7 +466,11 @@ MenuItemHandlerResult menuhandlerMpWeaponSlot(s32 operation, struct menuitem *it
 	case MENUOP_GETOPTIONTEXT:
 		return (s32) mpGetWeaponLabel(data->dropdown.value);
 	case MENUOP_SET:
+#ifdef PLATFORM_N64
 		mpSetWeaponSlot(item->param3, data->dropdown.value);
+#else
+		mpSetWeaponSlot(item->param3, data->dropdown.value, false);
+#endif
 		break;
 	case MENUOP_GETSELECTEDINDEX:
 		data->dropdown.value = mpGetWeaponSlot(item->param3);

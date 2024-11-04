@@ -580,6 +580,11 @@ extern s8 g_GexPropExplosionTypes[];
 // All Solos in Multi Mod
 extern bool g_NotLoadMod;
 
+// MP Weapon Random Choice
+extern bool g_UseMpWeaponRandomChoice;
+extern u8 g_MpWeaponRandomChoice[NUM_MPWEAPONS];
+extern s32 g_MpWeaponRandomChoiceNum;
+
 #else // PLATFORM_N64
 
 #define TEX_FILTER_2D G_TF_BILERP

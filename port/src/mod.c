@@ -381,6 +381,50 @@ static char *modConfigParseStage(char *p, char *token)
 	return p;
 }
 
+static char *modConfigParseMpWeaponRandomChoice(char *p, char *token)
+{
+	// eat opening bracket
+	p = strParseToken(p, token, NULL);
+	if (token[0] != '{' || token[1] != '\0') {
+		return NULL;
+	}
+
+	// parse keyvalues until } is reached
+	s32 tmp = 0;
+	char *tmps = NULL;
+	p = strParseToken(p, token, NULL);
+
+	memset(g_MpWeaponRandomChoice, 0, sizeof(g_MpWeaponRandomChoice));
+	s32 idx = 0;
+
+	while (p && token[0] && strcmp(token, "}") != 0) {
+		if (token[0] == ',' && !token[1]) {
+			p = strParseToken(p, token, NULL);
+			continue;
+		}
+		tmp = strtol(token, NULL, 0);
+		if (tmp < 0x00 || tmp > 0x2e) {
+			sysLogPrintf(LOG_ERROR, "modconfig: mpweaponrandomchoice: invalid mp weapon number: %s", token);
+			return NULL;
+		}
+		g_MpWeaponRandomChoice[idx++] = tmp;
+
+		p = strParseToken(p, token, NULL);
+	}
+
+	if (token[0] != '}') {
+		sysLogPrintf(LOG_ERROR, "modconfig: unterminated mpweaponrandomchoice block");
+		return NULL;
+	}
+
+	if (idx > 0) {
+		g_UseMpWeaponRandomChoice = true;
+		g_MpWeaponRandomChoiceNum = idx;
+	}
+
+	return p;
+}
+
 s32 modConfigLoad(const char *fname)
 {
 	u32 dataLen = 0;
@@ -400,6 +444,16 @@ s32 modConfigLoad(const char *fname)
 			p = modConfigParseStage(p, token);
 			if (!p) {
 				sysLogPrintf(LOG_ERROR, "modconfig: malformed stage block at offset %d", prev - data);
+				success = false;
+				break;
+			}
+		} else if (!strcmp(token, "mpweaponrandomchoice")) {
+			// mpweaponrandomchoice { VALUES... }
+			char *prev = p;
+			p = modConfigParseMpWeaponRandomChoice(p, token);
+
+			if (!p) {
+				sysLogPrintf(LOG_ERROR, "modconfig: malformed mpweaponrandomchoice block at offset %d", prev - data);
 				success = false;
 				break;
 			}
