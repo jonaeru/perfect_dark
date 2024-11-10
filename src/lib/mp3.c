@@ -417,7 +417,7 @@ s32 func00038ba8(s32 arg0, u8 *arg1, s32 arg2, s32 arg3)
 
 void mp3Dma(void)
 {
-	u32 state;
+	uintptr_t state;
 	ALDMAproc proc;
 
 	proc = n_syn->dma(&state);
