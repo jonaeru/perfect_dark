@@ -587,20 +587,20 @@ u32 romdataSegGetSize(const char *segName)
 	return romdataGetSeg(segName)->size;
 }
 
-u32 romdataFileGetEstimatedSize(u32 size, FileType filetype)
+u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype)
 {
 #ifdef PLATFORM_64BIT
-	switch (filetype) {
-	case FT_BG:	   return (u32)(size * 1.1);
-	case FT_TILES: return (u32)(size * 1.1);
-	case FT_LANG:  return (u32)(size * 1.3);
-	case FT_SETUP: return (u32)(size * 1.5);
-	case FT_PADS:  return (u32)(size * 1.7);
-	case FT_MODEL: return (u32)(size * 1.7);
+	switch (loadtype) {
+	case LOADTYPE_BG:	   return (u32)(size * 1.1f);
+	case LOADTYPE_TILES: return (u32)(size * 1.1f);
+	case LOADTYPE_LANG:  return (u32)(size * 1.3f);
+	case LOADTYPE_SETUP: return (u32)(size * 1.5f);
+	case LOADTYPE_PADS:  return (u32)(size * 1.7f);
+	case LOADTYPE_MODEL: return (u32)(size * 1.7f);
+	case LOADTYPE_GUN: return (u32)(size * 1.7f);
 	default:
-		sysLogPrintf(LOG_WARNING, "wrong file type in romdataFileGetEstimatedSize: %d", filetype);
+		sysLogPrintf(LOG_WARNING, "romdataFileGetEstimatedSize: wrong loadtype %d", loadtype);
 	}
 #endif
 	return size;
 }
-

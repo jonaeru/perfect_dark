@@ -4255,7 +4255,7 @@ void fileLoadPartToAddr(u16 filenum, void *memaddr, s32 offset, u32 len)
 	}
 }
 
-u32 fileGetInflatedSize(s32 filenum, FileType filetype)
+u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
 {
 	u8 *ptr;
 	u8 buffer[0x50];
@@ -4283,7 +4283,7 @@ u32 fileGetInflatedSize(s32 filenum, FileType filetype)
 	}
 
 	if (rzipIs1173(ptr)) {
-		return romdataFileGetEstimatedSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], filetype);
+		return romdataFileGetEstimatedSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], loadtype);
 	}
 
 #if VERSION < VERSION_NTSC_1_0
@@ -4300,7 +4300,7 @@ u32 fileGetInflatedSize(s32 filenum, FileType filetype)
 	return 0;
 }
 
-void *fileLoadToNew(s32 filenum, u32 method, FileType filetype)
+void *fileLoadToNew(s32 filenum, u32 method, u32 loadtype)
 {
 	struct fileinfo *info = &g_FileInfo[filenum];
 	u32 stack;
@@ -4308,7 +4308,7 @@ void *fileLoadToNew(s32 filenum, u32 method, FileType filetype)
 
 	if (method == FILELOADMETHOD_EXTRAMEM || method == FILELOADMETHOD_DEFAULT) {
 		if (info->loadedsize == 0) {
-			info->loadedsize = (fileGetInflatedSize(filenum, filetype) + 0x20) & 0xfffffff0;
+			info->loadedsize = (fileGetInflatedSize(filenum, loadtype) + 0x20) & 0xfffffff0;
 
 			if (method == FILELOADMETHOD_EXTRAMEM) {
 				info->loadedsize += 0x8000;

@@ -1181,7 +1181,7 @@ static int convertSetup(u8 *dst, u8 *src, u32 srclen)
 }
 
 u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, FT_SETUP);
+	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_SETUP);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convertSetup(dst, data, size);

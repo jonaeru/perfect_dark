@@ -6,15 +6,6 @@
 extern u8 *g_RomFile;
 extern u32 g_RomFileSize;
 
-typedef enum {
-	FT_BG,
-	FT_TILES,
-	FT_LANG,
-	FT_SETUP,
-	FT_PADS,
-	FT_MODEL
-} FileType;
-
 s32 romdataInit(void);
 
 u8 *romdataFileLoad(s32 fileNum, u32 *outSize);
@@ -30,7 +21,7 @@ s32 romdataFileGetNumForName(const char *name);
 u8 *romdataSegGetData(const char *segName);
 u8 *romdataSegGetDataEnd(const char *segName);
 u32 romdataSegGetSize(const char *segName);
-u32 romdataFileGetEstimatedSize(u32 size, FileType filetype);
+u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype);
 
 s32 romdataCheckGbcRom(void);
 

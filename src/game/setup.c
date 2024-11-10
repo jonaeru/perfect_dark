@@ -1319,7 +1319,7 @@ void setupLoadFiles(s32 stagenum)
 
 		g_LoadType = LOADTYPE_SETUP;
 
-		g_GeCreditsData = (u8 *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, FT_SETUP);
+		g_GeCreditsData = (u8 *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
 		setup = (struct stagesetup *)g_GeCreditsData;
 		langLoad(langGetLangBankIndexFromStagenum(stagenum));
 
@@ -1330,7 +1330,7 @@ void setupLoadFiles(s32 stagenum)
 
 		g_LoadType = LOADTYPE_PADS;
 
-		g_StageSetup.padfiledata = fileLoadToNew(g_Stages[g_StageIndex].padsfileid, FILELOADMETHOD_DEFAULT, FT_PADS);
+		g_StageSetup.padfiledata = fileLoadToNew(g_Stages[g_StageIndex].padsfileid, FILELOADMETHOD_DEFAULT, LOADTYPE_PADS);
 
 		g_StageSetup.waypoints = NULL;
 		g_StageSetup.waygroups = NULL;

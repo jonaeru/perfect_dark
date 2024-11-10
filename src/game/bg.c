@@ -1512,7 +1512,7 @@ void bgReset(s32 stagenum)
 	var8007fc54 -= 0xc;
 
 #ifdef PLATFORM_64BIT
-	inflatedsize = romdataFileGetEstimatedSize(inflatedsize, FT_BG);
+	inflatedsize = romdataFileGetEstimatedSize(inflatedsize, LOADTYPE_BG);
 #endif
 
 	inflatedsize = ALIGN16(inflatedsize);

@@ -190,7 +190,7 @@ struct modeldef *modeldefLoad(u16 fileid, u8 *dst, s32 size, struct texpool *arg
 	if (dst) {
 		modeldef = fileLoadToAddr(fileid, FILELOADMETHOD_EXTRAMEM, dst, size);
 	} else {
-		modeldef = fileLoadToNew(fileid, FILELOADMETHOD_EXTRAMEM, FT_MODEL);
+		modeldef = fileLoadToNew(fileid, FILELOADMETHOD_EXTRAMEM, LOADTYPE_MODEL);
 	}
 
 	modelPromoteTypeToPointer(modeldef);

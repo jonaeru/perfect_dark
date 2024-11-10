@@ -310,7 +310,7 @@ static int convertPadsFile(u8 *dst, u8 *src)
 }
 
 u8* preprocessPadsFile(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, FT_PADS);
+	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_PADS);
 	u8* dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convertPadsFile(dst, data);

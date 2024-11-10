@@ -76,7 +76,7 @@ u32 convertLangFile(u8 *dst, u8 *src, size_t srclen)
 }
 
 u8 *preprocessLangFile(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, FT_LANG);
+	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_LANG);
 	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
 
 	u32 newSize = convertLangFile(dst, data, size);
