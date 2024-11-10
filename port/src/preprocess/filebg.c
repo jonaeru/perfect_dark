@@ -306,8 +306,7 @@ void relinkPtr(uintptr_t* ptr)
 
 	struct ptrmarker* marker = findPtrMarker(*ptr);
 	if (!marker) {
-		fprintf(stderr, "[BG] WARNING: Unable to relink pointer: %p\n", ptr);
-		exit(EXIT_FAILURE);
+		sysFatalError("[BG] WARNING: Unable to relink pointer: %p\n", ptr);
 	}
 	
 	*ptr = marker->ptr_host;
@@ -554,8 +553,7 @@ void preprocessBgSection1(u8 *data, u32 size, u32 ofs)
 	u32 newSize = convertSection1(dst, data, ofs);
 
 	if (newSize > size) {
-		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a bg file, size %d newsize %d", size, newSize);
-		exit(EXIT_FAILURE);
+		sysFatalError("overflow when trying to preprocess a bg file, size %d newsize %d", size, newSize);
 	}
 
 	memcpy(data, dst, newSize);
@@ -569,8 +567,7 @@ u32 preprocessBgRoom(u8 *data, u32 size, u32 room_ofs)
 	u32 newSize = convertRoomGfxData(dst, data, size, room_ofs);
 
 	if (newSize > size) {
-		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a bg room, size %d newsize %d", size, newSize);
-		exit(EXIT_FAILURE);
+		sysFatalError("overflow when trying to preprocess a bg room, size %d newsize %d", size, newSize);
 	}
 
 	memcpy(data, dst, newSize);

@@ -26,7 +26,7 @@
 
 #include "types.h"
 #include "constants.h"
-
+#include "system.h"
 
 #if __BIG_ENDIAN__
 	#define htonll(x)   (x)

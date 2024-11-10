@@ -1187,8 +1187,7 @@ u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize) {
 	u32 newSize = convertSetup(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
-		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a model file, size %d newsize %d", size, newSize);
-		exit(EXIT_FAILURE);
+		sysFatalError("overflow when trying to preprocess a model file, size %d newsize %d", size, newSize);
 	}
 
 	memcpy(data, dst, newSize);

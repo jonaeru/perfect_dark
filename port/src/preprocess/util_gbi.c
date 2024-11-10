@@ -129,8 +129,7 @@ static u64 gbiRewriteAddr(u64 cmd, u8 opcode)
 		}
 		else {
 			if (offset < m_SrcVtxOffset) {
-				printf("Tried to load data from offset 0x%x but segment starts at 0x%x\n", offset, m_SrcVtxOffset);
-				exit(EXIT_FAILURE);
+				sysFatalError("Tried to load data from offset 0x%x but segment starts at 0x%x\n", offset, m_SrcVtxOffset);
 			}
 
 			offset = offset - m_SrcVtxOffset + m_DstVtxOffset;

@@ -94,8 +94,7 @@ u8 *preprocessTilesFile(u8 *data, u32 size, u32 *outSize)
 	u32 newSize = convertTiles(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
-		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess a tiles file, size %d newsize %d", size, newSize);
-		exit(EXIT_FAILURE);
+		sysFatalError("overflow when trying to preprocess a tiles file, size %d newsize %d", size, newSize);
 	}
 
 	memcpy(data, dst, newSize);

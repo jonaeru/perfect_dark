@@ -7,8 +7,7 @@ static int m_NumPtrMarkers;
 void addMarker(u32 ptr_src, uintptr_t ptr_host)
 {
 	if (m_NumPtrMarkers >= ARRAYCOUNT(m_PtrMarkers)) {
-		sysLogPrintf(LOG_ERROR, "Marker limit exceeded");
-		exit(EXIT_FAILURE);
+		sysFatalError("Marker limit exceeded");
 	}
 
 	m_PtrMarkers[m_NumPtrMarkers].ptr_src = ptr_src;

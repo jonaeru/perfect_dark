@@ -349,8 +349,7 @@ static void set_marker(u32 src_offset, enum contenttype type, u32 parent_src_off
 	}
 
 	if (m_NumMarkers >= ARRAYCOUNT(m_Markers)) {
-		fprintf(stderr, "Marker limit exceeded\n");
-		exit(EXIT_FAILURE);
+		sysFatalError("Marker limit exceeded");
 	}
 
 	m_Markers[m_NumMarkers].src_offset = src_offset;
@@ -994,8 +993,7 @@ u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize)
 	u32 newSize = convertModel(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
-		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess model, size %d newsize %d", size, newSize);
-		exit(EXIT_FAILURE);
+		sysFatalError("overflow when trying to preprocess model, size %d newsize %d", size, newSize);
 	}
 	
 	memcpy(data, dst, newSize);
@@ -1016,8 +1014,7 @@ u8 *preprocessGunFile(u8 *data, u32 size, u32 *outSize)
 	u32 newSize = convertModel(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
-		sysLogPrintf(LOG_ERROR, "overflow when trying to preprocess model, size %d newsize %d", size, newSize);
-		exit(EXIT_FAILURE);
+		sysFatalError("overflow when trying to preprocess model, size %d newsize %d", size, newSize);
 	}
 
 	memcpy(data, dst, newSize);
