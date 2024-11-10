@@ -1645,7 +1645,7 @@ typedef union {
 #endif
 	GunkC0         unkc0;
 #ifdef PLATFORM_64BIT
-	__int128       force_structure_alignment;
+	long long int  force_structure_alignment[2];
 #else
 	long long int  force_structure_alignment;
 #endif

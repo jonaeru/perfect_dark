@@ -1172,7 +1172,7 @@ void texCopyGdls(Gfx *src, Gfx *dst, s32 count)
 	dst = dst + (count - 1);
 
 	while (count--) {
-		dst->force_structure_alignment = src->force_structure_alignment;
+		*dst = *src;
 		dst--;
 		src--;
 	}
