@@ -73,6 +73,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
+#include "platform.h"
 #endif
 
 s32 g_DefaultWeapons[2];
@@ -1423,6 +1424,9 @@ void playerTickChrBody(void)
 			rwdatas = (u32 *)(allocation + offset1);
 			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
+#ifdef PLATFORM_64BIT
+			offset1 += 0x200;
+#endif
 			offset1 = ALIGN64(offset1);
 
 			weaponobj = (struct weaponobj *)(allocation + offset1);
@@ -1430,17 +1434,20 @@ void playerTickChrBody(void)
 			offset1 += sizeof(struct weaponobj);
 			offset1 = ALIGN64(offset1);
 
-			offset2 = offset1 + ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[bodynum].filenum));
+			offset2 = offset1 + ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[bodynum].filenum, FT_MODEL));
 
 			if (headnum >= 0) {
-				offset2 += ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[headnum].filenum));
+				offset2 += ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[headnum].filenum, FT_MODEL));
 			}
 
 			if (weaponmodelnum >= 0) {
-				offset2 += ALIGN64(fileGetInflatedSize(g_ModelStates[weaponmodelnum].fileid));
+				offset2 += ALIGN64(fileGetInflatedSize(g_ModelStates[weaponmodelnum].fileid, FT_MODEL));
 			}
 
 			offset2 += 0x4000;
+#ifdef PLATFORM_64BIT
+			offset2 += 0x2000;
+#endif
 			bgunCalculateGunMemCapacity();
 			spe8 = g_Vars.currentplayer->gunmem2 + offset2;
 			texInitPool(&texpool, spe8, bgunCalculateGunMemCapacity() - offset2);
@@ -1462,6 +1469,10 @@ void playerTickChrBody(void)
 			animInit(model->anim);
 
 			model->rwdatalen = 256;
+
+#ifdef PLATFORM_64BIT
+			model->rwdatalen += 128;
+#endif
 
 			texGetPoolLeftPos(&texpool);
 
