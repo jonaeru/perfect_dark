@@ -1,8 +1,8 @@
 #include "common.h"
 #include "system.h"
 
-struct ptrmarker m_PtrMarkers[1024*8];
-int m_NumPtrMarkers;
+static struct ptrmarker m_PtrMarkers[1024*8];
+static int m_NumPtrMarkers;
 
 void addMarker(u32 ptr_src, uintptr_t ptr_host)
 {

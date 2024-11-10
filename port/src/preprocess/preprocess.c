@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <PR/ultratypes.h>
 #include <PR/gbi.h>
-#include <PR/libaudio.h>
 #include "platform.h"
 #include "data.h"
 #include "bss.h"
@@ -15,121 +14,6 @@
 #include "mod.h"
 #include "system.h"
 #include "common.h"
-
-// HACK: to prevent double-swapping stuff, flag swapped offsets in a bitmap
-
-static u8 swapmap[0x40000 >> 3];
-
-static inline u32 alreadySwapped(const intptr_t addr) {
-	const u32 mask = (1 << (addr & 7));
-	const u32 old = swapmap[addr >> 3] & mask;
-	if (!old) {
-		swapmap[addr >> 3] |= mask;
-	}
-	return old;
-}
-
-static inline void preprocessALWaveTable(ALWaveTable *tbl, u8 *bankBase)
-{
-	if (alreadySwapped((u8 *)tbl - bankBase)) {
-		return;
-	}
-
-	PD_SWAP_VAL(tbl->len);
-	PD_SWAP_PTR(tbl->base);
-
-	if (tbl->type == AL_ADPCM_WAVE) {
-		if (tbl->waveInfo.adpcmWave.loop ) {
-			PD_SWAP_PTR(tbl->waveInfo.adpcmWave.loop);
-			ALADPCMloop *loop = PD_PTR_BASE(tbl->waveInfo.adpcmWave.loop, bankBase);
-			PD_SWAP_VAL(loop->count);
-			PD_SWAP_VAL(loop->start);
-			PD_SWAP_VAL(loop->end);
-			for (s32 i = 0; i < 16; ++i) {
-				PD_SWAP_VAL(loop->state[i]);
-			}
-		}
-		if (tbl->waveInfo.adpcmWave.book) {
-			PD_SWAP_PTR(tbl->waveInfo.adpcmWave.book);
-			ALADPCMBook *book = PD_PTR_BASE(tbl->waveInfo.adpcmWave.book, bankBase);
-			PD_SWAP_VAL(book->npredictors);
-			PD_SWAP_VAL(book->order);
-			const s32 bookSize = book->order * book->npredictors * ADPCMVSIZE;
-			for (s32 i = 0; i < bookSize && i < 128; ++i) {
-				PD_SWAP_VAL(book->book[i]);
-			}
-		}
-	} else if (tbl->type == AL_RAW16_WAVE) {
-		if (tbl->waveInfo.rawWave.loop) {
-			PD_SWAP_PTR(tbl->waveInfo.rawWave.loop);
-			ALRawLoop *loop = PD_PTR_BASE(tbl->waveInfo.rawWave.loop, bankBase);
-			PD_SWAP_VAL(loop->count);
-			PD_SWAP_VAL(loop->start);
-			PD_SWAP_VAL(loop->end);
-		}
-	}
-}
-
-static inline void preprocessALSound(ALSound *snd, u8 *bankBase)
-{
-	if (alreadySwapped((u8 *)snd - bankBase)) {
-		return;
-	}
-
-	if (snd->envelope) {
-		PD_SWAP_PTR(snd->envelope);
-		if (!alreadySwapped((intptr_t)snd->envelope)) {
-			ALEnvelope *env = PD_PTR_BASE(snd->envelope, bankBase);
-			PD_SWAP_VAL(env->attackTime);
-			PD_SWAP_VAL(env->releaseTime);
-			PD_SWAP_VAL(env->decayTime);
-		}
-	}
-
-	if (snd->keyMap) {
-		PD_SWAP_PTR(snd->keyMap);
-	}
-
-	if (snd->wavetable) {
-		PD_SWAP_PTR(snd->wavetable);
-		preprocessALWaveTable(PD_PTR_BASE(snd->wavetable, bankBase), bankBase);
-	}
-}
-
-static inline void preprocessALInstrument(ALInstrument *inst, u8 *bankBase)
-{
-	if (alreadySwapped((u8 *)inst - bankBase)) {
-		return;
-	}
-
-	PD_SWAP_VAL(inst->bendRange);
-	PD_SWAP_VAL(inst->soundCount);
-
-	for (s16 i = 0; i < inst->soundCount; ++i) {
-		PD_SWAP_PTR(inst->soundArray[i]);
-		preprocessALSound(PD_PTR_BASE(inst->soundArray[i], bankBase), bankBase);
-	}
-}
-
-static inline void preprocessALBank(ALBank *bank, u8 *bankBase)
-{
-	if (alreadySwapped((u8 *)bank - bankBase)) {
-		return;
-	}
-
-	PD_SWAP_VAL(bank->sampleRate);
-	PD_SWAP_VAL(bank->instCount);
-
-	if (bank->percussion) {
-		PD_SWAP_PTR(bank->percussion);
-		preprocessALInstrument(PD_PTR_BASE(bank->percussion, bankBase), bankBase);
-	}
-
-	for (s16 i = 0; i < bank->instCount; ++i) {
-		PD_SWAP_PTR(bank->instArray[i]);
-		preprocessALInstrument(PD_PTR_BASE(bank->instArray[i], bankBase), bankBase);
-	}
-}
 
 u8* preprocessAnimations(u8* data, u32 size, u32* outSize)
 {
@@ -195,22 +79,6 @@ u8* preprocessMpConfigs(u8* data, u32 size, u32* outSize)
 u8* preprocessJpnFont(u8* data, u32 size, u32* outSize)
 {
 	// ???
-	return 0;
-}
-
-// to be removed eventually #TODO
-u8* preprocessALBankFile_x86(u8* data, u32 size, u32* outSize)
-{
-	memset(swapmap, 0, sizeof(swapmap));
-
-	ALBankFile *bankf = (ALBankFile *)data;
-	PD_SWAP_VAL(bankf->revision);
-	PD_SWAP_VAL(bankf->bankCount);
-
-	for (s16 i = 0; i < bankf->bankCount; ++i) {
-		PD_SWAP_PTR(bankf->bankArray[i]);
-		preprocessALBank(PD_PTR_BASE(bankf->bankArray[i], data), data);
-	}
 	return 0;
 }
 
