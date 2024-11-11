@@ -1059,7 +1059,7 @@ typedef struct {
 // 4x4 float matrix
 typedef float Mtx_t[4][4];
 #else
-typedef long Mtx_t[4][4];
+typedef int32_t Mtx_t[4][4];
 #endif
 
 typedef union {
