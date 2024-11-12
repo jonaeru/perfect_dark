@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "common.h"
-#include "system.h"
+
+#include "preprocess/common.h"
 
 struct n64fontchar {
 	u8 index;
@@ -71,11 +71,11 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 	s32 *dst_kerning_table = (s32 *)dst;
 
 	for (int i = 0; i < 13 * 13; i++) {
-		dst_kerning_table[i] = srctodst32(src_kerning_table[i]);
+		dst_kerning_table[i] = PD_BE32(src_kerning_table[i]);
 	}
 
-	u32 src_offset = ALIGN(13 * 13 * 4, sizeof(u32));
-	u32 dst_offset = ALIGN(13 * 13 * 4, sizeof(uintptr_t));
+	u32 src_offset = PD_ALIGN(13 * 13 * 4, sizeof(u32));
+	u32 dst_offset = PD_ALIGN(13 * 13 * 4, sizeof(uintptr_t));
 
 	// Character table
 #if VERSION == VERSION_JPN_FINAL
@@ -84,12 +84,12 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontcharjpn)) - (src_offset + num_chars * sizeof(struct n64fontcharjpn));
 
 		for (int i = 0; i < num_chars; i++) {
-			dst_char_table[i].index = srctodst16(src_char_table[i].index);
+			dst_char_table[i].index = PD_BE16(src_char_table[i].index);
 			dst_char_table[i].baseline = src_char_table[i].baseline;
 			dst_char_table[i].height = src_char_table[i].height;
 			dst_char_table[i].width = src_char_table[i].width;
-			dst_char_table[i].kerningindex = srctodst16(src_char_table[i].kerningindex);
-			dst_char_table[i].pixeldata = src_char_table[i].pixeldata ? srctodst32(src_char_table[i].pixeldata) + diff : 0;
+			dst_char_table[i].kerningindex = PD_BE16(src_char_table[i].kerningindex);
+			dst_char_table[i].pixeldata = src_char_table[i].pixeldata ? PD_BE32(src_char_table[i].pixeldata) + diff : 0;
 		}
 
 		src_offset += num_chars * sizeof(struct n64fontcharjpn);
@@ -104,8 +104,8 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 			dst_char_table[i].baseline = src_char_table[i].baseline;
 			dst_char_table[i].height = src_char_table[i].height;
 			dst_char_table[i].width = src_char_table[i].width;
-			dst_char_table[i].kerningindex = srctodst32(src_char_table[i].kerningindex);
-			dst_char_table[i].pixeldata = src_char_table[i].pixeldata ? srctodst32(src_char_table[i].pixeldata) + diff : 0;
+			dst_char_table[i].kerningindex = PD_BE32(src_char_table[i].kerningindex);
+			dst_char_table[i].pixeldata = src_char_table[i].pixeldata ? PD_BE32(src_char_table[i].pixeldata) + diff : 0;
 		}
 
 		src_offset += num_chars * sizeof(struct n64fontchar);

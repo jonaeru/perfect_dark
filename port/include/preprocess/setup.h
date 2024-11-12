@@ -1,8 +1,7 @@
 #ifndef _IN_SETUP_DECL
 #define _IN_SETUP_DECL
 
-#include "common.h"
-
+#include "preprocess/common.h"
 
 struct n64_stagesetup {
 	u32 ptr_waypoints;

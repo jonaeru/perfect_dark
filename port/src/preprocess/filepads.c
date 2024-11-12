@@ -2,20 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
-#include "romdata.h"
-#include "system.h"
+#include "preprocess/common.h"
 
-#define PADFLAG_INTPOS          0x0001
-#define PADFLAG_UPALIGNTOX      0x0002
-#define PADFLAG_UPALIGNTOY      0x0004
-#define PADFLAG_UPALIGNTOZ      0x0008
-#define PADFLAG_UPALIGNINVERT   0x0010
-#define PADFLAG_LOOKALIGNTOX    0x0020
-#define PADFLAG_LOOKALIGNTOY    0x0040
-#define PADFLAG_LOOKALIGNTOZ    0x0080
-#define PADFLAG_LOOKALIGNINVERT 0x0100
-#define PADFLAG_HASBBOXDATA     0x0200
+#include "constants.h"
 
 struct n64_header {
 	s32 num_pads;
@@ -80,16 +69,16 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 	dstpos += num_pads * sizeof(u16);
 
 	for (int i = 0; i < num_pads; i++) {
-		srcpos = srctoh16(src_offsets[i]);
+		srcpos = PD_BE16(src_offsets[i]);
 
-		dst_offsets[i] = htodst16(dstpos);
+		dst_offsets[i] = (dstpos);
 
 		// Header
-		u32 n64_padheader = srctoh32(*(u32 *) &src[srcpos]);
+		u32 n64_padheader = PD_BE32(*(u32 *) &src[srcpos]);
 		struct padheader *host_padheader = (struct padheader *) &dst[dstpos];
 		u32 flags = (n64_padheader >> 14) & 0x3ffff;
 
-		*(u32*)host_padheader = htodst32(n64_padheader);
+		*(u32*)host_padheader = (n64_padheader);
 
 		srcpos += sizeof(struct padheader);
 		dstpos += sizeof(struct padheader);
@@ -99,9 +88,9 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 			s16 *srcptr = (s16 *) &src[srcpos];
 			s16 *dstptr = (s16 *) &dst[dstpos];
 
-			dstptr[0] = srctodst16(srcptr[0]);
-			dstptr[1] = srctodst16(srcptr[1]);
-			dstptr[2] = srctodst16(srcptr[2]);
+			dstptr[0] = PD_BE16(srcptr[0]);
+			dstptr[1] = PD_BE16(srcptr[1]);
+			dstptr[2] = PD_BE16(srcptr[2]);
 
 			srcpos += 8;
 			dstpos += 8;
@@ -109,9 +98,9 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 			u32 *srcptr = (u32 *) &src[srcpos];
 			u32 *dstptr = (u32 *) &dst[dstpos];
 
-			dstptr[0] = srctodst32(srcptr[0]);
-			dstptr[1] = srctodst32(srcptr[1]);
-			dstptr[2] = srctodst32(srcptr[2]);
+			dstptr[0] = PD_BE32(srcptr[0]);
+			dstptr[1] = PD_BE32(srcptr[1]);
+			dstptr[2] = PD_BE32(srcptr[2]);
 
 			srcpos += 12;
 			dstpos += 12;
@@ -122,9 +111,9 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 			u32 *srcptr = (u32 *) &src[srcpos];
 			u32 *dstptr = (u32 *) &dst[dstpos];
 
-			dstptr[0] = srctodst32(srcptr[0]);
-			dstptr[1] = srctodst32(srcptr[1]);
-			dstptr[2] = srctodst32(srcptr[2]);
+			dstptr[0] = PD_BE32(srcptr[0]);
+			dstptr[1] = PD_BE32(srcptr[1]);
+			dstptr[2] = PD_BE32(srcptr[2]);
 
 			srcpos += 12;
 			dstpos += 12;
@@ -135,9 +124,9 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 			u32 *srcptr = (u32 *) &src[srcpos];
 			u32 *dstptr = (u32 *) &dst[dstpos];
 
-			dstptr[0] = srctodst32(srcptr[0]);
-			dstptr[1] = srctodst32(srcptr[1]);
-			dstptr[2] = srctodst32(srcptr[2]);
+			dstptr[0] = PD_BE32(srcptr[0]);
+			dstptr[1] = PD_BE32(srcptr[1]);
+			dstptr[2] = PD_BE32(srcptr[2]);
 
 			srcpos += 12;
 			dstpos += 12;
@@ -148,12 +137,12 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 			u32 *srcptr = (u32 *) &src[srcpos];
 			u32 *dstptr = (u32 *) &dst[dstpos];
 
-			dstptr[0] = srctodst32(srcptr[0]);
-			dstptr[1] = srctodst32(srcptr[1]);
-			dstptr[2] = srctodst32(srcptr[2]);
-			dstptr[3] = srctodst32(srcptr[3]);
-			dstptr[4] = srctodst32(srcptr[4]);
-			dstptr[5] = srctodst32(srcptr[5]);
+			dstptr[0] = PD_BE32(srcptr[0]);
+			dstptr[1] = PD_BE32(srcptr[1]);
+			dstptr[2] = PD_BE32(srcptr[2]);
+			dstptr[3] = PD_BE32(srcptr[3]);
+			dstptr[4] = PD_BE32(srcptr[4]);
+			dstptr[5] = PD_BE32(srcptr[5]);
 
 			srcpos += 4 * 6;
 			dstpos += 4 * 6;
@@ -177,15 +166,15 @@ static int convertWayPoints(u8 *dst, int dstpos, u8 *src, int srcpos)
 	int n = 0;
 
 	for (int i = 0; i < num_waypoints; i++) {
-		host_waypoints[i].padnum = srctodst32(n64_waypoints[i].padnum);
-		host_waypoints[i].ptr_neighbours = htodst32(dstpos);
-		host_waypoints[i].groupnum = srctodst32(n64_waypoints[i].groupnum);
+		host_waypoints[i].padnum = PD_BE32(n64_waypoints[i].padnum);
+		host_waypoints[i].ptr_neighbours = (dstpos);
+		host_waypoints[i].groupnum = PD_BE32(n64_waypoints[i].groupnum);
 		host_waypoints[i].step = 0;
 
-		u32 *n64_neighbours = (u32 *) &src[srctoh32(n64_waypoints[i].ptr_neighbours)];
+		u32 *n64_neighbours = (u32 *) &src[PD_BE32(n64_waypoints[i].ptr_neighbours)];
 
 		for (int j = 0; n64_neighbours[j] != 0xffffffff; j++) {
-			host_neighbours[n++] = srctodst32(n64_neighbours[j]);
+			host_neighbours[n++] = PD_BE32(n64_neighbours[j]);
 			dstpos += 4;
 		}
 
@@ -217,13 +206,13 @@ static int convertWayGroups(u8 *dst, int dstpos, u8 *src, int srcpos)
 	int n = 0;
 
 	for (int i = 0; i < num_waygroups; i++) {
-		host_waygroups[i].ptr_waypoints = htodst32(dstpos);
+		host_waygroups[i].ptr_waypoints = (dstpos);
 		host_waygroups[i].step = 0;
 
-		u32 *n64_waypoints = (u32 *) &src[srctoh32(n64_waygroups[i].ptr_waypoints)];
+		u32 *n64_waypoints = (u32 *) &src[PD_BE32(n64_waygroups[i].ptr_waypoints)];
 
 		for (int j = 0; n64_waypoints[j] != 0xffffffff; j++) {
-			host_waypoints[n++] = srctodst32(n64_waypoints[j]);
+			host_waypoints[n++] = PD_BE32(n64_waypoints[j]);
 			dstpos += 4;
 		}
 
@@ -241,12 +230,12 @@ static int convertWayGroups(u8 *dst, int dstpos, u8 *src, int srcpos)
 	n = 0;
 
 	for (int i = 0; i < num_waygroups; i++) {
-		host_waygroups[i].ptr_neighbours = htodst32(dstpos);
+		host_waygroups[i].ptr_neighbours = (dstpos);
 
-		u32 *n64_neighbours = (u32 *) &src[srctoh32(n64_waygroups[i].ptr_neighbours)];
+		u32 *n64_neighbours = (u32 *) &src[PD_BE32(n64_waygroups[i].ptr_neighbours)];
 
 		for (int j = 0; n64_neighbours[j] != 0xffffffff; j++) {
-			host_neighbours[n++] = srctodst32(n64_neighbours[j]);
+			host_neighbours[n++] = PD_BE32(n64_neighbours[j]);
 			dstpos += 4;
 		}
 
@@ -263,14 +252,14 @@ static int convertCover(u8 *dst, int dstpos, u8 *src, int srcpos, int num_covers
 	struct generic_coverdefinition *host_covers = (struct generic_coverdefinition *) &dst[dstpos];
 
 	for (int i = 0; i < num_covers; i++) {
-		host_covers[i].pos[0] = srctodst32(n64_covers[i].pos[0]);
-		host_covers[i].pos[1] = srctodst32(n64_covers[i].pos[1]);
-		host_covers[i].pos[2] = srctodst32(n64_covers[i].pos[2]);
-		host_covers[i].dir[0] = srctodst32(n64_covers[i].dir[0]);
-		host_covers[i].dir[1] = srctodst32(n64_covers[i].dir[1]);
-		host_covers[i].dir[2] = srctodst32(n64_covers[i].dir[2]);
-		host_covers[i].flags = srctodst16(n64_covers[i].flags);
-		host_covers[i].unk1a = srctodst16(n64_covers[i].unk1a);
+		host_covers[i].pos[0] = PD_BE32(n64_covers[i].pos[0]);
+		host_covers[i].pos[1] = PD_BE32(n64_covers[i].pos[1]);
+		host_covers[i].pos[2] = PD_BE32(n64_covers[i].pos[2]);
+		host_covers[i].dir[0] = PD_BE32(n64_covers[i].dir[0]);
+		host_covers[i].dir[1] = PD_BE32(n64_covers[i].dir[1]);
+		host_covers[i].dir[2] = PD_BE32(n64_covers[i].dir[2]);
+		host_covers[i].flags = PD_BE16(n64_covers[i].flags);
+		host_covers[i].unk1a = PD_BE16(n64_covers[i].unk1a);
 	}
 
 	dstpos += num_covers * sizeof(struct generic_coverdefinition);
@@ -284,10 +273,10 @@ static int convertPadsFile(u8 *dst, u8 *src)
 	struct n64_header *n64_header = (struct n64_header *) src;
 	struct host_header *host_header = (struct host_header *) dst;
 
-	int num_pads = srctoh32(n64_header->num_pads);
-	int num_covers = srctoh32(n64_header->num_covers);
-	host_header->num_pads = htodst32(num_pads);
-	host_header->num_covers = htodst32(num_covers);
+	int num_pads = PD_BE32(n64_header->num_pads);
+	int num_covers = PD_BE32(n64_header->num_covers);
+	host_header->num_pads = (num_pads);
+	host_header->num_covers = (num_covers);
 
 	dstpos += sizeof(struct host_header);
 
@@ -295,16 +284,16 @@ static int convertPadsFile(u8 *dst, u8 *src)
 	dstpos = convertPads(dst, dstpos, src, sizeof(struct n64_header), num_pads);
 
 	// Waypoints
-	host_header->ptr_waypoints = htodst32(dstpos);
-	dstpos = convertWayPoints(dst, dstpos, src, srctoh32(n64_header->ptr_waypoints));
+	host_header->ptr_waypoints = (dstpos);
+	dstpos = convertWayPoints(dst, dstpos, src, PD_BE32(n64_header->ptr_waypoints));
 
 	// Waygroups
-	host_header->ptr_waygroups = htodst32(dstpos);
-	dstpos = convertWayGroups(dst, dstpos, src, srctoh32(n64_header->ptr_waygroups));
+	host_header->ptr_waygroups = (dstpos);
+	dstpos = convertWayGroups(dst, dstpos, src, PD_BE32(n64_header->ptr_waygroups));
 
 	// Cover
-	host_header->ptr_cover = htodst32(dstpos);
-	dstpos = convertCover(dst, dstpos, src, srctoh32(n64_header->ptr_cover), num_covers);
+	host_header->ptr_cover = (dstpos);
+	dstpos = convertCover(dst, dstpos, src, PD_BE32(n64_header->ptr_cover), num_covers);
 
 	return dstpos;
 }

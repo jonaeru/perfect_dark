@@ -1,12 +1,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "common.h"
-#include "gbi.h"
+#include <limits.h>
 
-#ifdef FORCE_BE32
-#define HOST_DWORDS_PER_CMD 1
-#elif UINTPTR_MAX == 0xFFFFFFFFFFFFFFFFu
+#include "preprocess/common.h"
+#include "preprocess/gbi.h"
+
+#if UINTPTR_MAX > 0xFFFFFFFFu
 #define HOST_DWORDS_PER_CMD 2
 #else
 #define HOST_DWORDS_PER_CMD 1
@@ -80,11 +80,11 @@ void gbiConvertVtx(u8 *dst, u32 offset, int count)
 	for (int i = 0; i < count; i++) {
 		struct vtx* vtx = &vtxs[i];
 
-		vtx->x = srctodst16(vtx->x);
-		vtx->y = srctodst16(vtx->y);
-		vtx->z = srctodst16(vtx->z);
-		vtx->s = srctodst16(vtx->s);
-		vtx->t = srctodst16(vtx->t);
+		vtx->x = PD_BE16(vtx->x);
+		vtx->y = PD_BE16(vtx->y);
+		vtx->z = PD_BE16(vtx->z);
+		vtx->s = PD_BE16(vtx->s);
+		vtx->t = PD_BE16(vtx->t);
 	}
 }
 
@@ -181,11 +181,11 @@ u32 gbiConvertGdl(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int segment_cmds)
 	u64 cmd;
 
 	do {
-		cmd = srctoh64(*n64_cmd);
+		cmd = PD_BE64(*n64_cmd);
 
 #if HOST_DWORDS_PER_CMD == 2
-		host_cmd[0] = htodst64((cmd & 0xffffffff00000000) >> 32);
-		host_cmd[1] = htodst64(cmd & 0xffffffff);
+		host_cmd[0] = ((cmd & 0xffffffff00000000) >> 32);
+		host_cmd[1] = (cmd & 0xffffffff);
 
 		if (segment_cmds && CMD_IS_SEGMENTED(cmd)) {
 			host_cmd[1] |= 1;

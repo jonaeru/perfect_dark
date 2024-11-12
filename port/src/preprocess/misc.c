@@ -4,16 +4,14 @@
 #include <assert.h>
 #include <PR/ultratypes.h>
 #include <PR/gbi.h>
-#include "platform.h"
+
 #include "data.h"
 #include "bss.h"
 #include "game/setuputils.h"
 #include "game/texdecompress.h"
-#include "preprocess.h"
-#include "romdata.h"
 #include "mod.h"
-#include "system.h"
-#include "common.h"
+
+#include "preprocess/common.h"
 
 u8* preprocessAnimations(u8* data, u32 size, u32* outSize)
 {

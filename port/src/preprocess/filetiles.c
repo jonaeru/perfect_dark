@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
-#include "romdata.h"
-#include "system.h"
-
+#include "preprocess/common.h"
 
 struct tile {
 	u8 type;
@@ -23,7 +20,7 @@ struct tile {
 
 u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 {
-	int num_rooms = srctoh32(*(u32 *) src);
+	int num_rooms = PD_BE32(*(u32 *) src);
 
 	size_t src_ptr_table_len = (num_rooms + 1) * 4;
 	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(u32);
@@ -32,19 +29,19 @@ u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 
 	size_t data_len = srclen - src_ptr_table_len - 4;
 
-	*(u32 *) dst = htodst32(num_rooms);
+	*(u32 *) dst = (num_rooms);
 
 	u32 *dst_offsets = (u32 *) (dst + sizeof(u32));
 	u32 cur_dst_offset = dst_ptr_table_len + sizeof(u32);
 
-	u32 cur_src_offset = srctoh32(src_offsets[0]);
-	u32 end_src_offset = srctoh32(src_offsets[num_rooms]);
+	u32 cur_src_offset = PD_BE32(src_offsets[0]);
+	u32 end_src_offset = PD_BE32(src_offsets[num_rooms]);
 	int room = 0;
 
 	while (1) {
 		// Check if this is a new room and write the pointer offset if so
-		while (room < (num_rooms + 1) && srctoh32(src_offsets[room]) == cur_src_offset) {
-			dst_offsets[room] = htodst32(cur_dst_offset);
+		while (room < (num_rooms + 1) && PD_BE32(src_offsets[room]) == cur_src_offset) {
+			dst_offsets[room] = (cur_dst_offset);
 			room++;
 		}
 
@@ -58,15 +55,15 @@ u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 
 		hosttile.type = n64tile->type;
 		hosttile.numvertices = n64tile->numvertices;
-		hosttile.flags = srctodst16(n64tile->flags);
-		hosttile.floortype = srctodst16(n64tile->floortype);
+		hosttile.flags = PD_BE16(n64tile->flags);
+		hosttile.floortype = PD_BE16(n64tile->floortype);
 		hosttile.xmin = n64tile->xmin;
 		hosttile.ymin = n64tile->ymin;
 		hosttile.zmin = n64tile->zmin;
 		hosttile.xmax = n64tile->xmax;
 		hosttile.ymax = n64tile->ymax;
 		hosttile.zmax = n64tile->zmax;
-		hosttile.floorcol = srctodst16(n64tile->floorcol);
+		hosttile.floorcol = PD_BE16(n64tile->floorcol);
 
 		memcpy(&dst[cur_dst_offset], &hosttile, sizeof(struct tile));
 
@@ -75,9 +72,9 @@ u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 
 		// Write tile vertices
 		for (int i = 0; i < hosttile.numvertices; i++) {
-			*(s16 *) &dst[cur_dst_offset + 0] = srctodst16(*(s16 *) &src[cur_src_offset + 0]);
-			*(s16 *) &dst[cur_dst_offset + 2] = srctodst16(*(s16 *) &src[cur_src_offset + 2]);
-			*(s16 *) &dst[cur_dst_offset + 4] = srctodst16(*(s16 *) &src[cur_src_offset + 4]);
+			*(s16 *) &dst[cur_dst_offset + 0] = PD_BE16(*(s16 *) &src[cur_src_offset + 0]);
+			*(s16 *) &dst[cur_dst_offset + 2] = PD_BE16(*(s16 *) &src[cur_src_offset + 2]);
+			*(s16 *) &dst[cur_dst_offset + 4] = PD_BE16(*(s16 *) &src[cur_src_offset + 4]);
 			cur_dst_offset += 6;
 			cur_src_offset += 6;
 		}

@@ -1,32 +1,31 @@
-#include "common.h"
-#include "system.h"
+#include "preprocess/common.h"
 
-static struct ptrmarker m_PtrMarkers[1024*8];
-static int m_NumPtrMarkers;
+static struct ptrmarker ptrMarkers[MAX_PTR_MARKERS];
+static int numPtrMarkers;
 
-void addMarker(u32 ptr_src, uintptr_t ptr_host)
+void ptrAdd(u32 ptr_src, uintptr_t ptr_host)
 {
-	if (m_NumPtrMarkers >= ARRAYCOUNT(m_PtrMarkers)) {
-		sysFatalError("Marker limit exceeded");
+	if (numPtrMarkers >= ARRAYCOUNT(ptrMarkers)) {
+		sysFatalError("ptrAdd(%p, %p): ptrmarker limit exceeded", (void *)(uintptr_t)ptr_src, (void *)ptr_host);
 	}
 
-	m_PtrMarkers[m_NumPtrMarkers].ptr_src = ptr_src;
-	m_PtrMarkers[m_NumPtrMarkers].ptr_host = ptr_host;
-	m_NumPtrMarkers++;
+	ptrMarkers[numPtrMarkers].ptr_src = ptr_src;
+	ptrMarkers[numPtrMarkers].ptr_host = ptr_host;
+	numPtrMarkers++;
 }
 
-struct ptrmarker* findPtrMarker(uintptr_t ptr_src)
+struct ptrmarker *ptrFind(uintptr_t ptr_src)
 {
-	for (int i = 0; i < m_NumPtrMarkers; i++) {
-		if (m_PtrMarkers[i].ptr_src == ptr_src) {
-			return &m_PtrMarkers[i];
+	for (int i = 0; i < numPtrMarkers; i++) {
+		if (ptrMarkers[i].ptr_src == ptr_src) {
+			return &ptrMarkers[i];
 		}
 	}
 
 	return NULL;
 }
 
-void resetMarkers()
+void ptrReset(void)
 {
-	m_NumPtrMarkers = 0;
+	numPtrMarkers = 0;
 }

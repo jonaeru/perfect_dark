@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
-#include "romdata.h"
-#include "system.h"
+#include "preprocess/common.h"
 
 static int getNextNonZero(u8 *src, u32 offset, size_t len)
 {
@@ -13,7 +11,7 @@ static int getNextNonZero(u8 *src, u32 offset, size_t len)
 
 	while (ptr < end) {
 		if (*ptr != 0) {
-			return srctoh32(*ptr);
+			return PD_BE32(*ptr);
 		}
 
 		ptr++;
@@ -37,7 +35,7 @@ u32 convertLangFile(u8 *dst, u8 *src, size_t srclen)
 {
 	// Convert it
 	u32 *src_offsets = (u32 *) src;
-	size_t src_ptr_table_len = srctoh32(src_offsets[0]);
+	size_t src_ptr_table_len = PD_BE32(src_offsets[0]);
 	size_t src_str_table_len = srclen - src_ptr_table_len;
 	int num_strings = getNumStrings(src, srclen);
 	size_t dst_ptr_table_len = num_strings * sizeof(uintptr_t);
@@ -48,11 +46,11 @@ u32 convertLangFile(u8 *dst, u8 *src, size_t srclen)
 	uintptr_t *dst_offsets = (uintptr_t *) dst;
 
 	for (int i = 0; i < num_strings; i++) {
-		u32 src_offset = srctoh32(src_offsets[i]);
+		u32 src_offset = PD_BE32(src_offsets[i]);
 
 		if (src_offset) {
 			// Write pointer
-			dst_offsets[i] = htodst32(cur_dst_offset);
+			dst_offsets[i] = (cur_dst_offset);
 
 			// Write string
 			u32 end = getNextNonZero(src, (i + 1) * 4, num_strings * 4);

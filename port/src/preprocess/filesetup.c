@@ -4,20 +4,14 @@
 
 #include "types.h"
 
-#include "assert.h"
+#include "preprocess/common.h"
+#include "preprocess/setup.h"
 
-#include "common.h"
-#include "setups_decl.h"
-
-#include "romdata.h"
-#include "system.h"
-
-
-static inline void convF32(f32 *dst, f32 src) { *(u32*)dst = srctoh32(*(u32*)&src); }
-static inline void convU32(u32 *dst, u32 src) { *dst = srctoh32(src); }
-static inline void convS32(s32 *dst, s32 src) { *dst = srctoh32(src); }
-static inline void convU16(u16 *dst, u32 src) { *dst = srctoh16(src); }
-static inline void convS16(s16 *dst, s32 src) { *dst = srctoh16(src); }
+static inline void convF32(f32 *dst, f32 src) { *(u32*)dst = PD_BE32(*(u32*)&src); }
+static inline void convU32(u32 *dst, u32 src) { *dst = PD_BE32(src); }
+static inline void convS32(s32 *dst, s32 src) { *dst = PD_BE32(src); }
+static inline void convU16(u16 *dst, u32 src) { *dst = PD_BE16(src); }
+static inline void convS16(s16 *dst, s32 src) { *dst = PD_BE16(src); }
 static inline void cpyByte(u8 *dst, u8 src) { *dst = src; }
 static inline void convCoord(struct coord* dst, struct n64_coord src) { convF32(&dst->x, src.x); convF32(&dst->y, src.y); convF32(&dst->z, src.z); }
 static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
@@ -40,7 +34,7 @@ static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
 		for (int j = 0; j < ARRAYCOUNT(dst); j++) PD_CONV_VAL(dst[i][j], src[i][j]); \
 }
 
-#define PD_CONV_PTR(dst, src, type) dst = (type)srctoh32(src)
+#define PD_CONV_PTR(dst, src, type) dst = (type)PD_BE32(src)
 
 static u32 obj_size(struct n64_defaultobj *obj)
 {
@@ -165,7 +159,7 @@ void convertDefaultObjHdr(struct defaultobj* dstobj, struct n64_defaultobj* srco
 	u16 *src_unk00_1 = (u16*)&srcobj->extrascale;
 	u8  *src_unk00_2 = (u8*)(src_unk00_1 + 1);
 
-	*dst_unk00_1 = srctoh16(*src_unk00_1);
+	*dst_unk00_1 = PD_BE16(*src_unk00_1);
 	dst_unk00_2[0] = src_unk00_2[0];
 	dst_unk00_2[1] = src_unk00_2[1];
 }
@@ -1000,7 +994,7 @@ u32 convertProps(u8* dst, u8* src)
 		type = cmd->type;
 	}
 
-	*(u32*)(dst) = htobe32(OBJTYPE_END);
+	*(u32*)(dst) = PD_BE32(OBJTYPE_END);
 	dst += sizeof(u32);
 
 	return (u32)(dst - start);
@@ -1028,10 +1022,10 @@ static uintptr_t convertIntro(u8 *dst, u8 *src)
 	s32* srcintro = (s32*)src;
 
 	while (true) {
-		s32 cmd = dstintro[0] = srctodst32(srcintro[0]);
+		s32 cmd = dstintro[0] = PD_BE32(srcintro[0]);
 		u8 size = cmd_size[*dstintro];
 		for (int i = 1; i < size; i++) {
-			dstintro[i] = srctodst32(srcintro[i]);
+			dstintro[i] = PD_BE32(srcintro[i]);
 		}
 
 		dstintro += size;
@@ -1073,7 +1067,7 @@ static u32 convertPads(struct path *dstpaths, u8 *dst, u8 *src, u32 dstpos)
 		dstpaths->pads = (s32*)dstpos;
 
 		while (*pads) {
-			s32 p = srctoh32(*pads++);
+			s32 p = PD_BE32(*pads++);
 			*dstpads++ = p;
 			dstpos += sizeof(s32);
 			if (p == -1) break;
@@ -1109,14 +1103,14 @@ u32 chraiGetAilistLength(u8 *list);
 
 static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 {
-	resetMarkers();
+	ptrReset();
 	struct n64_ailist *src_ailists = (struct n64_ailist*)&src[src_ofs];
 
 	// count the lists and pre-convert the fields
 	int nlists = 0;
 	for (struct n64_ailist *tmp = src_ailists; tmp->ptr_list; tmp++, nlists++) {
-		tmp->ptr_list = srctodst32(tmp->ptr_list);
-		tmp->id = srctodst32(tmp->id);
+		tmp->ptr_list = PD_BE32(tmp->ptr_list);
+		tmp->id = PD_BE32(tmp->id);
 	}
 
 	for (struct n64_ailist *ailist = src_ailists; ailist->ptr_list; ailist++) {
@@ -1125,19 +1119,19 @@ static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 		ailist->ptr_list = dstpos;
 
 		// multiple ailists can point to the same list, so we need to check if it was already copied
-		struct ptrmarker *marker = findPtrMarker(src_ptr_list);
+		struct ptrmarker *marker = ptrFind(src_ptr_list);
 		if (marker) {
 			ailist->ptr_list = marker->ptr_host;
 			continue;
 		}
 
-		addMarker(src_ptr_list, dstpos);
+		ptrAdd(src_ptr_list, dstpos);
 
 		u8 *list = &src[src_ptr_list];
 		u32 listsize = chraiGetAilistLength(list);
 		memcpy(dst + dstpos, list, listsize);
 
-		dstpos += ALIGN(listsize, 4);
+		dstpos += PD_ALIGN(listsize, 4);
 	}
 	
 	return dstpos;
@@ -1148,10 +1142,10 @@ static int convertSetup(u8 *dst, u8 *src, u32 srclen)
 	struct n64_stagesetup *src_header = (struct n64_stagesetup*)src;
 	struct stagesetup *dst_header = (struct stagesetup*)dst;
 
-	src_header->ptr_props = srctodst32(src_header->ptr_props);
-	src_header->ptr_intro = srctodst32(src_header->ptr_intro);
-	src_header->ptr_ailists = srctodst32(src_header->ptr_ailists);
-	src_header->ptr_paths = srctodst32(src_header->ptr_paths);
+	src_header->ptr_props = PD_BE32(src_header->ptr_props);
+	src_header->ptr_intro = PD_BE32(src_header->ptr_intro);
+	src_header->ptr_ailists = PD_BE32(src_header->ptr_ailists);
+	src_header->ptr_paths = PD_BE32(src_header->ptr_paths);
 
 	u32 srcpos = sizeof(*src_header);
 	u32 dstpos = sizeof(*dst_header);
