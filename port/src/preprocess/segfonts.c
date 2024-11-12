@@ -56,8 +56,8 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 	// Character table
 #if VERSION == VERSION_JPN_FINAL
 		struct n64_fontcharjpn *src_char_table = (struct n64_fontcharjpn *) &src[src_offset];
-		struct hostfontcharjpn *dst_char_table = (struct hostfontcharjpn *) &dst[dst_offset];
-		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontcharjpn)) - (src_offset + num_chars * sizeof(struct n64_fontcharjpn));
+		struct fontchar *dst_char_table = (struct fontchar *) &dst[dst_offset];
+		u32 diff = (dst_offset + num_chars * sizeof(struct fontchar)) - (src_offset + num_chars * sizeof(struct n64_fontcharjpn));
 
 		for (int i = 0; i < num_chars; i++) {
 			dst_char_table[i].index = PD_BE16(src_char_table[i].index);
@@ -69,7 +69,7 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 		}
 
 		src_offset += num_chars * sizeof(struct n64_fontcharjpn);
-		dst_offset += num_chars * sizeof(struct hostfontcharjpn);
+		dst_offset += num_chars * sizeof(struct fontchar);
 #else
 		struct n64_fontchar *src_char_table = (struct n64_fontchar *) &src[src_offset];
 		struct fontchar *dst_char_table = (struct fontchar *) &dst[dst_offset];
