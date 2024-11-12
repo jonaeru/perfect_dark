@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ "port-x64" ]
+    branches: [ "port" ]
   pull_request:
-    branches: [ "port-x64" ]
+    branches: [ "port" ]
   workflow_dispatch:
 
 jobs:
@@ -27,18 +27,18 @@ jobs:
             mingw-w64-i686-zlib
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build pd.exe
+      - name: Build pd.i686.exe
         run: make -f Makefile.port -j
-      - name: Build pd.pal.exe
+      - name: Build pd.pal.i686.exe
         run: make -f Makefile.port -j ROMID=pal-final
-      - name: Build pd.jpn.exe
+      - name: Build pd.jpn.i686.exe
         run: make -f Makefile.port -j ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
-          cp build/ntsc-final-port/pd.exe bin/
-          cp build/pal-final-port/pd.pal.exe bin/
-          cp build/jpn-final-port/pd.jpn.exe bin/
+          cp build/ntsc-final-port/pd.i686.exe bin/
+          cp build/pal-final-port/pd.pal.i686.exe bin/
+          cp build/jpn-final-port/pd.jpn.i686.exe bin/
           cp /mingw32/bin/{SDL2.dll,zlib1.dll,libgcc_s_dw2-1.dll,libwinpthread-1.dll} bin/
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
@@ -58,18 +58,18 @@ jobs:
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-dev:i386 zlib1g-dev:i386
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build pd.exe
+      - name: Build pd.i686
         run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2
-      - name: Build pd.pal.exe
+      - name: Build pd.pal.i686
         run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2 ROMID=pal-final
-      - name: Build pd.jpn.exe
+      - name: Build pd.jpn.i686
         run: make -f Makefile.port TARGET_PLATFORM=i686-linux -j2 ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
-          cp build/ntsc-final-port/pd.exe bin/pd
-          cp build/pal-final-port/pd.pal.exe bin/pd.pal
-          cp build/jpn-final-port/pd.jpn.exe bin/pd.jpn
+          cp build/ntsc-final-port/pd.i686 bin/pd
+          cp build/pal-final-port/pd.pal.i686 bin/pd.pal
+          cp build/jpn-final-port/pd.jpn.i686 bin/pd.jpn
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -98,18 +98,18 @@ jobs:
             mingw-w64-x86_64-zlib
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build pd.exe
+      - name: Build pd.x86_64.exe
         run: make -f Makefile.port -j
-      - name: Build pd.pal.exe
+      - name: Build pd.pal.x86_64.exe
         run: make -f Makefile.port -j ROMID=pal-final
-      - name: Build pd.jpn.exe
+      - name: Build pd.jpn.x86_64.exe
         run: make -f Makefile.port -j ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
-          cp build/ntsc-final-port/pd.exe bin/
-          cp build/pal-final-port/pd.pal.exe bin/
-          cp build/jpn-final-port/pd.jpn.exe bin/
+          cp build/ntsc-final-port/pd.x86_64.exe bin/
+          cp build/pal-final-port/pd.pal.x86_64.exe bin/
+          cp build/jpn-final-port/pd.jpn.x86_64.exe bin/
           cp /mingw64/bin/{SDL2.dll,zlib1.dll,libwinpthread-1.dll,libgcc_s_seh-1.dll} bin/
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
@@ -129,18 +129,18 @@ jobs:
           sudo apt-get install git gcc g++ gcc-multilib g++-multilib make libsdl2-dev zlib1g-dev libsdl2-2.0-0
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Build pd.exe
+      - name: Build pd.x86_64
         run: make -f Makefile.port TARGET_PLATFORM=x86_64-linux -j2
-      - name: Build pd.pal.exe
+      - name: Build pd.pal.x86_64
         run: make -f Makefile.port TARGET_PLATFORM=x86_64-linux -j2 ROMID=pal-final
-      - name: Build pd.jpn.exe
+      - name: Build pd.jpn.x86_64
         run: make -f Makefile.port TARGET_PLATFORM=x86_64-linux -j2 ROMID=jpn-final
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data
-          cp build/ntsc-final-port/pd.exe bin/pd
-          cp build/pal-final-port/pd.pal.exe bin/pd.pal
-          cp build/jpn-final-port/pd.jpn.exe bin/pd.jpn
+          cp build/ntsc-final-port/pd.x86_64 bin/pd
+          cp build/pal-final-port/pd.pal.x86_64 bin/pd.pal
+          cp build/jpn-final-port/pd.jpn.x86_64 bin/pd.jpn
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -187,7 +187,7 @@ jobs:
 
   publish-latest-build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/port-x64'
+    if: github.ref == 'refs/heads/port'
     needs: [build-i686-windows, build-i686-linux, build-x86_64-windows, build-x86_64-linux, build-flatpak-bundle]
     permissions:
       contents: write
@@ -208,6 +208,6 @@ jobs:
           zip -r ../ci-release/pd-x86_64-windows.zip pd-x86_64-windows
           mv io.github.fgsfdsfgs.perfect_dark.flatpak/io.github.fgsfdsfgs.perfect_dark.flatpak ../ci-release/
           popd
-          git tag --force ci-dev-build-x64 port-x64
-          git push --force origin ci-dev-build-x64
-          gh release upload --clobber ci-dev-build-x64 ci-release/*
+          git tag --force ci-dev-build port
+          git push --force origin ci-dev-build
+          gh release upload --clobber ci-dev-build ci-release/*
