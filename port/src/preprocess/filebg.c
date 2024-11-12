@@ -427,7 +427,7 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 
 		ptrAdd(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
-		uintptr_t col_end = numgdls > 0 != 0 ? gdls_addr[0] : infsize;
+		uintptr_t col_end = (numgdls > 0) ? gdls_addr[0] : infsize;
 		size_t col_len = col_end - curpos_src;
 
 		memcpy(dst + curpos_dst, src + curpos_src, col_len);
@@ -507,38 +507,6 @@ static u32 convertSection1(u8 *dst, u8 *src, u32 ofs)
 	convertPrimaryBgCmds(dst, &dstpos, &src[src_bgcmds], dst_portalvtxs, src_portalvtxs);
 
 	return dstpos;
-}
-
-static void convertSection2TextureNums(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 srclen)
-{
-	u16 *src_ids = (u16 *) &src[*srcpos];
-	u16 *dst_ids = (u16 *) &dst[*dstpos];
-	int count = srclen / sizeof(u16);
-
-	for (int i = 0; i < count; i++) {
-		dst_ids[i] = PD_BE16(src_ids[i]);
-	}
-
-	*srcpos += srclen;
-	*dstpos += srclen;
-}
-
-static void convertSection3Bboxes(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
-{
-	s16 *src_bboxes = (s16 *) &src[*srcpos];
-	s16 *dst_bboxes = (s16 *) &dst[*dstpos];
-
-	for (int i = 0; i < m_NumRooms; i++) {
-		dst_bboxes[i * 6 + 0] = PD_BE16(src_bboxes[i * 6 + 0]);
-		dst_bboxes[i * 6 + 1] = PD_BE16(src_bboxes[i * 6 + 1]);
-		dst_bboxes[i * 6 + 2] = PD_BE16(src_bboxes[i * 6 + 2]);
-		dst_bboxes[i * 6 + 3] = PD_BE16(src_bboxes[i * 6 + 3]);
-		dst_bboxes[i * 6 + 4] = PD_BE16(src_bboxes[i * 6 + 4]);
-		dst_bboxes[i * 6 + 5] = PD_BE16(src_bboxes[i * 6 + 5]);
-	}
-
-	*srcpos += sizeof(s16) * 6 * (m_NumRooms - 1);
-	*dstpos += sizeof(s16) * 6 * (m_NumRooms - 1);
 }
 
 void preprocessBgSection1(u8 *data, u32 size, u32 ofs)

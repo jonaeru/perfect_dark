@@ -47,7 +47,7 @@ struct alignconfig {
 	int after;
 };
 
-struct alignconfig m_AlignConfigs[] = {
+static const struct alignconfig alignConfigs[] = {
 	/* 0*/ { 16, 4 },
 	/* 1*/ { 4,  4 },
 	/* 2*/ { 4,  4 },
@@ -73,8 +73,8 @@ struct alignconfig m_AlignConfigs[] = {
 	/*22*/ { 4,  4 }
 };
 
-struct marker m_Markers[1024];
-int m_NumMarkers;
+static struct marker contentMarkers[1024];
+static int numContentMarkers;
 
 struct src_modeldef {
 	u32 ptr_rootnode;
@@ -324,18 +324,18 @@ static inline uintptr_t minPtr3(uintptr_t a, uintptr_t b, uintptr_t c) {
 	return minPtr(minPtr(a, b), c);
 }
 
-static struct marker *find_marker(u32 src_offset)
+static struct marker *findMarker(u32 src_offset)
 {
-	for (int i = 0; i < m_NumMarkers; i++) {
-		if (m_Markers[i].src_offset == src_offset) {
-			return &m_Markers[i];
+	for (int i = 0; i < numContentMarkers; i++) {
+		if (contentMarkers[i].src_offset == src_offset) {
+			return &contentMarkers[i];
 		}
 	}
 
 	return NULL;
 }
 
-static void set_marker(u32 src_offset, enum contenttype type, u32 parent_src_offset)
+static void setMarker(u32 src_offset, enum contenttype type, u32 parent_src_offset)
 {
 	if (src_offset == 0) {
 		return;
@@ -343,21 +343,21 @@ static void set_marker(u32 src_offset, enum contenttype type, u32 parent_src_off
 
 	src_offset &= 0x00ffffff;
 
-	if (find_marker(src_offset)) {
+	if (findMarker(src_offset)) {
 		return;
 	}
 
-	if (m_NumMarkers >= ARRAYCOUNT(m_Markers)) {
-		sysFatalError("Marker limit exceeded");
+	if (numContentMarkers >= ARRAYCOUNT(contentMarkers)) {
+		sysFatalError("setMarker: marker limit exceeded");
 	}
 
-	m_Markers[m_NumMarkers].src_offset = src_offset;
-	m_Markers[m_NumMarkers].type = type;
-	m_Markers[m_NumMarkers].parent_src_offset = parent_src_offset;
-	m_NumMarkers++;
+	contentMarkers[numContentMarkers].src_offset = src_offset;
+	contentMarkers[numContentMarkers].type = type;
+	contentMarkers[numContentMarkers].parent_src_offset = parent_src_offset;
+	numContentMarkers++;
 }
 
-enum contenttype m_NodeTypeToContentType[] = {
+static const enum contenttype nodeTypeToContentType[] = {
 	/*0x00*/ -1,
 	/*0x01*/ CT_RODATA_CHRINFO,
 	/*0x02*/ CT_RODATA_POSITION,
@@ -388,12 +388,12 @@ enum contenttype m_NodeTypeToContentType[] = {
 
 static void populateMarkers(u8 *src)
 {
-	m_NumMarkers = 0;
+	numContentMarkers = 0;
 
-	set_marker(0x05000000, CT_MODELDEF, 0);
+	setMarker(0x05000000, CT_MODELDEF, 0);
 
-	for (int i = 0; i < m_NumMarkers; i++) {
-		struct marker *marker = &m_Markers[i];
+	for (int i = 0; i < numContentMarkers; i++) {
+		struct marker *marker = &contentMarkers[i];
 		void *src_thing = &src[marker->src_offset];
 		int numvtx = 0;
 		u32 colstart = 0;
@@ -403,26 +403,26 @@ static void populateMarkers(u8 *src)
 			struct src_modeldef *src_modeldef = src_thing;
 			int num_texconfigs = PD_BE16(src_modeldef->numtexconfigs);
 			u32 texconfigpos = PD_BE32(src_modeldef->ptr_texconfigs);
-			set_marker(PD_BE32(src_modeldef->ptr_rootnode), CT_NODE, marker->src_offset);
-			set_marker(PD_BE32(src_modeldef->ptr_parts), CT_PARTS, marker->src_offset);
+			setMarker(PD_BE32(src_modeldef->ptr_rootnode), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_modeldef->ptr_parts), CT_PARTS, marker->src_offset);
 
 			for (int i = 0; i < num_texconfigs; i++) {
-				set_marker(texconfigpos + sizeof(struct src_texconfig) * i, CT_TEXCONFIG, marker->src_offset);
+				setMarker(texconfigpos + sizeof(struct src_texconfig) * i, CT_TEXCONFIG, marker->src_offset);
 			}
 			break;
 		case CT_NODE:
 			struct src_modelnode *src_node = src_thing;
 			u32 node_type = PD_BE16(src_node->type) & 0xff;
-			set_marker(PD_BE32(src_node->ptr_rodata), m_NodeTypeToContentType[node_type], marker->src_offset);
-			set_marker(PD_BE32(src_node->ptr_parent), CT_NODE, marker->src_offset);
-			set_marker(PD_BE32(src_node->ptr_next), CT_NODE, marker->src_offset);
-			set_marker(PD_BE32(src_node->ptr_prev), CT_NODE, marker->src_offset);
-			set_marker(PD_BE32(src_node->ptr_child), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_node->ptr_rodata), nodeTypeToContentType[node_type], marker->src_offset);
+			setMarker(PD_BE32(src_node->ptr_parent), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_node->ptr_next), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_node->ptr_prev), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_node->ptr_child), CT_NODE, marker->src_offset);
 			break;
 		case CT_TEXCONFIG:
 			struct src_texconfig *src_texconfig = src_thing;
 			if ((PD_BE32(src_texconfig->ptr) & 0xff000000) == 0x05000000) {
-				set_marker(PD_BE32(src_texconfig->ptr), CT_TEXDATA, marker->src_offset);
+				setMarker(PD_BE32(src_texconfig->ptr), CT_TEXDATA, marker->src_offset);
 			}
 			break;
 		case CT_PARTS:
@@ -431,7 +431,7 @@ static void populateMarkers(u8 *src)
 			int num_parts = PD_BE16(src_modeldef2->numparts);
 
 			for (int i = 0; i < num_parts; i++) {
-				set_marker(PD_BE32(src_parts[i]), CT_NODE, marker->src_offset);
+				setMarker(PD_BE32(src_parts[i]), CT_NODE, marker->src_offset);
 			}
 			break;
 		case CT_RODATA_CHRINFO:
@@ -440,26 +440,26 @@ static void populateMarkers(u8 *src)
 			break;
 		case CT_RODATA_GUNDL:
 			struct src_rodata_gundl *src_gundl = src_thing;
-			set_marker(PD_BE32(src_gundl->ptr_opagdl), CT_GDL, marker->src_offset);
-			set_marker(PD_BE32(src_gundl->ptr_xlugdl), CT_GDL, marker->src_offset);
-			set_marker(PD_BE32(src_gundl->ptr_vertices), CT_VTXCOL, marker->src_offset);
+			setMarker(PD_BE32(src_gundl->ptr_opagdl), CT_GDL, marker->src_offset);
+			setMarker(PD_BE32(src_gundl->ptr_xlugdl), CT_GDL, marker->src_offset);
+			setMarker(PD_BE32(src_gundl->ptr_vertices), CT_VTXCOL, marker->src_offset);
 			break;
 		case CT_RODATA_DISTANCE:
 			struct src_rodata_distance *src_dist = src_thing;
-			set_marker(PD_BE32(src_dist->ptr_target), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_dist->ptr_target), CT_NODE, marker->src_offset);
 			break;
 		case CT_RODATA_REORDER:
 			struct src_rodata_reorder *src_reorder = src_thing;
-			set_marker(PD_BE32(src_reorder->ptr_node_unk18), CT_NODE, marker->src_offset);
-			set_marker(PD_BE32(src_reorder->ptr_node_unk1c), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_reorder->ptr_node_unk18), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_reorder->ptr_node_unk1c), CT_NODE, marker->src_offset);
 			break;
 		case CT_RODATA_CHRGUNFIRE:
 			struct src_rodata_chrgunfire *src_chrgunfire = src_thing;
-			set_marker(PD_BE32(src_chrgunfire->ptr_texture), CT_TEXCONFIG, marker->src_offset);
+			setMarker(PD_BE32(src_chrgunfire->ptr_texture), CT_TEXCONFIG, marker->src_offset);
 			break;
 		case CT_RODATA_TOGGLE:
 			struct src_rodata_toggle *src_toggle = src_thing;
-			set_marker(PD_BE32(src_toggle->ptr_target), CT_NODE, marker->src_offset);
+			setMarker(PD_BE32(src_toggle->ptr_target), CT_NODE, marker->src_offset);
 			break;
 		case CT_RODATA_STARGUNFIRE:
 			struct src_rodata_stargunfire *src_stargunfire = src_thing;
@@ -467,19 +467,19 @@ static void populateMarkers(u8 *src)
 			u32 vtxstart = PD_BE32(src_stargunfire->ptr_vertices);
 			u32 vtxend = vtxstart + colstart;
 			colstart = ALIGN8(vtxstart + colstart);
-			set_marker(vtxstart, CT_VTXCOL4, marker->src_offset);
+			setMarker(vtxstart, CT_VTXCOL4, marker->src_offset);
 			if (vtxend != colstart) { 
-				set_marker(vtxend, CT_SKIP, marker->src_offset);
+				setMarker(vtxend, CT_SKIP, marker->src_offset);
 			}
-			set_marker(colstart, CT_VTXCOL, marker->src_offset);
-			set_marker(PD_BE32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
+			setMarker(colstart, CT_VTXCOL, marker->src_offset);
+			setMarker(PD_BE32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
 			break;
 		case CT_RODATA_DL:
 			struct src_rodata_dl *src_dl = src_thing;
-			set_marker(PD_BE32(src_dl->ptr_opagdl), CT_GDL, marker->src_offset);
-			set_marker(PD_BE32(src_dl->ptr_xlugdl), CT_GDL, marker->src_offset);
-			set_marker(PD_BE32(src_dl->ptr_colours), CT_VTXCOL, marker->src_offset);
-			set_marker(PD_BE32(src_dl->ptr_vertices), CT_VTXCOL, marker->src_offset);
+			setMarker(PD_BE32(src_dl->ptr_opagdl), CT_GDL, marker->src_offset);
+			setMarker(PD_BE32(src_dl->ptr_xlugdl), CT_GDL, marker->src_offset);
+			setMarker(PD_BE32(src_dl->ptr_colours), CT_VTXCOL, marker->src_offset);
+			setMarker(PD_BE32(src_dl->ptr_vertices), CT_VTXCOL, marker->src_offset);
 			break;
 		case CT_TEXDATA:
 		case CT_VTXCOL:
@@ -490,27 +490,29 @@ static void populateMarkers(u8 *src)
 		case CT_RODATA_HEADSPOT:
 		case CT_RODATA_19:
 			break;
+		default:
+			break;
 		}
 	}
 }
 
 static void sortMarkers(void)
 {
-	for (int i = 0; i < m_NumMarkers - 1; i++) {
+	for (int i = 0; i < numContentMarkers - 1; i++) {
 		u32 min_offset = 0xffffffff;
 		int min_index = -1;
 
-		for (int j = i + 1; j < m_NumMarkers; j++) {
-			if (m_Markers[j].src_offset < min_offset) {
-				min_offset = m_Markers[j].src_offset;
+		for (int j = i + 1; j < numContentMarkers; j++) {
+			if (contentMarkers[j].src_offset < min_offset) {
+				min_offset = contentMarkers[j].src_offset;
 				min_index = j;
 			}
 		}
 
-		if (min_index >= 0 && m_Markers[min_index].src_offset < m_Markers[i].src_offset) {
-			struct marker tmp = m_Markers[i];
-			m_Markers[i] = m_Markers[min_index];
-			m_Markers[min_index] = tmp;
+		if (min_index >= 0 && contentMarkers[min_index].src_offset < contentMarkers[i].src_offset) {
+			struct marker tmp = contentMarkers[i];
+			contentMarkers[i] = contentMarkers[min_index];
+			contentMarkers[min_index] = tmp;
 		}
 	}
 }
@@ -519,13 +521,13 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 {
 	u32 dstpos = 0;
 
-	for (int i = 0; i < m_NumMarkers; i++) {
-		struct marker *marker = &m_Markers[i];
+	for (int i = 0; i < numContentMarkers; i++) {
+		struct marker *marker = &contentMarkers[i];
 		void *src_thing = &src[marker->src_offset];
-		u32 src_end = i < m_NumMarkers - 1 ? m_Markers[i + 1].src_offset : src_file_len;
+		u32 src_end = i < numContentMarkers - 1 ? contentMarkers[i + 1].src_offset : src_file_len;
 		u32 src_len = src_end - marker->src_offset;
 
-		dstpos = PD_ALIGN(dstpos, m_AlignConfigs[marker->type].before);
+		dstpos = PD_ALIGN(dstpos, alignConfigs[marker->type].before);
 
 		marker->dst_offset = dstpos;
 		void *dst_thing = &dst[dstpos];
@@ -598,7 +600,7 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 			dstpos += src_len;
 			break;
 		case CT_GDL:
-			struct marker *parent = find_marker(marker->parent_src_offset);
+			struct marker *parent = findMarker(marker->parent_src_offset);
 			u32 src_vtx;
 			u32 dst_vtx;
 
@@ -768,7 +770,7 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 			break;
 		}
 
-		dstpos = PD_ALIGN(dstpos, m_AlignConfigs[marker->type].after);
+		dstpos = PD_ALIGN(dstpos, alignConfigs[marker->type].after);
 	}
 
 	return dstpos;
@@ -780,7 +782,7 @@ static u32 resolvePointer(u32 src_offset)
 		return 0;
 	}
 
-	struct marker *marker = find_marker(src_offset & 0x00ffffff);
+	struct marker *marker = findMarker(src_offset & 0x00ffffff);
 	return marker ? (0x05000000 | marker->dst_offset) : 0;
 }
 
@@ -788,8 +790,8 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 {
 	uintptr_t textures_end = 0;
 
-	for (int i = 0; i < m_NumMarkers; i++) {
-		struct marker *marker = &m_Markers[i];
+	for (int i = 0; i < numContentMarkers; i++) {
+		struct marker *marker = &contentMarkers[i];
 		void *src_thing = &src[marker->src_offset];
 		void *dst_thing = &dst[marker->dst_offset];
 		
@@ -925,6 +927,7 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 		case CT_RODATA_POSITIONHELD:
 		case CT_RODATA_HEADSPOT:
 		case CT_RODATA_19:
+		default:
 			break;
 		}
 

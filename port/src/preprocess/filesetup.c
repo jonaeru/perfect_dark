@@ -34,7 +34,7 @@ static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
 		for (int j = 0; j < ARRAYCOUNT(dst); j++) PD_CONV_VAL(dst[i][j], src[i][j]); \
 }
 
-#define PD_CONV_PTR(dst, src, type) dst = (type)PD_BE32(src)
+#define PD_CONV_PTR(dst, src, type) dst = (type)(uintptr_t)PD_BE32(src)
 
 static u32 obj_size(struct n64_defaultobj *obj)
 {
@@ -1061,10 +1061,10 @@ static u32 convertPaths(u8 *dst, u8 *src)
 static u32 convertPads(struct path *dstpaths, u8 *dst, u8 *src, u32 dstpos)
 {
 	u32 start = dstpos;
-	s32 *dstpads = (s32*)&dst[dstpos];
+	s32 *dstpads = (s32 *)&dst[dstpos];
 	while (dstpaths->pads) {
-		s32 *pads = (s32*)&src[(uintptr_t)dstpaths->pads];
-		dstpaths->pads = (s32*)dstpos;
+		s32 *pads = (s32 *)&src[(uintptr_t)dstpaths->pads];
+		dstpaths->pads = (s32 *)(uintptr_t)dstpos;
 
 		while (*pads) {
 			s32 p = PD_BE32(*pads++);
@@ -1081,12 +1081,12 @@ static u32 convertPads(struct path *dstpaths, u8 *dst, u8 *src, u32 dstpos)
 
 static u32 convertAiLists(u8* dst, u8* src)
 {
-	struct n64_ailist* srcailist = (struct n64_ailist*)src;
-	struct ailist* dstailist = (struct ailist*)dst;
+	struct n64_ailist* srcailist = (struct n64_ailist *)src;
+	struct ailist* dstailist = (struct ailist *)dst;
 
 	while (true) {
 		// at this point these fields are already converted, so we just assign
-		dstailist->list = (u8*)srcailist->ptr_list;
+		dstailist->list = (u8 *)(uintptr_t)srcailist->ptr_list;
 		dstailist->id = srcailist->id;
 
 
@@ -1096,10 +1096,10 @@ static u32 convertAiLists(u8* dst, u8* src)
 		srcailist++;
 	}
 
-	return (u32)((u8*)dstailist - dst + sizeof(uintptr_t));
+	return (u32)((u8 *)dstailist - dst + sizeof(uintptr_t));
 }
 
-u32 chraiGetAilistLength(u8 *list);
+extern u32 chraiGetAilistLength(u8 *list);
 
 static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 {
@@ -1151,22 +1151,22 @@ static int convertSetup(u8 *dst, u8 *src, u32 srclen)
 	u32 dstpos = sizeof(*dst_header);
 
 	srcpos = src_header->ptr_props;
-	dst_header->props = (u32*) dstpos;
+	dst_header->props = (u32 *)(uintptr_t)dstpos;
 	dstpos += convertProps(&dst[dstpos], &src[srcpos]);
 
 	srcpos = src_header->ptr_intro;
-	dst_header->intro = (s32*)dstpos;
+	dst_header->intro = (s32 *)(uintptr_t)dstpos;
 	dstpos += convertIntro(&dst[dstpos], &src[srcpos]);
 	
 	// write the lists bytecodes before the ailists entries
 	dstpos = convertLists(dst, src, dstpos, src_header->ptr_ailists);
 
 	srcpos = src_header->ptr_ailists;
-	dst_header->ailists = (struct ailist*)dstpos;
+	dst_header->ailists = (struct ailist *)(uintptr_t)dstpos;
 	dstpos += convertAiLists(&dst[dstpos], &src[srcpos]);
 
 	srcpos = src_header->ptr_paths;
-	dst_header->paths = (struct path*) dstpos;
+	dst_header->paths = (struct path *)(uintptr_t)dstpos;
 	dstpos += convertPaths(&dst[dstpos], &src[srcpos]);
 
 	dstpos += convertPads((struct path*)&dst[(uintptr_t)dst_header->paths], dst, src, dstpos);

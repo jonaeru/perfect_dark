@@ -264,7 +264,7 @@ static inline void romdataInitSegment(struct romfile *seg)
 			seg->size = seg[1].data - seg->data;
 		} else {
 			// this is the last segment, calculate based on rom size
-			seg->size = (u8 *)g_RomFileSize - seg->data;
+			seg->size = (uintptr_t)g_RomFileSize - (uintptr_t)seg->data;
 		}
 	}
 
