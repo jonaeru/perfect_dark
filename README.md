@@ -52,10 +52,10 @@ ARM platforms might be supported, but are mostly untested.
 ## Download
 
 Latest [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/actions) of the netplay branch for supported platforms:
-* [x86_64-windows (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-net-x86_64-windows.zip)
-* [i686-windows (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-net-i686-windows.zip)
-* [x86_64-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-net-x86_64-linux.zip)
-* [i686-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-net-i686-linux.zip)
+* [x86_64-windows (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-x86_64-windows.zip)
+* [i686-windows (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-windows.zip)
+* [x86_64-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-x86_64-linux.zip)
+* [i686-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-linux.zip)
 
 If you are looking for regular builds (the `port` branch), see [this link](https://github.com/fgsfdsfgs/perfect_dark/blob/port/README.md#download).
 
