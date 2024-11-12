@@ -539,6 +539,7 @@ struct modelrodata_type11 { // type 0x11
 	u32 unk10;
 	void *unk14;
 	u32 unk18;
+	u32 unk1c;
 };
 
 struct modelrodata_toggle { // type 0x12

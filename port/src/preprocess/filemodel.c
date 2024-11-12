@@ -565,8 +565,9 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 			dst_type11->unk08 = PD_BE32(src_type11->unk08);
 			dst_type11->unk0c = PD_BE32(src_type11->unk0c);
 			dst_type11->unk10 = PD_BE32(src_type11->unk10);
-			dst_type11->unk14 = (void *)(uintptr_t)PD_BE32(src_type11->extra1);
-			dst_type11->unk18 = PD_BE32(src_type11->extra2);
+			dst_type11->unk14 = NULL;
+			dst_type11->unk18 = PD_BE32(src_type11->extra1);
+			dst_type11->unk1c = PD_BE32(src_type11->extra2);
 			dstpos += sizeof(*dst_type11);
 			break;
 		case CT_RODATA_TOGGLE:
