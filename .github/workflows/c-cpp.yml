@@ -60,11 +60,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build pd.i686
-        run: cmake -G"Unix Makefiles" -Bbuild . && cmake --build build -j
+        run: cmake -G"Unix Makefiles" -Bbuild -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 . && cmake --build build -j
       - name: Build pd.pal.i686
-        run: cmake -G"Unix Makefiles" -Bbuild_pal -DROMID=pal-final . && cmake --build build_pal -j
+        run: cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 -DROMID=pal-final . && cmake --build build_pal -j
       - name: Build pd.jpn.i686
-        run: cmake -G"Unix Makefiles" -Bbuild_jpn -DROMID=jpn-final . && cmake --build build_jpn -j
+        run: cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 -DROMID=jpn-final . && cmake --build build_jpn -j
       - name: Prepare artifact for packaging
         run: |
           mkdir -p bin/data

@@ -27,6 +27,10 @@ option(FORCE_CROSSCOMPILE "Force cross compiling" NO)
 # Determine target arch
 
 target_architecture(TARGET_ARCH)
+if(TARGET_ARCH STREQUAL "i386")
+  # for historical reasons
+  set(TARGET_ARCH "i686")
+endif()
 
 # TODO
 set(TARGET_IS_BIG_ENDIAN FALSE)
