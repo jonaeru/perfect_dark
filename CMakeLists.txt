@@ -8,7 +8,9 @@ include(FindPkgConfig)
 include(AssetUtils)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # On first build set the build type to RelWithDebInfo if it's not already set
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
