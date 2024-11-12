@@ -27,7 +27,7 @@
 typedef s32 PakErr1;
 typedef s32 PakErr2;
 typedef s32 MenuDialogHandlerResult;
-typedef intptr_t MenuItemHandlerResult;
+typedef uintptr_t MenuItemHandlerResult;
 typedef s16 RoomNum;
 
 #ifdef PLATFORM_N64
@@ -541,6 +541,8 @@ struct modelrodata_type11 { // type 0x11
 	u32 unk0c;
 	u32 unk10;
 	void *unk14;
+	u32 unk18;
+	u32 unk1c;
 };
 
 struct modelrodata_toggle { // type 0x12
@@ -551,6 +553,7 @@ struct modelrodata_toggle { // type 0x12
 struct modelrodata_positionheld { // type 0x15
 	struct coord pos;
 	s16 mtxindex;
+	s32 unk10;
 };
 
 struct modelrodata_stargunfire { // type 0x16
@@ -2309,8 +2312,8 @@ struct hand {
 	/*0x0dbc*/ u32 fspare7;
 	/*0x0dc0*/ u32 fspare8;
 	/*0x0dc4*/ struct abmag abmag;
-	/*0x0dcc*/ s32 *unk0dcc;
-	/*0x0dd0*/ s32 *unk0dd0;
+	/*0x0dcc*/ uintptr_t *unk0dcc;
+	/*0x0dd0*/ uintptr_t *unk0dd0;
 	/*0x0dd4*/ s32 unk0dd4;
 	/*0x0dd8*/ Mtxf *unk0dd8;
 };
@@ -2357,8 +2360,8 @@ struct gunctrl {
 	/*0x15b1*/ u8 gunloadstate;
 	/*0x15b2*/ u16 loadfilenum;
 	/*0x15b4*/ struct modeldef **loadtomodeldef;
-	/*0x15b8*/ u32 *loadmemptr;
-	/*0x15bc*/ u32 *loadmemremaining;
+	/*0x15b8*/ uintptr_t *loadmemptr;
+	/*0x15bc*/ uintptr_t*loadmemremaining;
 	/*0x15c0*/ struct texpool texpool;
 	/*0x15d0*/ u32 nexttexturetoload;
 	/*0x15d4*/ struct fileinfo fileinfo;
@@ -2850,6 +2853,7 @@ struct coverdefinition {
 	struct coord pos;
 	struct coord look;
 	u16 flags;
+	u16 unk1a;
 };
 
 struct cover {
@@ -2862,9 +2866,9 @@ struct cover {
 struct padsfileheader {
 	s32 numpads;
 	s32 numcovers;
-	s32 waypointsoffset;
-	s32 waygroupsoffset;
-	s32 coversoffset;
+	uintptr_t waypointsoffset;
+	uintptr_t waygroupsoffset;
+	uintptr_t coversoffset;
 	u16 padoffsets[1];
 };
 
@@ -3354,8 +3358,8 @@ struct handlerdata_checkbox {
 };
 
 struct handlerdata_dropdown {
-	u32 value;
-	u32 unk04;
+	uintptr_t value;
+	uintptr_t unk04;
 };
 
 struct handlerdata_keyboard {
@@ -3369,8 +3373,8 @@ struct handlerdata_label {
 
 struct handlerdata_list {
 	union {
-		u32 value;
-		s32 values32;
+		uintptr_t value;
+		intptr_t values32;
 	};
 	union {
 		s32 unk04;
@@ -3396,8 +3400,8 @@ struct menuitemrenderdata {
 struct handlerdata_type19 {
 	Gfx *gdl;
 	union {
-		s32 unk04;
-		u32 unk04u32;
+		intptr_t unk04;
+		uintptr_t unk04u32;
 	};
 	struct menuitemrenderdata *renderdata2;
 	s32 unk0c;
@@ -3433,7 +3437,7 @@ struct menuitem {
 	intptr_t param3;
 
 	union {
-		s32 (*handler)(s32 operation, struct menuitem *item, union handlerdata *data);
+		uintptr_t (*handler)(s32 operation, struct menuitem *item, union handlerdata *data);
 		void (*handlervoid)(s32 operation, struct menuitem *item, union handlerdata *data);
 	};
 };
@@ -3883,7 +3887,11 @@ struct menumodel {
 	/*0x05e*/ s16 curanimnum;
 	/*0x060*/ struct model bodymodel;
 	/*0x084*/ struct anim bodyanim;
+#ifdef PLATFORM_64BIT
+	/*0x110*/ u32 rwdata[256+128];
+#else
 	/*0x110*/ u32 rwdata[256];
+#endif
 	/*0x510*/ f32 curposx;
 	/*0x514*/ f32 curposy;
 	/*0x518*/ f32 curposz;
@@ -5183,7 +5191,7 @@ struct shieldhit {
 };
 
 struct bgroom {
-	u32 unk00;
+	uintptr_t unk00;
 	struct coord pos;
 	u8 br_light_min;
 	u8 br_light_max;
@@ -5246,7 +5254,7 @@ struct mplockinfo {
 
 struct boltbeam {
 	union {
-		s32 unk00;
+		intptr_t unk00;
 		struct prop *unk00_prop;
 	};
 
@@ -5378,7 +5386,7 @@ struct guncmd {
 	u8 type;
 	u8 unk01;
 	u16 unk02;
-	s32 unk04;
+	intptr_t unk04;
 };
 
 struct pakthing {

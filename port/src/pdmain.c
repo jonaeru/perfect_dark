@@ -579,7 +579,7 @@ void mainTick(void)
 			viUpdateMode();
 		}
 
-		rdpCreateTask(gdlstart, gdl, 0, (s32) &msg);
+		rdpCreateTask(gdlstart, gdl, 0, (uintptr_t) &msg);
 		memaPrint();
 		profileSetMarker(PROFILE_MAINTICK_END);
 	}
