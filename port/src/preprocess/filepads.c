@@ -35,33 +35,13 @@ struct n64_waypoint {
 	s32 step;
 };
 
-struct host_waypoint {
-	s32 padnum;
-	uintptr_t ptr_neighbours;
-	s32 groupnum;
-	s32 step;
-};
-
 struct n64_waygroup {
 	u32 ptr_neighbours;
 	u32 ptr_waypoints;
 	s32 step;
 };
 
-struct host_waygroup {
-	uintptr_t ptr_neighbours;
-	uintptr_t ptr_waypoints;
-	s32 step;
-};
-
-struct generic_coverdefinition {
-	u32 pos[3];
-	u32 dir[3];
-	u16 flags;
-	u16 unk1a;
-};
-
-static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
+static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 {
 	u16 *src_offsets = (u16 *) &src[srcpos];
 	u16 *dst_offsets = (u16 *) &dst[dstpos];
@@ -152,22 +132,22 @@ static int convertPads(u8 *dst, int dstpos, u8 *src, int srcpos, int num_pads)
 	return dstpos;
 }
 
-static int convertWayPoints(u8 *dst, int dstpos, u8 *src, int srcpos)
+static u32 convertWayPoints(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 {
 	struct n64_waypoint *n64_waypoints = (struct n64_waypoint *) &src[srcpos];
-	struct host_waypoint *host_waypoints = (struct host_waypoint *) &dst[dstpos];
+	struct waypoint *host_waypoints = (struct waypoint *) &dst[dstpos];
 	int num_waypoints;
 
 	for (num_waypoints = 0; n64_waypoints[num_waypoints].padnum != -1; num_waypoints++);
 
-	dstpos += (num_waypoints + 1) * sizeof(struct host_waypoint);
+	dstpos += (num_waypoints + 1) * sizeof(struct waypoint);
 
 	u32 *host_neighbours = (u32 *) &dst[dstpos];
 	int n = 0;
 
 	for (int i = 0; i < num_waypoints; i++) {
 		host_waypoints[i].padnum = PD_BE32(n64_waypoints[i].padnum);
-		host_waypoints[i].ptr_neighbours = (dstpos);
+		host_waypoints[i].neighbours = (void *)(uintptr_t)dstpos;
 		host_waypoints[i].groupnum = PD_BE32(n64_waypoints[i].groupnum);
 		host_waypoints[i].step = 0;
 
@@ -184,29 +164,29 @@ static int convertWayPoints(u8 *dst, int dstpos, u8 *src, int srcpos)
 
 	// Terminator
 	host_waypoints[num_waypoints].padnum = 0xffffffff;
-	host_waypoints[num_waypoints].ptr_neighbours = 0;
+	host_waypoints[num_waypoints].neighbours = NULL;
 	host_waypoints[num_waypoints].groupnum = 0;
 	host_waypoints[num_waypoints].step = 0;
 
 	return dstpos;
 }
 
-static int convertWayGroups(u8 *dst, int dstpos, u8 *src, int srcpos)
+static u32 convertWayGroups(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 {
 	struct n64_waygroup *n64_waygroups = (struct n64_waygroup *) &src[srcpos];
-	struct host_waygroup *host_waygroups = (struct host_waygroup *) &dst[dstpos];
+	struct waygroup *host_waygroups = (struct waygroup *) &dst[dstpos];
 	int num_waygroups;
 
 	for (num_waygroups = 0; n64_waygroups[num_waygroups].ptr_neighbours != 0; num_waygroups++);
 
-	dstpos += (num_waygroups + 1) * sizeof(struct host_waygroup);
+	dstpos += (num_waygroups + 1) * sizeof(struct waygroup);
 
 	// Waygroups and child waypoints
 	u32 *host_waypoints = (u32 *) &dst[dstpos];
 	int n = 0;
 
 	for (int i = 0; i < num_waygroups; i++) {
-		host_waygroups[i].ptr_waypoints = (dstpos);
+		host_waygroups[i].waypoints = (void *)(uintptr_t)dstpos;
 		host_waygroups[i].step = 0;
 
 		u32 *n64_waypoints = (u32 *) &src[PD_BE32(n64_waygroups[i].ptr_waypoints)];
@@ -221,8 +201,8 @@ static int convertWayGroups(u8 *dst, int dstpos, u8 *src, int srcpos)
 	}
 
 	// Terminator
-	host_waygroups[num_waygroups].ptr_neighbours = 0;
-	host_waygroups[num_waygroups].ptr_waypoints = 0;
+	host_waygroups[num_waygroups].neighbours = NULL;
+	host_waygroups[num_waygroups].waypoints = NULL;
 	host_waygroups[num_waygroups].step = 0;
 
 	// Waygroup neighbours
@@ -230,7 +210,7 @@ static int convertWayGroups(u8 *dst, int dstpos, u8 *src, int srcpos)
 	n = 0;
 
 	for (int i = 0; i < num_waygroups; i++) {
-		host_waygroups[i].ptr_neighbours = (dstpos);
+		host_waygroups[i].neighbours = (void *)(uintptr_t)dstpos;
 
 		u32 *n64_neighbours = (u32 *) &src[PD_BE32(n64_waygroups[i].ptr_neighbours)];
 
@@ -246,30 +226,26 @@ static int convertWayGroups(u8 *dst, int dstpos, u8 *src, int srcpos)
 	return dstpos;
 }
 
-static int convertCover(u8 *dst, int dstpos, u8 *src, int srcpos, int num_covers)
+static u32 convertCover(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_covers)
 {
-	struct generic_coverdefinition *n64_covers = (struct generic_coverdefinition *) &src[srcpos];
-	struct generic_coverdefinition *host_covers = (struct generic_coverdefinition *) &dst[dstpos];
+	struct coverdefinition *n64_covers = (struct coverdefinition *) &src[srcpos];
+	struct coverdefinition *host_covers = (struct coverdefinition *) &dst[dstpos];
 
 	for (int i = 0; i < num_covers; i++) {
-		host_covers[i].pos[0] = PD_BE32(n64_covers[i].pos[0]);
-		host_covers[i].pos[1] = PD_BE32(n64_covers[i].pos[1]);
-		host_covers[i].pos[2] = PD_BE32(n64_covers[i].pos[2]);
-		host_covers[i].dir[0] = PD_BE32(n64_covers[i].dir[0]);
-		host_covers[i].dir[1] = PD_BE32(n64_covers[i].dir[1]);
-		host_covers[i].dir[2] = PD_BE32(n64_covers[i].dir[2]);
+		host_covers[i].pos = PD_SWAPPED_VAL(n64_covers[i].pos);
+		host_covers[i].look = PD_SWAPPED_VAL(n64_covers[i].look);
 		host_covers[i].flags = PD_BE16(n64_covers[i].flags);
 		host_covers[i].unk1a = PD_BE16(n64_covers[i].unk1a);
 	}
 
-	dstpos += num_covers * sizeof(struct generic_coverdefinition);
+	dstpos += num_covers * sizeof(struct coverdefinition);
 
 	return dstpos;
 }
 
-static int convertPadsFile(u8 *dst, u8 *src)
+static u32 convertPadsFile(u8 *dst, u8 *src)
 {
-	int dstpos = 0;
+	u32 dstpos = 0;
 	struct n64_header *n64_header = (struct n64_header *) src;
 	struct host_header *host_header = (struct host_header *) dst;
 

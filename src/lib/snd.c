@@ -1697,7 +1697,7 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 	}
 
 #ifndef PLATFORM_N64
-	preprocessALCMidiHdr(binstart, ziplen);
+	preprocessALCMidiHdr(binstart, ziplen, NULL);
 #endif
 
 #if VERSION < VERSION_NTSC_1_0

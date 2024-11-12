@@ -18,7 +18,7 @@ struct tile {
 	u16 floorcol;
 };
 
-u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
+static u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 {
 	int num_rooms = PD_BE32(*(u32 *) src);
 

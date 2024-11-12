@@ -70,48 +70,12 @@ struct host_primaryheader {
 	uintptr_t unused2;
 };
 
-struct n64_room {
+struct n64_bgroom {
 	u32 ptr_gfxdata;
-	u32 pos[3];
+	struct coord pos;
 	u8 br_light_min;
 	u8 br_light_max;
 };
-
-struct host_room {
-	uintptr_t ptr_gfxdata;
-	u32 pos[3];
-	u8 br_light_min;
-	u8 br_light_max;
-};
-
-struct portal {
-	u16 verticesoffset;
-	s16 roomnum1;
-	s16 roomnum2;
-	u8 flags;
-};
-
-struct generic_portalvertices {
-	u8 count;
-	u32 vertices[1][3];
-};
-
-/*
-struct light {
-	u16 roomnum;
-	u16 colour;
-	u8 brightness;
-	u8 sparkable : 1;
-	u8 healthy : 1;
-	u8 on : 1;
-	u8 sparking : 1;
-	u8 vulnerable : 1;
-	u8 brightnessmult;
-	s8 dirx;
-	s8 diry;
-	s8 dirz;
-	s16 bbox[4][3];
-};*/
 
 struct n64_roomblock {
 	u8 type;
@@ -121,31 +85,11 @@ struct n64_roomblock {
 	u32 ptr_colours;
 };
 
-struct host_roomblock {
-	u8 type;
-	uintptr_t ptr_next;
-	uintptr_t ptr_gdl;
-	uintptr_t ptr_vertices;
-	uintptr_t ptr_colours;
-};
-
 struct n64_roomgfxdata {
 	u32 ptr_vertices;
 	u32 ptr_colours;
 	u32 ptr_opablocks;
 	u32 ptr_xlublocks;
-	s16 lightsindex;
-	s16 numlights;
-	s16 numvertices;
-	s16 numcolours;
-	// roomblocks[]
-};
-
-struct host_roomgfxdata {
-	uintptr_t ptr_vertices;
-	uintptr_t ptr_colours;
-	uintptr_t ptr_opablocks;
-	uintptr_t ptr_xlublocks;
 	s16 lightsindex;
 	s16 numlights;
 	s16 numvertices;
@@ -161,38 +105,32 @@ struct vtx {
 	u16 t;
 };
 
-int m_NumRooms;
-
-u32 m_AllocSizes[512];
-
 static void convertPrimaryRooms(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos)
 {
-	struct n64_room *n64_rooms = (struct n64_room *) &src[*srcpos];
-	struct host_room *host_rooms = (struct host_room *) &dst[*dstpos];
+	struct n64_bgroom *n64_rooms = (struct n64_bgroom *) &src[*srcpos];
+	struct bgroom *host_rooms = (struct bgroom *) &dst[*dstpos];
 
-	m_NumRooms = 0;
+	s32 numRooms = 0;
 
 	for (int i = 1; n64_rooms[i].ptr_gfxdata != 0; i++) {
-		m_NumRooms++;
+		numRooms++;
 	}
 
-	for (int i = 0; i < m_NumRooms + 1; i++) {
-		host_rooms[i].ptr_gfxdata = PD_BE32(n64_rooms[i].ptr_gfxdata);
-		host_rooms[i].pos[0] = PD_BE32(n64_rooms[i].pos[0]);
-		host_rooms[i].pos[1] = PD_BE32(n64_rooms[i].pos[1]);
-		host_rooms[i].pos[2] = PD_BE32(n64_rooms[i].pos[2]);
+	for (int i = 0; i < numRooms + 1; i++) {
+		host_rooms[i].unk00 = PD_BE32(n64_rooms[i].ptr_gfxdata);
+		host_rooms[i].pos = PD_SWAPPED_VAL(n64_rooms[i].pos);
 		host_rooms[i].br_light_min = n64_rooms[i].br_light_min;
 		host_rooms[i].br_light_max = n64_rooms[i].br_light_max;
 	}
 
-	*srcpos += sizeof(*n64_rooms) * (m_NumRooms + 2);
-	*dstpos += sizeof(*host_rooms) * (m_NumRooms +2);
+	*srcpos += sizeof(*n64_rooms) * (numRooms + 2);
+	*dstpos += sizeof(*host_rooms) * (numRooms +2);
 }
 
 static void convertPrimaryPortals(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u32 *src_portalvtxs, u32 *dst_portalvtxs)
 {
-	struct portal *n64_portals = (struct portal *) &src[*srcpos];
-	struct portal *host_portals = (struct portal *) &dst[*dstpos];
+	struct bgportal *n64_portals = (struct bgportal *) &src[*srcpos];
+	struct bgportal *host_portals = (struct bgportal *) &dst[*dstpos];
 
 	// Count portals
 	int numportals = 0;
@@ -216,18 +154,13 @@ static void convertPrimaryPortals(u8 *dst, u32 *dstpos, u8 *src, u32 *srcpos, u3
 	*dst_portalvtxs = *dstpos;
 
 	while (1) {
-		struct generic_portalvertices *n64_pvertices = (struct generic_portalvertices*)&src[*srcpos];
-		struct generic_portalvertices*host_pvertices = (struct generic_portalvertices*)&dst[*dstpos];
+		struct portalvertices *n64_pvertices = (struct portalvertices *)&src[*srcpos];
+		struct portalvertices *host_pvertices = (struct portalvertices *)&dst[*dstpos];
 
 		host_pvertices->count = n64_pvertices->count;
 
 		for (int j = 0; j < host_pvertices->count; j++) {
-			//host_pvertices->vertices[j].x = PD_BE32(n64_pvertices->vertices[j].x);
-			//host_pvertices->vertices[j].y = PD_BE32(n64_pvertices->vertices[j].y);
-			//host_pvertices->vertices[j].z = PD_BE32(n64_pvertices->vertices[j].z);
-			host_pvertices->vertices[j][0] = PD_BE32(n64_pvertices->vertices[j][0]);
-			host_pvertices->vertices[j][1] = PD_BE32(n64_pvertices->vertices[j][1]);
-			host_pvertices->vertices[j][2] = PD_BE32(n64_pvertices->vertices[j][2]);
+			host_pvertices->vertices[j] = PD_SWAPPED_VAL(n64_pvertices->vertices[j]);
 		}
 
 		*srcpos += 4 + host_pvertices->count * 12;
@@ -320,43 +253,43 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 	int numgdls = 0;
 
 	struct n64_roomgfxdata *src_header = (struct n64_roomgfxdata*)src;
-	struct host_roomgfxdata *dst_header = (struct host_roomgfxdata*)dst;
+	struct roomgfxdata *dst_header = (struct roomgfxdata*)dst;
 
-	dst_header->ptr_vertices = PD_BE32(src_header->ptr_vertices);
-	dst_header->ptr_colours = PD_BE32(src_header->ptr_colours);
-	dst_header->ptr_opablocks = PD_BE32(src_header->ptr_opablocks);
-	dst_header->ptr_xlublocks = PD_BE32(src_header->ptr_xlublocks);
+	dst_header->vertices = (void *)(uintptr_t)PD_BE32(src_header->ptr_vertices);
+	dst_header->colours = (void *)(uintptr_t)PD_BE32(src_header->ptr_colours);
+	dst_header->opablocks = (void *)(uintptr_t)PD_BE32(src_header->ptr_opablocks);
+	dst_header->xlublocks = (void *)(uintptr_t)PD_BE32(src_header->ptr_xlublocks);
 	dst_header->lightsindex = PD_BE16(src_header->lightsindex);
 	dst_header->numlights = PD_BE16(src_header->numlights);
 	dst_header->numvertices = PD_BE16(src_header->numvertices);
 	dst_header->numcolours = PD_BE16(src_header->numcolours);
 
-	intptr_t endpos = dst_header->ptr_vertices - src_ofs;
+	intptr_t endpos = (uintptr_t)dst_header->vertices - src_ofs;
 	uintptr_t curpos_src = sizeof(struct n64_roomgfxdata);
-	uintptr_t curpos_dst = sizeof(struct host_roomgfxdata);
+	uintptr_t curpos_dst = sizeof(struct roomgfxdata);
 
 	// roomblocks
 	int ncoords = 0;
 	
 	// save the ptr to roomblocks here to iterate later to fix the pointers
-	struct host_roomblock *ptr_dst_roomblocks = (struct host_roomblock*)&dst[curpos_dst];
+	struct roomblock *ptr_dst_roomblocks = (struct roomblock*)&dst[curpos_dst];
 
 	int numblocks = 0;
 	while ((intptr_t)(curpos_src + sizeof(struct n64_roomblock)) <= endpos) {
 		struct n64_roomblock *src_roomblock = (struct n64_roomblock*)&src[curpos_src];
-		struct host_roomblock *dest_roomblock = (struct host_roomblock*)&dst[curpos_dst];
+		struct roomblock *dest_roomblock = (struct roomblock*)&dst[curpos_dst];
 
 		dest_roomblock->type = src_roomblock->type;
-		dest_roomblock->ptr_next = PD_BE32(src_roomblock->ptr_next);
-		dest_roomblock->ptr_gdl = PD_BE32(src_roomblock->ptr_gdl);
-		dest_roomblock->ptr_vertices = PD_BE32(src_roomblock->ptr_vertices);
-		dest_roomblock->ptr_colours = PD_BE32(src_roomblock->ptr_colours);
+		dest_roomblock->next = (void *)(uintptr_t)PD_BE32(src_roomblock->ptr_next);
+		dest_roomblock->gdl = (void *)(uintptr_t)PD_BE32(src_roomblock->ptr_gdl);
+		dest_roomblock->vertices = (void *)(uintptr_t)PD_BE32(src_roomblock->ptr_vertices);
+		dest_roomblock->colours = (void *)(uintptr_t)PD_BE32(src_roomblock->ptr_colours);
 
 		ptrAdd(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
 		if (src_roomblock->type == BLOCK_PARENT) {
 			ncoords++;
-			uintptr_t vtx_ptr = dest_roomblock->ptr_vertices - src_ofs;
+			uintptr_t vtx_ptr = (uintptr_t)dest_roomblock->vertices - src_ofs;
 			if (vtx_ptr < endpos) endpos = vtx_ptr;
 		}
 		else if (src_roomblock->ptr_gdl) {
@@ -364,7 +297,7 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 		}
 
 		curpos_src += sizeof(struct n64_roomblock);
-		curpos_dst += sizeof(struct host_roomblock);
+		curpos_dst += sizeof(struct roomblock);
 		numblocks++;
 	}
 
@@ -390,15 +323,15 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 	curpos_dst = ALIGN8(curpos_dst);
 
 	// vertices
-	uintptr_t ptr_src_vertices = curpos_src = ALIGN8(dst_header->ptr_vertices - src_ofs);
+	uintptr_t ptr_src_vertices = curpos_src = ALIGN8((uintptr_t)dst_header->vertices - src_ofs);
 	uintptr_t ptr_dst_vertices = curpos_dst + dst_roomoffset;
 
 	ptrAdd(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
 
-	uintptr_t vtx_end = dst_header->ptr_colours - src_ofs;
+	uintptr_t vtx_end = (uintptr_t)dst_header->colours - src_ofs;
 
-	while (dst_header->ptr_colours && curpos_src < vtx_end) {
-		struct vtx *src_vtx = (struct vtx*)(src + curpos_src);
+	while (dst_header->colours && curpos_src < vtx_end) {
+		struct vtx *src_vtx = (struct vtx*)(src + curpos_src); 
 		struct vtx *dst_vtx = (struct vtx*)(dst + curpos_dst);
 
 		dst_vtx->coord[0] = PD_BE16(src_vtx->coord[0]);
@@ -421,8 +354,8 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 	uintptr_t ptr_src_colors = 0;
 	uintptr_t ptr_dst_colors = 0;
 
-	if (dst_header->ptr_colours) {
-		ptr_src_colors = curpos_src = ALIGN8(dst_header->ptr_colours - src_ofs);
+	if (dst_header->colours) {
+		ptr_src_colors = curpos_src = ALIGN8((uintptr_t)dst_header->colours - src_ofs);
 		ptr_dst_colors = curpos_dst + dst_roomoffset;
 
 		ptrAdd(curpos_src + src_ofs, curpos_dst + dst_roomoffset);
@@ -437,7 +370,7 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 
 	// gdls
 	gbiSetVtx(src_header->ptr_vertices, ptr_src_vertices);
-	gbiSetSegment(0x0e, dst_header->ptr_vertices);
+	gbiSetSegment(0x0e, (uintptr_t)dst_header->vertices);
 
 	uintptr_t gdlstart = curpos_dst;
 	for (size_t i = 0; i < numgdls; i++) {
@@ -447,29 +380,29 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 
 	// relink ptrs: roomblocks
 	for (size_t i = 0; i < numblocks; i++) {
-		struct host_roomblock *block = (struct host_roomblock*)&ptr_dst_roomblocks[i];
-		
-		relinkPtr((uintptr_t*)&block->ptr_next);
+		struct roomblock *block = (struct roomblock*)&ptr_dst_roomblocks[i];
+
+		relinkPtr((uintptr_t*)&block->next);
 
 		if (block->type == BLOCK_LEAF) {
-			relinkPtr((uintptr_t*)&block->ptr_gdl);
-			u32 offset_vtx = block->ptr_vertices - ptr_src_vertices - src_ofs;
-			u32 offset_col = block->ptr_colours - ptr_src_colors - src_ofs;
+			relinkPtr((uintptr_t*)&block->gdl);
+			u32 offset_vtx = (uintptr_t)block->vertices - ptr_src_vertices - src_ofs;
+			u32 offset_col = (uintptr_t)block->colours - ptr_src_colors - src_ofs;
 
-			block->ptr_vertices = ptr_dst_vertices + offset_vtx;
-			block->ptr_colours = ptr_dst_colors + offset_col;
+			block->vertices = (void *)(ptr_dst_vertices + offset_vtx);
+			block->colours = (void *)(ptr_dst_colors + offset_col);
 		}
 		else {
-			relinkPtr((uintptr_t*)&block->ptr_gdl); // child
-			relinkPtr((uintptr_t*)&block->ptr_vertices); // coord
+			relinkPtr((uintptr_t*)&block->gdl); // child
+			relinkPtr((uintptr_t*)&block->vertices); // coord
 		}
 	}
 	
 	// relink ptrs: header
-	relinkPtr((uintptr_t*)&dst_header->ptr_vertices);
-	relinkPtr((uintptr_t*)&dst_header->ptr_colours);
-	relinkPtr((uintptr_t*)&dst_header->ptr_opablocks);
-	relinkPtr((uintptr_t*)&dst_header->ptr_xlublocks);
+	relinkPtr((uintptr_t*)&dst_header->vertices);
+	relinkPtr((uintptr_t*)&dst_header->colours);
+	relinkPtr((uintptr_t*)&dst_header->opablocks);
+	relinkPtr((uintptr_t*)&dst_header->xlublocks);
 
 	return curpos_dst;
 }

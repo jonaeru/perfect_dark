@@ -31,7 +31,7 @@ static inline void* swapPtr(void** x) { return (void*)PD_BEPTR((uintptr_t)x); }
 static inline struct coord swapCrd(struct coord crd) { crd.x = swapF32(crd.x); crd.y = swapF32(crd.y); crd.z = swapF32(crd.z); return crd; }
 static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
 
-#define PD_SWAP_VAL(x) x = _Generic((x), \
+#define PD_SWAPPED_VAL(x) _Generic((x), \
 	f32: swapF32, \
 	u32: swapU32, \
 	s32: swapS32, \
@@ -40,6 +40,8 @@ static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
 	struct coord: swapCrd, \
 	default: swapUnk	\
 )(x)
+
+#define PD_SWAP_VAL(x) x = PD_SWAPPED_VAL(x)
 
 #define PD_SWAP_PTR(x) x = swapPtr((void *)(x))
 

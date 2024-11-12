@@ -14,7 +14,6 @@ struct n64_stagesetup {
 	u32 ptr_padfiledata;
 };
 
-
 struct n64_coord {
 	f32 x;
 	f32 y;

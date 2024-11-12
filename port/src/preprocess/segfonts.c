@@ -6,7 +6,7 @@
 
 #include "preprocess/common.h"
 
-struct n64fontchar {
+struct n64_fontchar {
 	u8 index;
 	s8 baseline;
 	u8 height;
@@ -15,37 +15,13 @@ struct n64fontchar {
 	u32 pixeldata;
 };
 
-struct hostfontchar {
-	u8 index;
-	s8 baseline;
-	u8 height;
-	u8 width;
-	s32 kerningindex;
-	uintptr_t pixeldata;
-};
-
-struct n64fontcharjpn {
+struct n64_fontcharjpn {
 	u16 index;
 	s8 baseline;
 	u8 height;
 	u8 width;
 	s16 kerningindex;
 	u32 pixeldata;
-};
-
-struct hostfontcharjpn {
-	u16 index;
-	s8 baseline;
-	u8 height;
-	u8 width;
-	s16 kerningindex;
-	uintptr_t pixeldata;
-};
-
-struct fontdef {
-	const char *name;
-	u32 offsets[3];
-	int pal_extra_chars;
 };
 
 u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
@@ -63,7 +39,7 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 	}
 #endif
 
-	size_t dstlen = srclen - (num_chars * sizeof(struct n64fontchar)) + (num_chars * sizeof(struct hostfontchar)) + 0x20;
+	size_t dstlen = srclen - (num_chars * sizeof(struct n64_fontchar)) + (num_chars * sizeof(struct fontchar)) + 0x20;
 	u8* dst = sysMemZeroAlloc(dstlen);
 
 	// Kerning table
@@ -79,9 +55,9 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 
 	// Character table
 #if VERSION == VERSION_JPN_FINAL
-		struct n64fontcharjpn *src_char_table = (struct n64fontcharjpn *) &src[src_offset];
+		struct n64_fontcharjpn *src_char_table = (struct n64_fontcharjpn *) &src[src_offset];
 		struct hostfontcharjpn *dst_char_table = (struct hostfontcharjpn *) &dst[dst_offset];
-		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontcharjpn)) - (src_offset + num_chars * sizeof(struct n64fontcharjpn));
+		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontcharjpn)) - (src_offset + num_chars * sizeof(struct n64_fontcharjpn));
 
 		for (int i = 0; i < num_chars; i++) {
 			dst_char_table[i].index = PD_BE16(src_char_table[i].index);
@@ -89,15 +65,15 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 			dst_char_table[i].height = src_char_table[i].height;
 			dst_char_table[i].width = src_char_table[i].width;
 			dst_char_table[i].kerningindex = PD_BE16(src_char_table[i].kerningindex);
-			dst_char_table[i].pixeldata = src_char_table[i].pixeldata ? PD_BE32(src_char_table[i].pixeldata) + diff : 0;
+			dst_char_table[i].pixeldata = (void *)(uintptr_t)(src_char_table[i].pixeldata ? PD_BE32(src_char_table[i].pixeldata) + diff : 0);
 		}
 
-		src_offset += num_chars * sizeof(struct n64fontcharjpn);
+		src_offset += num_chars * sizeof(struct n64_fontcharjpn);
 		dst_offset += num_chars * sizeof(struct hostfontcharjpn);
 #else
-		struct n64fontchar *src_char_table = (struct n64fontchar *) &src[src_offset];
-		struct hostfontchar *dst_char_table = (struct hostfontchar *) &dst[dst_offset];
-		u32 diff = (dst_offset + num_chars * sizeof(struct hostfontchar)) - (src_offset + num_chars * sizeof(struct n64fontchar));
+		struct n64_fontchar *src_char_table = (struct n64_fontchar *) &src[src_offset];
+		struct fontchar *dst_char_table = (struct fontchar *) &dst[dst_offset];
+		u32 diff = (dst_offset + num_chars * sizeof(struct fontchar)) - (src_offset + num_chars * sizeof(struct n64_fontchar));
 
 		for (int i = 0; i < num_chars; i++) {
 			dst_char_table[i].index = src_char_table[i].index;
@@ -105,11 +81,11 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 			dst_char_table[i].height = src_char_table[i].height;
 			dst_char_table[i].width = src_char_table[i].width;
 			dst_char_table[i].kerningindex = PD_BE32(src_char_table[i].kerningindex);
-			dst_char_table[i].pixeldata = src_char_table[i].pixeldata ? PD_BE32(src_char_table[i].pixeldata) + diff : 0;
+			dst_char_table[i].pixeldata = (void *)(uintptr_t)(src_char_table[i].pixeldata ? PD_BE32(src_char_table[i].pixeldata) + diff : 0);
 		}
 
-		src_offset += num_chars * sizeof(struct n64fontchar);
-		dst_offset += num_chars * sizeof(struct hostfontchar);
+		src_offset += num_chars * sizeof(struct n64_fontchar);
+		dst_offset += num_chars * sizeof(struct fontchar);
 #endif
 
 	// Pixel data
@@ -119,4 +95,10 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 	if (outSize) *outSize = ALIGN16(dst_offset + len);
 
 	return dst;
+}
+
+u8 *preprocessJpnFont(u8* data, u32 size, u32* outSize)
+{
+	// ???
+	return NULL;
 }

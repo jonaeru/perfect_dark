@@ -13,7 +13,7 @@
 
 #include "preprocess/common.h"
 
-u8* preprocessAnimations(u8* data, u32 size, u32* outSize)
+u8 *preprocessAnimations(u8* data, u32 size, u32* outSize)
 {
 	// set the anim table pointers as well
 	extern u8 *_animationsTableRomStart;
@@ -38,10 +38,11 @@ u8* preprocessAnimations(u8* data, u32 size, u32* outSize)
 			anim->data = 0xffffffff;
 		}
 	}
-	return 0;
+
+	return NULL;
 }
 
-u8* preprocessMpConfigs(u8* data, u32 size, u32* outSize)
+u8 *preprocessMpConfigs(u8* data, u32 size, u32* outSize)
 {
 	const u32 count = size / sizeof(struct mpconfig);
 	struct mpconfig *cfg = (struct mpconfig *)data;
@@ -71,38 +72,11 @@ u8* preprocessMpConfigs(u8* data, u32 size, u32* outSize)
 #endif
 		}
 	}
-	return 0;
+
+	return NULL;
 }
 
-u8* preprocessJpnFont(u8* data, u32 size, u32* outSize)
-{
-	// ???
-	return 0;
-}
-
-void preprocessALCMidiHdr(u8 *data, u32 size)
-{
-	ALCMidiHdr *hdr = (ALCMidiHdr *)data;
-	PD_SWAP_VAL(hdr->division);
-	for (s32 i = 0; i < ARRAYCOUNT(hdr->trackOffset); ++i) {
-		PD_SWAP_VAL(hdr->trackOffset[i]);
-	}
-}
-
-u8* preprocessSequences(u8* data, u32 size, u32* outSize)
-{
-	struct seqtable *seq = (struct seqtable *)data;
-	PD_SWAP_VAL(seq->count);
-
-	for (s16 i = 0; i < seq->count; ++i) {
-		PD_SWAP_VAL(seq->entries[i].binlen);
-		PD_SWAP_VAL(seq->entries[i].ziplen);
-		PD_SWAP_VAL(seq->entries[i].romaddr);
-	}
-	return 0;
-}
-
-u8* preprocessTexturesList(u8* data, u32 size, u32* outSize)
+u8 *preprocessTexturesList(u8* data, u32 size, u32* outSize)
 {
 	struct texture *tex = (struct texture *)data;
 	const u32 count = size / sizeof(*tex);
@@ -116,5 +90,6 @@ u8* preprocessTexturesList(u8* data, u32 size, u32* outSize)
 		tex->soundsurfacetype = tex->surfacetype;
 		tex->surfacetype = tmp;
 	}
-	return 0;
+
+	return NULL;
 }

@@ -27,46 +27,46 @@ struct texaddr {
 	u32 dst;
 };
 
-u32 m_Segments[16];
-u32 m_SrcVtxOffset;
-u32 m_DstVtxOffset;
+static u32 gbiSegments[16];
+static u32 srcVtxOffset;
+static u32 dstVtxOffset;
 
-struct texaddr m_TexAddrs[64];
-int m_NumTexAddr;
+static struct texaddr texAddrs[64];
+static int numTexAddrs;
 
 void gbiReset(void)
 {
-	for (int i = 0; i < ARRAYCOUNT(m_Segments); i++) {
-		m_Segments[i] = 0;
+	for (int i = 0; i < ARRAYCOUNT(gbiSegments); i++) {
+		gbiSegments[i] = 0;
 	}
 	
-	m_SrcVtxOffset = 0;
-	m_DstVtxOffset = 0;
-	m_NumTexAddr = 0;
+	srcVtxOffset = 0;
+	dstVtxOffset = 0;
+	numTexAddrs = 0;
 }
 
 void gbiSetSegment(int segment, u32 offset)
 {
-	m_Segments[segment] = offset & 0x00ffffff;
+	gbiSegments[segment] = offset & 0x00ffffff;
 }
 
 void gbiSetVtx(u32 src_offset, u32 dst_offset)
 {
-	m_SrcVtxOffset = src_offset & 0x00ffffff;
-	m_DstVtxOffset = dst_offset & 0x00ffffff;
+	srcVtxOffset = src_offset & 0x00ffffff;
+	dstVtxOffset = dst_offset & 0x00ffffff;
 }
 
 void gbiAddTexAddr(u32 src_offset, u32 dst_offset)
 {
-	m_TexAddrs[m_NumTexAddr].src   = src_offset & 0x00ffffff;
-	m_TexAddrs[m_NumTexAddr++].dst = dst_offset & 0x00ffffff;
+	texAddrs[numTexAddrs].src   = src_offset & 0x00ffffff;
+	texAddrs[numTexAddrs++].dst = dst_offset & 0x00ffffff;
 }
 
 u32 gbiFindTexAddr(u32 src_offset)
 {
-	for (int i = 0; i < m_NumTexAddr; i++) {
-		if (m_TexAddrs[i].src == src_offset)
-			return m_TexAddrs[i].dst;
+	for (int i = 0; i < numTexAddrs; i++) {
+		if (texAddrs[i].src == src_offset)
+			return texAddrs[i].dst;
 	}
 
 	return 0;
@@ -128,11 +128,11 @@ static u64 gbiRewriteAddr(u64 cmd, u8 opcode)
 			offset = gbiFindTexAddr(offset);
 		}
 		else {
-			if (offset < m_SrcVtxOffset) {
-				sysFatalError("Tried to load data from offset 0x%x but segment starts at 0x%x\n", offset, m_SrcVtxOffset);
+			if (offset < srcVtxOffset) {
+				sysFatalError("Tried to load data from offset 0x%x but segment starts at 0x%x\n", offset, srcVtxOffset);
 			}
 
-			offset = offset - m_SrcVtxOffset + m_DstVtxOffset;
+			offset = offset - srcVtxOffset + dstVtxOffset;
 		}
 	}
 

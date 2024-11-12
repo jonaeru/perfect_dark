@@ -7,6 +7,8 @@
 #include "preprocess/common.h"
 #include "preprocess/setup.h"
 
+extern u32 chraiGetAilistLength(u8 *list);
+
 static inline void convF32(f32 *dst, f32 src) { *(u32*)dst = PD_BE32(*(u32*)&src); }
 static inline void convU32(u32 *dst, u32 src) { *dst = PD_BE32(src); }
 static inline void convS32(s32 *dst, s32 src) { *dst = PD_BE32(src); }
@@ -36,7 +38,7 @@ static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
 
 #define PD_CONV_PTR(dst, src, type) dst = (type)(uintptr_t)PD_BE32(src)
 
-static u32 obj_size(struct n64_defaultobj *obj)
+static inline u32 objSizeN64(struct n64_defaultobj *obj)
 {
 	switch (obj->type) {
 	case OBJTYPE_CHR:                return sizeof(struct n64_packedchr) / sizeof(u32);
@@ -100,8 +102,7 @@ static u32 obj_size(struct n64_defaultobj *obj)
 	return 1;
 }
 
-
-void conv_tvscreen(struct tvscreen* dstobj, struct n64_tvscreen* srcobj)
+static void convTvScreen(struct tvscreen* dstobj, struct n64_tvscreen* srcobj)
 {
 	PD_CONV_PTR(dstobj->cmdlist, srcobj->ptr_cmdlist, u32*);
 	PD_CONV_VAL(dstobj->offset, srcobj->offset);
@@ -144,7 +145,7 @@ void conv_tvscreen(struct tvscreen* dstobj, struct n64_tvscreen* srcobj)
 	PD_CONV_VAL(dstobj->colinc, srcobj->colinc);
 }
 
-void convertDefaultObjHdr(struct defaultobj* dstobj, struct n64_defaultobj* srcobj)
+static void convertDefaultObjHdr(struct defaultobj* dstobj, struct n64_defaultobj* srcobj)
 {
 	PD_CONV_VAL(dstobj->extrascale, srcobj->extrascale);
 	
@@ -164,7 +165,7 @@ void convertDefaultObjHdr(struct defaultobj* dstobj, struct n64_defaultobj* srco
 	dst_unk00_2[1] = src_unk00_2[1];
 }
 
-void convertDefaultObj(struct defaultobj* dstobj, struct n64_defaultobj* srcobj)
+static void convertDefaultObj(struct defaultobj* dstobj, struct n64_defaultobj* srcobj)
 {
 	PD_CONV_VAL(dstobj->extrascale, srcobj->extrascale);
 	PD_CONV_VAL(dstobj->hidden2, srcobj->hidden2);
@@ -187,7 +188,7 @@ void convertDefaultObj(struct defaultobj* dstobj, struct n64_defaultobj* srcobj)
 	PD_CONV_VAL(dstobj->geocount, srcobj->geocount);
 }
 
-u32 convertProps(u8* dst, u8* src)
+static u32 convertProps(u8* dst, u8* src)
 {
 	u8* start = dst;
 	struct n64_defaultobj* cmd = (struct n64_defaultobj*)src;
@@ -373,7 +374,7 @@ u32 convertProps(u8* dst, u8* src)
 				struct singlemonitorobj* dstobj = (struct singlemonitorobj*)dst;
 
 				convertDefaultObj(&dstobj->base, cmd);
-				conv_tvscreen(&dstobj->screen, &srcobj->screen);
+				convTvScreen(&dstobj->screen, &srcobj->screen);
 
 				PD_CONV_VAL(dstobj->owneroffset, srcobj->owneroffset);
 				PD_CONV_VAL(dstobj->ownerpart, srcobj->ownerpart);
@@ -390,7 +391,7 @@ u32 convertProps(u8* dst, u8* src)
 				convertDefaultObj(&dstobj->base, cmd);
 
 				for (size_t i = 0; i < 4; i++)
-					conv_tvscreen(&dstobj->screens[i], &srcobj->screens[i]);
+					convTvScreen(&dstobj->screens[i], &srcobj->screens[i]);
 
 				PD_CONV_ARRAY(dstobj->imagenums, srcobj->imagenums);
 				dst += sizeof(struct multimonitorobj);
@@ -990,7 +991,7 @@ u32 convertProps(u8* dst, u8* src)
 			}
 		}
 
-		cmd = (struct n64_defaultobj*)((u32*)cmd + obj_size(cmd));
+		cmd = (struct n64_defaultobj*)((u32*)cmd + objSizeN64(cmd));
 		type = cmd->type;
 	}
 
@@ -1099,8 +1100,6 @@ static u32 convertAiLists(u8* dst, u8* src)
 	return (u32)((u8 *)dstailist - dst + sizeof(uintptr_t));
 }
 
-extern u32 chraiGetAilistLength(u8 *list);
-
 static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 {
 	ptrReset();
@@ -1137,7 +1136,7 @@ static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 	return dstpos;
 }
 
-static int convertSetup(u8 *dst, u8 *src, u32 srclen)
+static u32 convertSetup(u8 *dst, u8 *src, u32 srclen)
 {
 	struct n64_stagesetup *src_header = (struct n64_stagesetup*)src;
 	struct stagesetup *dst_header = (struct stagesetup*)dst;
