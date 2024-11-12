@@ -316,11 +316,22 @@ static u32 convertAudioBankFile(u8 *dst, u8 *src)
 u8 *preprocessALBankFile(u8 *src, u32 size, u32 *outSize)
 {
 	ptrReset();
-	u32 dstlen = size * 3;
+
+	const u32 dstlen = size * 3; // this should overshoot any possible bank size, but * 2 also works for vanilla banks
 	u8 *dst = sysMemZeroAlloc(dstlen);
 
-	*outSize = convertAudioBankFile(dst, src);
-	*outSize = ALIGN16(*outSize);
+	u32 reallen = convertAudioBankFile(dst, src);
+	if (reallen > dstlen || ALIGN16(reallen) > dstlen) {
+		sysFatalError("overflow when trying to preprocess an ALBankFile, size %u dstlen %u reallen %u", size, dstlen, reallen);
+	}
+
+	reallen = ALIGN16(reallen);
+
+	if (reallen < dstlen) {
+		dst = sysMemRealloc(dst, reallen);
+	}
+
+	*outSize = reallen;
 
 	return dst;
 }

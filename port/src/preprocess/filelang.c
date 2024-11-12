@@ -31,7 +31,7 @@ static int getNumStrings(u8 *src, size_t len)
 	return 1;
 }
 
-u32 convertLangFile(u8 *dst, u8 *src, size_t srclen)
+static u32 convertLangFile(u8 *dst, u8 *src, size_t srclen)
 {
 	// Convert it
 	u32 *src_offsets = (u32 *) src;
