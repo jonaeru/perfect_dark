@@ -1602,6 +1602,16 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 		return gdl;
 	}
 
+#ifndef PLATFORM_N64
+	// Rounding the crosshair positions allow them to more accurately follow the
+	// gun's vector. Without this, the mantissa isn't factored in at all (cast
+	// to integer), which leads to some awkward behavior, such as the crosshair
+	// taking a long time to return to the center of the screen when coming from
+	// an up and/or left direction.
+	g_Vars.currentplayer->crosspos[0] = roundf(g_Vars.currentplayer->crosspos[0]);
+	g_Vars.currentplayer->crosspos[1] = roundf(g_Vars.currentplayer->crosspos[1]);
+#endif
+
 #if PAL
 	g_ScaleX = 1;
 #else
