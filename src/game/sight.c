@@ -1036,6 +1036,14 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, s32 x, s32 y, s32 dir, u32 colour)
 	vertices[2].y = points[5] * 10;
 	vertices[2].z = -10;
 
+#ifndef PLATFORM_N64
+	// Center-align Skedar tris
+	for (int i = 0; i < 3; ++i) {
+		vertices[i].x -= 2;
+		vertices[i].y += 2;
+	}
+#endif
+
 	// @bug: This also needs to check for COLOUR_LIGHTRED because the caller can
 	// use two shades of red. The second colour is used when zeroing the sight
 	// in on a new target. Because of this bug, targeting an ally with the
@@ -1333,13 +1341,15 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 		marginbottom = viewhalfheight - availablebelow * frac;
 		margintop = viewhalfheight - availableabove * frac;
 
-		// Center-align the zoom range.
+#ifndef PLATFORM_N64
+		// Center-align the zoom range
 		if (frac != 1.0f) {
 			viewleft += 1;
 			viewright += 1;
 			viewbottom += 1;
 			viewtop += 1;
 		}
+#endif
 
 #define BOXLEFT   (viewleft + marginleft)
 #define BOXRIGHT  (viewright - marginright)
@@ -1481,6 +1491,14 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 	vertices[7].x = inner[1] * 10;
 	vertices[7].y = inner[2] * 10;
 	vertices[7].z = -10;
+
+#ifndef PLATFORM_N64
+	// Center-align Maian tris
+	for (int i = 0; i < 8; ++i) {
+		vertices[i].x -= 2;
+		vertices[i].y += 2;
+	}
+#endif
 
 	colours[0].word = PD_BE32(0x00ff000f);
 	colours[1].word = PD_BE32(hasprop ? colour : 0x00ff0044);
