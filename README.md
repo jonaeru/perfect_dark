@@ -105,18 +105,18 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 1. Install [MSYS2](https://www.msys2.org).
 2. Open the `MINGW64` prompt if building for x86_64, or the `MINGW32` prompt if building for i686. (**NOTE:** _do not_ use the `MSYS` prompt)
 3. Install dependencies:  
-   `pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2 mingw-w64-x86_64-zlib mingw-w64-x86_64-cmake mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib mingw-w64-i686-cmake make git`
+   `pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-SDL2 mingw-w64-x86_64-zlib mingw-w64-x86_64-cmake mingw-w64-x86_64-python3 mingw-w64-i686-toolchain mingw-w64-i686-SDL2 mingw-w64-i686-zlib mingw-w64-i686-cmake mingw-w64-i686-python3 make git`
 4. Get the source code:  
    `git clone --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
 5. Run `cmake -G"Unix Makefiles" -Bbuild .`.
    * Add ` -DROMID=pal-final` or ` -DROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.\
 6. Run `cmake --build build -j4 -- -O`.
-6. The resulting executable will be at `build/pd.x86_64.exe` (or at `build/pd.i686.exe` if building for i686).
-7. If you don't know where you downloaded the source to, you can run `explorer .` to open the current directory.
+7. The resulting executable will be at `build/pd.x86_64.exe` (or at `build/pd.i686.exe` if building for i686).
+8. If you don't know where you downloaded the source to, you can run `explorer .` to open the current directory.
 
 ### Linux
 
-1. Ensure you have gcc, g++ (version 10.0+), make, cmake, git and SDL2 (version 2.0.12+), libGL and ZLib installed on your system.
+1. Ensure you have gcc, g++ (version 10.0+), make, cmake, git, python3 and SDL2 (version 2.0.12+), libGL and ZLib installed on your system.
    * If you wish to crosscompile, you will also need to have libraries and compilers for the target platform installed, e.g. `gcc-multilib` and `g++-multilib` for x86_64 -> i686 crosscompilation.
 2. Get the source code:  
    `git clone --recursive https://github.com/fgsfdsfgs/perfect_dark.git && cd perfect_dark`
@@ -125,7 +125,31 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
    * Add ` -DROMID=pal-final` or ` -DROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.
    * Add ` -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32` at the end of the command if you want to crosscompile from x86_64 to x86.
 4. Run `cmake --build build -j4`.
-4. The resulting executable will be at `build/pd.<arch>` (for example `build/pd.x86_64`).
+5. The resulting executable will be at `build/pd.<arch>` (for example `build/pd.x86_64`).
+
+### Nintendo Switch
+
+1. Set up the [devkitA64 environment](https://devkitpro.org/wiki/Getting_Started).
+   * On Windows you can do it under MSYS2 or WSL, usually MSYS2 is recommended.
+   * If using MSYS2, make sure to use the **MSYS2** shell, **not** MINGW32 or MINGW64.
+2. Install host dependencies:
+   * On MSYS2: `pacman -Syuu && pacman -S git make cmake python3`
+   * On Linux: use your package manager as normal to install the above dependencies.
+3. Install Switch toolchain and dependencies:
+   * ```
+     dkp-pacman -Syuu
+     dkp-pacman -S devkitA64 switch-libnx switch-zlib switch-sdl2 switch-cmake dkp-toolchain-vars
+     ```
+   * If in MSYS2 or `dkp-pacman` doesn't work, replace it with just `pacman`.
+4. Ensure devkitA64 environment variables are set:
+   * `source /opt/devkitpro/switchvars.sh`
+   * If your `$DEVKITPRO` path is different, substitute that instead or set the variables manually.
+5. Configure:
+   * `aarch64-none-elf-cmake -G"Unix Makefiles" -Bbuild .`
+   * Add ` -DROMID=pal-final` or ` -DROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.
+6. Build:
+   * `make -C build -j4`
+7. The resulting executable will be at `build/pd.arm64.nro`.
 
 ### Notes
 

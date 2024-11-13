@@ -19,6 +19,7 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "video.h"
+#include "game/bondview.h"
 #endif
 
 #define NUM_SUCCESS_PARTICLES 280
@@ -30,7 +31,8 @@
 #define PXTOBYTES(val) ((val) * 2)
 
 #ifndef PLATFORM_N64
-s32 g_MenuBlurFb = 0;
+static s32 g_MenuBlurFb = 0;
+static bool g_MenuBlurDone = false;
 #endif
 
 /**
@@ -127,6 +129,8 @@ void menugfxCreateBlur(void)
 	}
 	// copy full viewport and downscale to 40x30
 	videoCopyFramebuffer(g_MenuBlurFb, 0, -1, -1);
+	// we'll generate a blurred version later
+	g_MenuBlurDone = false;
 #endif
 }
 
@@ -144,6 +148,23 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 		return menugfxRenderGradient(gdl, 0, 0, viGetWidth(), viGetHeight(), 0xff, 0xff, 0xff);
 	}
 
+#ifndef PLATFORM_N64
+	width = viGetWidth();
+	height = viGetHeight();
+	if (g_MenuBlurFb && !g_MenuBlurDone) {
+		// blit the small blur texture onto a screen-sized framebuffer while blurring it
+		g_MenuBlurDone = true;
+		g_BlurFbDirty = true;
+		gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 0xff);
+		gDPSetTextureFilter(gdl++, G_TF_BLUR_EXT);
+		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, g_MenuBlurFb);
+		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_BlurFb);
+		gSPImageRectangleEXT(gdl++, 0, 0, 0, 0, width << 2, height << 2, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0, BLURIMG_WIDTH, BLURIMG_HEIGHT);
+		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, 0);
+		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, 0);
+	}
+#endif
+
 	colours = gfxAllocateColours(1);
 	vertices = gfxAllocateVertices(4);
 
@@ -155,8 +176,8 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 			G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
 #ifndef PLATFORM_N64
-	// let gDPLoadTextureBlock above set the size, then overwrite the texture selection with our fb texture
-	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, g_MenuBlurFb);
+	// LoadTextureBlock will set up the sizes, but we'll use the framebuffer instead of g_BlurBuffer
+	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_BlurFb);
 #endif
 
 	gDPPipeSync(gdl++);
@@ -164,14 +185,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-
-#ifdef PLATFORM_N64
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-#else
-	// enable blur filter for the texture
-	gDPSetTextureFilter(gdl++, G_TF_BLUR_EXT);
-#endif
-
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 #if VERSION >= VERSION_JPN_FINAL

@@ -353,7 +353,7 @@ FILE *fsFileOpenRead(const char *name)
 	return fopen(fsFullPath(name), "rb");
 }
 
-void fsFileClose(FILE *f)
+void fsFileFree(FILE *f)
 {
 	fclose(f);
 }
