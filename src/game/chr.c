@@ -3872,13 +3872,13 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 			}
 
 			if (rwdata->gdl == rodata->opagdl) {
-				gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->opagdl) & 0xffffff));
+				gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->opagdl) & 0xffffff));
 			} else {
 				gdlptr = rwdata->gdl;
 			}
 
 			if (rodata->xlugdl) {
-				gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->xlugdl) & 0xffffff));
+				gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->xlugdl) & 0xffffff));
 			} else {
 				gdlptr2 = NULL;
 			}
@@ -4032,13 +4032,13 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 			// use the space... after the model definition's colour table?
 			// Let's hope that's not being used by other instances...
 			if (rwdata->gdl == rodata->opagdl) {
-				gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->opagdl) & 0xffffff));
+				gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->opagdl) & 0xffffff));
 			} else {
 				gdlptr = rwdata->gdl;
 			}
 
 			if (rodata->xlugdl) {
-				gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->xlugdl) & 0xffffff));
+				gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->xlugdl) & 0xffffff));
 			} else {
 				gdlptr2 = NULL;
 			}
@@ -4174,13 +4174,13 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 				}
 
 				if (rwdata->gdl == rodata->opagdl) {
-					gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->opagdl) & 0xffffff));
+					gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->opagdl) & 0xffffff));
 				} else {
 					gdlptr = rwdata->gdl;
 				}
 
 				if (rodata->xlugdl) {
-					gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->xlugdl) & 0xffffff));
+					gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->xlugdl) & 0xffffff));
 				} else {
 					gdlptr2 = NULL;
 				}
@@ -4222,7 +4222,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 											coordinate = vertices[i].z + (s32)spd4.f[2];
 
 											if (coordinate == bestcoords[2]) {
-												if ((uintptr_t)rwdata->colours == ALIGN8((u32)rodata->vertices + rodata->numvertices * sizeof(Vtx))) {
+												if ((uintptr_t)rwdata->colours == ALIGN8((uintptr_t)rodata->vertices + rodata->numvertices * sizeof(Vtx))) {
 													Col *colours = vtxstoreAllocate(rodata->numcolours, VTXSTORETYPE_CHRCOL, 0, 0);
 													s32 j;
 
@@ -4369,13 +4369,13 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 				if (rwdata->vertices != rodata->vertices
 						&& (uintptr_t)rwdata->colours != ALIGN8((uintptr_t)&rodata->vertices[rodata->numvertices])) {
 					if (rwdata->gdl == rodata->opagdl) {
-						gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((s32)UNSEGADDR(rodata->opagdl) & 0xffffff));
+						gdlptr = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->opagdl) & 0xffffff));
 					} else {
 						gdlptr = rwdata->gdl;
 					}
 
 					if (rodata->xlugdl) {
-						gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((s32)UNSEGADDR(rodata->xlugdl) & 0xffffff));
+						gdlptr2 = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->xlugdl) & 0xffffff));
 					} else {
 						gdlptr2 = NULL;
 					}
