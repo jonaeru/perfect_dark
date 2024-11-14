@@ -263,87 +263,109 @@ static void populateMarkers(u8 *src)
 
 		switch (marker->type) {
 		case CT_MODELDEF:
-			struct n64_modeldef *src_modeldef = src_thing;
-			int num_texconfigs = PD_BE16(src_modeldef->numtexconfigs);
-			u32 texconfigpos = PD_BE32(src_modeldef->ptr_texconfigs);
-			setMarker(PD_BE32(src_modeldef->ptr_rootnode), CT_NODE, marker->src_offset);
-			setMarker(PD_BE32(src_modeldef->ptr_parts), CT_PARTS, marker->src_offset);
+			{
+				struct n64_modeldef *src_modeldef = src_thing;
+				int num_texconfigs = PD_BE16(src_modeldef->numtexconfigs);
+				u32 texconfigpos = PD_BE32(src_modeldef->ptr_texconfigs);
+				setMarker(PD_BE32(src_modeldef->ptr_rootnode), CT_NODE, marker->src_offset);
+				setMarker(PD_BE32(src_modeldef->ptr_parts), CT_PARTS, marker->src_offset);
 
-			for (int i = 0; i < num_texconfigs; i++) {
-				setMarker(texconfigpos + sizeof(struct n64_textureconfig) * i, CT_TEXCONFIG, marker->src_offset);
+				for (int i = 0; i < num_texconfigs; i++) {
+					setMarker(texconfigpos + sizeof(struct n64_textureconfig) * i, CT_TEXCONFIG, marker->src_offset);
+				}
+				break;
 			}
-			break;
 		case CT_NODE:
-			struct n64_modelnode *src_node = src_thing;
-			u32 node_type = PD_BE16(src_node->type) & 0xff;
-			setMarker(PD_BE32(src_node->ptr_rodata), nodeTypeToContentType[node_type], marker->src_offset);
-			setMarker(PD_BE32(src_node->ptr_parent), CT_NODE, marker->src_offset);
-			setMarker(PD_BE32(src_node->ptr_next), CT_NODE, marker->src_offset);
-			setMarker(PD_BE32(src_node->ptr_prev), CT_NODE, marker->src_offset);
-			setMarker(PD_BE32(src_node->ptr_child), CT_NODE, marker->src_offset);
-			break;
+			{
+				struct n64_modelnode *src_node = src_thing;
+				u32 node_type = PD_BE16(src_node->type) & 0xff;
+				setMarker(PD_BE32(src_node->ptr_rodata), nodeTypeToContentType[node_type], marker->src_offset);
+				setMarker(PD_BE32(src_node->ptr_parent), CT_NODE, marker->src_offset);
+				setMarker(PD_BE32(src_node->ptr_next), CT_NODE, marker->src_offset);
+				setMarker(PD_BE32(src_node->ptr_prev), CT_NODE, marker->src_offset);
+				setMarker(PD_BE32(src_node->ptr_child), CT_NODE, marker->src_offset);
+				break;
+			}
 		case CT_TEXCONFIG:
-			struct n64_textureconfig *src_texconfig = src_thing;
-			if ((PD_BE32(src_texconfig->ptr) & 0xff000000) == 0x05000000) {
-				setMarker(PD_BE32(src_texconfig->ptr), CT_TEXDATA, marker->src_offset);
+			{
+				struct n64_textureconfig *src_texconfig = src_thing;
+				if ((PD_BE32(src_texconfig->ptr) & 0xff000000) == 0x05000000) {
+					setMarker(PD_BE32(src_texconfig->ptr), CT_TEXDATA, marker->src_offset);
+				}
+				break;
 			}
-			break;
 		case CT_PARTS:
-			struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
-			u32 *src_parts = (u32 *) src_thing;
-			int num_parts = PD_BE16(src_modeldef2->numparts);
+			{
+				struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
+				u32 *src_parts = (u32 *) src_thing;
+				int num_parts = PD_BE16(src_modeldef2->numparts);
 
-			for (int i = 0; i < num_parts; i++) {
-				setMarker(PD_BE32(src_parts[i]), CT_NODE, marker->src_offset);
+				for (int i = 0; i < num_parts; i++) {
+					setMarker(PD_BE32(src_parts[i]), CT_NODE, marker->src_offset);
+				}
+				break;
 			}
-			break;
 		case CT_RODATA_CHRINFO:
 			break;
 		case CT_RODATA_POSITION:
 			break;
 		case CT_RODATA_GUNDL:
-			struct n64_modelrodata_gundl *src_gundl = src_thing;
-			setMarker(PD_BE32(src_gundl->ptr_opagdl), CT_GDL, marker->src_offset);
-			setMarker(PD_BE32(src_gundl->ptr_xlugdl), CT_GDL, marker->src_offset);
-			setMarker(PD_BE32(src_gundl->ptr_vertices), CT_VTXCOL, marker->src_offset);
-			break;
-		case CT_RODATA_DISTANCE:
-			struct n64_modelrodata_distance *src_dist = src_thing;
-			setMarker(PD_BE32(src_dist->ptr_target), CT_NODE, marker->src_offset);
-			break;
-		case CT_RODATA_REORDER:
-			struct n64_modelrodata_reorder *src_reorder = src_thing;
-			setMarker(PD_BE32(src_reorder->ptr_node_unk18), CT_NODE, marker->src_offset);
-			setMarker(PD_BE32(src_reorder->ptr_node_unk1c), CT_NODE, marker->src_offset);
-			break;
-		case CT_RODATA_CHRGUNFIRE:
-			struct n64_modelrodata_chrgunfire *src_chrgunfire = src_thing;
-			setMarker(PD_BE32(src_chrgunfire->ptr_texture), CT_TEXCONFIG, marker->src_offset);
-			break;
-		case CT_RODATA_TOGGLE:
-			struct n64_modelrodata_toggle *src_toggle = src_thing;
-			setMarker(PD_BE32(src_toggle->ptr_target), CT_NODE, marker->src_offset);
-			break;
-		case CT_RODATA_STARGUNFIRE:
-			struct n64_modelrodata_stargunfire *src_stargunfire = src_thing;
-			colstart = PD_BE32(src_stargunfire->unk00)*4*(sizeof(s16) * 6);
-			u32 vtxstart = PD_BE32(src_stargunfire->ptr_vertices);
-			u32 vtxend = vtxstart + colstart;
-			colstart = ALIGN8(vtxstart + colstart);
-			setMarker(vtxstart, CT_VTXCOL4, marker->src_offset);
-			if (vtxend != colstart) { 
-				setMarker(vtxend, CT_SKIP, marker->src_offset);
+			{
+				struct n64_modelrodata_gundl *src_gundl = src_thing;
+				setMarker(PD_BE32(src_gundl->ptr_opagdl), CT_GDL, marker->src_offset);
+				setMarker(PD_BE32(src_gundl->ptr_xlugdl), CT_GDL, marker->src_offset);
+				setMarker(PD_BE32(src_gundl->ptr_vertices), CT_VTXCOL, marker->src_offset);
+				break;
 			}
-			setMarker(colstart, CT_VTXCOL, marker->src_offset);
-			setMarker(PD_BE32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
-			break;
+		case CT_RODATA_DISTANCE:
+			{
+				struct n64_modelrodata_distance *src_dist = src_thing;
+				setMarker(PD_BE32(src_dist->ptr_target), CT_NODE, marker->src_offset);
+				break;
+			}
+		case CT_RODATA_REORDER:
+			{
+				struct n64_modelrodata_reorder *src_reorder = src_thing;
+				setMarker(PD_BE32(src_reorder->ptr_node_unk18), CT_NODE, marker->src_offset);
+				setMarker(PD_BE32(src_reorder->ptr_node_unk1c), CT_NODE, marker->src_offset);
+				break;
+			}
+		case CT_RODATA_CHRGUNFIRE:
+			{
+				struct n64_modelrodata_chrgunfire *src_chrgunfire = src_thing;
+				setMarker(PD_BE32(src_chrgunfire->ptr_texture), CT_TEXCONFIG, marker->src_offset);
+				break;
+			}
+		case CT_RODATA_TOGGLE:
+			{
+				struct n64_modelrodata_toggle *src_toggle = src_thing;
+				setMarker(PD_BE32(src_toggle->ptr_target), CT_NODE, marker->src_offset);
+				break;
+			}
+		case CT_RODATA_STARGUNFIRE:
+			{
+				struct n64_modelrodata_stargunfire *src_stargunfire = src_thing;
+				colstart = PD_BE32(src_stargunfire->unk00)*4*(sizeof(s16) * 6);
+				u32 vtxstart = PD_BE32(src_stargunfire->ptr_vertices);
+				u32 vtxend = vtxstart + colstart;
+				colstart = ALIGN8(vtxstart + colstart);
+				setMarker(vtxstart, CT_VTXCOL4, marker->src_offset);
+				if (vtxend != colstart) { 
+					setMarker(vtxend, CT_SKIP, marker->src_offset);
+				}
+				setMarker(colstart, CT_VTXCOL, marker->src_offset);
+				setMarker(PD_BE32(src_stargunfire->ptr_gdl), CT_GDL, marker->src_offset);
+				break;
+			}
 		case CT_RODATA_DL:
-			struct n64_modelrodata_dl *src_dl = src_thing;
-			setMarker(PD_BE32(src_dl->ptr_opagdl), CT_GDL, marker->src_offset);
-			setMarker(PD_BE32(src_dl->ptr_xlugdl), CT_GDL, marker->src_offset);
-			setMarker(PD_BE32(src_dl->ptr_colours), CT_VTXCOL, marker->src_offset);
-			setMarker(PD_BE32(src_dl->ptr_vertices), CT_VTXCOL, marker->src_offset);
-			break;
+			{
+				struct n64_modelrodata_dl *src_dl = src_thing;
+				setMarker(PD_BE32(src_dl->ptr_opagdl), CT_GDL, marker->src_offset);
+				setMarker(PD_BE32(src_dl->ptr_xlugdl), CT_GDL, marker->src_offset);
+				setMarker(PD_BE32(src_dl->ptr_colours), CT_VTXCOL, marker->src_offset);
+				setMarker(PD_BE32(src_dl->ptr_vertices), CT_VTXCOL, marker->src_offset);
+				break;
+			}
 		case CT_TEXDATA:
 		case CT_VTXCOL:
 		case CT_GDL:
@@ -397,231 +419,269 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 
 		switch (marker->type) {
 		case CT_MODELDEF:
-			struct n64_modeldef *src_modeldef = src_thing;
-			struct modeldef *dst_modeldef = dst_thing;
-			dst_modeldef->skel = (void *)(uintptr_t)PD_BE32(src_modeldef->ptr_skel);
-			dst_modeldef->numparts = PD_BE16(src_modeldef->numparts);
-			dst_modeldef->nummatrices = PD_BE16(src_modeldef->nummatrices);
-			dst_modeldef->scale = PD_BE32(src_modeldef->scale);
-			dst_modeldef->rwdatalen = PD_BE16(src_modeldef->rwdatalen);
-			dst_modeldef->numtexconfigs = PD_BE16(src_modeldef->numtexconfigs);
-			dstpos += sizeof(*dst_modeldef);
-			break;
-		case CT_NODE:
-			struct n64_modelnode *src_node = src_thing;
-			struct modelnode *dst_node = dst_thing;
-			dst_node->type = PD_BE16(src_node->type);
-			dstpos += sizeof(*dst_node);
-			break;
-		case CT_TEXCONFIG:
-			struct n64_textureconfig *src_texconfig = src_thing;
-			struct textureconfig *dst_texconfig = dst_thing;
-
-			while (src_len >= sizeof(*src_texconfig)) {
-				if ((PD_BE32(src_texconfig->ptr) & 0xff000000) != 0x05000000) {
-					dst_texconfig->textureptr = (void *)(uintptr_t)PD_BE32(src_texconfig->ptr);
-				}
-
-				dst_texconfig->width = src_texconfig->width;
-				dst_texconfig->height = src_texconfig->height;
-				dst_texconfig->level = src_texconfig->level;
-				dst_texconfig->format = src_texconfig->format;
-				dst_texconfig->depth = src_texconfig->depth;
-				dst_texconfig->s = src_texconfig->s;
-				dst_texconfig->t = src_texconfig->t;
-				dst_texconfig->unk0b = src_texconfig->unk0b;
-
-				dstpos += sizeof(*dst_texconfig);
-				src_len -= sizeof(*src_texconfig);
-				src_texconfig++;
-				dst_texconfig++;
+			{
+				struct n64_modeldef *src_modeldef = src_thing;
+				struct modeldef *dst_modeldef = dst_thing;
+				dst_modeldef->skel = (void *)(uintptr_t)PD_BE32(src_modeldef->ptr_skel);
+				dst_modeldef->numparts = PD_BE16(src_modeldef->numparts);
+				dst_modeldef->nummatrices = PD_BE16(src_modeldef->nummatrices);
+				dst_modeldef->scale = PD_BE32(src_modeldef->scale);
+				dst_modeldef->rwdatalen = PD_BE16(src_modeldef->rwdatalen);
+				dst_modeldef->numtexconfigs = PD_BE16(src_modeldef->numtexconfigs);
+				dstpos += sizeof(*dst_modeldef);
+				break;
 			}
-			break;
+		case CT_NODE:
+			{
+				struct n64_modelnode *src_node = src_thing;
+				struct modelnode *dst_node = dst_thing;
+				dst_node->type = PD_BE16(src_node->type);
+				dstpos += sizeof(*dst_node);
+				break;
+			}
+		case CT_TEXCONFIG:
+			{
+				struct n64_textureconfig *src_texconfig = src_thing;
+				struct textureconfig *dst_texconfig = dst_thing;
+
+				while (src_len >= sizeof(*src_texconfig)) {
+					if ((PD_BE32(src_texconfig->ptr) & 0xff000000) != 0x05000000) {
+						dst_texconfig->textureptr = (void *)(uintptr_t)PD_BE32(src_texconfig->ptr);
+					}
+
+					dst_texconfig->width = src_texconfig->width;
+					dst_texconfig->height = src_texconfig->height;
+					dst_texconfig->level = src_texconfig->level;
+					dst_texconfig->format = src_texconfig->format;
+					dst_texconfig->depth = src_texconfig->depth;
+					dst_texconfig->s = src_texconfig->s;
+					dst_texconfig->t = src_texconfig->t;
+					dst_texconfig->unk0b = src_texconfig->unk0b;
+
+					dstpos += sizeof(*dst_texconfig);
+					src_len -= sizeof(*src_texconfig);
+					src_texconfig++;
+					dst_texconfig++;
+				}
+				break;
+			}
 		case CT_TEXDATA:
 			memcpy(dst_thing, src_thing, src_len);
 			dstpos += src_len;
 			break;
 		case CT_PARTS:
-			struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
-			u32 *src_parts = (u32 *) src_thing;
-			uintptr_t *dst_parts = (uintptr_t *) dst_thing;
-			int num_parts = PD_BE16(src_modeldef2->numparts);
-			u16 *src_nums = (u16 *) &src_parts[num_parts];
-			u16 *dst_nums = (u16 *) &dst_parts[num_parts];
+			{
+				struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
+				u32 *src_parts = (u32 *) src_thing;
+				uintptr_t *dst_parts = (uintptr_t *) dst_thing;
+				int num_parts = PD_BE16(src_modeldef2->numparts);
+				u16 *src_nums = (u16 *) &src_parts[num_parts];
+				u16 *dst_nums = (u16 *) &dst_parts[num_parts];
 
-			for (int i = 0; i < num_parts; i++) {
-				dst_nums[i] = PD_BE16(src_nums[i]);
+				for (int i = 0; i < num_parts; i++) {
+					dst_nums[i] = PD_BE16(src_nums[i]);
+				}
+				dstpos += num_parts * sizeof(uintptr_t) + num_parts * sizeof(u16);
+				if (num_parts) {
+					dstpos = ALIGN8(dstpos);
+				}
+				break;
 			}
-			dstpos += num_parts * sizeof(uintptr_t) + num_parts * sizeof(u16);
-			if (num_parts) {
-				dstpos = ALIGN8(dstpos);
-			}
-			break;
 		case CT_VTXCOL:
 		case CT_VTXCOL4:
 			memcpy(dst_thing, src_thing, src_len);
 			dstpos += src_len;
 			break;
 		case CT_GDL:
-			struct marker *parent = findMarker(marker->parent_src_offset);
-			u32 src_vtx;
-			u32 dst_vtx;
+			{
+				struct marker *parent = findMarker(marker->parent_src_offset);
+				u32 src_vtx;
+				u32 dst_vtx;
 
-			if (parent->type == CT_RODATA_GUNDL) {
-				struct n64_modelrodata_gundl *src_rodata = (struct n64_modelrodata_gundl *) &src[parent->src_offset];
-				struct modelrodata_gundl *dst_rodata = (struct modelrodata_gundl *) &dst[parent->dst_offset];
-				src_vtx = PD_BE32(src_rodata->ptr_vertices) & 0x00ffffff;
-				dst_vtx = ((uintptr_t)dst_rodata->vertices) & 0x00ffffff;
-			} else if (parent->type == CT_RODATA_STARGUNFIRE) {
-				struct n64_modelrodata_stargunfire *src_rodata = (struct n64_modelrodata_stargunfire *) &src[parent->src_offset];
-				struct modelrodata_stargunfire *dst_rodata = (struct modelrodata_stargunfire *) &dst[parent->dst_offset];
-				src_vtx = PD_BE32(src_rodata->ptr_vertices) & 0x00ffffff;
-				dst_vtx = ((uintptr_t)dst_rodata->vertices) & 0x00ffffff;
-			} else if (parent->type == CT_RODATA_DL) {
-				struct n64_modelrodata_dl *src_rodata = (struct n64_modelrodata_dl *) &src[parent->src_offset];
-				struct modelrodata_dl *dst_rodata = (struct modelrodata_dl *) &dst[parent->dst_offset];
-				src_vtx = PD_BE32(src_rodata->ptr_vertices) & 0x00ffffff;
-				dst_vtx = ((uintptr_t)dst_rodata->vertices) & 0x00ffffff;
+				if (parent->type == CT_RODATA_GUNDL) {
+					struct n64_modelrodata_gundl *src_rodata = (struct n64_modelrodata_gundl *) &src[parent->src_offset];
+					struct modelrodata_gundl *dst_rodata = (struct modelrodata_gundl *) &dst[parent->dst_offset];
+					src_vtx = PD_BE32(src_rodata->ptr_vertices) & 0x00ffffff;
+					dst_vtx = ((uintptr_t)dst_rodata->vertices) & 0x00ffffff;
+				} else if (parent->type == CT_RODATA_STARGUNFIRE) {
+					struct n64_modelrodata_stargunfire *src_rodata = (struct n64_modelrodata_stargunfire *) &src[parent->src_offset];
+					struct modelrodata_stargunfire *dst_rodata = (struct modelrodata_stargunfire *) &dst[parent->dst_offset];
+					src_vtx = PD_BE32(src_rodata->ptr_vertices) & 0x00ffffff;
+					dst_vtx = ((uintptr_t)dst_rodata->vertices) & 0x00ffffff;
+				} else if (parent->type == CT_RODATA_DL) {
+					struct n64_modelrodata_dl *src_rodata = (struct n64_modelrodata_dl *) &src[parent->src_offset];
+					struct modelrodata_dl *dst_rodata = (struct modelrodata_dl *) &dst[parent->dst_offset];
+					src_vtx = PD_BE32(src_rodata->ptr_vertices) & 0x00ffffff;
+					dst_vtx = ((uintptr_t)dst_rodata->vertices) & 0x00ffffff;
+				}
+
+				dstpos = gbiConvertGdl(dst, dstpos, src, marker->src_offset, 0);
+				break;
 			}
-
-			dstpos = gbiConvertGdl(dst, dstpos, src, marker->src_offset, 0);
-			break;
 		case CT_RODATA_CHRINFO:
-			struct modelrodata_chrinfo *src_chrinfo = src_thing;
-			struct modelrodata_chrinfo *dst_chrinfo = dst_thing;
-			dst_chrinfo->animpart = PD_BE16(src_chrinfo->animpart);
-			dst_chrinfo->mtxindex = PD_BE16(src_chrinfo->mtxindex);
-			dst_chrinfo->unk04 = PD_BE32(src_chrinfo->unk04);
-			dst_chrinfo->rwdataindex = PD_BE16(src_chrinfo->rwdataindex);
-			dstpos += sizeof(*dst_chrinfo);
-			break;
-		case CT_RODATA_POSITION:
-			struct modelrodata_position *src_position = src_thing;
-			struct modelrodata_position *dst_position = dst_thing;
-			dst_position->pos = PD_SWAPPED_VAL(src_position->pos);
-			dst_position->part = PD_BE16(src_position->part);
-			dst_position->mtxindexes[0] = PD_BE16(src_position->mtxindexes[0]);
-			dst_position->mtxindexes[1] = PD_BE16(src_position->mtxindexes[1]);
-			dst_position->mtxindexes[2] = PD_BE16(src_position->mtxindexes[2]);
-			dst_position->drawdist = PD_SWAPPED_VAL(src_position->drawdist);
-			dstpos += sizeof(*dst_position);
-			break;
-		case CT_RODATA_GUNDL:
-			struct n64_modelrodata_gundl *src_gundl = src_thing;
-			struct modelrodata_gundl *dst_gundl = dst_thing;
-			dst_gundl->vertices = NULL;
-			dst_gundl->numvertices = PD_BE16(src_gundl->numvertices);
-			dst_gundl->unk12 = PD_BE16(src_gundl->unk12);
-			dstpos += sizeof(*dst_gundl);
-			break;
-		case CT_RODATA_DISTANCE:
-			struct n64_modelrodata_distance *src_dist = src_thing;
-			struct modelrodata_distance *dst_dist = dst_thing;
-			dst_dist->near = PD_SWAPPED_VAL(src_dist->near);
-			dst_dist->far = PD_SWAPPED_VAL(src_dist->far);
-			dst_dist->rwdataindex = PD_BE16(src_dist->rwdataindex);
-			dstpos += sizeof(*dst_dist);
-			break;
-		case CT_RODATA_REORDER:
-			struct n64_modelrodata_reorder *src_reorder = src_thing;
-			struct modelrodata_reorder *dst_reorder = dst_thing;
-			dst_reorder->unk00 = PD_SWAPPED_VAL(src_reorder->unk00);
-			dst_reorder->unk04 = PD_SWAPPED_VAL(src_reorder->unk04);
-			dst_reorder->unk08 = PD_SWAPPED_VAL(src_reorder->unk08);
-			dst_reorder->unk0c[0] = PD_SWAPPED_VAL(src_reorder->unk0c[0]);
-			dst_reorder->unk0c[1] = PD_SWAPPED_VAL(src_reorder->unk0c[1]);
-			dst_reorder->unk0c[2] = PD_SWAPPED_VAL(src_reorder->unk0c[2]);
-			dst_reorder->side = PD_BE16(src_reorder->side);
-			dst_reorder->rwdataindex = PD_BE16(src_reorder->rwdataindex);
-			dstpos += sizeof(*dst_reorder);
-			break;
-		case CT_RODATA_BBOX:
-			struct modelrodata_bbox *src_bbox = src_thing;
-			struct modelrodata_bbox *dst_bbox = dst_thing;
-			dst_bbox->hitpart = PD_BE32(src_bbox->hitpart);
-			dst_bbox->xmin = PD_SWAPPED_VAL(src_bbox->xmin);
-			dst_bbox->xmax = PD_SWAPPED_VAL(src_bbox->xmax);
-			dst_bbox->ymin = PD_SWAPPED_VAL(src_bbox->ymin);
-			dst_bbox->ymax = PD_SWAPPED_VAL(src_bbox->ymax);
-			dst_bbox->zmin = PD_SWAPPED_VAL(src_bbox->zmin);
-			dst_bbox->zmax = PD_SWAPPED_VAL(src_bbox->zmax);
-			dstpos += sizeof(*dst_bbox);
-			break;
-		case CT_RODATA_CHRGUNFIRE:
-			struct n64_modelrodata_chrgunfire *src_chrgunfire = src_thing;
-			struct modelrodata_chrgunfire *dst_chrgunfire = dst_thing;
-			dst_chrgunfire->pos = PD_SWAPPED_VAL(src_chrgunfire->pos);
-			dst_chrgunfire->dim = PD_SWAPPED_VAL(src_chrgunfire->dim);
-			dst_chrgunfire->unk1c = PD_SWAPPED_VAL(src_chrgunfire->unk1c);
-			dst_chrgunfire->rwdataindex = PD_BE16(src_chrgunfire->rwdataindex);
-			dst_chrgunfire->baseaddr = NULL;
-			dstpos += sizeof(*dst_chrgunfire);
-			break;
-		case CT_RODATA_11:
-			struct n64_modelrodata_type11 *src_type11 = src_thing;
-			struct modelrodata_type11 *dst_type11 = dst_thing;
-			dst_type11->unk00 = PD_BE32(src_type11->unk00);
-			dst_type11->unk04 = PD_BE32(src_type11->unk04);
-			dst_type11->unk08 = PD_BE32(src_type11->unk08);
-			dst_type11->unk0c = PD_BE32(src_type11->unk0c);
-			dst_type11->unk10 = PD_BE32(src_type11->unk10);
-			dst_type11->unk14 = NULL;
-			dst_type11->unk18 = PD_BE32(src_type11->extra1);
-			dst_type11->unk1c = PD_BE32(src_type11->extra2);
-			dstpos += sizeof(*dst_type11);
-			break;
-		case CT_RODATA_TOGGLE:
-			struct n64_modelrodata_toggle *src_toggle = src_thing;
-			struct modelrodata_toggle *dst_toggle = dst_thing;
-			dst_toggle->rwdataindex = PD_BE16(src_toggle->rwdataindex);
-			dstpos += sizeof(*dst_toggle);
-			break;
-		case CT_RODATA_POSITIONHELD:
-			struct modelrodata_positionheld *src_posheld = src_thing;
-			struct modelrodata_positionheld *dst_posheld = dst_thing;
-			dst_posheld->pos = PD_SWAPPED_VAL(src_posheld->pos);
-			dst_posheld->mtxindex = PD_BE16(src_posheld->mtxindex);
-			dst_posheld->unk10 = PD_BE32(src_posheld->unk10);
-			dstpos += sizeof(*dst_posheld);
-			break;
-		case CT_RODATA_STARGUNFIRE:
-			struct n64_modelrodata_stargunfire *src_stargunfire = src_thing;
-			struct modelrodata_stargunfire *dst_stargunfire = dst_thing;
-			dst_stargunfire->unk00 = PD_BE32(src_stargunfire->unk00);
-			dstpos += sizeof(*dst_stargunfire);
-			break;
-		case CT_RODATA_HEADSPOT:
-			struct modelrodata_headspot *src_headspot = src_thing;
-			struct modelrodata_headspot *dst_headspot = dst_thing;
-			dst_headspot->rwdataindex = PD_BE16(src_headspot->rwdataindex);
-			dstpos += sizeof(*dst_headspot);
-			break;
-		case CT_RODATA_DL:
-			struct n64_modelrodata_dl *src_dl = src_thing;
-			struct modelrodata_dl *dst_dl = dst_thing;
-			dst_dl->numvertices = PD_BE16(src_dl->numvertices);
-			dst_dl->mcount = PD_BE16(src_dl->mcount);
-			dst_dl->rwdataindex = PD_BE16(src_dl->rwdataindex);
-			dst_dl->numcolours = PD_BE16(src_dl->numcolours);
-			dstpos += sizeof(*dst_dl);
-			break;
-		case CT_RODATA_19:
-			struct modelrodata_type19 *src_type19 = src_thing;
-			struct modelrodata_type19 *dst_type19 = dst_thing;
-			u32 *src_vertices = src_thing + sizeof(u32);
-			u32 *dst_vertices = dst_thing + sizeof(u32);
-			int num_vertices = PD_BE32(src_type19->numvertices);
-
-			dst_type19->numvertices = (num_vertices);
-			dstpos += sizeof(u32);
-
-			for (int i = 0; i < num_vertices; i++) {
-				dst_vertices[i * 3 + 0] = PD_BE32(src_vertices[i * 3 + 0]);
-				dst_vertices[i * 3 + 1] = PD_BE32(src_vertices[i * 3 + 1]);
-				dst_vertices[i * 3 + 2] = PD_BE32(src_vertices[i * 3 + 2]);
-				dstpos += sizeof(u32) * 3;
+			{
+				struct modelrodata_chrinfo *src_chrinfo = src_thing;
+				struct modelrodata_chrinfo *dst_chrinfo = dst_thing;
+				dst_chrinfo->animpart = PD_BE16(src_chrinfo->animpart);
+				dst_chrinfo->mtxindex = PD_BE16(src_chrinfo->mtxindex);
+				dst_chrinfo->unk04 = PD_BE32(src_chrinfo->unk04);
+				dst_chrinfo->rwdataindex = PD_BE16(src_chrinfo->rwdataindex);
+				dstpos += sizeof(*dst_chrinfo);
+				break;
 			}
-			break;
+		case CT_RODATA_POSITION:
+			{
+				struct modelrodata_position *src_position = src_thing;
+				struct modelrodata_position *dst_position = dst_thing;
+				dst_position->pos = PD_SWAPPED_VAL(src_position->pos);
+				dst_position->part = PD_BE16(src_position->part);
+				dst_position->mtxindexes[0] = PD_BE16(src_position->mtxindexes[0]);
+				dst_position->mtxindexes[1] = PD_BE16(src_position->mtxindexes[1]);
+				dst_position->mtxindexes[2] = PD_BE16(src_position->mtxindexes[2]);
+				dst_position->drawdist = PD_SWAPPED_VAL(src_position->drawdist);
+				dstpos += sizeof(*dst_position);
+				break;
+			}
+		case CT_RODATA_GUNDL:
+			{
+				struct n64_modelrodata_gundl *src_gundl = src_thing;
+				struct modelrodata_gundl *dst_gundl = dst_thing;
+				dst_gundl->vertices = NULL;
+				dst_gundl->numvertices = PD_BE16(src_gundl->numvertices);
+				dst_gundl->unk12 = PD_BE16(src_gundl->unk12);
+				dstpos += sizeof(*dst_gundl);
+				break;
+			}
+		case CT_RODATA_DISTANCE:
+			{
+				struct n64_modelrodata_distance *src_dist = src_thing;
+				struct modelrodata_distance *dst_dist = dst_thing;
+				dst_dist->near = PD_SWAPPED_VAL(src_dist->near);
+				dst_dist->far = PD_SWAPPED_VAL(src_dist->far);
+				dst_dist->rwdataindex = PD_BE16(src_dist->rwdataindex);
+				dstpos += sizeof(*dst_dist);
+				break;
+			}
+		case CT_RODATA_REORDER:
+			{
+				struct n64_modelrodata_reorder *src_reorder = src_thing;
+				struct modelrodata_reorder *dst_reorder = dst_thing;
+				dst_reorder->unk00 = PD_SWAPPED_VAL(src_reorder->unk00);
+				dst_reorder->unk04 = PD_SWAPPED_VAL(src_reorder->unk04);
+				dst_reorder->unk08 = PD_SWAPPED_VAL(src_reorder->unk08);
+				dst_reorder->unk0c[0] = PD_SWAPPED_VAL(src_reorder->unk0c[0]);
+				dst_reorder->unk0c[1] = PD_SWAPPED_VAL(src_reorder->unk0c[1]);
+				dst_reorder->unk0c[2] = PD_SWAPPED_VAL(src_reorder->unk0c[2]);
+				dst_reorder->side = PD_BE16(src_reorder->side);
+				dst_reorder->rwdataindex = PD_BE16(src_reorder->rwdataindex);
+				dstpos += sizeof(*dst_reorder);
+				break;
+			}
+		case CT_RODATA_BBOX:
+			{
+				struct modelrodata_bbox *src_bbox = src_thing;
+				struct modelrodata_bbox *dst_bbox = dst_thing;
+				dst_bbox->hitpart = PD_BE32(src_bbox->hitpart);
+				dst_bbox->xmin = PD_SWAPPED_VAL(src_bbox->xmin);
+				dst_bbox->xmax = PD_SWAPPED_VAL(src_bbox->xmax);
+				dst_bbox->ymin = PD_SWAPPED_VAL(src_bbox->ymin);
+				dst_bbox->ymax = PD_SWAPPED_VAL(src_bbox->ymax);
+				dst_bbox->zmin = PD_SWAPPED_VAL(src_bbox->zmin);
+				dst_bbox->zmax = PD_SWAPPED_VAL(src_bbox->zmax);
+				dstpos += sizeof(*dst_bbox);
+				break;
+			}
+		case CT_RODATA_CHRGUNFIRE:
+			{
+				struct n64_modelrodata_chrgunfire *src_chrgunfire = src_thing;
+				struct modelrodata_chrgunfire *dst_chrgunfire = dst_thing;
+				dst_chrgunfire->pos = PD_SWAPPED_VAL(src_chrgunfire->pos);
+				dst_chrgunfire->dim = PD_SWAPPED_VAL(src_chrgunfire->dim);
+				dst_chrgunfire->unk1c = PD_SWAPPED_VAL(src_chrgunfire->unk1c);
+				dst_chrgunfire->rwdataindex = PD_BE16(src_chrgunfire->rwdataindex);
+				dst_chrgunfire->baseaddr = NULL;
+				dstpos += sizeof(*dst_chrgunfire);
+				break;
+			}
+		case CT_RODATA_11:
+			{
+				struct n64_modelrodata_type11 *src_type11 = src_thing;
+				struct modelrodata_type11 *dst_type11 = dst_thing;
+				dst_type11->unk00 = PD_BE32(src_type11->unk00);
+				dst_type11->unk04 = PD_BE32(src_type11->unk04);
+				dst_type11->unk08 = PD_BE32(src_type11->unk08);
+				dst_type11->unk0c = PD_BE32(src_type11->unk0c);
+				dst_type11->unk10 = PD_BE32(src_type11->unk10);
+				dst_type11->unk14 = NULL;
+				dst_type11->unk18 = PD_BE32(src_type11->extra1);
+				dst_type11->unk1c = PD_BE32(src_type11->extra2);
+				dstpos += sizeof(*dst_type11);
+				break;
+			}
+		case CT_RODATA_TOGGLE:
+			{
+				struct n64_modelrodata_toggle *src_toggle = src_thing;
+				struct modelrodata_toggle *dst_toggle = dst_thing;
+				dst_toggle->rwdataindex = PD_BE16(src_toggle->rwdataindex);
+				dstpos += sizeof(*dst_toggle);
+				break;
+			}
+		case CT_RODATA_POSITIONHELD:
+			{
+				struct modelrodata_positionheld *src_posheld = src_thing;
+				struct modelrodata_positionheld *dst_posheld = dst_thing;
+				dst_posheld->pos = PD_SWAPPED_VAL(src_posheld->pos);
+				dst_posheld->mtxindex = PD_BE16(src_posheld->mtxindex);
+				dst_posheld->unk10 = PD_BE32(src_posheld->unk10);
+				dstpos += sizeof(*dst_posheld);
+				break;
+			}
+		case CT_RODATA_STARGUNFIRE:
+			{
+				struct n64_modelrodata_stargunfire *src_stargunfire = src_thing;
+				struct modelrodata_stargunfire *dst_stargunfire = dst_thing;
+				dst_stargunfire->unk00 = PD_BE32(src_stargunfire->unk00);
+				dstpos += sizeof(*dst_stargunfire);
+				break;
+			}
+		case CT_RODATA_HEADSPOT:
+			{
+				struct modelrodata_headspot *src_headspot = src_thing;
+				struct modelrodata_headspot *dst_headspot = dst_thing;
+				dst_headspot->rwdataindex = PD_BE16(src_headspot->rwdataindex);
+				dstpos += sizeof(*dst_headspot);
+				break;
+			}
+		case CT_RODATA_DL:
+			{
+				struct n64_modelrodata_dl *src_dl = src_thing;
+				struct modelrodata_dl *dst_dl = dst_thing;
+				dst_dl->numvertices = PD_BE16(src_dl->numvertices);
+				dst_dl->mcount = PD_BE16(src_dl->mcount);
+				dst_dl->rwdataindex = PD_BE16(src_dl->rwdataindex);
+				dst_dl->numcolours = PD_BE16(src_dl->numcolours);
+				dstpos += sizeof(*dst_dl);
+				break;
+			}
+		case CT_RODATA_19:
+			{
+				struct modelrodata_type19 *src_type19 = src_thing;
+				struct modelrodata_type19 *dst_type19 = dst_thing;
+				u32 *src_vertices = src_thing + sizeof(u32);
+				u32 *dst_vertices = dst_thing + sizeof(u32);
+				int num_vertices = PD_BE32(src_type19->numvertices);
+
+				dst_type19->numvertices = (num_vertices);
+				dstpos += sizeof(u32);
+
+				for (int i = 0; i < num_vertices; i++) {
+					dst_vertices[i * 3 + 0] = PD_BE32(src_vertices[i * 3 + 0]);
+					dst_vertices[i * 3 + 1] = PD_BE32(src_vertices[i * 3 + 1]);
+					dst_vertices[i * 3 + 2] = PD_BE32(src_vertices[i * 3 + 2]);
+					dstpos += sizeof(u32) * 3;
+				}
+				break;
+			}
 		case CT_SKIP: 
 			break;
 		}
@@ -655,125 +715,147 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 
 		switch (marker->type) {
 		case CT_MODELDEF:
-			struct n64_modeldef *src_modeldef = src_thing;
-			struct modeldef *dst_modeldef = dst_thing;
-			dst_modeldef->rootnode = (void *)(uintptr_t)resolvePointer(PD_BE32(src_modeldef->ptr_rootnode));
-			dst_modeldef->parts = (void *)(uintptr_t)resolvePointer(PD_BE32(src_modeldef->ptr_parts));
-			dst_modeldef->texconfigs = (void *)(uintptr_t)resolvePointer(PD_BE32(src_modeldef->ptr_texconfigs));
-			break;
+			{
+				struct n64_modeldef *src_modeldef = src_thing;
+				struct modeldef *dst_modeldef = dst_thing;
+				dst_modeldef->rootnode = (void *)(uintptr_t)resolvePointer(PD_BE32(src_modeldef->ptr_rootnode));
+				dst_modeldef->parts = (void *)(uintptr_t)resolvePointer(PD_BE32(src_modeldef->ptr_parts));
+				dst_modeldef->texconfigs = (void *)(uintptr_t)resolvePointer(PD_BE32(src_modeldef->ptr_texconfigs));
+				break;
+			}
 		case CT_NODE:
-			struct n64_modelnode *src_node = src_thing;
-			struct modelnode *dst_node = dst_thing;
-			dst_node->rodata = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_rodata));
-			dst_node->parent = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_parent));
-			dst_node->next = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_next));
-			dst_node->prev = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_prev));
-			dst_node->child = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_child));
+			{
+				struct n64_modelnode *src_node = src_thing;
+				struct modelnode *dst_node = dst_thing;
+				dst_node->rodata = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_rodata));
+				dst_node->parent = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_parent));
+				dst_node->next = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_next));
+				dst_node->prev = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_prev));
+				dst_node->child = (void *)(uintptr_t)resolvePointer(PD_BE32(src_node->ptr_child));
 
-			lowestptr = (uintptr_t)dst_node->rodata;
-			break;
+				lowestptr = (uintptr_t)dst_node->rodata;
+				break;
+			}
 		case CT_TEXCONFIG:
-			struct n64_textureconfig *src_texconfig = src_thing;
-			struct textureconfig *dst_texconfig = dst_thing;
-			if ((PD_BE32(src_texconfig->ptr) & 0xff000000) == 0x05000000) {
-				dst_texconfig->textureptr = (void *)(uintptr_t)resolvePointer(PD_BE32(src_texconfig->ptr));
-				gbiAddTexAddr(PD_BE32(src_texconfig->ptr), (uintptr_t)dst_texconfig->textureptr);
+			{
+				struct n64_textureconfig *src_texconfig = src_thing;
+				struct textureconfig *dst_texconfig = dst_thing;
+				if ((PD_BE32(src_texconfig->ptr) & 0xff000000) == 0x05000000) {
+					dst_texconfig->textureptr = (void *)(uintptr_t)resolvePointer(PD_BE32(src_texconfig->ptr));
+					gbiAddTexAddr(PD_BE32(src_texconfig->ptr), (uintptr_t)dst_texconfig->textureptr);
+				}
+				break;
 			}
-			break;
 		case CT_PARTS:
-			struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
-			u32 *src_parts = (u32 *) src_thing;
-			uintptr_t *dst_parts = (uintptr_t *) dst_thing;
-			int num_parts = PD_BE16(src_modeldef2->numparts);
+			{
+				struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
+				u32 *src_parts = (u32 *) src_thing;
+				uintptr_t *dst_parts = (uintptr_t *) dst_thing;
+				int num_parts = PD_BE16(src_modeldef2->numparts);
 
-			for (int i = 0; i < num_parts; i++) {
-				dst_parts[i] = (resolvePointer(PD_BE32(src_parts[i])));
+				for (int i = 0; i < num_parts; i++) {
+					dst_parts[i] = (resolvePointer(PD_BE32(src_parts[i])));
+				}
+				break;
 			}
-			break;
 		case CT_RODATA_CHRINFO:
 			break;
 		case CT_RODATA_POSITION:
 			break;
 		case CT_RODATA_GUNDL:
-			struct n64_modelrodata_gundl *src_gundl = src_thing;
-			struct modelrodata_gundl *dst_gundl = dst_thing;
-			dst_gundl->opagdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_gundl->ptr_opagdl));
-			dst_gundl->xlugdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_gundl->ptr_xlugdl));
-			dst_gundl->vertices = (void *)(uintptr_t)resolvePointer(PD_BE32(src_gundl->ptr_vertices));
-			
-			gbiConvertVtx(dst, ((uintptr_t)dst_gundl->vertices) & 0x00ffffff, dst_gundl->numvertices);
+			{
+				struct n64_modelrodata_gundl *src_gundl = src_thing;
+				struct modelrodata_gundl *dst_gundl = dst_thing;
+				dst_gundl->opagdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_gundl->ptr_opagdl));
+				dst_gundl->xlugdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_gundl->ptr_xlugdl));
+				dst_gundl->vertices = (void *)(uintptr_t)resolvePointer(PD_BE32(src_gundl->ptr_vertices));
+				
+				gbiConvertVtx(dst, ((uintptr_t)dst_gundl->vertices) & 0x00ffffff, dst_gundl->numvertices);
 
-			gbiSetVtx(PD_BE32(src_gundl->ptr_vertices), (uintptr_t)dst_gundl->vertices);
-			gbiSetSegment(0x04, (uintptr_t)dst_gundl->vertices);
+				gbiSetVtx(PD_BE32(src_gundl->ptr_vertices), (uintptr_t)dst_gundl->vertices);
+				gbiSetSegment(0x04, (uintptr_t)dst_gundl->vertices);
 
-			gbiGdlRewriteAddrs(dst, (uintptr_t)dst_gundl->opagdl);
-			gbiGdlRewriteAddrs(dst, (uintptr_t)dst_gundl->xlugdl);
+				gbiGdlRewriteAddrs(dst, (uintptr_t)dst_gundl->opagdl);
+				gbiGdlRewriteAddrs(dst, (uintptr_t)dst_gundl->xlugdl);
 
-			if (dst_gundl->opagdl) dst_gundl->opagdl = SEGADDR(dst_gundl->opagdl);
-			if (dst_gundl->xlugdl) dst_gundl->xlugdl = SEGADDR(dst_gundl->xlugdl);
+				if (dst_gundl->opagdl) dst_gundl->opagdl = SEGADDR(dst_gundl->opagdl);
+				if (dst_gundl->xlugdl) dst_gundl->xlugdl = SEGADDR(dst_gundl->xlugdl);
 
-			lowestptr = minPtr3((uintptr_t)dst_gundl->opagdl, (uintptr_t)dst_gundl->xlugdl, (uintptr_t)dst_gundl->vertices);
-			break;
-		case CT_RODATA_DISTANCE:
-			struct n64_modelrodata_distance *src_dist = src_thing;
-			struct modelrodata_distance *dst_dist = dst_thing;
-			dst_dist->target = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dist->ptr_target));
-			break;
-		case CT_RODATA_REORDER:
-			struct n64_modelrodata_reorder *src_reorder = src_thing;
-			struct modelrodata_reorder *dst_reorder = dst_thing;
-			dst_reorder->unk18 = (void *)(uintptr_t)resolvePointer(PD_BE32(src_reorder->ptr_node_unk18));
-			dst_reorder->unk1c = (void *)(uintptr_t)resolvePointer(PD_BE32(src_reorder->ptr_node_unk1c));
-			break;
-		case CT_RODATA_CHRGUNFIRE:
-			struct n64_modelrodata_chrgunfire *src_chrgunfire = src_thing;
-			struct modelrodata_chrgunfire *dst_chrgunfire = dst_thing;
-			dst_chrgunfire->texture = (void *)(uintptr_t)resolvePointer(PD_BE32(src_chrgunfire->ptr_texture));
-			if ((PD_BE32((u32)(uintptr_t)dst_chrgunfire->texture) & 0xff000000) == 0x05000000) {
-				gbiAddTexAddr(PD_BE32((u32)(uintptr_t)dst_chrgunfire->texture), (uintptr_t)dst_chrgunfire->texture);
+				lowestptr = minPtr3((uintptr_t)dst_gundl->opagdl, (uintptr_t)dst_gundl->xlugdl, (uintptr_t)dst_gundl->vertices);
+				break;
 			}
-			break;
+		case CT_RODATA_DISTANCE:
+			{
+				struct n64_modelrodata_distance *src_dist = src_thing;
+				struct modelrodata_distance *dst_dist = dst_thing;
+				dst_dist->target = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dist->ptr_target));
+				break;
+			}
+		case CT_RODATA_REORDER:
+			{
+				struct n64_modelrodata_reorder *src_reorder = src_thing;
+				struct modelrodata_reorder *dst_reorder = dst_thing;
+				dst_reorder->unk18 = (void *)(uintptr_t)resolvePointer(PD_BE32(src_reorder->ptr_node_unk18));
+				dst_reorder->unk1c = (void *)(uintptr_t)resolvePointer(PD_BE32(src_reorder->ptr_node_unk1c));
+				break;
+			}
+		case CT_RODATA_CHRGUNFIRE:
+			{
+				struct n64_modelrodata_chrgunfire *src_chrgunfire = src_thing;
+				struct modelrodata_chrgunfire *dst_chrgunfire = dst_thing;
+				dst_chrgunfire->texture = (void *)(uintptr_t)resolvePointer(PD_BE32(src_chrgunfire->ptr_texture));
+				if ((PD_BE32((u32)(uintptr_t)dst_chrgunfire->texture) & 0xff000000) == 0x05000000) {
+					gbiAddTexAddr(PD_BE32((u32)(uintptr_t)dst_chrgunfire->texture), (uintptr_t)dst_chrgunfire->texture);
+				}
+				break;
+			}
 		case CT_RODATA_TOGGLE:
-			struct n64_modelrodata_toggle *src_toggle = src_thing;
-			struct modelrodata_toggle *dst_toggle = dst_thing;
-			dst_toggle->target = (void *)(uintptr_t)resolvePointer(PD_BE32(src_toggle->ptr_target));
-			break;
+			{
+				struct n64_modelrodata_toggle *src_toggle = src_thing;
+				struct modelrodata_toggle *dst_toggle = dst_thing;
+				dst_toggle->target = (void *)(uintptr_t)resolvePointer(PD_BE32(src_toggle->ptr_target));
+				break;
+			}
 		case CT_RODATA_STARGUNFIRE:
-			struct n64_modelrodata_stargunfire *src_stargunfire = src_thing;
-			struct modelrodata_stargunfire *dst_stargunfire = dst_thing;
-			dst_stargunfire->vertices = (void *)(uintptr_t)resolvePointer(PD_BE32(src_stargunfire->ptr_vertices));
-			dst_stargunfire->gdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_stargunfire->ptr_gdl));
+			{
+				struct n64_modelrodata_stargunfire *src_stargunfire = src_thing;
+				struct modelrodata_stargunfire *dst_stargunfire = dst_thing;
+				dst_stargunfire->vertices = (void *)(uintptr_t)resolvePointer(PD_BE32(src_stargunfire->ptr_vertices));
+				dst_stargunfire->gdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_stargunfire->ptr_gdl));
 
-			gbiConvertVtx(dst, ((uintptr_t)dst_stargunfire->vertices) & 0x00ffffff, dst_stargunfire->unk00*4);
+				gbiConvertVtx(dst, ((uintptr_t)dst_stargunfire->vertices) & 0x00ffffff, dst_stargunfire->unk00*4);
 
-			gbiSetVtx(PD_BE32(src_stargunfire->ptr_vertices), (uintptr_t)dst_stargunfire->vertices);
-			gbiSetSegment(0x04, (uintptr_t)dst_stargunfire->vertices);
-			gbiGdlRewriteAddrs(dst, (uintptr_t)dst_stargunfire->gdl);
-			if (dst_stargunfire->gdl) dst_stargunfire->gdl = SEGADDR(dst_stargunfire->gdl);
+				gbiSetVtx(PD_BE32(src_stargunfire->ptr_vertices), (uintptr_t)dst_stargunfire->vertices);
+				gbiSetSegment(0x04, (uintptr_t)dst_stargunfire->vertices);
+				gbiGdlRewriteAddrs(dst, (uintptr_t)dst_stargunfire->gdl);
+				if (dst_stargunfire->gdl) dst_stargunfire->gdl = SEGADDR(dst_stargunfire->gdl);
 
-			lowestptr = minPtr((uintptr_t)dst_stargunfire->gdl, (uintptr_t)dst_stargunfire->vertices);
-			break;
+				lowestptr = minPtr((uintptr_t)dst_stargunfire->gdl, (uintptr_t)dst_stargunfire->vertices);
+				break;
+			}
 		case CT_RODATA_DL:
-			struct n64_modelrodata_dl *src_dl = src_thing;
-			struct modelrodata_dl *dst_dl = dst_thing;
-			dst_dl->opagdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_opagdl));
-			dst_dl->xlugdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_xlugdl));
-			dst_dl->colours = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_colours));
-			dst_dl->vertices = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_vertices));
-			
-			gbiConvertVtx(dst, ((uintptr_t)dst_dl->vertices) & 0x00ffffff, dst_dl->numvertices);
+			{
+				struct n64_modelrodata_dl *src_dl = src_thing;
+				struct modelrodata_dl *dst_dl = dst_thing;
+				dst_dl->opagdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_opagdl));
+				dst_dl->xlugdl = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_xlugdl));
+				dst_dl->colours = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_colours));
+				dst_dl->vertices = (void *)(uintptr_t)resolvePointer(PD_BE32(src_dl->ptr_vertices));
+				
+				gbiConvertVtx(dst, ((uintptr_t)dst_dl->vertices) & 0x00ffffff, dst_dl->numvertices);
 
-			gbiSetVtx(PD_BE32(src_dl->ptr_vertices), (uintptr_t)dst_dl->vertices);
-			gbiSetSegment(0x04, (uintptr_t)dst_dl->vertices);
-			gbiGdlRewriteAddrs(dst, (uintptr_t)dst_dl->opagdl);
-			gbiGdlRewriteAddrs(dst, (uintptr_t)dst_dl->xlugdl);
-			
-			if (dst_dl->opagdl) dst_dl->opagdl = SEGADDR(dst_dl->opagdl);
-			if (dst_dl->xlugdl) dst_dl->xlugdl = SEGADDR(dst_dl->xlugdl);
+				gbiSetVtx(PD_BE32(src_dl->ptr_vertices), (uintptr_t)dst_dl->vertices);
+				gbiSetSegment(0x04, (uintptr_t)dst_dl->vertices);
+				gbiGdlRewriteAddrs(dst, (uintptr_t)dst_dl->opagdl);
+				gbiGdlRewriteAddrs(dst, (uintptr_t)dst_dl->xlugdl);
+				
+				if (dst_dl->opagdl) dst_dl->opagdl = SEGADDR(dst_dl->opagdl);
+				if (dst_dl->xlugdl) dst_dl->xlugdl = SEGADDR(dst_dl->xlugdl);
 
-			lowestptr = minPtr3((uintptr_t)dst_dl->opagdl, (uintptr_t)dst_dl->xlugdl, (uintptr_t)dst_dl->colours);
-			lowestptr = minPtr(lowestptr, (uintptr_t)dst_dl->vertices);
-			break;
+				lowestptr = minPtr3((uintptr_t)dst_dl->opagdl, (uintptr_t)dst_dl->xlugdl, (uintptr_t)dst_dl->colours);
+				lowestptr = minPtr(lowestptr, (uintptr_t)dst_dl->vertices);
+				break;
+			}
 		case CT_TEXDATA:
 		case CT_VTXCOL:
 		case CT_VTXCOL4:
