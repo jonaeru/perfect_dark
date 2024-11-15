@@ -145,22 +145,22 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
    * On Windows you can do it under MSYS2 or WSL, usually MSYS2 is recommended.
    * If using MSYS2, make sure to use the **MSYS2** shell, **not** MINGW32 or MINGW64.
 2. Install host dependencies:
-   * On MSYS2: `pacman -Syuu && pacman -S git make cmake python3`
+   * On MSYS2: execute command `pacman -Syuu && pacman -S git make cmake python3`
    * On Linux: use your package manager as normal to install the above dependencies.
 3. Install Switch toolchain and dependencies:
-   * ```
+   * Execute commands: ```
      dkp-pacman -Syuu
-     dkp-pacman -S devkitA64 switch-libnx switch-zlib switch-sdl2 switch-cmake dkp-toolchain-vars
+     dkp-pacman -S devkitA64 libnx switch-zlib switch-sdl2 switch-cmake dkp-toolchain-vars
      ```
    * If in MSYS2 or `dkp-pacman` doesn't work, replace it with just `pacman`.
 4. Ensure devkitA64 environment variables are set:
-   * `source /opt/devkitpro/switchvars.sh`
+   * Execute command: `source /opt/devkitpro/switchvars.sh`
    * If your `$DEVKITPRO` path is different, substitute that instead or set the variables manually.
 5. Configure:
-   * `aarch64-none-elf-cmake -G"Unix Makefiles" -Bbuild .`
+   * Execute command: `aarch64-none-elf-cmake -G"Unix Makefiles" -Bbuild .`
    * Add ` -DROMID=pal-final` or ` -DROMID=jpn-final` at the end of the command if you want to build a PAL or JPN executable respectively.
 6. Build:
-   * `make -C build -j4`
+   * Execute command: `make -C build -j4`
 7. The resulting executable will be at `build/pd.arm64.nro`.
 
 ### Notes
