@@ -1985,6 +1985,11 @@ static void gfx_draw_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lr
         rdp.other_mode_h = (rdp.other_mode_h & ~(3U << G_MDSFT_TEXTFILT)) | G_TF_POINT;
     }
 
+    ulx += rdp.subpixel_ofs_x;
+    lrx += rdp.subpixel_ofs_x;
+    uly += rdp.subpixel_ofs_y;
+    lry += rdp.subpixel_ofs_y;
+
     // U10.2 coordinates
     float ulxf = ulx;
     float ulyf = uly;
@@ -2187,11 +2192,6 @@ static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t
     if (mode == G_CYC_FILL) {
         gfx_dp_set_combine_mode(color_comb(0, 0, 0, G_CCMUX_SHADE), alpha_comb(0, 0, 0, G_ACMUX_SHADE), 0, 0);
     }
-
-    ulx += rdp.subpixel_ofs_x;
-    lrx += rdp.subpixel_ofs_x;
-    uly += rdp.subpixel_ofs_y;
-    lry += rdp.subpixel_ofs_y;
 
     gfx_draw_rectangle(ulx, uly, lrx, lry);
     rdp.combine_mode = saved_combine_mode;
