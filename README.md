@@ -148,7 +148,8 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
    * On MSYS2: execute command `pacman -Syuu && pacman -S git make cmake python3`
    * On Linux: use your package manager as normal to install the above dependencies.
 3. Install Switch toolchain and dependencies:
-   * Execute commands: ```
+   * Execute commands:
+     ```
      dkp-pacman -Syuu
      dkp-pacman -S devkitA64 libnx switch-zlib switch-sdl2 switch-cmake dkp-toolchain-vars
      ```
