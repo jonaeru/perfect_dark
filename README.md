@@ -138,7 +138,7 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 3. Install Switch toolchain and dependencies:
    * ```
      dkp-pacman -Syuu
-     dkp-pacman -S devkitA64 switch-libnx switch-zlib switch-sdl2 switch-cmake dkp-toolchain-vars
+     dkp-pacman -S devkitA64 libnx switch-zlib switch-sdl2 switch-cmake dkp-toolchain-vars
      ```
    * If in MSYS2 or `dkp-pacman` doesn't work, replace it with just `pacman`.
 4. Ensure devkitA64 environment variables are set:
