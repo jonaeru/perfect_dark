@@ -1105,7 +1105,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						aimoffhist[i] = !aimonhist[i];
 					}
 
-					g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					if (numsamples > 0) {
+						g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					}
 				}
 
 				if (!lvIsPaused()) {
@@ -1436,10 +1438,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						aimoffhist[i] = !aimonhist[i];
 					}
 
-#ifdef AVOID_UB
-					if (numsamples)
-#endif
-					g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					if (numsamples > 0) {
+						g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					}
 				}
 
 				if (!lvIsPaused()) {
