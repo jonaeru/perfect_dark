@@ -173,9 +173,9 @@ jobs:
           mkdir -p bin/perfectdark/data
           mkdir -p bin/perfectdark_pal/data
           mkdir -p bin/perfectdark_jpn/data
-          cp build/pd.arm64.nro bin/
-          cp build_pal/pd.pal.arm64.nro bin/
-          cp build_jpn/pd.jpn.arm64.nro bin/
+          cp build/pd.arm64.nro bin/perfectdark/
+          cp build_pal/pd.pal.arm64.nro bin/perfectdark_pal/
+          cp build_jpn/pd.jpn.arm64.nro bin/perfectdark_jpn/
           touch bin/perfectdark/data/put_your_rom_here.txt
           touch bin/perfectdark_pal/data/put_your_rom_here.txt
           touch bin/perfectdark_jpn/data/put_your_rom_here.txt
