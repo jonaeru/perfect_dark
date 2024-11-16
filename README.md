@@ -56,7 +56,6 @@ Latest [automatic builds](https://github.com/fgsfdsfgs/perfect_dark/actions) of 
 * [i686-windows (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-windows.zip)
 * [x86_64-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-x86_64-linux.zip)
 * [i686-linux (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-i686-linux.zip)
-* [arm64-nswitch (`port-net`)](https://nightly.link/fgsfdsfgs/perfect_dark/workflows/c-cpp/port-net/pd-arm64-nswitch.zip)
 
 If you are looking for regular builds (the `port` branch), see [this link](https://github.com/fgsfdsfgs/perfect_dark/blob/port/README.md#download).
 
@@ -87,6 +86,8 @@ A GPU supporting OpenGL 3.0 or above is required to run the port.
 The Nintendo Switch build ZIP comes with all 3 regions in different folders: `perfectdark`, `perfectdark_pal` and `perfectdark_jpn`.
 
 Take the folder for the region you want and put it into the `/switch` folder on your SD card, then put your ROM into the `data` folder inside of the folder you extracted as described above.
+
+`port-net` currently does not work on the Switch.
 
 ## Controls
 
