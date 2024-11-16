@@ -72,9 +72,9 @@ A GPU supporting OpenGL 3.0 or above is required to run the port.
 
 ### Installing the Nintendo Switch version
 
-The Nintendo Switch build ZIP comes with all 3 regions in different folders: `perfectdark`, `perfectdark_pal` and `perfectdark_jon`.
+The Nintendo Switch build ZIP comes with all 3 regions in different folders: `perfectdark`, `perfectdark_pal` and `perfectdark_jpn`.
 
-Take the folder for the region you want and put it into the `/switch` folder on your SD card, then put in your ROM as described above.
+Take the folder for the region you want and put it into the `/switch` folder on your SD card, then put your ROM into the `data` folder inside of the folder you extracted as described above.
 
 ## Controls
 
