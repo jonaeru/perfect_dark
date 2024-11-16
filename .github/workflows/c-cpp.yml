@@ -225,7 +225,7 @@ jobs:
   publish-latest-build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/port'
-    needs: [build-i686-windows, build-i686-linux, build-x86_64-windows, build-x86_64-linux, build-flatpak-bundle]
+    needs: [build-i686-windows, build-i686-linux, build-x86_64-windows, build-x86_64-linux, build-arm64-nswitch, build-flatpak-bundle]
     permissions:
       contents: write
     steps:
@@ -243,6 +243,7 @@ jobs:
           tar czf ../ci-release/pd-x86_64-linux.tar.gz pd-x86_64-linux
           zip -r ../ci-release/pd-i686-windows.zip pd-i686-windows
           zip -r ../ci-release/pd-x86_64-windows.zip pd-x86_64-windows
+          zip -r ../ci-release/pd-arm64-nswitch.zip pd-arm64-nswitch
           mv io.github.fgsfdsfgs.perfect_dark.flatpak/io.github.fgsfdsfgs.perfect_dark.flatpak ../ci-release/
           popd
           git tag --force ci-dev-build port
