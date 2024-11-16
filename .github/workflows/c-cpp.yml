@@ -151,7 +151,7 @@ jobs:
           path: bin/
           retention-days: 0
 
-  build-arm64-switch:
+  build-arm64-nswitch:
     runs-on: ubuntu-latest
     steps:
       - name: Install host dependencies
