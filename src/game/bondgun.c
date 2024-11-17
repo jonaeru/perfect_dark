@@ -898,7 +898,7 @@ void bgunStartAnimation(struct guncmd *cmd, s32 handnum, struct hand *hand)
 	if (cmd->type != GUNCMD_PLAYANIMATION) {
 		struct guncmd *loopcmd = cmd;
 		s32 done = false;
-		u32 rand = random() % 100;
+		u32 rand = rngRandom() % 100;
 
 		while (loopcmd->type != GUNCMD_END) {
 			if (bgun0f098884(loopcmd, &hand->gset) && !done) {
@@ -7220,7 +7220,7 @@ void bgunUpdateMagnum(struct hand *hand, s32 handnum, struct modeldef *modeldef,
 
 	if (modeldef != NULL) {
 		for (i = 0; i < hand->unk0cc8_04; i++) {
-			struct modelnode *node = modelGetPart(modeldef, 0x0a + random() % 6);
+			struct modelnode *node = modelGetPart(modeldef, 0x0a + rngRandom() % 6);
 
 			if (node) {
 				s32 index = modelFindNodeMtxIndex(node, 0);
@@ -11264,8 +11264,8 @@ struct sndstate **bgunAllocateAudioHandle(void)
 void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u32 rand1 = random();
-	u32 rand2 = random();
+	u32 rand1 = rngRandom();
+	u32 rand2 = rngRandom();
 	struct sndstate **handle;
 
 	if (g_Vars.lvupdate240 <= 0) {
@@ -11344,8 +11344,8 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 			if (texturenum == 10000) {
 				soundnum = SFX_SHIELD_DAMAGE;
 			} else if (gset->weaponnum == WEAPON_LASER) {
-				if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (random() % 2))) {
-					if ((random() % 2) == 0) {
+				if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (rngRandom() % 2))) {
+					if ((rngRandom() % 2) == 0) {
 						soundnum = SFX_CLOAK_ON;
 					} else {
 						soundnum = SFX_CLOAK_OFF;
@@ -11409,8 +11409,8 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 		}
 	}
 #else
-	u32 rand1 = random();
-	u32 rand2 = random();
+	u32 rand1 = rngRandom();
+	u32 rand2 = rngRandom();
 	struct sndstate **handle;
 
 	if (g_Vars.lvupdate240 <= 0) {
@@ -11483,7 +11483,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 				soundnum = SFX_SHIELD_DAMAGE;
 			} else if (gset->weaponnum == WEAPON_LASER) {
 				if (gset->weaponfunc == FUNC_PRIMARY || (gset->unk063a % 8) == 0) {
-					if ((random() % 2) == 0) {
+					if ((rngRandom() % 2) == 0) {
 						soundnum = SFX_CLOAK_ON;
 					} else {
 						soundnum = SFX_CLOAK_OFF;
@@ -11561,8 +11561,8 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 {
 #if VERSION >= VERSION_NTSC_1_0
 	struct sndstate **handle;
-	u32 rand1 = random();
-	u32 rand2 = random();
+	u32 rand1 = rngRandom();
+	u32 rand2 = rngRandom();
 	bool playdefault;
 	s16 soundnum;
 	bool overridden;
@@ -11585,7 +11585,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 		if (gset->weaponnum == WEAPON_LASER) {
 			playdefault = false;
 
-			if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (random() % 2))) {
+			if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (rngRandom() % 2))) {
 				// Laser sounds
 				s16 sounds[] = {SFX_CLOAK_ON, SFX_CLOAK_OFF};
 				soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
@@ -11660,8 +11660,8 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 	}
 #else
 	struct sndstate **handle;
-	u32 rand1 = random();
-	u32 rand2 = random();
+	u32 rand1 = rngRandom();
+	u32 rand2 = rngRandom();
 	s16 soundnum;
 	bool overridden;
 
