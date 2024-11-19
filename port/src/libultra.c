@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <PR/os_internal.h>
 #include <PR/rcp.h>
+#include "platform.h"
 #include "system.h"
 #include "input.h"
 #include "video.h"
@@ -466,6 +467,7 @@ OSIntMask osSetIntMask(OSIntMask mask)
 
 /* libc compatibility wrappers */
 
+#ifndef PLATFORM_OSX
 #ifndef HAVE_BZERO
 void bzero(void *ptr, size_t size)
 {
@@ -478,6 +480,7 @@ void bcopy(const void *src, void *dst, size_t n)
 {
 	memcpy(dst, src, n);
 }
+#endif
 #endif
 
 #ifndef HAVE_BCMP

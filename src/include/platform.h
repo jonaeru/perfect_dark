@@ -10,6 +10,10 @@
 #elif defined(__linux__)
 	#define PLATFORM_POSIX 1
 	#define PLATFORM_LINUX 1
+// add osx
+#elif defined(__APPLE__)
+	#define PLATFORM_POSIX 1
+	#define PLATFORM_OSX 1
 #else
 	// assume POSIX-compatible
 	#define PLATFORM_POSIX 1
