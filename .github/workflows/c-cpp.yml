@@ -318,6 +318,8 @@ jobs:
           pushd ci-artifacts
           tar czf ../ci-release/pd-i686-linux.tar.gz pd-i686-linux
           tar czf ../ci-release/pd-x86_64-linux.tar.gz pd-x86_64-linux
+          tar cJf ../ci-release/pd-x86_64-osx.tar.xz pd-x86_64-osx
+          tar cJf ../ci-release/pd-arm64-osx.tar.xz pd-arm64-osx
           zip -r ../ci-release/pd-i686-windows.zip pd-i686-windows
           zip -r ../ci-release/pd-x86_64-windows.zip pd-x86_64-windows
           zip -r ../ci-release/pd-arm64-nswitch.zip pd-arm64-nswitch
