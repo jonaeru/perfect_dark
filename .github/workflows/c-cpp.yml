@@ -157,9 +157,10 @@ jobs:
     steps:
       - name: Install dependencies
         run: brew install cmake gcc python3 zlib git
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Build pd.x86_64
         run: |
-          ls -la
           cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=x86_64 .
           cmake --build build --target pd -j4 --clean-first
       - name: Build pd.pal.x86_64
@@ -190,9 +191,10 @@ jobs:
     steps:
       - name: Install dependencies
         run: brew install cmake gcc python3 zlib git
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Build pd.arm64
         run: |
-          ls -la
           cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=arm64 .
           cmake --build build --target pd -j4 --clean-first
       - name: Build pd.pal.arm64
