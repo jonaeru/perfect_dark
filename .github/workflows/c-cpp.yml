@@ -151,6 +151,118 @@ jobs:
           path: bin/
           retention-days: 0
 
+  build-x86_64-osx:
+    runs-on: macos-14
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install zlib
+          wget http://libsdl.org/release/SDL2-2.30.9.dmg -O SDL2.dmg
+          hdiutil mount SDL2.dmg
+          sudo cp -vr /Volumes/SDL2/SDL2.framework /Library/Frameworks
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build pd.x86_64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=x86_64 .
+          cmake --build build --target pd -j4 --clean-first
+      - name: Build pd.pal.x86_64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=pal-final .
+          cmake --build build_pal --target pd -j4 --clean-first
+      - name: Build pd.jpn.x86_64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=jpn-final .
+          cmake --build build_jpn --target pd -j4 --clean-first
+      - name: Prepare artifact for packaging
+        run: |
+          mkdir -p bin/data
+          cp build/pd.x86_64 bin/
+          cp build_pal/pd.pal.x86_64 bin/
+          cp build_jpn/pd.jpn.x86_64 bin/
+          cp -vr /Library/Frameworks/SDL2.framework bin/
+          touch bin/data/put_your_rom_here.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pd-x86_64-osx
+          path: bin/
+          retention-days: 0
+
+  build-arm64-osx:
+    runs-on: macos-14
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install zlib
+          wget http://libsdl.org/release/SDL2-2.30.9.dmg -O SDL2.dmg
+          hdiutil mount SDL2.dmg
+          sudo cp -vr /Volumes/SDL2/SDL2.framework /Library/Frameworks
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build pd.arm64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=arm64 .
+          cmake --build build --target pd -j4 --clean-first
+      - name: Build pd.pal.arm64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=pal-final .
+          cmake --build build_pal --target pd -j4 --clean-first
+      - name: Build pd.jpn.arm64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=jpn-final .
+          cmake --build build_jpn --target pd -j4 --clean-first
+      - name: Prepare artifact for packaging
+        run: |
+          mkdir -p bin/data
+          cp build/pd.arm64 bin/
+          cp build_pal/pd.pal.arm64 bin/
+          cp build_jpn/pd.jpn.arm64 bin/
+          cp -vr /Library/Frameworks/SDL2.framework bin/
+          touch bin/data/put_your_rom_here.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pd-arm64-osx
+          path: bin/
+          retention-days: 0
+
+  build-arm64-nswitch:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/port'
+    steps:
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install git make cmake curl
+      - name: Install devkitA64 docker image
+        run: sudo docker pull devkitpro/devkita64:latest
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build pd.arm64.nro
+        run: sudo docker run --name pd --rm -v `pwd`:`pwd` -w `pwd` devkitpro/devkita64:latest bash ./tools/buildscripts/nswitch_docker.sh build
+      - name: Build pd.pal.arm64.nro
+        run: sudo docker run --name pd --rm -v `pwd`:`pwd` -w `pwd` devkitpro/devkita64:latest bash ./tools/buildscripts/nswitch_docker.sh build_pal -DROMID=pal-final
+      - name: Build pd.jpn.arm64.nro
+        run: sudo docker run --name pd --rm -v `pwd`:`pwd` -w `pwd` devkitpro/devkita64:latest bash ./tools/buildscripts/nswitch_docker.sh build_jpn -DROMID=jpn-final
+      - name: Prepare artifact for packaging
+        run: |
+          mkdir -p bin/perfectdark/data
+          mkdir -p bin/perfectdark_pal/data
+          mkdir -p bin/perfectdark_jpn/data
+          cp build/pd.arm64.nro bin/perfectdark/
+          cp build_pal/pd.pal.arm64.nro bin/perfectdark_pal/
+          cp build_jpn/pd.jpn.arm64.nro bin/perfectdark_jpn/
+          touch bin/perfectdark/data/put_your_rom_here.txt
+          touch bin/perfectdark_pal/data/put_your_rom_here.txt
+          touch bin/perfectdark_jpn/data/put_your_rom_here.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pd-arm64-nswitch
+          path: bin/
+          retention-days: 0
+
   build-flatpak-bundle:
     name: "Build flatpak bundle"
     runs-on: ubuntu-latest
@@ -190,7 +302,7 @@ jobs:
   publish-latest-build:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/port'
-    needs: [build-i686-windows, build-i686-linux, build-x86_64-windows, build-x86_64-linux, build-flatpak-bundle]
+    needs: [build-i686-windows, build-i686-linux, build-x86_64-windows, build-x86_64-linux, build-arm64-nswitch, build-x86_64-osx, build-arm64-osx, build-flatpak-bundle]
     permissions:
       contents: write
     steps:
@@ -206,8 +318,11 @@ jobs:
           pushd ci-artifacts
           tar czf ../ci-release/pd-i686-linux.tar.gz pd-i686-linux
           tar czf ../ci-release/pd-x86_64-linux.tar.gz pd-x86_64-linux
+          tar cJf ../ci-release/pd-x86_64-osx.tar.xz pd-x86_64-osx
+          tar cJf ../ci-release/pd-arm64-osx.tar.xz pd-arm64-osx
           zip -r ../ci-release/pd-i686-windows.zip pd-i686-windows
           zip -r ../ci-release/pd-x86_64-windows.zip pd-x86_64-windows
+          zip -r ../ci-release/pd-arm64-nswitch.zip pd-arm64-nswitch
           mv io.github.fgsfdsfgs.perfect_dark.flatpak/io.github.fgsfdsfgs.perfect_dark.flatpak ../ci-release/
           popd
           git tag --force ci-dev-build port

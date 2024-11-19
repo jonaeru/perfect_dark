@@ -151,6 +151,11 @@ include_directories("${CMAKE_SOURCE_DIR}/src/lib/ultra/audio")
 include_directories("${CMAKE_SOURCE_DIR}/port/include")
 include_directories("${CMAKE_BINARY_DIR}/port/include")
 
+# Set Release optimization to -Og until I fix the -O2 issues
+if(NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+  add_compile_options(-Og)
+endif()
+
 # Common CFLAGS
 add_compile_options(
   -fno-inline-functions
@@ -210,6 +215,8 @@ if(NOT GL_LIBRARY)
     set(GL_LIBRARY opengl32)
   elseif(NINTENDO_SWITCH)
     set(GL_LIBRARY EGL glapi drm_nouveau)
+  elseif(APPLE)
+    set(GL_LIBRARY "-framework OpenGL")
   else()
     set(GL_LIBRARY GL)
   endif()
@@ -326,7 +333,7 @@ endif()
 
 if(NINTENDO_SWITCH)
   add_custom_command(TARGET pd POST_BUILD
-    COMMAND nacptool --create "Perfect Dark" "fgsfds & contributors" "${VERSION_ROMID}/${VERSION_BRANCH}/${VERSION_HASH}" "${BIN_NAME}.nacp"
+    COMMAND nacptool --create "Perfect Dark" "fgsfds and contributors" "${VERSION_ROMID}/${VERSION_BRANCH}/${VERSION_HASH}" "${BIN_NAME}.nacp"
     COMMAND aarch64-none-elf-strip -o ${CMAKE_BINARY_DIR}/${BIN_NAME}.stripped.elf ${CMAKE_BINARY_DIR}/${BIN_NAME}.elf
     COMMAND elf2nro ${CMAKE_BINARY_DIR}/${BIN_NAME}.stripped.elf ${CMAKE_BINARY_DIR}/${BIN_NAME}.nro --icon=${CMAKE_SOURCE_DIR}/dist/nswitch/icon.jpg --nacp=${BIN_NAME}.nacp
   )

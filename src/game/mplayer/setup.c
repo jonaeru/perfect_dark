@@ -205,7 +205,7 @@ s16 mpChooseRandomStage(void)
 		}
 	}
 
-	index = random() % numchallengescomplete;
+	index = rngRandom() % numchallengescomplete;
 
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
@@ -3512,7 +3512,7 @@ MenuItemHandlerResult menuhandlerMpNTeams(s32 operation, struct menuitem *item, 
 		s32 somevalue = (numchrs + numteams - 1) / numteams;
 		s32 teamsremaining = numteams;
 		s32 chrsremaining = numchrs;
-		s32 start = random() % numchrs;
+		s32 start = rngRandom() % numchrs;
 
 		s32 i;
 		s32 teamnum;
@@ -3535,7 +3535,7 @@ MenuItemHandlerResult menuhandlerMpNTeams(s32 operation, struct menuitem *item, 
 #endif
 
 			if (teamsremaining >= chrsremaining) {
-				teamnum = random() % numteams;
+				teamnum = rngRandom() % numteams;
 
 				while (true) {
 					if (array[teamnum] == 0) {
@@ -3550,7 +3550,7 @@ MenuItemHandlerResult menuhandlerMpNTeams(s32 operation, struct menuitem *item, 
 					}
 				}
 			} else {
-				teamnum = random() % numteams;
+				teamnum = rngRandom() % numteams;
 
 				while (true) {
 					if (array[teamnum] < somevalue) {
