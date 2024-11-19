@@ -468,24 +468,20 @@ OSIntMask osSetIntMask(OSIntMask mask)
 /* libc compatibility wrappers */
 
 #ifndef PLATFORM_OSX
-#ifndef HAVE_BZERO
+
 void bzero(void *ptr, size_t size)
 {
 	memset(ptr, 0, size);
 }
-#endif
 
-#ifndef HAVE_BCOPY
 void bcopy(const void *src, void *dst, size_t n)
 {
 	memcpy(dst, src, n);
 }
-#endif
-#endif
 
-#ifndef HAVE_BCMP
 s32 bcmp(const void *s1, const void *s2, size_t n)
 {
 	return memcmp(s1, s2, n);
 }
+
 #endif
