@@ -151,6 +151,70 @@ jobs:
           path: bin/
           retention-days: 0
 
+  build-x86_64-osx:
+    runs-on: macos-14
+    if: github.ref == 'refs/heads/port'
+    steps:
+      - name: Install dependencies
+        run: brew install cmake gcc python3 zlib git
+      - name: Build pd.x86_64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=x86_64 .
+          cmake --build build --target pd -j4 --clean-first
+      - name: Build pd.pal.x86_64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=pal-final .
+          cmake --build build_pal --target pd -j4 --clean-first
+      - name: Build pd.jpn.x86_64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=jpn-final .
+          cmake --build build_jpn --target pd -j4 --clean-first
+      - name: Prepare artifact for packaging
+        run: |
+          mkdir -p bin/data
+          cp build/pd.x86_64 bin/
+          cp build_pal/pd.pal.x86_64 bin/
+          cp build_jpn/pd.jpn.x86_64 bin/
+          touch bin/data/put_your_rom_here.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pd-x86_64-osx
+          path: bin/
+          retention-days: 0
+
+  build-arm64-osx:
+    runs-on: macos-14
+    if: github.ref == 'refs/heads/port'
+    steps:
+      - name: Install dependencies
+        run: brew install cmake gcc python3 zlib git
+      - name: Build pd.arm64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=arm64 .
+          cmake --build build --target pd -j4 --clean-first
+      - name: Build pd.pal.arm64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=pal-final .
+          cmake --build build_pal --target pd -j4 --clean-first
+      - name: Build pd.jpn.arm64
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=jpn-final .
+          cmake --build build_jpn --target pd -j4 --clean-first
+      - name: Prepare artifact for packaging
+        run: |
+          mkdir -p bin/data
+          cp build/pd.arm64 bin/
+          cp build_pal/pd.pal.arm64 bin/
+          cp build_jpn/pd.jpn.arm64 bin/
+          touch bin/data/put_your_rom_here.txt
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pd-arm64-osx
+          path: bin/
+          retention-days: 0
+
   build-arm64-nswitch:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/port'
