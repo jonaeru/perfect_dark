@@ -156,7 +156,11 @@ jobs:
     if: github.ref == 'refs/heads/port'
     steps:
       - name: Install dependencies
-        run: brew install cmake gcc python3 zlib git
+        run: |
+          brew install cmake gcc python3 zlib git
+          wget http://libsdl.org/release/SDL2-2.30.9.dmg -O SDL2.dmg
+          hdiutil mount SDL2.dmg
+          sudo cp -vr /Volumes/SDL2/SDL2.framework /Library/Frameworks
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build pd.x86_64
@@ -177,6 +181,7 @@ jobs:
           cp build/pd.x86_64 bin/
           cp build_pal/pd.pal.x86_64 bin/
           cp build_jpn/pd.jpn.x86_64 bin/
+          cp -vr /Library/Frameworks/SDL2.framework bin/
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -190,7 +195,11 @@ jobs:
     if: github.ref == 'refs/heads/port'
     steps:
       - name: Install dependencies
-        run: brew install cmake gcc python3 zlib git
+        run: |
+          brew install cmake gcc python3 zlib git
+          wget http://libsdl.org/release/SDL2-2.30.9.dmg -O SDL2.dmg
+          hdiutil mount SDL2.dmg
+          sudo cp -vr /Volumes/SDL2/SDL2.framework /Library/Frameworks
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build pd.arm64
@@ -211,6 +220,7 @@ jobs:
           cp build/pd.arm64 bin/
           cp build_pal/pd.pal.arm64 bin/
           cp build_jpn/pd.jpn.arm64 bin/
+          cp -vr /Library/Frameworks/SDL2.framework bin/
           touch bin/data/put_your_rom_here.txt
       - name: Upload artifact
         uses: actions/upload-artifact@v4
