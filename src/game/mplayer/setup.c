@@ -237,7 +237,7 @@ s16 mpChooseRandomMultiStage(void)
 		}
 	}
 
-	index = random() % numchallengescomplete;
+	index = rngRandom() % numchallengescomplete;
 
 	for (i = 0; i < 32; i++) {
 		if ((i <= 12 || (i >= 27 && i <= 31)) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
@@ -264,7 +264,7 @@ s16 mpChooseRandomSoloStage(void)
 		}
 	}
 
-	index = random() % numchallengescomplete;
+	index = rngRandom() % numchallengescomplete;
 
 	for (i = 0; i < 27; i++) {
 		if ((i >= 13 && i <= 26) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
@@ -291,7 +291,7 @@ s16 mpChooseRandomGexStage(void)
 		}
 	}
 
-	index = random() % numchallengescomplete;
+	index = rngRandom() % numchallengescomplete;
 
 	for (i = 0; i < 53; i++) {
 		if (i >= 32 && i <= 52 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {

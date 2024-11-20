@@ -3876,7 +3876,7 @@ void chrChoke(struct chrdata *chr, s32 choketype)
 			SFX_SKEDAR_ROAR_052F,
 		};
 
-		soundnum = sounds[random() % 3];
+		soundnum = sounds[rngRandom() % 3];
 		nextindexskedar++;
 
 		if (nextindexskedar >= ARRAYCOUNT(sounds)) {

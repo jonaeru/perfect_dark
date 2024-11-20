@@ -1367,7 +1367,7 @@ void mpApplyWeaponSet(void)
 			numoptions = g_MpWeaponRandomChoiceNum;
 		}
 		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
-			mpSetWeaponSlot(i, random() % numoptions, g_UseMpWeaponRandomChoice);
+			mpSetWeaponSlot(i, rngRandom() % numoptions, g_UseMpWeaponRandomChoice);
 		}
 #endif
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
@@ -1385,7 +1385,7 @@ void mpApplyWeaponSet(void)
 			numoptions = g_MpWeaponRandomChoiceNum;
 		}
 		for (i = 0; i < 5; i++) {
-			mpSetWeaponSlot(i, g_UseMpWeaponRandomChoice ? random() % numoptions : random() % numoptions + 1, g_UseMpWeaponRandomChoice);
+			mpSetWeaponSlot(i, g_UseMpWeaponRandomChoice ? rngRandom() % numoptions : rngRandom() % numoptions + 1, g_UseMpWeaponRandomChoice);
 		}
 
 		// Always set "Disabled"
