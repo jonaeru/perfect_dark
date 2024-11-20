@@ -904,7 +904,14 @@ static void gfx_opengl_init_extensions(void) {
     if (!GLAD_GL_ARB_depth_clamp) {
         if (GLAD_GL_EXT_depth_clamp || GLAD_GL_NV_depth_clamp) {
             GLAD_GL_ARB_depth_clamp = 1;
+        } else if (!gl_es && GLVersion.major >= 3) {
+            // GL3.2+ should have depth_clamp as part of the spec, but some devices don't report it for some reason
+            GLAD_GL_ARB_depth_clamp = (GLVersion.major > 3 || (GLVersion.major == 3 && GLVersion.minor >= 2));
         }
+    }
+
+    if (!GLAD_GL_ARB_texture_mirror_clamp_to_edge) {
+        GLAD_GL_ARB_texture_mirror_clamp_to_edge = GLAD_GL_EXT_texture_mirror_clamp_to_edge;
     }
 
     if (GLVersion.major < 3 && !GLAD_GL_ARB_framebuffer_object) {
@@ -929,6 +936,12 @@ static void gfx_opengl_init(void) {
     if (!gladLoadGLLoader(gl_load_proc) || glGetString == NULL || glEnable == NULL) {
         sysFatalError("Could not load OpenGL.\nReported SDL error: %s", SDL_GetError());
     }
+
+    // check if we're using ES or core, which have more limited feature sets
+    int val = 0;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &val);
+    gl_core_profile = (val == SDL_GL_CONTEXT_PROFILE_CORE);
+    gl_es = (val == SDL_GL_CONTEXT_PROFILE_ES);
 
     gfx_opengl_init_extensions();
 
@@ -960,12 +973,6 @@ static void gfx_opengl_init(void) {
         // GL_MIRROR_CLAMP_TO_EDGE unsupported
         gl_mirror_clamp = GL_MIRRORED_REPEAT;
     }
-
-    // check if we're using ES or core, which have more limited feature sets
-    int val = 0;
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &val);
-    gl_core_profile = (val == SDL_GL_CONTEXT_PROFILE_CORE);
-    gl_es = (val == SDL_GL_CONTEXT_PROFILE_ES);
 
     // determine GLSL version
     if (gl_es) {
