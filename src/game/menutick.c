@@ -675,6 +675,9 @@ void menuTick(void)
 							g_Textures[0x0745].surfacetype = SURFACETYPE_METAL;
 							g_Textures[0x0746].soundsurfacetype = SURFACETYPE_DEFAULT;
 							g_Textures[0x0746].surfacetype = SURFACETYPE_DEFAULT;
+							// Icicle Pyramid
+							g_Textures[0x0bde].surfacetype = SURFACETYPE_DEFAULT;
+							g_Textures[0x0bde].soundsurfacetype = SURFACETYPE_DEFAULT;
 						} else if (g_ModNum == MOD_KAKARIKO) {
 							g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DEFAULT;
 							g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_DEFAULT;
