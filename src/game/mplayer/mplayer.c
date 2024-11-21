@@ -245,6 +245,7 @@ void mpStartMatch(void)
 	}
 	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
 	modConfigLoad(MOD_CONFIG_FNAME);
+	// Set textures surfacetype
 	if (g_ModNum == MOD_GEX) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
@@ -348,16 +349,59 @@ void mpStartMatch(void)
 		g_Textures[0x0c8d].surfacetype = SURFACETYPE_WOOD;
 		g_Textures[0x0c8e].surfacetype = SURFACETYPE_NONE;
 		g_Textures[0x0c8f].surfacetype = SURFACETYPE_DIRT;
-	} else {
-		g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
-		g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
-		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_DEFAULT;
-		g_Textures[0x073f].soundsurfacetype = SURFACETYPE_DEFAULT;
-		g_Textures[0x0740].soundsurfacetype = SURFACETYPE_DEFAULT;
-		g_Textures[0x0741].soundsurfacetype = SURFACETYPE_DEFAULT;
-		g_Textures[0x0745].surfacetype = SURFACETYPE_METAL;
-		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_DEFAULT;
-		g_Textures[0x0746].surfacetype = SURFACETYPE_DEFAULT;
+		// Essentially, 0daf - 0dcc
+		g_Textures[0x0048].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0049].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004A].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004B].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x004C].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004D].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004E].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004F].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0050].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0051].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0052].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0053].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0054].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0056].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0057].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x005C].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x005D].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x005E].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x005F].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0060].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0061].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0062].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0064].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0065].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0067].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0068].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0048].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0049].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004A].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004B].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x004C].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004D].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004E].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004F].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0050].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0051].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0052].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0053].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0054].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0056].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0057].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x005C].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x005D].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x005E].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x005F].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0060].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0061].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0062].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0064].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0065].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0067].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0068].surfacetype = SURFACETYPE_WOOD;
 	}
 #endif
 
