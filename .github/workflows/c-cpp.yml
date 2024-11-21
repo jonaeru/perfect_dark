@@ -164,15 +164,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Build pd.x86_64
         run: |
-          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=x86_64 .
+          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_MACOSX_RPATH=ON -DCMAKE_OSX_ARCHITECTURES=x86_64 .
           cmake --build build --target pd -j4 --clean-first
       - name: Build pd.pal.x86_64
         run: |
-          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=pal-final .
+          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_MACOSX_RPATH=ON -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=pal-final .
           cmake --build build_pal --target pd -j4 --clean-first
       - name: Build pd.jpn.x86_64
         run: |
-          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=jpn-final .
+          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_MACOSX_RPATH=ON -DCMAKE_OSX_ARCHITECTURES=x86_64 -DROMID=jpn-final .
           cmake --build build_jpn --target pd -j4 --clean-first
       - name: Prepare artifact for packaging
         run: |
@@ -202,15 +202,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Build pd.arm64
         run: |
-          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=arm64 .
+          cmake -G"Unix Makefiles" -Bbuild -DCMAKE_MACOSX_RPATH=ON -DCMAKE_OSX_ARCHITECTURES=arm64 .
           cmake --build build --target pd -j4 --clean-first
       - name: Build pd.pal.arm64
         run: |
-          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=pal-final .
+          cmake -G"Unix Makefiles" -Bbuild_pal -DCMAKE_MACOSX_RPATH=ON -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=pal-final .
           cmake --build build_pal --target pd -j4 --clean-first
       - name: Build pd.jpn.arm64
         run: |
-          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=jpn-final .
+          cmake -G"Unix Makefiles" -Bbuild_jpn -DCMAKE_MACOSX_RPATH=ON -DCMAKE_OSX_ARCHITECTURES=arm64 -DROMID=jpn-final .
           cmake --build build_jpn --target pd -j4 --clean-first
       - name: Prepare artifact for packaging
         run: |
