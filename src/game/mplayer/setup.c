@@ -172,6 +172,8 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP2 + 0x60,      0, L_MPMENU_316 }, // Icicle Pyramid
 	// Kakariko Village Mod
 	{ STAGE_24,                   0, L_MPMENU_319 }, // Kakariko Village (Stormy)
+	// Dark Noon Mod
+	{ STAGE_TEST_MP7,             0, L_MPMENU_321 }, // Valley
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -184,8 +186,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (54 Stage + 4 Random)
-	return 58;
+#else // All Solos in Multi Mod (55 Stage + 4 Random)
+	return 59;
 #endif
 }
 
@@ -198,7 +200,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 54; i++) {
+	for (i = 0; i < 55; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -210,7 +212,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 54; i++) {
+	for (i = 0; i < 55; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -321,7 +323,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 53, L_MPMENU_318  }, // "Zelda"
-		{ 54, L_MPMENU_118  }, // "Random"
+		{ 54, L_MPMENU_320  }, // "Dark Noon"
+		{ 55, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -378,7 +381,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #ifdef PLATFORM_N64
 		data->list.value = 3;
 #else // All Solos in Multi Mod
-		data->list.value = 7;
+		data->list.value = 8;
 #endif
 
 #ifdef PLATFORM_N64 // All Solos in Multi Mod

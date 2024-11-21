@@ -94,7 +94,8 @@ static const struct romfilepatch filePatches[] = {
 	{ 0x92b0, 1, "\x6c", "\x99" },
 };
 
-static struct romfile fileSlots[3][ROMDATA_MAX_FILES] = {
+static struct romfile fileSlots[4][ROMDATA_MAX_FILES] = {
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
@@ -369,6 +370,10 @@ static inline void romdataInitFiles(void)
 			fileSlots[MOD_KAKARIKO][i].size = nextofs - ofs;
 			fileSlots[MOD_KAKARIKO][i].source = SRC_UNLOADED;
 			fileSlots[MOD_KAKARIKO][i].preprocessed = 0;
+			fileSlots[MOD_DARKMOON][i].data = g_RomFile + ofs;
+			fileSlots[MOD_DARKMOON][i].size = nextofs - ofs;
+			fileSlots[MOD_DARKMOON][i].source = SRC_UNLOADED;
+			fileSlots[MOD_DARKMOON][i].preprocessed = 0;
 		}
 	}
 
@@ -379,8 +384,10 @@ static inline void romdataInitFiles(void)
 		fileSlots[MOD_NORMAL][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 		fileSlots[MOD_GEX][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 		fileSlots[MOD_KAKARIKO][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
+		fileSlots[MOD_DARKMOON][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 	}
 
+	// Model Slot Expansion
 	// Dr. Caroll Body (PD Plus Mod)
 	fileSlots[MOD_NORMAL][FILE_CDRCARROLL2].data = 0;
 	fileSlots[MOD_NORMAL][FILE_CDRCARROLL2].size = 0;
@@ -389,6 +396,7 @@ static inline void romdataInitFiles(void)
 	fileSlots[MOD_NORMAL][FILE_CDRCARROLL2].name = "Ccarroll2Z";
 	fileSlots[MOD_GEX][FILE_CDRCARROLL2] = fileSlots[MOD_NORMAL][FILE_CDRCARROLL2];
 	fileSlots[MOD_KAKARIKO][FILE_CDRCARROLL2] = fileSlots[MOD_NORMAL][FILE_CDRCARROLL2];
+	fileSlots[MOD_DARKMOON][FILE_CDRCARROLL2] = fileSlots[MOD_NORMAL][FILE_CDRCARROLL2];
 	// Skedar Body (PD Plus Mod)
 	fileSlots[MOD_NORMAL][FILE_CSKEDAR2].data = 0;
 	fileSlots[MOD_NORMAL][FILE_CSKEDAR2].size = 0;
@@ -397,6 +405,7 @@ static inline void romdataInitFiles(void)
 	fileSlots[MOD_NORMAL][FILE_CSKEDAR2].name = "Cskedar2Z";
 	fileSlots[MOD_GEX][FILE_CSKEDAR2] = fileSlots[MOD_NORMAL][FILE_CSKEDAR2];
 	fileSlots[MOD_KAKARIKO][FILE_CSKEDAR2] = fileSlots[MOD_NORMAL][FILE_CSKEDAR2];
+	fileSlots[MOD_DARKMOON][FILE_CSKEDAR2] = fileSlots[MOD_NORMAL][FILE_CSKEDAR2];
 	// Dr. Caroll Hand (PD Plus Mod)
 	fileSlots[MOD_NORMAL][FILE_GHAND_DRCARROLL].data = 0;
 	fileSlots[MOD_NORMAL][FILE_GHAND_DRCARROLL].size = 0;
@@ -405,6 +414,7 @@ static inline void romdataInitFiles(void)
 	fileSlots[MOD_NORMAL][FILE_GHAND_DRCARROLL].name = "Ghand_carollZ";
 	fileSlots[MOD_GEX][FILE_GHAND_DRCARROLL] = fileSlots[MOD_NORMAL][FILE_GHAND_DRCARROLL];
 	fileSlots[MOD_KAKARIKO][FILE_GHAND_DRCARROLL] = fileSlots[MOD_NORMAL][FILE_GHAND_DRCARROLL];
+	fileSlots[MOD_DARKMOON][FILE_GHAND_DRCARROLL] = fileSlots[MOD_NORMAL][FILE_GHAND_DRCARROLL];
 	// Skedar Hand (PD Plus Mod)
 	fileSlots[MOD_NORMAL][FILE_GHAND_SKEDAR].data = 0;
 	fileSlots[MOD_NORMAL][FILE_GHAND_SKEDAR].size = 0;
@@ -413,6 +423,7 @@ static inline void romdataInitFiles(void)
 	fileSlots[MOD_NORMAL][FILE_GHAND_SKEDAR].name = "Ghand_skedarZ";
 	fileSlots[MOD_GEX][FILE_GHAND_SKEDAR] = fileSlots[MOD_NORMAL][FILE_GHAND_SKEDAR];
 	fileSlots[MOD_KAKARIKO][FILE_GHAND_SKEDAR] = fileSlots[MOD_NORMAL][FILE_GHAND_SKEDAR];
+	fileSlots[MOD_DARKMOON][FILE_GHAND_SKEDAR] = fileSlots[MOD_NORMAL][FILE_GHAND_SKEDAR];
 }
 
 static inline void romdataResetFile(s32 fileNum)
