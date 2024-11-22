@@ -241,7 +241,7 @@ void mpStartMatch(void)
 	} else if (stagenum == STAGE_24) {
 		g_ModNum = MOD_KAKARIKO;
 	} else if (stagenum == STAGE_TEST_MP7) {
-		g_ModNum = MOD_DARKMOON;
+		g_ModNum = MOD_DARKNOON;
 	} else {
 		g_ModNum = MOD_NORMAL;
 	}
