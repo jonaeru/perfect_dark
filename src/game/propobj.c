@@ -1615,7 +1615,19 @@ void propCalculateShadeColour(struct prop *prop, u8 *nextcol, u16 floorcol)
 #endif
 	{
 		s32 shade = func0f068fc8(prop, 0);
-
+		if (USINGDEVICE(DEVICE_NIGHTVISION)) {
+			switch (prop->type) {
+				case PROPTYPE_PLAYER:
+				if (g_Vars.currentplayer->prop == prop) {
+					break;
+				}
+				default:
+				if (prop->rooms[0] >= 0) {
+					shade = g_Rooms[prop->rooms[0]].br_settled_regional;
+				}
+				break;
+			}
+		}
 		roomr = shade;
 		roomg = shade;
 		roomb = shade;
