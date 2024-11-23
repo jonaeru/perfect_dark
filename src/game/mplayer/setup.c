@@ -173,7 +173,7 @@ struct mparena g_MpArenas[] = {
 	// Kakariko Village Mod
 	{ STAGE_24,                   0, L_MPMENU_319 }, // Kakariko Village (Stormy)
 	// Dark Noon Mod
-	{ STAGE_TEST_MP7,             0, L_MPMENU_321 }, // Valley
+	{ STAGE_TEST_MP8,             0, L_MPMENU_321 }, // Valley
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
