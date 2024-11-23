@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 if(APPLE)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.4" CACHE STRING "Minimum OS X deployment version")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.7" CACHE STRING "Minimum OS X deployment version")
 endif()
 
 project(pd C CXX)
