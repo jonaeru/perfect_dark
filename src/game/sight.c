@@ -708,13 +708,13 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	return gdl;
 }
 
-Gfx *sightDrawDefault(Gfx *gdl, bool sighton)
+Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
 	s32 radius;
 	s32 cornergap;
 	u32 colour;
-	s32 x = (s32) g_Vars.currentplayer->crosspos[0] / g_ScaleX;
-	s32 y = g_Vars.currentplayer->crosspos[1];
+	s32 x = (s32) crossx / g_ScaleX;
+	s32 y = crossy;
 	struct trackedprop *trackedprop;
 	s32 i;
 
@@ -904,13 +904,13 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton)
 	return gdl;
 }
 
-Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
+Gfx *sightDrawClassic(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
 	struct textureconfig *tconfig = &g_TexGeCrosshairConfigs[0];
 	f32 spc4[2];
 	f32 spbc[2];
-	s32 x = g_Vars.currentplayer->crosspos[0];
-	s32 y = g_Vars.currentplayer->crosspos[1] + 1; // Plus one, to align with the laser sight.
+	s32 x = crossx;
+	s32 y = crossy + 1; // Plus one, to align with the laser sight.
 	s32 x1;
 	s32 x2;
 	s32 y1;
@@ -968,9 +968,9 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	return gdl;
 }
 
-Gfx *sightDrawType2(Gfx *gdl, bool sighton)
+Gfx *sightDrawType2(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
-	return sightDrawClassic(gdl, sighton);
+	return sightDrawClassic(gdl, sighton, crossx, crossy);
 }
 
 #define COLOUR_LIGHTRED 0xff555564
@@ -1068,7 +1068,7 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, s32 x, s32 y, s32 dir, u32 colour)
 	return gdl;
 }
 
-Gfx *sightDrawSkedar(Gfx *gdl, bool sighton)
+Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
 	s32 viewleft = viGetViewLeft() / g_ScaleX;
 	s32 viewtop = viGetViewTop();
@@ -1078,10 +1078,10 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton)
 	s32 viewbottom = viewtop + viewheight - 1;
 	s32 paddingy = viewheight / 4;
 	s32 paddingx = viewwidth / 4;
-	s32 x = (s32) (g_Vars.currentplayer->crosspos[0] / g_ScaleX);
+	s32 x = (s32) (crossx / g_ScaleX);
 	s32 trix1;
 	s32 trix2;
-	s32 y = g_Vars.currentplayer->crosspos[1];
+	s32 y = crossy;
 	s32 triy2;
 	s32 triy1;
 	u32 colour;
@@ -1261,7 +1261,7 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton)
 	return gdl;
 }
 
-Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
+Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
 	s32 viewleft = viGetViewLeft() / g_ScaleX;
 	s32 viewtop = viGetViewTop();
@@ -1415,12 +1415,12 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 		gdl = text0f153780(gdl);
 	}
 
-	gdl = sightDrawDefault(gdl, sighton);
+	gdl = sightDrawDefault(gdl, sighton, crossx, crossy);
 
 	return gdl;
 }
 
-Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
+Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
 	s32 viewleft = viGetViewLeft() / g_ScaleX;
 	s32 viewtop = viGetViewTop();
@@ -1428,8 +1428,8 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 	s32 viewheight = viGetViewHeight();
 	s32 viewright = viewleft + viewwidth - 1;
 	s32 viewbottom = viewtop + viewheight - 1;
-	s32 x = (s32)g_Vars.currentplayer->crosspos[0] / g_ScaleX;
-	s32 y = g_Vars.currentplayer->crosspos[1];
+	s32 x = (s32)crossx / g_ScaleX;
+	s32 y = crossy;
 	Vtx *vertices;
 	Col *colours;
 	s32 inner[4];
@@ -1536,10 +1536,10 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 	return gdl;
 }
 
-Gfx *sightDrawTarget(Gfx *gdl)
+Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 {
-	s32 x = sightGetAdjustedX((s32)g_Vars.currentplayer->crosspos[0] / g_ScaleX);
-	s32 y = g_Vars.currentplayer->crosspos[1];
+	s32 x = sightGetAdjustedX((s32)crossx / g_ScaleX);
+	s32 y = crossy;
 
 	static u32 var80070f9c = 0x00ff00ff;
 	static u32 var80070fa0 = 0x00ff0011;
@@ -1608,8 +1608,11 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 	// to integer), which leads to some awkward behavior, such as the crosshair
 	// taking a long time to return to the center of the screen when coming from
 	// an up and/or left direction.
-	g_Vars.currentplayer->crosspos[0] = roundf(g_Vars.currentplayer->crosspos[0]);
-	g_Vars.currentplayer->crosspos[1] = roundf(g_Vars.currentplayer->crosspos[1]);
+	const f32 crossx = roundf(g_Vars.currentplayer->crosspos[0]);
+	const f32 crossy = roundf(g_Vars.currentplayer->crosspos[1]);
+#else
+	const f32 crossx = g_Vars.currentplayer->crosspos[0];
+	const f32 crossy = g_Vars.currentplayer->crosspos[1];
 #endif
 
 #if PAL
@@ -1637,28 +1640,28 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 
 	switch (sight) {
 	case SIGHT_DEFAULT:
-		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_CLASSIC:
-		gdl = sightDrawClassic(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawClassic(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_2:
-		gdl = sightDrawType2(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawType2(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_3:
-		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_SKEDAR:
-		gdl = sightDrawSkedar(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawSkedar(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_ZOOM:
-		gdl = sightDrawZoom(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawZoom(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_MAIAN:
-		gdl = sightDrawMaian(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawMaian(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	default:
-		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex));
+		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_NONE:
 		break;
@@ -1667,7 +1670,7 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 	if (sight != SIGHT_NONE && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex)) {
 		if ((optionsGetAlwaysShowTarget(g_Vars.currentplayerstats->mpindex) && !sighton)
 				|| (sighton && sightHasTargetWhileAiming(sight))) {
-			gdl = sightDrawTarget(gdl);
+			gdl = sightDrawTarget(gdl, crossx, crossy);
 		}
 	}
 
