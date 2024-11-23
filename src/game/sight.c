@@ -515,6 +515,7 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 #ifndef PLATFORM_N64
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
 #endif
 
 	// Draw the lines that span most of the viewport
@@ -551,6 +552,7 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 #endif
 
 	gdl = text0f153838(gdl);
@@ -908,7 +910,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton)
 	f32 spc4[2];
 	f32 spbc[2];
 	s32 x = g_Vars.currentplayer->crosspos[0];
-	s32 y = g_Vars.currentplayer->crosspos[1];
+	s32 y = g_Vars.currentplayer->crosspos[1] + 1; // Plus one, to align with the laser sight.
 	s32 x1;
 	s32 x2;
 	s32 y1;
@@ -1033,6 +1035,14 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, s32 x, s32 y, s32 dir, u32 colour)
 	vertices[2].x = points[4] * 10;
 	vertices[2].y = points[5] * 10;
 	vertices[2].z = -10;
+
+#ifndef PLATFORM_N64
+	// Center-align Skedar tris
+	for (int i = 0; i < 3; ++i) {
+		vertices[i].x -= 2;
+		vertices[i].y += 2;
+	}
+#endif
 
 	// @bug: This also needs to check for COLOUR_LIGHTRED because the caller can
 	// use two shades of red. The second colour is used when zeroing the sight
@@ -1331,6 +1341,16 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 		marginbottom = viewhalfheight - availablebelow * frac;
 		margintop = viewhalfheight - availableabove * frac;
 
+#ifndef PLATFORM_N64
+		// Center-align the zoom range
+		if (frac != 1.0f) {
+			viewleft += 1;
+			viewright += 1;
+			viewbottom += 1;
+			viewtop += 1;
+		}
+#endif
+
 #define BOXLEFT   (viewleft + marginleft)
 #define BOXRIGHT  (viewright - marginright)
 #define BOXBOTTOM (viewbottom - marginbottom)
@@ -1346,6 +1366,7 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 
 #ifndef PLATFORM_N64
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+		gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
 #endif
 
 		// Top left
@@ -1387,6 +1408,7 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton)
 
 #ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+		gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 #endif
 
 		gdl = text0f153838(gdl);
@@ -1425,6 +1447,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 #ifndef PLATFORM_N64
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
 #endif
 
 	vertices = gfxAllocateVertices(8);
@@ -1469,6 +1492,14 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 	vertices[7].y = inner[2] * 10;
 	vertices[7].z = -10;
 
+#ifndef PLATFORM_N64
+	// Center-align Maian tris
+	for (int i = 0; i < 8; ++i) {
+		vertices[i].x -= 2;
+		vertices[i].y += 2;
+	}
+#endif
+
 	colours[0].word = PD_BE32(0x00ff000f);
 	colours[1].word = PD_BE32(hasprop ? colour : 0x00ff0044);
 
@@ -1499,6 +1530,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton)
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 #endif
 
 	return gdl;
@@ -1519,6 +1551,7 @@ Gfx *sightDrawTarget(Gfx *gdl)
 
 #ifndef PLATFORM_N64
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
 	if (SIGHT_SCALE == 0) {
 		// Draw single rectangle to preserve intended opacity
 		gDPHudRectangle(gdl++, x, y, x, y);
@@ -1537,6 +1570,7 @@ Gfx *sightDrawTarget(Gfx *gdl)
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 #endif
 
 	gdl = text0f153838(gdl);
@@ -1567,6 +1601,16 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 	if (g_Vars.currentplayer->gunctrl.passivemode) {
 		return gdl;
 	}
+
+#ifndef PLATFORM_N64
+	// Rounding the crosshair positions allow them to more accurately follow the
+	// gun's vector. Without this, the mantissa isn't factored in at all (cast
+	// to integer), which leads to some awkward behavior, such as the crosshair
+	// taking a long time to return to the center of the screen when coming from
+	// an up and/or left direction.
+	g_Vars.currentplayer->crosspos[0] = roundf(g_Vars.currentplayer->crosspos[0]);
+	g_Vars.currentplayer->crosspos[1] = roundf(g_Vars.currentplayer->crosspos[1]);
+#endif
 
 #if PAL
 	g_ScaleX = 1;
