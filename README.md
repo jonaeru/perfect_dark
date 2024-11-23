@@ -35,9 +35,11 @@ There are minor graphics- and gameplay-related issues, and possibly occasional c
   * in practice the game will have issues running faster than ~165 FPS, so use VSync or `Video.FramerateLimit` to cap it.
 * emulate the Transfer Pak functionality the game has on the Nintendo 64 to unlock some cheats automatically.
 
-Currently both 32-bit and 64-bit platforms should be supported.  
-The port is tested on i686 and x86_64, both on Windows and on Linux.  
-ARM platforms might be supported, but are mostly untested.
+The following platforms are officially supported and tested:
+* Windows: x86_64, i686
+* Linux: x86_64, i686
+* Mac: x86_64, arm64
+* Nintendo Switch: arm64
 
 ## Download
 
@@ -68,7 +70,7 @@ Optionally, you can also put your Perfect Dark for GameBoy Color ROM named `pd.g
 
 Additional information can be found in the [wiki](https://github.com/fgsfdsfgs/perfect_dark/wiki).
 
-A GPU supporting OpenGL 3.0 or above is required to run the port.
+A GPU supporting OpenGL 3.0/ES3.0 or above is required to run the port.
 
 ### Installing the Nintendo Switch version
 
@@ -165,7 +167,7 @@ Alternate compilers or toolchains can be specified by passing `-DCMAKE_TOOLCHAIN
 
 You will need to provide a `jpn-final` or `pal-final` ROM to run executables built for those regions, named `pd.jpn-final.z64` or `pd.pal-final.z64`.
 
-It might be possible to build and run the game on an ARM/AArch64 platform, but this has not been tested.
+It might be possible to build and run the game on platforms that are not specified in the supported platforms list (e.g. Linux on armv7), but this has not been tested.
 
 ## Credits
 
