@@ -68,6 +68,8 @@ If you want to use a PAL or JPN ROM instead, put them into the `data` directory 
 
 Optionally, you can also put your Perfect Dark for GameBoy Color ROM named `pd.gbc` in the `data` directory if you want to emulate having the Nintendo 64's Transfer Pak and unlock some cheats automatically.
 
+Optionally, you can move the data folder to `~/.local/share/perfectdark` on Linux or `~/Library/Application Support/perfectdark` on MacOS.
+
 Additional information can be found in the [wiki](https://github.com/fgsfdsfgs/perfect_dark/wiki).
 
 A GPU supporting OpenGL 3.0/ES3.0 or above is required to run the port.
