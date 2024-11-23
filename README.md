@@ -36,8 +36,8 @@ There are minor graphics- and gameplay-related issues, and possibly occasional c
 * emulate the Transfer Pak functionality the game has on the Nintendo 64 to unlock some cheats automatically.
 
 The following platforms are officially supported and tested:
-* Windows: x86_64, i686 (should work on Windows 7 and above)
-* Linux: x86_64, i686
+* Windows 7+: i686, x86_64
+* Linux: i686, x86_64
 * MacOS: x86_64 (OS 10.9+), arm64 (OS 11.0+)
 * Nintendo Switch: arm64
 
