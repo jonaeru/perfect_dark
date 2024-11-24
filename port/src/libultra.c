@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <PR/os_internal.h>
 #include <PR/rcp.h>
+#include "platform.h"
 #include "system.h"
 #include "input.h"
 #include "video.h"
@@ -277,7 +278,7 @@ static inline void osEeepromLoad(const char *fname)
 		FILE *fp = fsFileOpenRead(fname);
 		if (fp) {
 			fread(eeprom, 1, EEPROM_SIZE, fp);
-			fsFileClose(fp);
+			fsFileFree(fp);
 		} else {
 			sysLogPrintf(LOG_NOTE, "could not read EEPROM from `%s`: %s", fsFullPath(fname), strerror(errno));
 		}
@@ -289,7 +290,7 @@ static inline void osEeepromSave(const char *fname)
 	FILE* fp = fsFileOpenWrite(fname);
 	if (fp) {
 		fwrite(eeprom, 1, EEPROM_SIZE, fp);
-		fsFileClose(fp);
+		fsFileFree(fp);
 	} else {
 		sysLogPrintf(LOG_ERROR, "could not save EEPROM to `%s`: %s", fsFullPath(fname), strerror(errno));
 	}
@@ -433,7 +434,7 @@ void osInvalDCache(void *a, s32 b)
 
 }
 
-s32 osPiStartDma(OSIoMesg *mb, s32 priority, s32 direction, uintptr_t devAddr, void *vAddr, size_t nbytes, OSMesgQueue *mq)
+s32 osPiStartDma(OSIoMesg *mb, s32 priority, s32 direction, uintptr_t devAddr, void *vAddr, u32 nbytes, OSMesgQueue *mq)
 {
 	memcpy(vAddr, (const void *)devAddr, nbytes);
 	return 0;
@@ -466,23 +467,21 @@ OSIntMask osSetIntMask(OSIntMask mask)
 
 /* libc compatibility wrappers */
 
-#ifndef HAVE_BZERO
+#ifndef PLATFORM_OSX
+
 void bzero(void *ptr, size_t size)
 {
 	memset(ptr, 0, size);
 }
-#endif
 
-#ifndef HAVE_BCOPY
 void bcopy(const void *src, void *dst, size_t n)
 {
 	memcpy(dst, src, n);
 }
-#endif
 
-#ifndef HAVE_BCMP
 s32 bcmp(const void *s1, const void *s2, size_t n)
 {
 	return memcmp(s1, s2, n);
 }
+
 #endif

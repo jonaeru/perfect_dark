@@ -49,9 +49,10 @@
 #define ABS(val)            ((val) > 0 ? (val) : -(val))
 #define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
 #define ALIGN2(val)         (((val) | 1) ^ 0x1)
+#define ALIGN4(val)         (((val) | 3) ^ 0x3)
 #define ALIGN8(val)         ((((val) + 0x7) | 0x7) ^ 0x7)
 #define ALIGN16(val)        ((((val) + 0xf) | 0xf) ^ 0xf)
-#define ALIGN64(val)        (((((u32)(val)) + 0x3f) | 0x3f) ^ 0x3f)
+#define ALIGN64(val)        (((((uintptr_t)(val)) + 0x3f) | 0x3f) ^ 0x3f)
 #define ARRAYCOUNT(a)       (s32)(sizeof(a) / sizeof(a[0]))
 #define CHRNAVSEED(chr)     ((g_Vars.lvframe60 >> 9) * 128 + chr->chrnum * 8)
 #define CHRRACE(chr)        (chr ? chr->race : RACE_HUMAN)
@@ -62,7 +63,7 @@
 #define LINEHEIGHT          (VERSION == VERSION_JPN_FINAL ? 14 : 11)
 #define MIXCOLOUR(dialog, property) dialog->transitionfrac < 0.0f ? g_MenuColours[dialog->type].property : colourBlend(g_MenuColours[dialog->type2].property, g_MenuColours[dialog->type].property, dialog->colourweight)
 #define MPCHR(index)        ((index) < MAX_PLAYERS ? &g_PlayerConfigsArray[index].base : &g_BotConfigsArray[(index) - MAX_PLAYERS].base)
-#define RANDOMFRAC()        (random() * (1.0f / U32_MAX))
+#define RANDOMFRAC()        (rngRandom() * (1.0f / U32_MAX))
 #define SECSTOTIME240(secs) (secs * 240)
 #define SECSTOTIME60(secs)  (secs * 60)
 #define PFS(device)         (device == SAVEDEVICE_GAMEPAK ? NULL : &g_Pfses[device])
@@ -2895,6 +2896,7 @@
 #define MPOPTION_AUTORANDOMWEAPON_START 0x00800000
 #define MPOPTION_AUTORANDOMWEAPON_END   0x01000000
 #define MPOPTION_FRIENDLYFIRE           0x02000000
+#define MPOPTION_NOPLAYERONRADAR        0x04000000
 
 #define MPPAUSEMODE_UNPAUSED 0
 #define MPPAUSEMODE_PAUSED   1

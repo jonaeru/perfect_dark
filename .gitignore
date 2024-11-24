@@ -4,6 +4,7 @@
 *.exe
 pd.*.z64
 build
+.flatpak-builder
 extracted
 src/assets/*/*.bin
 src/assets/*/*.ctl
@@ -22,3 +23,5 @@ src/assets/*/textures/*.bin
 src/generated
 tools/mkrom/mkrom
 /.vs
+CppProperties.json
+.idea

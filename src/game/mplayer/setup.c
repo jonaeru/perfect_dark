@@ -169,7 +169,7 @@ s16 mpChooseRandomStage(void)
 		}
 	}
 
-	index = random() % numchallengescomplete;
+	index = rngRandom() % numchallengescomplete;
 
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
@@ -219,7 +219,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		for (i = 0; i < ARRAYCOUNT(g_MpArenas); i++) {
 			if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 				if (count == data->list.value) {
-					return (s32)langGet(g_MpArenas[i].name);
+					return (uintptr_t)langGet(g_MpArenas[i].name);
 				}
 
 				count++;
@@ -272,7 +272,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 			count++;
 		}
 #endif
-		return (s32)langGet(groups[count].name);
+		return (uintptr_t)langGet(groups[count].name);
 	case MENUOP_GETGROUPSTARTINDEX:
 		groupindex = data->list.value;
 
@@ -336,7 +336,7 @@ MenuItemHandlerResult menuhandlerMpWeaponSlot(s32 operation, struct menuitem *it
 		data->dropdown.value = mpGetNumWeaponOptions();
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) mpGetWeaponLabel(data->dropdown.value);
+		return (uintptr_t) mpGetWeaponLabel(data->dropdown.value);
 	case MENUOP_SET:
 		mpSetWeaponSlot(item->param3, data->dropdown.value);
 		break;
@@ -359,7 +359,7 @@ MenuItemHandlerResult menuhandlerMpWeaponSetDropdown(s32 operation, struct menui
 		data->dropdown.value = func0f189058(item->param);
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) mpGetWeaponSetName(data->dropdown.value);
+		return (uintptr_t) mpGetWeaponSetName(data->dropdown.value);
 	case MENUOP_SET:
 		mpSetWeaponSet(data->dropdown.value);
 		break;
@@ -425,7 +425,7 @@ MenuItemHandlerResult menuhandlerMpAimControl(s32 operation, struct menuitem *it
 		data->dropdown.value = 2;
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) langGet(labels[data->dropdown.value]);
+		return (uintptr_t) langGet(labels[data->dropdown.value]);
 	case MENUOP_SET:
 		optionsSetAimControl(g_MpPlayerNum, data->dropdown.value);
 		break;
@@ -815,7 +815,7 @@ MenuItemHandlerResult mpChallengesListHandler(s32 operation, struct menuitem *it
 			loopx += 13;
 		}
 
-		return (s32) gdl;
+		return (uintptr_t) gdl;
 	case MENUOP_GETOPTIONHEIGHT:
 		data->list.value = 26;
 		break;
@@ -1049,7 +1049,7 @@ MenuItemHandlerResult mpMedalMenuHandler(s32 operation, struct menuitem *item, u
 				((renderdata->x + 20) << 2) * g_ScaleX, (renderdata->y + 11) << 2,
 				G_TX_RENDERTILE, 0, 0x0160, 1024 / g_ScaleX, -1024);
 
-		return (s32) gdl;
+		return (uintptr_t) gdl;
 	}
 
 	return 0;
@@ -2130,11 +2130,11 @@ MenuItemHandlerResult mpLoadSettingsMenuHandler(s32 operation, struct menuitem *
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		if (data->list.value < mpGetNumUnlockedPresets()) {
-			return (s32)mpGetPresetNameBySlot(data->list.value);
+			return (uintptr_t)mpGetPresetNameBySlot(data->list.value);
 		}
 		if (g_FileLists[1] != NULL) {
 			func0f0d564c(g_FileLists[1]->files[data->list.value - mpGetNumUnlockedPresets()].name, g_StringPointer, false);
-			return (s32)g_StringPointer;
+			return (uintptr_t)g_StringPointer;
 		}
 		break;
 	case MENUOP_SET:
@@ -2172,10 +2172,10 @@ MenuItemHandlerResult mpLoadSettingsMenuHandler(s32 operation, struct menuitem *
 		break;
 	case MENUOP_GETOPTGROUPTEXT:
 		if (data->list.value == 0) {
-			return (s32)langGet(L_MPMENU_141); // "Presets"
+			return (uintptr_t)langGet(L_MPMENU_141); // "Presets"
 		}
 		if (g_FileLists[1] != NULL) {
-			return (s32)filemgrGetDeviceNameOrStartIndex(1, operation, data->list.value - 1);
+			return (uintptr_t)filemgrGetDeviceNameOrStartIndex(1, operation, data->list.value - 1);
 		}
 		break;
 	case MENUOP_GETGROUPSTARTINDEX:
@@ -2269,7 +2269,7 @@ MenuItemHandlerResult mpLoadPlayerMenuHandler(s32 operation, struct menuitem *it
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		filemgrGetSelectName(g_StringPointer, &g_FileLists[0]->files[data->list.value], FILETYPE_MPPLAYER);
-		return (s32)g_StringPointer;
+		return (uintptr_t)g_StringPointer;
 	case MENUOP_SET:
 		file = &g_FileLists[0]->files[data->list.value];
 		available = true;
@@ -2790,7 +2790,7 @@ MenuItemHandlerResult mpAddChangeSimulantMenuHandler(s32 operation, struct menui
 		for (i = 0; i < ARRAYCOUNT(g_BotProfiles); i++) {
 			if (challengeIsFeatureUnlocked(g_BotProfiles[i].requirefeature)) {
 				if (count == data->list.value) {
-					return (s32)langGet(g_BotProfiles[i].name);
+					return (uintptr_t)langGet(g_BotProfiles[i].name);
 				}
 
 				count++;
@@ -2851,7 +2851,7 @@ MenuItemHandlerResult mpAddChangeSimulantMenuHandler(s32 operation, struct menui
 		data->list.value = 2;
 		break;
 	case MENUOP_GETOPTGROUPTEXT:
-		return (s32)langGet(groups[data->list.value].name);
+		return (uintptr_t)langGet(groups[data->list.value].name);
 	case MENUOP_GETGROUPSTARTINDEX:
 		for (i = 0; i < groups[data->list.value].offset; i++) {
 			if (challengeIsFeatureUnlocked(g_BotProfiles[i].requirefeature)) {
@@ -2958,14 +2958,14 @@ MenuItemHandlerResult mpBotDifficultyMenuHandler(s32 operation, struct menuitem 
 			if (challengeIsFeatureUnlocked(g_BotProfiles[i].requirefeature)) {
 				if (count == data->dropdown.value) {
 					// "Meat", "Easy", "Normal" etc
-					return (s32) langGet(L_MISC_082 + i);
+					return (uintptr_t) langGet(L_MISC_082 + i);
 				}
 
 				count++;
 			}
 		}
 
-		return (s32)"\n";
+		return (uintptr_t)"\n";
 	}
 
 	return 0;
@@ -2980,6 +2980,24 @@ MenuItemHandlerResult menuhandlerMpDeleteSimulant(s32 operation, struct menuitem
 
 	return 0;
 }
+
+#ifndef PLATFORM_N64
+MenuItemHandlerResult menuhandlerMpCopySimulant(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	switch (operation) {
+	case MENUOP_SET:
+		mpCopySimulant(g_Menus[g_MpPlayerNum].mpsetup.slotindex);
+		menuPopDialog();
+		break;
+	case MENUOP_CHECKDISABLED:
+		if (mpHasUnusedBotSlots() == 0) {
+			return true;
+		}
+	}
+
+	return 0;
+}
+#endif
 
 char *mpMenuTitleEditSimulant(struct menudialogdef *dialogdef)
 {
@@ -3199,6 +3217,16 @@ struct menuitem g_MpEditSimulantMenuItems[] = {
 		0,
 		NULL,
 	},
+#ifndef PLATFORM_N64
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Copy Simulant\n",
+		0,
+		menuhandlerMpCopySimulant,
+	},
+#endif
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -3352,7 +3380,7 @@ MenuItemHandlerResult menuhandlerMpNTeams(s32 operation, struct menuitem *item, 
 		s32 somevalue = (numchrs + numteams - 1) / numteams;
 		s32 teamsremaining = numteams;
 		s32 chrsremaining = numchrs;
-		s32 start = random() % numchrs;
+		s32 start = rngRandom() % numchrs;
 
 		s32 i;
 		s32 teamnum;
@@ -3375,7 +3403,7 @@ MenuItemHandlerResult menuhandlerMpNTeams(s32 operation, struct menuitem *item, 
 #endif
 
 			if (teamsremaining >= chrsremaining) {
-				teamnum = random() % numteams;
+				teamnum = rngRandom() % numteams;
 
 				while (true) {
 					if (array[teamnum] == 0) {
@@ -3390,7 +3418,7 @@ MenuItemHandlerResult menuhandlerMpNTeams(s32 operation, struct menuitem *item, 
 					}
 				}
 			} else {
-				teamnum = random() % numteams;
+				teamnum = rngRandom() % numteams;
 
 				while (true) {
 					if (array[teamnum] < somevalue) {
@@ -3529,10 +3557,10 @@ MenuItemHandlerResult func0f17dac4(s32 operation, struct menuitem *item, union h
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		if ((g_MpSetup.options & MPOPTION_TEAMSENABLED) == 0) {
-			return (s32) "\n";
+			return (uintptr_t) "\n";
 		}
 
-		return (s32) g_BossFile.teamnames[data->list.value];
+		return (uintptr_t) g_BossFile.teamnames[data->list.value];
 	}
 
 	return menuhandlerMpTeamsLabel(operation, item, data);
@@ -3961,14 +3989,14 @@ MenuItemHandlerResult mpSelectTuneListHandler(s32 operation, struct menuitem *it
 			s32 numtracks = mpGetNumUnlockedTracks();
 
 			if (data->list.value < numtracks) {
-				return (s32) mpGetTrackName(data->list.value);
+				return (uintptr_t) mpGetTrackName(data->list.value);
 			}
 
 			if (mpGetUsingMultipleTunes()) {
-				return (s32) langGet(var80085ce8[1 + data->list.value - numtracks]);
+				return (uintptr_t) langGet(var80085ce8[1 + data->list.value - numtracks]);
 			}
 
-			return (s32) langGet(var80085ce8[data->list.value - numtracks]);
+			return (uintptr_t) langGet(var80085ce8[data->list.value - numtracks]);
 		}
 	case MENUOP_SET:
 		{
@@ -4676,7 +4704,7 @@ MenuItemHandlerResult mpChallengesListMenuHandler(s32 operation, struct menuitem
 
 			marginleft += 13;
 		}
-		return (s32)gdl;
+		return (uintptr_t)gdl;
 	case MENUOP_GETOPTIONHEIGHT:
 		data->list.value = 26;
 		break;
@@ -4811,15 +4839,15 @@ MenuItemHandlerResult menuhandlerMpLock(s32 operation, struct menuitem *item, un
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		if (mpGetLockType() == MPLOCKTYPE_CHALLENGE) {
-			return (s32) langGet(L_MPMENU_049); // "Challenge"
+			return (uintptr_t) langGet(L_MPMENU_049); // "Challenge"
 		}
 		if (data->dropdown.value <= 3) {
-			return (s32) langGet(labels[data->dropdown.value]);
+			return (uintptr_t) langGet(labels[data->dropdown.value]);
 		}
 		if (mpGetLockType() == MPLOCKTYPE_PLAYER) {
-			return (s32) g_PlayerConfigsArray[mpGetLockPlayerNum()].base.name;
+			return (uintptr_t) g_PlayerConfigsArray[mpGetLockPlayerNum()].base.name;
 		}
-		return (s32) mpGetCurrentPlayerName(item);
+		return (uintptr_t) mpGetCurrentPlayerName(item);
 	case MENUOP_SET:
 		if (mpGetLockType() != MPLOCKTYPE_CHALLENGE) {
 			mpSetLock(data->dropdown.value, g_MpPlayerNum);
@@ -5079,7 +5107,7 @@ MenuItemHandlerResult menuhandlerPlayerTeam(s32 operation, struct menuitem *item
 #endif
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) &g_BossFile.teamnames[data->dropdown.value];
+		return (uintptr_t) &g_BossFile.teamnames[data->dropdown.value];
 	case MENUOP_SET:
 		g_Vars.mpplayerteams[item->param] = data->dropdown.value;
 		break;
@@ -5109,7 +5137,7 @@ MenuItemHandlerResult menuhandlerMpNumberOfSimulants(s32 operation, struct menui
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		sprintf(g_StringPointer, "%d\n", data->dropdown.value + 1);
-		return (s32) g_StringPointer;
+		return (uintptr_t) g_StringPointer;
 	case MENUOP_SET:
 		g_Vars.mpquickteamnumsims = data->dropdown.value + 1;
 		break;
@@ -5135,7 +5163,7 @@ MenuItemHandlerResult menuhandlerMpSimulantsPerTeam(s32 operation, struct menuit
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		sprintf(g_StringPointer, "%d\n", data->dropdown.value + 1);
-		return (s32) g_StringPointer;
+		return (uintptr_t) g_StringPointer;
 	case MENUOP_SET:
 		g_Vars.unk0004a0 = data->dropdown.value + 1;
 		break;
@@ -5171,7 +5199,7 @@ MenuItemHandlerResult mpQuickTeamSimulantDifficultyHandler(s32 operation, struct
 		for (i = 0; i < NUM_BOTDIFFS; i++) {
 			if (challengeIsFeatureUnlocked(g_BotProfiles[i].requirefeature)) {
 				if (count == data->dropdown.value) {
-					return (s32) langGet(i + L_MISC_082);
+					return (uintptr_t) langGet(i + L_MISC_082);
 				}
 
 				count++;

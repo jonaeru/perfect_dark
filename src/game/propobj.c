@@ -1094,7 +1094,7 @@ struct projectile *projectileAllocate(void)
 
 	// If there were none, pick one at random
 	if (bestindex == -1 && g_MaxProjectiles) {
-		bestindex = random() % g_MaxProjectiles;
+		bestindex = rngRandom() % g_MaxProjectiles;
 	}
 
 	if (bestindex >= 0) {
@@ -1513,7 +1513,7 @@ s32 func0f068fc8(struct prop *prop, bool arg1)
 	s32 *extraptr;
 
 	if (prop->rooms[0] == -1) {
-		actual = random() % 255;
+		actual = rngRandom() % 255;
 		extra = 0;
 	} else if (obj->type == OBJTYPE_DOOR) {
 		struct doorobj *door = (struct doorobj *)obj;
@@ -1615,6 +1615,15 @@ void propCalculateShadeColour(struct prop *prop, u8 *nextcol, u16 floorcol)
 #endif
 	{
 		s32 shade = func0f068fc8(prop, 0);
+
+		// fix props flickering in split screen when one of the players has night vision on
+		if (prop->type != PROPTYPE_PLAYER || g_Vars.currentplayer->prop != prop) {
+			if (USINGDEVICE(DEVICE_NIGHTVISION)) {
+				if (prop->rooms[0] >= 0) {
+					shade = g_Rooms[prop->rooms[0]].br_settled_regional;
+				}
+			}
+		}
 
 		roomr = shade;
 		roomg = shade;
@@ -3727,7 +3736,7 @@ void projectileFall(struct defaultobj *obj, f32 arg1[3][3])
 						t4 = NEXT(i);
 						t3 = PREV(i);
 					} else {
-						if ((random() % 2) == 0) {
+						if ((rngRandom() % 2) == 0) {
 							t4 = PREV(i);
 							t3 = NEXT(i);
 						} else {
@@ -3879,7 +3888,7 @@ void knifePlayWooshSound(struct defaultobj *obj)
 				&& obj->projectile->bouncecount <= 0
 				&& (obj->hidden & OBJHFLAG_THROWNKNIFE)) {
 			u16 soundnums[] = { SFX_8074, SFX_8074, SFX_8074 };
-			s32 index = random() % ARRAYCOUNT(soundnums);
+			s32 index = rngRandom() % ARRAYCOUNT(soundnums);
 
 			if (obj->projectile->lastwooshframe < g_Vars.lvframe60 - TICKS(6)) {
 				psStopSound(obj->prop, PSTYPE_GENERAL, 0xffff);
@@ -4028,7 +4037,7 @@ void knifeLand(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 
 	// @bug? Should these be assigned to zero?
 	objGetLocalZMin(bbox);
-	random();
+	rngRandom();
 
 	sp1c.x = RANDOMFRAC() * 0.8f + arg2->x - 0.4f;
 	sp1c.y = RANDOMFRAC() * 0.8f + arg2->y - 0.4f;
@@ -7415,7 +7424,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 								} else if (weapon->weaponnum == WEAPON_GRENADE && weapon->gunfunc == FUNC_SECONDARY) {
 									u16 sp100[] = {SFX_0027, SFX_0028, SFX_0029, SFX_002A};
 
-									psCreate(0, prop, sp100[random() % 4], -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
+									psCreate(0, prop, sp100[rngRandom() % 4], -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
 									psCreate(0, prop, SFX_EYESPYHIT, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
 								} else {
 									psCreate(0, prop, SFX_EYESPYHIT, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
@@ -9267,10 +9276,10 @@ void autogunTickShoot(struct prop *autogunprop)
 
 								missed = false;
 
-								if (random() % 2) {
-									hitpos.y += 2 + (random() % 10);
+								if (rngRandom() % 2) {
+									hitpos.y += 2 + (rngRandom() % 10);
 								} else {
-									hitpos.y -= 2 + (random() % 10);
+									hitpos.y -= 2 + (rngRandom() % 10);
 								}
 
 								bgunPlayPropHitSound(&gset, targetprop, -1);
@@ -9629,7 +9638,7 @@ void chopperFireRocket(struct chopperobj *chopper, bool side)
 		pos.z = sp6c.m[3][2] + chopperprop->pos.f[2];
 
 		direction.x = targetprop->pos.x - pos.x;
-		direction.y = targetprop->pos.y - pos.y + (s32)(random() % 100);
+		direction.y = targetprop->pos.y - pos.y + (s32)(rngRandom() % 100);
 		direction.z = targetprop->pos.z - pos.z;
 
 		guNormalize(&direction.x, &direction.y, &direction.z);
@@ -9670,8 +9679,8 @@ void chopperIncrementBarrel(struct prop *chopperprop, bool firing)
 		rodata = modelGetPartRodata(model->definition, MODELPART_CHOPPER_0001);
 		gunaimy = targetprop->pos.y - 20.0f;
 
-		gunpos.x = random() * random() * 0 * 30.0f + rodata->pos.x;
-		gunpos.y = random() * 0 * 30.0f + (rodata->pos.y - 50.0f);
+		gunpos.x = rngRandom() * rngRandom() * 0 * 30.0f + rodata->pos.x;
+		gunpos.y = rngRandom() * 0 * 30.0f + (rodata->pos.y - 50.0f);
 		gunpos.z = rodata->pos.z + 250.0f;
 
 		if (obj->modelnum == MODEL_A51INTERCEPTOR) {
@@ -9840,7 +9849,7 @@ void chopperIncrementMovement(struct prop *prop, f32 goalroty, f32 goalrotx, str
 
 	if (chopper->bob > M_BADTAU) {
 		chopper->bob = 0.0f;
-		chopper->bobstrength = ((random() % 8) + 2) * 0.01f;
+		chopper->bobstrength = ((rngRandom() % 8) + 2) * 0.01f;
 
 		if (chopper->base.flags & OBJFLAG_CHOPPER_INACTIVE) {
 			chopper->bobstrength *= 0.15f;
@@ -10073,7 +10082,7 @@ void chopperTickFall(struct prop *chopperprop)
 		if (bob > M_BADTAU) {
 			bob = 0;
 
-			chopper->bobstrength = (random() % 8 + 2) * 0.01f;
+			chopper->bobstrength = (rngRandom() % 8 + 2) * 0.01f;
 
 			if (obj->flags & OBJFLAG_CHOPPER_INACTIVE) {
 				chopper->bobstrength *= 0.15f;
@@ -13147,7 +13156,7 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 				tvscreenSetCmdlist(screen, (u32 *) cmd->arg1);
 				break;
 			case TVCMD_RANDSETCMDLIST:
-				if ((random() >> 16) < cmd->arg2) {
+				if ((rngRandom() >> 16) < cmd->arg2) {
 					tvscreenSetCmdlist(screen, (u32 *) cmd->arg1);
 				} else {
 					screen->offset += 3;
@@ -13922,7 +13931,7 @@ void objDeform(struct defaultobj *obj, s32 level)
 	if (debugIsObjDeformDebugEnabled());
 	if (debugIsObjDeformDebugEnabled());
 
-	salt = random();
+	salt = rngRandom();
 
 	if (debugIsObjDeformDebugEnabled()) {
 		salt &= 0xffff;
@@ -15041,13 +15050,13 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 
 				if (rwdata->gdl != NULL) {
 					if (rwdata->gdl == rodata->opagdl) {
-						s3 = (Gfx *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->opagdl) & 0xffffff));
+						s3 = (Gfx *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->opagdl) & 0xffffff));
 					} else {
 						s3 = rwdata->gdl;
 					}
 
 					if (rodata->xlugdl != NULL) {
-						s5 = (void *)((uintptr_t)rodata->colours + ((u32)UNSEGADDR(rodata->xlugdl) & 0xffffff));
+						s5 = (void *)((uintptr_t)rodata->colours + ((uintptr_t)UNSEGADDR(rodata->xlugdl) & 0xffffff));
 					}
 
 					vertices = rwdata->vertices;
@@ -15059,10 +15068,10 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 				struct modelrodata_gundl *rodata = &node->rodata->gundl;
 
 				if (rodata->opagdl != NULL) {
-					s3 = (Gfx *)((uintptr_t)rodata->baseaddr + ((u32)UNSEGADDR(rodata->opagdl) & 0xffffff));
+					s3 = (Gfx *)((uintptr_t)rodata->baseaddr + ((uintptr_t)UNSEGADDR(rodata->opagdl) & 0xffffff));
 
 					if (rodata->xlugdl != NULL) {
-						s5 = (Gfx *)((uintptr_t)rodata->baseaddr + ((u32)UNSEGADDR(rodata->xlugdl) & 0xffffff));
+						s5 = (Gfx *)((uintptr_t)rodata->baseaddr + ((uintptr_t)UNSEGADDR(rodata->xlugdl) & 0xffffff));
 					}
 
 					vertices = (void *)(uintptr_t)rodata->baseaddr;
@@ -15488,7 +15497,7 @@ void objDamage(struct defaultobj *obj, f32 damage, struct coord *pos, s32 weapon
 			if (objGetDestroyedLevel(obj) == 1) {
 				u32 stack;
 				struct multiammocrateobj *crate = (struct multiammocrateobj *) obj;
-				s32 startindex = random() % ARRAYCOUNT(crate->slots);
+				s32 startindex = rngRandom() % ARRAYCOUNT(crate->slots);
 				s32 i = startindex;
 
 				do {
@@ -15830,7 +15839,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 			struct prop *hitprop = hit->prop;
 			s8 iswindoweddoor = obj->model->definition->skel == &g_SkelWindowedDoor ? true : false;
 
-			textureindex = WALLHITTEX_GLASS1 + (random() % 3);
+			textureindex = WALLHITTEX_GLASS1 + (rngRandom() % 3);
 
 			if ((obj->type == OBJTYPE_DOOR && !iswindoweddoor)
 					|| (obj->flags & OBJFLAG_INVINCIBLE)
@@ -15858,7 +15867,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 
 			if (surfacetype->numwallhittexes > 0) {
 				spc4 = false;
-				spcc = random() % surfacetype->numwallhittexes;
+				spcc = rngRandom() % surfacetype->numwallhittexes;
 
 				if ((obj->model->definition->skel == &g_SkelWindowedDoor && hit->dlnode == modelGetPart(obj->model->definition, MODELPART_WINDOWEDDOOR_0003))
 						|| (obj->model->definition->skel == &g_SkelCctv && hit->dlnode == modelGetPart(obj->model->definition, MODELPART_CCTV_LENS))) {
@@ -20067,7 +20076,7 @@ void doorCreateSparks(struct doorobj *door)
 
 	sparksCreate(door->base.prop->rooms[0], door->base.prop, &sp7c, &sp70, &pad.up, SPARKTYPE_ENVIRONMENTAL1);
 
-	if (random() % 2) {
+	if (rngRandom() % 2) {
 		sparksCreate(door->base.prop->rooms[0], door->base.prop, &sp88, &sp70, &pad.up, SPARKTYPE_ENVIRONMENTAL4);
 	} else {
 		sparksCreate(door->base.prop->rooms[0], door->base.prop, &sp88, &sp70, &pad.up, SPARKTYPE_ENVIRONMENTAL5);
@@ -20117,7 +20126,7 @@ bool doorCalcIntendedFrac(struct doorobj *door)
 
 		// Skedar Ruins random door stuckage
 		if (door->base.flags3 & OBJFLAG3_DOOR_STICKY) {
-			s32 value = (random() % 64) + 30;
+			s32 value = (rngRandom() % 64) + 30;
 
 #ifndef PLATFORM_N64 // emulate low fps cal rate for stuckage test
 			if (((g_Vars.lvframenum % value) == 0)
@@ -20131,7 +20140,7 @@ bool doorCalcIntendedFrac(struct doorobj *door)
 				door->fracspeed = 0.0f;
 				doorCreateSparks(door);
 
-				if (random() % 2) {
+				if (rngRandom() % 2) {
 					dothething = true;
 					psStopSound(door->base.prop, PSTYPE_DOOR, 0xffff);
 					door->mode = DOORMODE_IDLE;
@@ -20141,7 +20150,7 @@ bool doorCalcIntendedFrac(struct doorobj *door)
 				loopdoor = door;
 
 				while (loopdoor) {
-					if (random() % 2 && loopdoor->mode != DOORMODE_IDLE) {
+					if (rngRandom() % 2 && loopdoor->mode != DOORMODE_IDLE) {
 						loopdoor->fracspeed = 0.0f;
 						doorCreateSparks(loopdoor);
 
@@ -21377,10 +21386,10 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 						endpos.y = targetprop->pos.y;
 						endpos.z = targetprop->pos.z;
 
-						if (random() % 2) {
-							endpos.y += (random() % 10) + 2;
+						if (rngRandom() % 2) {
+							endpos.y += (rngRandom() % 10) + 2;
 						} else {
-							endpos.y -= (random() % 10) + 2;
+							endpos.y -= (rngRandom() % 10) + 2;
 						}
 
 						bgunPlayPropHitSound(&gset, targetprop, -1);

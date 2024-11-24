@@ -209,7 +209,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(s32 operation, struct menuitem *it
 					G_TX_RENDERTILE, 0, 0x0160, 1024 / g_ScaleX, -1024);
 		}
 
-		return (s32)gdl;
+		return (uintptr_t)gdl;
 	}
 
 	return 0;
@@ -279,7 +279,7 @@ MenuItemHandlerResult frDifficultyDropdownMenuHandler(s32 operation, struct menu
 		}
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) langGet(names[data->dropdown.value]);
+		return (uintptr_t) langGet(names[data->dropdown.value]);
 	case MENUOP_SET:
 		frSetDifficulty(data->dropdown.value);
 		menuPushDialog(&g_FrTrainingInfoPreGameMenuDialog);
@@ -876,7 +876,7 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 90, renderdata->y + 50, renderdata->x + 96, renderdata->y + 51, linecolourmid, linecolourfig);
 #endif
 
-		return (s32)gdl;
+		return (uintptr_t)gdl;
 	}
 
 	return 0;
@@ -1438,10 +1438,10 @@ MenuItemHandlerResult ciOfficeInformationMenuHandler(s32 operation, struct menui
 	case MENUOP_GETOPTIONTEXT:
 		if (data->list.value < numunlockedchrbios) {
 			chrbio = ciGetChrBioByBodynum(ciGetChrBioBodynumBySlot(data->list.value));
-			return (s32) langGet(chrbio->name);
+			return (uintptr_t) langGet(chrbio->name);
 		} else {
 			miscbio = ciGetMiscBio(ciGetMiscBioIndexBySlot(data->list.value - numunlockedchrbios));
-			return (s32) langGet(miscbio->name);
+			return (uintptr_t) langGet(miscbio->name);
 		}
 		break;
 	case MENUOP_SET:
@@ -1459,7 +1459,7 @@ MenuItemHandlerResult ciOfficeInformationMenuHandler(s32 operation, struct menui
 		data->list.value = 2;
 		break;
 	case MENUOP_GETOPTGROUPTEXT:
-		return (s32) langGet(groups[data->list.value].name);
+		return (uintptr_t) langGet(groups[data->list.value].name);
 	case MENUOP_GETGROUPSTARTINDEX:
 		data->list.groupstartindex = data->list.value == 0 ? 0 : numunlockedchrbios;
 		break;
@@ -1535,19 +1535,7 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 	f32 y;
 	f32 scale;
 
-	switch (operation) {
-	case MENUOP_OPEN:
-		if (bodynum == BODY_DRCAROLL) {
-			scale = 0.7f;
-			g_Menus[g_MpPlayerNum].menumodel.zoom = -1;
-		} else {
-			g_Menus[g_MpPlayerNum].menumodel.zoom = 30;
-			scale = 1.0f;
-		}
-
-		g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
-		g_Menus[g_MpPlayerNum].menumodel.removingpiece = false;
-
+#ifndef PLATFORM_N64
 #if VERSION == VERSION_PAL_FINAL
 		if (g_ViRes != VIRES_HI) {
 			x = -117;
@@ -1574,6 +1562,50 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
 			x = -100;
 		}
+#endif
+#endif
+
+	switch (operation) {
+	case MENUOP_OPEN:
+		if (bodynum == BODY_DRCAROLL) {
+			scale = 0.7f;
+			g_Menus[g_MpPlayerNum].menumodel.zoom = -1;
+		} else {
+			g_Menus[g_MpPlayerNum].menumodel.zoom = 30;
+			scale = 1.0f;
+		}
+
+		g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
+		g_Menus[g_MpPlayerNum].menumodel.removingpiece = false;
+
+#ifdef PLATFORM_N64
+#if VERSION == VERSION_PAL_FINAL
+		if (g_ViRes != VIRES_HI) {
+			x = -117;
+
+			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+				x = -87;
+			}
+		} else {
+			x = -177;
+
+			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+				x = -127;
+			}
+		}
+#elif VERSION == VERSION_PAL_BETA
+		x = -117;
+
+		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+			x = -87;
+		}
+#else
+		x = -130;
+
+		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+			x = -100;
+		}
+#endif
 #endif
 
 		y = -15;
@@ -1603,6 +1635,11 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 	case MENUOP_CLOSE:
 		break;
 	case MENUOP_TICK:
+#ifndef PLATFORM_N64
+		x = (float)x * ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
+		g_Menus[g_MpPlayerNum].menumodel.newposx = x;
+#endif
+
 		if (bodynum == BODY_DRCAROLL) {
 			static struct modelpartvisibility vis[] = {
 				{ MODELPART_DRCAROLL_0001, false },
@@ -1693,7 +1730,7 @@ MenuItemHandlerResult dtDeviceListMenuHandler(s32 operation, struct menuitem *it
 		data->list.value = dtGetNumAvailable();
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) bgunGetName(dtGetWeaponByDeviceIndex(dtGetIndexBySlot(data->list.value)));
+		return (uintptr_t) bgunGetName(dtGetWeaponByDeviceIndex(dtGetIndexBySlot(data->list.value)));
 	case MENUOP_SET:
 		g_DtSlot = data->list.value;
 		menuPushDialog(&g_DtDetailsMenuDialog);
@@ -1888,6 +1925,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 			g_Menus[g_MpPlayerNum].training.weaponnum = weaponnum;
 			func0f105948(weaponnum);
 
+#ifdef PLATFORM_N64
 #if VERSION == VERSION_PAL_FINAL
 			if (g_ViRes == VIRES_HI) {
 				if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
@@ -1923,6 +1961,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 				g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
 			}
 #endif
+#endif
 
 			g_Menus[g_MpPlayerNum].menumodel.newscale /= 2.5f;
 		}
@@ -1930,6 +1969,47 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 	case MENUOP_CLOSE:
 		break;
 	case MENUOP_TICK:
+#ifndef PLATFORM_N64
+#if VERSION == VERSION_PAL_FINAL
+		if (g_ViRes == VIRES_HI) {
+			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+				g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
+				g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
+			} else {
+				g_Menus[g_MpPlayerNum].menumodel.newposx = 104;
+				g_Menus[g_MpPlayerNum].menumodel.curposx = 104;
+			}
+		} else {
+			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+				g_Menus[g_MpPlayerNum].menumodel.newposx = 64;
+				g_Menus[g_MpPlayerNum].menumodel.curposx = 64;
+			} else {
+				g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
+				g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
+			}
+		}
+#elif VERSION == VERSION_PAL_BETA
+		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+			g_Menus[g_MpPlayerNum].menumodel.newposx = 64;
+			g_Menus[g_MpPlayerNum].menumodel.curposx = 64;
+		} else {
+			g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
+			g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
+		}
+#else
+		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+			g_Menus[g_MpPlayerNum].menumodel.newposx = 70;
+			g_Menus[g_MpPlayerNum].menumodel.curposx = 70;
+		} else {
+			g_Menus[g_MpPlayerNum].menumodel.newposx = 90;
+			g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
+		}
+#endif
+
+		g_Menus[g_MpPlayerNum].menumodel.newposx *= ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
+		g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx;
+#endif
+
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
 			if (dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot)) == WEAPON_DISGUISE41) {
 				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_006A;
@@ -2006,7 +2086,7 @@ MenuItemHandlerResult htHoloListMenuHandler(s32 operation, struct menuitem *item
 		data->list.value = htGetNumUnlocked();
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (s32) htGetName(htGetIndexBySlot(data->list.value));
+		return (uintptr_t) htGetName(htGetIndexBySlot(data->list.value));
 	case MENUOP_SET:
 		var80088bb4 = data->list.value;
 		menuPushDialog(&g_HtDetailsMenuDialog);
@@ -2512,7 +2592,7 @@ MenuItemHandlerResult ciHangarInformationMenuHandler(s32 operation, struct menui
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		bio = ciGetHangarBio(ciGetHangarBioIndexBySlot(data->list.value));
-		return (s32) langGet(bio->name);
+		return (uintptr_t) langGet(bio->name);
 	case MENUOP_SET:
 		g_HangarBioSlot = data->list.value;
 		bioindex = ciGetHangarBioIndexBySlot(g_HangarBioSlot);
@@ -2530,7 +2610,7 @@ MenuItemHandlerResult ciHangarInformationMenuHandler(s32 operation, struct menui
 		data->list.value = 2;
 		break;
 	case MENUOP_GETOPTGROUPTEXT:
-		return (s32) langGet(groups[data->list.value].name);
+		return (uintptr_t) langGet(groups[data->list.value].name);
 	case MENUOP_GETGROUPSTARTINDEX:
 		data->list.groupstartindex = data->list.value == 0 ? 0 : groups[1].offset;
 		break;
@@ -2612,7 +2692,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(s32 operation, struct menuitem *i
 
 		gdl = text0f153780(gdl);
 
-		return (s32)gdl;
+		return (uintptr_t)gdl;
 	}
 
 	return 0;

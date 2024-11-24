@@ -73,6 +73,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
+#include "platform.h"
 #endif
 
 s32 g_DefaultWeapons[2];
@@ -322,7 +323,7 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 	// Look for pads that aren't bad (and therefore aren't very bad either) and
 	// are at least 10m away. For each pad added, set their distance to -1 so
 	// they don't get reused later.
-	i = random() % numpads;
+	i = rngRandom() % numpads;
 	p = i; \
 	while (sllen < 4) {
 		if (padsqdists[p] > 1000 * 1000 && !badpads[p]) {
@@ -361,7 +362,7 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 	// If the shortlist still has vacant slots, iterate the pads again but this
 	// time take the bad pads. Keep the very bad pads out of contention for now.
-	p = i = random() % numpads;
+	p = i = rngRandom() % numpads;
 
 	while (sllen < 4) {
 		if (padsqdists[p] > 1000 * 1000 && !verybadpads[p]) {
@@ -454,7 +455,7 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 	// Finally, choose a random pad from the shortlist
 	if (sllen > 0) {
-		p = random() % sllen;
+		p = rngRandom() % sllen;
 
 		dstpos->x = slpositions[p].x;
 		dstpos->y = slpositions[p].y;
@@ -465,7 +466,7 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 		dstangle = slangles[p];
 	} else {
 		// No shortlisted pads, so pick a random one from the full selection
-		padUnpack(pads[random() % numpads], PADFIELD_POS | PADFIELD_LOOK | PADFIELD_ROOM, &pad);
+		padUnpack(pads[rngRandom() % numpads], PADFIELD_POS | PADFIELD_LOOK | PADFIELD_ROOM, &pad);
 
 		dstrooms[0] = pad.room;
 		dstrooms[1] = -1;
@@ -1019,7 +1020,7 @@ void playerSpawn(void)
 					if (g_Vars.lvframenum > 0
 							&& (g_ChrSlots[i].hidden & CHRHFLAG_ONBONDSSCREEN)
 							&& func0f06b39c(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
-							&& (random() % 8)) {
+							&& (rngRandom() % 8)) {
 						sqdist += 1000 * 1000;
 					}
 
@@ -1055,7 +1056,7 @@ void playerSpawn(void)
 
 			// Randomly swap some of the earlier elements so the player
 			// doesn't always spawn into the closest
-			if (numsqdists > 1 && (random() % 2) == 0) {
+			if (numsqdists > 1 && (rngRandom() % 2) == 0) {
 				tmpchr = sortedchrs[0];
 				sqdist = sorteddists[0];
 				sortedchrs[0] = sortedchrs[1];
@@ -1064,7 +1065,7 @@ void playerSpawn(void)
 				sorteddists[1] = sqdist;
 			}
 
-			if (numsqdists > 2 && (random() % 4) == 0) {
+			if (numsqdists > 2 && (rngRandom() % 4) == 0) {
 				tmpchr = sortedchrs[0];
 				sqdist = sorteddists[0];
 				sortedchrs[0] = sortedchrs[2];
@@ -1100,6 +1101,15 @@ void playerSpawn(void)
 			}
 		} else {
 #ifndef PLATFORM_N64
+			if (cheatIsActive(CHEAT_CLOAKINGDEVICE)) {
+				invGiveSingleWeapon(WEAPON_CLOAKINGDEVICE);
+#if VERSION >= VERSION_PAL_FINAL
+				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, TICKS(7200));
+#else
+				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, 7200);
+#endif
+			}
+
 			if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
 				invGiveSingleWeapon(WEAPON_NIGHTVISION);
 			}
@@ -1414,6 +1424,9 @@ void playerTickChrBody(void)
 			rwdatas = (u32 *)(allocation + offset1);
 			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
+#ifdef PLATFORM_64BIT
+			offset1 += 0x200;
+#endif
 			offset1 = ALIGN64(offset1);
 
 			weaponobj = (struct weaponobj *)(allocation + offset1);
@@ -1421,17 +1434,20 @@ void playerTickChrBody(void)
 			offset1 += sizeof(struct weaponobj);
 			offset1 = ALIGN64(offset1);
 
-			offset2 = offset1 + ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[bodynum].filenum));
+			offset2 = offset1 + ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[bodynum].filenum, LOADTYPE_MODEL));
 
 			if (headnum >= 0) {
-				offset2 += ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[headnum].filenum));
+				offset2 += ALIGN64(fileGetInflatedSize(g_HeadsAndBodies[headnum].filenum, LOADTYPE_MODEL));
 			}
 
 			if (weaponmodelnum >= 0) {
-				offset2 += ALIGN64(fileGetInflatedSize(g_ModelStates[weaponmodelnum].fileid));
+				offset2 += ALIGN64(fileGetInflatedSize(g_ModelStates[weaponmodelnum].fileid, LOADTYPE_MODEL));
 			}
 
 			offset2 += 0x4000;
+#ifdef PLATFORM_64BIT
+			offset2 += 0x2000;
+#endif
 			bgunCalculateGunMemCapacity();
 			spe8 = g_Vars.currentplayer->gunmem2 + offset2;
 			texInitPool(&texpool, spe8, bgunCalculateGunMemCapacity() - offset2);
@@ -1453,6 +1469,10 @@ void playerTickChrBody(void)
 			animInit(model->anim);
 
 			model->rwdatalen = 256;
+
+#ifdef PLATFORM_64BIT
+			model->rwdatalen += 128;
+#endif
 
 			texGetPoolLeftPos(&texpool);
 
@@ -2789,7 +2809,7 @@ void playerTickExplode(void)
 
 		explosionCreateSimple(NULL, &pos, g_Vars.currentplayer->prop->rooms, EXPLOSIONTYPE_BONDEXPLODE, g_Vars.currentplayernum);
 
-		g_Vars.currentplayer->bondnextexplode = g_Vars.lvframe60 + TICKS(15) + (random() % TICKS(15));
+		g_Vars.currentplayer->bondnextexplode = g_Vars.lvframe60 + TICKS(15) + (rngRandom() % TICKS(15));
 	}
 }
 
@@ -4452,7 +4472,7 @@ void playerDisplayShield(void)
 	if (g_Vars.currentplayer->shieldshowtime < 0) {
 		s32 rand = ((g_Vars.currentplayer->shieldshowrnd >> 16) % 200) * 4 + 800;
 
-		g_Vars.currentplayer->shieldshowrnd = random();
+		g_Vars.currentplayer->shieldshowrnd = rngRandom();
 		g_Vars.currentplayer->shieldshowrot = g_Vars.thisframestart240 % rand;
 	}
 
@@ -5617,7 +5637,7 @@ void playerChooseThirdPersonAnimation(struct chrdata *chr, s32 crouchpos, f32 sp
 			animnum = prevanimnum;
 			speed = 0.5f;
 		} else {
-			animnum = g_DeathAnimations[random() % g_NumDeathAnimations];
+			animnum = g_DeathAnimations[rngRandom() % g_NumDeathAnimations];
 			speed = 0.5f;
 		}
 

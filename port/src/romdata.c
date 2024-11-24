@@ -4,7 +4,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <PR/ultratypes.h>
-#include <PR/ultratypes.h>
 #include "lib/rzip.h"
 #include "romdata.h"
 #include "fs.h"
@@ -50,6 +49,9 @@
 #endif
 
 #define ROMDATA_MAX_FILES 2048
+
+#define GBC_ROM_NAME "pd.gbc"
+#define GBC_ROM_SIZE 4194304
 
 u8 *g_RomFile;
 u32 g_RomFileSize;
@@ -236,6 +238,17 @@ static inline void romdataLoadRom(void)
 	romDataSegSize = dataSegLen;
 }
 
+static inline void romdataUpdateSegStartEnd(struct romfile* seg)
+{
+	if (seg->segstart) {
+		*seg->segstart = seg->data;
+	}
+
+	if (seg->segend) {
+		*seg->segend = seg->data + seg->size;
+	}
+}
+
 static inline void romdataInitSegment(struct romfile *seg)
 {
 	if (!seg->data) {
@@ -251,7 +264,7 @@ static inline void romdataInitSegment(struct romfile *seg)
 			seg->size = seg[1].data - seg->data;
 		} else {
 			// this is the last segment, calculate based on rom size
-			seg->size = (u8 *)g_RomFileSize - seg->data;
+			seg->size = (uintptr_t)g_RomFileSize - (uintptr_t)seg->data;
 		}
 	}
 
@@ -269,7 +282,7 @@ static inline void romdataInitSegment(struct romfile *seg)
 		if (g_RomFile) {
 			newData = g_RomFile + (uintptr_t)seg->data;
 			seg->source = SRC_ROM;
-			sysLogPrintf(LOG_NOTE, "loading segment %s from ROM (offset %08x pointer %p)", seg->name, (u32)seg->data, newData);
+			sysLogPrintf(LOG_NOTE, "loading segment %s from ROM (offset %08x pointer %p)", seg->name, (uintptr_t)seg->data, newData);
 		} else {
 			sysFatalError("No ROM or external file for segment:\n%s", seg->name);
 		}
@@ -281,17 +294,19 @@ static inline void romdataInitSegment(struct romfile *seg)
 
 	seg->data = newData;
 
-	if (seg->segstart) {
-		*seg->segstart = seg->data;
-	}
-
-	if (seg->segend) {
-		*seg->segend = seg->data + seg->size;
-	}
+	romdataUpdateSegStartEnd(seg);
 
 	// call the post load function if any
 	if (seg->preprocess && !seg->preprocessed) {
-		seg->preprocess(seg->data, seg->size);
+		newData = seg->preprocess(seg->data, seg->size, &seg->size);
+
+		if (newData) {
+			if (seg->source == SRC_EXTERNAL)
+				sysMemFree(seg->data);
+			seg->data = newData;
+			romdataUpdateSegStartEnd(seg);
+		}
+		
 		seg->preprocessed = 1;
 	}
 }
@@ -386,6 +401,53 @@ s32 romdataInit(void)
 	return 0;
 }
 
+static inline bool romdataCheckGbcRomContents(const u8 *gbcRomFile, const u32 gbcRomSize)
+{
+	if (gbcRomSize != GBC_ROM_SIZE) {
+		return false;
+	}
+
+	// ROM title
+	if (memcmp(gbcRomFile + 0x134, "PerfDark   VPDE", 15) != 0) {
+		return false;
+	}
+
+	// Licensee code
+	if (memcmp(gbcRomFile + 0x144, "4Y", 2) != 0) {
+		return false;
+	}
+
+	// Header and global checksums
+	if (gbcRomFile[0x14D] != 0xA1 || gbcRomFile[0x14E] != 0xAD || gbcRomFile[0x14F] != 0x0F) {
+		return false;
+	}
+
+	return true;
+}
+
+s32 romdataCheckGbcRom(void)
+{
+	if (fsFileSize(GBC_ROM_NAME) < 0) {
+		// bail early if it doesn't exist to avoid generating error messages
+		return false;
+	}
+
+	u32 gbcRomSize = 0;
+	u8 *gbcRomFile = fsFileLoad(GBC_ROM_NAME, &gbcRomSize);
+	if (!gbcRomFile) {
+		return false;
+	}
+
+	const bool ret = romdataCheckGbcRomContents(gbcRomFile, gbcRomSize);
+	sysMemFree(gbcRomFile);
+
+	if (ret) {
+		sysLogPrintf(LOG_NOTE, "romdataCheckGbcRom: valid GBC rom found");
+	}
+
+	return ret;
+}
+
 s32 romdataFileGetSize(s32 fileNum)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
@@ -447,7 +509,7 @@ u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
 	return out;
 }
 
-void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size)
+void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *outSize)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		sysLogPrintf(LOG_ERROR, "romdataFilePreprocess: invalid file num %d", fileNum);
@@ -465,7 +527,7 @@ void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size)
 				}
 			}
 			// then preprocess
-			filePreprocFuncs[loadType](data, size);
+			filePreprocFuncs[loadType](data, size, outSize);
 			// fileSlots[fileNum].preprocessed = 1;
 		}
 	}
@@ -523,4 +585,22 @@ u8 *romdataSegGetDataEnd(const char *segName)
 u32 romdataSegGetSize(const char *segName)
 {
 	return romdataGetSeg(segName)->size;
+}
+
+u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype)
+{
+#ifdef PLATFORM_64BIT
+	switch (loadtype) {
+	case LOADTYPE_BG:	   return (u32)(size * 1.1f);
+	case LOADTYPE_TILES: return (u32)(size * 1.1f);
+	case LOADTYPE_LANG:  return (u32)(size * 1.3f);
+	case LOADTYPE_SETUP: return (u32)(size * 1.5f);
+	case LOADTYPE_PADS:  return (u32)(size * 1.7f);
+	case LOADTYPE_MODEL: return (u32)(size * 1.7f);
+	case LOADTYPE_GUN: return (u32)(size * 1.7f);
+	default:
+		sysLogPrintf(LOG_WARNING, "romdataFileGetEstimatedSize: wrong loadtype %d", loadtype);
+	}
+#endif
+	return size;
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.fgsfdsfgs.perfect_dark</id>
+  <name>Perfect Dark</name>
+  <developer id="io.github.fgsfdsfgs.perfect_dark">
+    <name>Perfect Dark Contributors</name>
+    <url>https://github.com/fgsfdsfgs/perfect_dark/graphs/contributors</url>
+  </developer>
+  <launchable type="desktop-id">io.github.fgsfdsfgs.perfect_dark.desktop</launchable>
+  <summary>Modern cross-platform port of Perfect Dark</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <url type="homepage">https://github.com/fgsfdsfgs/perfect_dark/</url>
+  <description>
+      <p>This is a port of Ryan Dywer's decompilation of classic N64 shooter Perfect Dark to modern systems.</p>
+  </description>
+  <!--
+  <screenshots>
+    <screenshot type="default">
+      <image type="source">https://gitlab.com/fpiesche/dxx-rebirth-assets/-/raw/c6e7e79eebe92905f84f07a635ffab5122a94bd1/d1x/screenshots/retromode.png</image>
+      <caption>"Retro mode": the default graphics setup, like the original game but in high resolution</caption>
+  <screenshots>
+  -->
+  <categories>
+    <category>Game</category>
+    <category>ActionGame</category>
+    <category>Shooter</category>
+  </categories>
+  <keywords>
+    <keyword>n64</keyword>
+    <keyword>scifi</keyword>
+    <keyword>cyberpunk</keyword>
+    <keyword>retro</keyword>
+    <keyword>sourceport</keyword>
+    <keyword>port</keyword>
+  </keywords>
+  <releases>
+    <release version="latest" date="2024-05-14"/>
+  </releases>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-realistic">moderate</content_attribute>
+    <content_attribute id="violence-bloodshed">mild</content_attribute>
+  </content_rating>
+  <update_contact>https://github.com/fgsfdsfgs/perfect_dark/</update_contact>
+</component>

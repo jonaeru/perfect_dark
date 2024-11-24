@@ -28,6 +28,7 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#include "platform.h"
 
 const char var7f1a78e0[] = "LIGHTS : Hit occured on light %d in room %d\n";
 const char var7f1a7910[] = "L2(%d) -> ";
@@ -424,7 +425,7 @@ void roomInitLights(s32 roomnum)
 #if VERSION < VERSION_NTSC_1_0
 		if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
 			light->brightness = 0;
-			light->sparkable = (random() % 2) ? true : false;
+			light->sparkable = (rngRandom() % 2) ? true : false;
 			light->healthy = false;
 			light->on = false;
 			light->sparking = false;
@@ -525,7 +526,7 @@ void roomSetLightsFaulty(s32 roomnum, s32 chance)
 
 	if (g_Rooms[roomnum].numlights) {
 		for (i = 0; i < g_Rooms[roomnum].numlights; i++) {
-			if ((random() % 100) < chance) {
+			if ((rngRandom() % 100) < chance) {
 				light->healthy = false;
 				light->on = false;
 			}
@@ -592,7 +593,11 @@ void func0f001c0c(void)
 	table2size = align16(g_NumPortals * 4);
 	table3size = align16(g_Vars.roomcount * 4);
 	table4size = align16((u32)var8009cae0 * (u32)var8009cae0);
+#ifdef PLATFORM_64BIT
+	sp68 = align16(g_Vars.roomcount * 8 * 2);
+#else
 	sp68 = align16(g_Vars.roomcount * 8);
+#endif
 
 	mempGetStageFree();
 
@@ -975,9 +980,9 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 	}
 
 	if (light->sparking) {
-		if ((random() % 8) == 0) {
+		if ((rngRandom() % 8) == 0) {
 			light->sparking = false;
-		} else if ((random() % 2) == 0) {
+		} else if ((rngRandom() % 2) == 0) {
 			struct coord spc8;
 			struct coord spbc;
 			struct coord spb0;
@@ -1031,7 +1036,7 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 
 			room = (void *) (roomnum * sizeof(struct bgroom));
 
-			switch (random() % 4) {
+			switch (rngRandom() % 4) {
 			case 0:
 				if (roomnum && roomnum && roomnum);
 				sparktype = SPARKTYPE_LIGHT1;
@@ -1049,14 +1054,14 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 
 			lightGetBboxCentre(roomnum, lightnum, &centre);
 
-			room = (void *) ((u8 *) g_BgRooms + (u32) room);
+			room = (void *) ((u8 *) g_BgRooms + (uintptr_t) room);
 			centre.x += room->pos.x;
 			centre.y += room->pos.y;
 			centre.z += room->pos.z;
 
 			sparksCreate(roomnum, NULL, &centre, &spa4, &sp8c, sparktype);
 
-			if ((random() % 4) == 0) {
+			if ((rngRandom() % 4) == 0) {
 				smokerooms[0] = roomnum;
 				smokerooms[1] = -1;
 
@@ -1068,7 +1073,7 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 			return true;
 		}
 	} else {
-		if ((random() % 80) == 0) {
+		if ((rngRandom() % 80) == 0) {
 			light->sparking = true;
 		}
 	}
@@ -1120,7 +1125,7 @@ void lightsConfigureForPerfectDarknessCutscene(void)
 		g_Rooms[i].lightop_to_frac = 0.5f;
 
 		for (j = 0; j < g_Rooms[i].numlights; j++) {
-			light->sparkable = random() % 2 ? true : false;
+			light->sparkable = rngRandom() % 2 ? true : false;
 			light->healthy = true;
 			light->on = true;
 			light->sparking = false;
@@ -1145,7 +1150,7 @@ void lightsConfigureForPerfectDarknessGameplay(void)
 		g_Rooms[i].lightop_to_frac = 0;
 
 		for (j = 0; j < g_Rooms[i].numlights; j++) {
-			light->sparkable = random() % 2 ? true : false;
+			light->sparkable = rngRandom() % 2 ? true : false;
 			light->healthy = false;
 			light->on = false;
 			light->sparking = false;
@@ -1695,11 +1700,19 @@ void func0f004c6c(void)
 	u8 *ptr;
 	u8 *backupptr;
 
+#ifdef PLATFORM_64BIT
+	sp44 = align16(0x2000 * 2);
+	sp40 = align16(g_NumPortals * 4 * 2);
+	sp3c = align16(g_NumPortals * 0xc * 2);
+	sp38 = align16(g_NumPortals * 4 * 2);
+	sp34 = align16(g_NumPortals * 2 * 2);
+#else
 	sp44 = align16(0x2000);
 	sp40 = align16(g_NumPortals * 4);
 	sp3c = align16(g_NumPortals * 0xc);
 	sp38 = align16(g_NumPortals * 4);
 	sp34 = align16(g_NumPortals * 2);
+#endif
 
 	for (i = 0, s4 = sp38; i < g_NumPortals; i++) {
 		if (i != 0) {

@@ -85,6 +85,14 @@ struct menuitem g_CtcOptionsMenuItems[] = {
 		MPOPTION_FRIENDLYFIRE,
 		menuhandlerMpDisplayTeam,
 	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"No Player on Radar",
+		MPOPTION_NOPLAYERONRADAR,
+		menuhandlerMpCheckboxOption,
+	},
 #endif
 	{
 		MENUITEMTYPE_CHECKBOX,
@@ -246,7 +254,7 @@ void ctcInitProps(void)
 
 	for (i = 0; i != ARRAYCOUNT(g_ScenarioData.ctc.teamindexes); i++) {
 		do {
-			g_ScenarioData.ctc.teamindexes[i] = random() % 4;
+			g_ScenarioData.ctc.teamindexes[i] = rngRandom() % 4;
 		} while (teamsdone[g_ScenarioData.ctc.teamindexes[i]]);
 
 		teamsdone[g_ScenarioData.ctc.teamindexes[i]] = true;

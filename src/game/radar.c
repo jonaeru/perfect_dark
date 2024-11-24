@@ -80,7 +80,7 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, s32 arg2, s3
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
 	func0f0b278c(&gdl, spb0, spa8, tconfig->width, tconfig->height,
-			0, 0, 1, 0, 0xff, 0, 40, tconfig->level > 0, 0);
+			0, 0, 0, 0, 0xff, 0, 40, tconfig->level > 0, 0);
 
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
@@ -329,6 +329,7 @@ Gfx *radarRender(Gfx *gdl)
 		}
 #ifndef PLATFORM_N64
 		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
+		gDPSetSubpixelOffsetEXT(gdl++, -2, 2);
 #endif
 	}
 
@@ -336,6 +337,10 @@ Gfx *radarRender(Gfx *gdl)
 	gdl = func0f153134(gdl);
 
 	// Draw dots for human players
+#ifndef PLATFORM_N64
+	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
+	if (!(g_MpSetup.options & MPOPTION_NOPLAYERONRADAR)) {
+#endif
 	for (i = 0; i < playercount; i++) {
 		if (i != playernum) {
 			if (g_Vars.players[i]->isdead == false
@@ -356,6 +361,9 @@ Gfx *radarRender(Gfx *gdl)
 			}
 		}
 	}
+#ifndef PLATFORM_N64
+	}
+#endif
 
 	// Draw dots for coop AI buddies
 	if (!g_Vars.normmplayerisrunning && g_MissionConfig.iscoop) {
@@ -377,7 +385,11 @@ Gfx *radarRender(Gfx *gdl)
 	}
 
 	// Draw dots for MP simulants
+#ifdef PLATFORM_N64
 	if (g_Vars.normmplayerisrunning) {
+#else
+	if (g_Vars.normmplayerisrunning && !(g_MpSetup.options & MPOPTION_NOPLAYERONRADAR)) {
+#endif
 		for (i = 0; i < g_BotCount; i++) {
 			if (!chrIsDead(g_MpBotChrPtrs[i])
 					&& (g_MpBotChrPtrs[i]->hidden & CHRHFLAG_CLOAKED) == 0

@@ -907,7 +907,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						aimoffhist[i] = !aimonhist[i];
 					}
 
-					g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					if (numsamples > 0) {
+						g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					}
 				}
 
 				if (!lvIsPaused()) {
@@ -1238,7 +1240,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						aimoffhist[i] = !aimonhist[i];
 					}
 
-					g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					if (numsamples > 0) {
+						g_Vars.currentplayer->insightaimmode = aimonhist[numsamples - 1];
+					}
 				}
 
 				if (!lvIsPaused()) {
@@ -1579,6 +1583,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 
 						// Handle xbla-style crouch cycling
+						const s32 oldcrouchpos = g_Vars.currentplayer->crouchpos;
 						for (i = 0; i < numsamples; i++) {
 							// handle 1964GEPD style crouch setting
 							s32 crouchsample;
@@ -1619,6 +1624,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 									g_Vars.currentplayer->crouchpos = CROUCHPOS_DUCK;
 								}
 							}
+						}
+						// prevent uncrouching if we don't fit
+						while (g_Vars.currentplayer->crouchpos > oldcrouchpos && !bwalkCanUncrouch()) {
+							g_Vars.currentplayer->crouchpos--;
 						}
 					}
 #endif
@@ -2489,7 +2498,7 @@ void bmoveUpdateHead(f32 arg0, f32 arg1, f32 arg2, Mtxf *arg3, f32 arg4)
 		}
 	} else {
 		if (g_Vars.currentplayer->startnewbonddie) {
-			bheadStartDeathAnimation(g_DeathAnimations[random() % g_NumDeathAnimations], random() % 2, 0, 1);
+			bheadStartDeathAnimation(g_DeathAnimations[rngRandom() % g_NumDeathAnimations], rngRandom() % 2, 0, 1);
 			g_Vars.currentplayer->startnewbonddie = false;
 		}
 

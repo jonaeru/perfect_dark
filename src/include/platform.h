@@ -4,9 +4,15 @@
 // detect OS
 #if defined(_WIN32)
 	#define PLATFORM_WIN32 1
+#elif defined(__SWITCH__)
+	#define PLATFORM_POSIX 1
+	#define PLATFORM_NSWITCH 1
 #elif defined(__linux__)
 	#define PLATFORM_POSIX 1
 	#define PLATFORM_LINUX 1
+#elif defined(__APPLE__)
+	#define PLATFORM_POSIX 1
+	#define PLATFORM_OSX 1
 #else
 	// assume POSIX-compatible
 	#define PLATFORM_POSIX 1
@@ -27,11 +33,6 @@
 	#define PLATFORM_ARM 7
 #else
 	#error "Unknown CPU arch."
-#endif
-
-// TODO: remove this after 64-bit support is in place
-#ifdef PLATFORM_64BIT
-	#error "64-bit platforms are currently not supported."
 #endif
 
 // detect endianness
