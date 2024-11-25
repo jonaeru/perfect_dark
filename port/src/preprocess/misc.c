@@ -108,9 +108,12 @@ u8 *preprocessTexturesList(u8* data, u32 size, u32* outSize)
 		} else if (i == 0x0746) {
 			tex->soundsurfacetype = SURFACETYPE_SHALLOWWATER;
 			tex->surfacetype = SURFACETYPE_SHALLOWWATER;
+		} else if (i == 0x0bde) {
+			// Icicle Pyramid
+			tex->soundsurfacetype = SURFACETYPE_GLASS;
+			tex->surfacetype = SURFACETYPE_GLASS;
 		}
 	}
-
 
 	return NULL;
 }
