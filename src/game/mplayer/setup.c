@@ -100,6 +100,7 @@ struct menudialogdef g_MpDropOutMenuDialog = {
 
 struct mparena g_MpArenas[] = {
 	// Stage, unlock, name
+#ifdef PLATFORM_N64
 	{ STAGE_MP_SKEDAR,     0,                          L_MPMENU_119 },
 	{ STAGE_MP_PIPES,      0,                          L_MPMENU_120 },
 	{ STAGE_MP_RAVINE,     MPFEATURE_STAGE_RAVINE,     L_MPMENU_121 },
@@ -117,6 +118,31 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
+#else // Kakariko Village Mod
+	{ STAGE_MP_SKEDAR,     0, L_MPMENU_119 },
+	{ STAGE_MP_PIPES,      0, L_MPMENU_120 },
+	{ STAGE_MP_RAVINE,     0, L_MPMENU_121 },
+	{ STAGE_MP_G5BUILDING, 0, L_MPMENU_122 },
+	{ STAGE_MP_SEWERS,     0, L_MPMENU_123 },
+	{ STAGE_MP_WAREHOUSE,  0, L_MPMENU_124 },
+	{ STAGE_MP_GRID,       0, L_MPMENU_125 },
+	{ STAGE_MP_RUINS,      0, L_MPMENU_126 },
+	{ STAGE_MP_AREA52,     0, L_MPMENU_127 },
+	{ STAGE_MP_BASE,       0, L_MPMENU_128 },
+	{ STAGE_MP_FORTRESS,   0, L_MPMENU_130 },
+	{ STAGE_MP_VILLA,      0, L_MPMENU_131 },
+	{ STAGE_MP_CARPARK,    0, L_MPMENU_132 },
+	{ STAGE_MP_TEMPLE,     0, L_MPMENU_133 },
+	{ STAGE_MP_COMPLEX,    0, L_MPMENU_134 },
+	{ STAGE_MP_FELICITY,   0, L_MPMENU_135 },
+	{ STAGE_TEST_ARCH,     0, L_MPMENU_484 }, // Abandoned
+	{ STAGE_TEST_DEST,     0, L_MPMENU_485 }, // Playground
+	{ STAGE_TEST_RUN,      0, L_MPMENU_486 }, // Noche cerrada
+	{ STAGE_24,            0, L_MPMENU_487 }, // Stormy
+	{ STAGE_28,            0, L_MPMENU_488 }, // Bizarre
+#endif
+
+
 };
 
 s32 mpGetNumStages(void)
