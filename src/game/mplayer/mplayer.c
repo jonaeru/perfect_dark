@@ -1913,7 +1913,7 @@ struct botprofile g_BotProfiles[] = {
 	{ BOTTYPE_GENERAL, BOTDIFF_NORMAL,  L_MISC_090, MPBODY_DDSHOCK,       0                         },
 	{ BOTTYPE_GENERAL, BOTDIFF_HARD,    L_MISC_091, MPBODY_A51TROOPER,    MPFEATURE_BOTDIFF_HARD    },
 	{ BOTTYPE_GENERAL, BOTDIFF_PERFECT, L_MISC_092, MPBODY_A51AIRMAN,     MPFEATURE_BOTDIFF_PERFECT },
-	{ BOTTYPE_GENERAL, BOTDIFF_DARK,    L_MISC_093, MPBODY_STEWARDESS,    MPFEATURE_BOTDIFF_DARK    }, // BODY_CONNERY
+	{ BOTTYPE_GENERAL, BOTDIFF_DARK,    L_MISC_093, MPBODY_CONNERY   ,    MPFEATURE_BOTDIFF_DARK    },
 	{ BOTTYPE_PEACE,   BOTDIFF_NORMAL,  L_MISC_094, MPBODY_CIFEMTECH,     0                         },
 	{ BOTTYPE_SHIELD,  BOTDIFF_NORMAL,  L_MISC_095, MPBODY_DD_GUARD,      0                         },
 	{ BOTTYPE_ROCKET,  BOTDIFF_NORMAL,  L_MISC_096, MPBODY_JONATHAN,      0                         },
@@ -1993,67 +1993,67 @@ struct mpbody g_MpBodies[] = {
 	/*0x3b*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3c*/ { BODY_DJBOND,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 #else // GoldenEye X Mod
-	/*0x00*/ { BODY_DJBOND,           L_OPTIONS_070,   HEAD_CARRINGTON,   0 }, // Bond (Tuxedo)
-	/*0x01*/ { BODY_AREA51GUARD,      L_OPTIONS_064,   HEAD_ROSS,         0 }, // Bond (Formal)
-	/*0x02*/ { BODY_SECRETARY,        L_OPTIONS_053,   HEAD_ROSS,         0 }, // Bond (Stealth)
-	/*0x03*/ { BODY_CASSANDRA,        L_OPTIONS_027,   HEAD_ROSS,         0 }, // Bond (Arctic)
-	/*0x04*/ { BODY_DD_SECGUARD,      L_OPTIONS_042,   HEAD_ROSS,         0 }, // Bond (Jungle)
-	/*0x05*/ { BODY_OVERALL,          L_OPTIONS_041,   HEAD_PRYCE,        0 }, // Natalya (Russia)
-	/*0x06*/ { BODY_NEGOTIATOR,       L_OPTIONS_044,   HEAD_PRYCE,        0 }, // Natalya (Cuba)
-	/*0x07*/ { BODY_G5_GUARD,         L_OPTIONS_031,   HEAD_MRBLONDE,     0 }, // Trevelyan (006)
-	/*0x08*/ { BODY_CARRINGTON,       L_OPTIONS_029,   HEAD_MRBLONDE,     0 }, // Trevelyan (Janus)
-	/*0x09*/ { BODY_MRBLONDE,         L_OPTIONS_030,   HEAD_CASSANDRA,    0 }, // Xenia
-	/*0x0a*/ { BODY_TRENT,            L_OPTIONS_046,   HEAD_SILKE,        0 }, // Ourumov
-	/*0x0b*/ { BODY_LABTECH,          L_OPTIONS_055,   HEAD_GRAHAM,       0 }, // Boris
-	/*0x0c*/ { BODY_STRIPES,          L_OPTIONS_047,   HEAD_SMITH,        0 }, // Valentin
-	/*0x0d*/ { BODY_OFFICEWORKER,     L_OPTIONS_038,   HEAD_ALEX,         0 }, // Mishkin
-	/*0x0e*/ { BODY_STEWARDESS_COAT,  L_OPTIONS_063,   HEAD_GARETH,       0 }, // May Day
-	/*0x0f*/ { BODY_CARREVENINGSUIT,  L_OPTIONS_028,   HEAD_SECRETARY,    0 }, // Jaws
-	/*0x10*/ { BODY_STEWARD,          L_OPTIONS_061,   HEAD_ROBERT,       0 }, // Oddjob
-	/*0x11*/ { BODY_DDSNIPER,         L_OPTIONS_045,   HEAD_MARK2,        0 }, // Baron Samedi
-	/*0x12*/ { BODY_BIOTECH,          L_OPTIONS_058,   HEAD_SANCHEZ,      0 }, // Russian Soldier
-	/*0x13*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   HEAD_SHAUN,        0 }, // Russian Infantry
-	/*0x14*/ { BODY_CILABTECH,        L_OPTIONS_033,   HEAD_SCOTT_H,      0 }, // Russian Commandant
-	/*0x15*/ { BODY_DD_LABTECH,       L_OPTIONS_057,   HEAD_BEAU5,        0 }, // Male Scientist
-	/*0x16*/ { BODY_CIFEMTECH,        L_OPTIONS_034,   HEAD_JULIANNE,     0 }, // Female Scientist
-	/*0x17*/ { BODY_PRES_SECURITY,    L_OPTIONS_066,   HEAD_KEN,          0 }, // Janus Marine
-	/*0x18*/ { BODY_PRESIDENT,        L_OPTIONS_050,   HEAD_DARKAQUA,     0 }, // Naval Officer
-	/*0x19*/ { BODY_PILOTAF1,         L_OPTIONS_060,   HEAD_FEM_GUARD,    0 }, // Helicopter Pilot
-	/*0x1a*/ { BODY_JONATHAN,         L_OPTIONS_032,   HEAD_PENNY,        0 }, // St. Petersburg Guard
-	/*0x1b*/ { BODY_FEM_GUARD,        L_OPTIONS_037,   HEAD_LAURA,        0 }, // Female Civilian (Jeans)
-	/*0x1c*/ { BODY_FEMLABTECH,       L_OPTIONS_056,   HEAD_DAVEC,        0 }, // Female Civilian (Skirt)
-	/*0x1d*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_VD,           0 }, // Male Civilian (Vest)
-	/*0x1e*/ { BODY_FBIGUY,           L_OPTIONS_049,   HEAD_BEAU6,        0 }, // Male Civilian (Plaid)
-	/*0x1f*/ { BODY_A51TROOPER,       L_OPTIONS_051,   HEAD_BEAU3,        0 }, // Male Civilian (Red)
-	/*0x20*/ { BODY_A51AIRMAN,        L_OPTIONS_052,   HEAD_STEVEM,       0 }, // Male Civilian (Blue)
-	/*0x21*/ { BODY_CIAGUY,           L_OPTIONS_048,   HEAD_GRIFFEY,      0 }, // Male Civilian (Grey)
-	/*0x22*/ { BODY_DD_GUARD,         L_OPTIONS_039,   HEAD_TIM,          0 }, // Siberian Guard (Brown)
-	/*0x23*/ { BODY_OFFICEWORKER,     L_OPTIONS_069,   HEAD_KEITH,        0 }, // Siberian Guard (Black)
-	/*0x24*/ { BODY_DD_SHOCK_INF,     L_OPTIONS_040,   HEAD_MOTO,         0 }, // Arctic Commando
-	/*0x25*/ { BODY_ALASKAN_GUARD,    L_OPTIONS_059,   HEAD_FEM_GUARD2,   0 }, // Siberian Special Forces
-	/*0x26*/ { BODY_OFFICEWORKER2,    L_OPTIONS_043,   HEAD_JOEL,         0 }, // Jungle Commando
-	/*0x27*/ { BODY_G5_SWAT_GUARD,    L_OPTIONS_054,   HEAD_A51FACEPLATE, 0 }, // Janus Special Forces
-	/*0x28*/ { BODY_NSA_LACKEY,       L_OPTIONS_065,   HEAD_WINNER,       0 }, // Male Moonraker Elite
-	/*0x29*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_COOK,         0 }, // Female Moonraker Elite
-	/*0x2a*/ { BODY_STEWARDESS,       L_OPTIONS_062,   HEAD_LAURA,        0 }, // Rosika
-//	/*----*/ { BODY_DARK_LEATHER,     L_OPTIONS_018,   HEAD_BEAU1,        0 }, // Developer
-	/*0x2b*/ { BODY_DARK_COMBAT,      L_OPTIONS_016,   HEAD_DARK_COMBAT,  0 }, // Female Special Operative
-	/*0x2c*/ { BODY_CISOLDIER,        L_OPTIONS_035,   HEAD_JONATHAN,     0 }, // Male Special Operative
-	/*0x2d*/ { BODY_ELVISWAISTCOAT,   L_MPWEAPONS_158, HEAD_ELVIS,        0 }, // Elton
-	/*0x2e*/ { BODY_TESTCHR,          L_OPTIONS_036,   HEAD_GREY,         0 }, // Assault Trooper
-//	/*----*/ { BODY_DARK_TRENCH,      L_OPTIONS_017,   HEAD_DARK_COMBAT,  0 }, // Bond (Classic)
-//	/*----*/ { BODY_DARK_FROCK,       L_OPTIONS_018,   HEAD_DARK_FROCK,   0 }, // Developer
-//	/*----*/ { BODY_DARK_RIPPED,      L_OPTIONS_019,   HEAD_DARK_FROCK,   0 }, // Developer
-//	/*----*/ { BODY_DARK_AF1,         L_OPTIONS_020,   HEAD_DARK_COMBAT,  0 }, // Baron Samedi (Death)
-//	/*----*/ { BODY_DARKWET,          L_OPTIONS_021,   HEAD_DARKAQUA,     0 }, // Santa Claus
-//	/*----*/ { BODY_DARKAQUALUNG,     L_OPTIONS_022,   HEAD_DARKAQUA,     0 }, // Joanna Aqualung
-	/*0x2f*/ { BODY_DARKSNOW,         L_OPTIONS_020,   HEAD_BIOTECH,      0 }, // Baron Samedi (Death)
-	/*0x30*/ { BODY_DARK_TRENCH,      L_OPTIONS_021,   HEAD_DARK_FROCK,   0 }, // Santa Claus
-//	/*----*/ { BODY_ELVIS1,           L_OPTIONS_026,   HEAD_ELVIS,        0 }, // Maian
-	/*0x31*/ { BODY_CONNERY,          L_OPTIONS_017,   HEAD_NEIL2,        0 }, // Bond (Classic)
-	/*0x32*/ { BODY_DARK_NEGOTIATOR,  L_OPTIONS_017,   HEAD_TRENT,        0 }, // Bond (Classic)
-	/*0x33*/ { BODY_MOORE,            L_OPTIONS_017,   HEAD_MURCHIE,      0 }, // Bond (Classic)
-	/*0x34*/ { BODY_DALTON,           L_OPTIONS_017,   HEAD_JON,          0 }, // Bond (Classic)
+	/*0x00*/ { BODY_DJBOND,           L_OPTIONS_070,   HEAD_CARRINGTON,   0    }, // Bond (Tuxedo)
+	/*0x01*/ { BODY_AREA51GUARD,      L_OPTIONS_064,   HEAD_ROSS,         0    }, // Bond (Formal)
+	/*0x02*/ { BODY_SECRETARY,        L_OPTIONS_053,   HEAD_ROSS,         0    }, // Bond (Stealth)
+	/*0x03*/ { BODY_CASSANDRA,        L_OPTIONS_027,   HEAD_ROSS,         0    }, // Bond (Arctic)
+	/*0x04*/ { BODY_DD_SECGUARD,      L_OPTIONS_042,   HEAD_ROSS,         0    }, // Bond (Jungle)
+	/*0x05*/ { BODY_OVERALL,          L_OPTIONS_041,   HEAD_PRYCE,        0    }, // Natalya (Russia)
+	/*0x06*/ { BODY_NEGOTIATOR,       L_OPTIONS_044,   HEAD_PRYCE,        0    }, // Natalya (Cuba)
+	/*0x07*/ { BODY_G5_GUARD,         L_OPTIONS_031,   HEAD_MRBLONDE,     0    }, // Trevelyan (006)
+	/*0x08*/ { BODY_CARRINGTON,       L_OPTIONS_029,   HEAD_MRBLONDE,     0    }, // Trevelyan (Janus)
+	/*0x09*/ { BODY_MRBLONDE,         L_OPTIONS_030,   HEAD_CASSANDRA,    0    }, // Xenia
+	/*0x0a*/ { BODY_TRENT,            L_OPTIONS_046,   HEAD_SILKE,        0    }, // Ourumov
+	/*0x0b*/ { BODY_LABTECH,          L_OPTIONS_055,   HEAD_GRAHAM,       0    }, // Boris
+	/*0x0c*/ { BODY_STRIPES,          L_OPTIONS_047,   HEAD_SMITH,        0    }, // Valentin
+	/*0x0d*/ { BODY_OFFICEWORKER,     L_OPTIONS_038,   HEAD_ALEX,         0    }, // Mishkin
+	/*0x0e*/ { BODY_STEWARDESS_COAT,  L_OPTIONS_063,   HEAD_GARETH,       0    }, // May Day
+	/*0x0f*/ { BODY_CARREVENINGSUIT,  L_OPTIONS_028,   HEAD_SECRETARY,    0    }, // Jaws
+	/*0x10*/ { BODY_STEWARD,          L_OPTIONS_061,   HEAD_ROBERT,       0    }, // Oddjob
+	/*0x11*/ { BODY_DDSNIPER,         L_OPTIONS_045,   HEAD_MARK2,        0    }, // Baron Samedi
+	/*0x12*/ { BODY_BIOTECH,          L_OPTIONS_058,   HEAD_SANCHEZ,      0    }, // Russian Soldier
+	/*0x13*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   HEAD_SHAUN,        0    }, // Russian Infantry
+	/*0x14*/ { BODY_CILABTECH,        L_OPTIONS_033,   HEAD_SCOTT_H,      0    }, // Russian Commandant
+	/*0x15*/ { BODY_DD_LABTECH,       L_OPTIONS_057,   HEAD_BEAU5,        0    }, // Male Scientist
+	/*0x16*/ { BODY_CIFEMTECH,        L_OPTIONS_034,   HEAD_JULIANNE,     0    }, // Female Scientist [broken]
+	/*0x17*/ { BODY_PRES_SECURITY,    L_OPTIONS_066,   HEAD_KEN,          0    }, // Janus Marine
+	/*0x18*/ { BODY_PRESIDENT,        L_OPTIONS_050,   HEAD_DARKAQUA,     0    }, // Naval Officer
+	/*0x19*/ { BODY_PILOTAF1,         L_OPTIONS_060,   HEAD_FEM_GUARD,    0    }, // Helicopter Pilot
+	/*0x1a*/ { BODY_JONATHAN,         L_OPTIONS_032,   HEAD_PENNY,        0    }, // St. Petersburg Guard
+	/*0x1b*/ { BODY_FEM_GUARD,        L_OPTIONS_037,   HEAD_LAURA,        0    }, // Female Civilian (Jeans) [broken]
+	/*0x1c*/ { BODY_FEMLABTECH,       L_OPTIONS_056,   HEAD_DAVEC,        0    }, // Female Civilian (Skirt) [broken]
+	/*0x1d*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_VD,           0    }, // Male Civilian (Vest)
+	/*0x1e*/ { BODY_FBIGUY,           L_OPTIONS_049,   HEAD_BEAU6,        0    }, // Male Civilian (Plaid)
+	/*0x1f*/ { BODY_A51TROOPER,       L_OPTIONS_051,   HEAD_BEAU3,        0    }, // Male Civilian (Red)
+	/*0x20*/ { BODY_A51AIRMAN,        L_OPTIONS_052,   HEAD_STEVEM,       0    }, // Male Civilian (Blue)
+	/*0x21*/ { BODY_CIAGUY,           L_OPTIONS_048,   HEAD_GRIFFEY,      0    }, // Male Civilian (Grey)
+	/*0x22*/ { BODY_DD_GUARD,         L_OPTIONS_039,   HEAD_TIM,          0    }, // Siberian Guard (Brown)
+	/*0x23*/ { BODY_OFFICEWORKER,     L_OPTIONS_069,   HEAD_KEITH,        0    }, // Siberian Guard (Black)
+	/*0x24*/ { BODY_DD_SHOCK_INF,     L_OPTIONS_040,   HEAD_MOTO,         0    }, // Arctic Commando
+	/*0x25*/ { BODY_ALASKAN_GUARD,    L_OPTIONS_059,   HEAD_FEM_GUARD2,   0    }, // Siberian Special Forces
+	/*0x26*/ { BODY_OFFICEWORKER2,    L_OPTIONS_043,   HEAD_JOEL,         0    }, // Jungle Commando
+	/*0x27*/ { BODY_G5_SWAT_GUARD,    L_OPTIONS_054,   HEAD_A51FACEPLATE, 0    }, // Janus Special Forces
+	/*0x28*/ { BODY_NSA_LACKEY,       L_OPTIONS_065,   HEAD_WINNER,       0    }, // Male Moonraker Elite
+	/*0x29*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_COOK,         0    }, // Female Moonraker Elite [broken]
+	/*0x2a*/ { BODY_STEWARDESS,       L_OPTIONS_062,   HEAD_LAURA,        0    }, // Rosika [broken]
+	/*0x2b*/ { BODY_DARK_LEATHER,     L_OPTIONS_018,   HEAD_BEAU1,        0xff }, // Developer
+	/*0x2c*/ { BODY_DARK_COMBAT,      L_OPTIONS_016,   HEAD_DARK_COMBAT,  0    }, // Female Special Operative
+	/*0x2d*/ { BODY_CISOLDIER,        L_OPTIONS_035,   HEAD_JONATHAN,     0    }, // Male Special Operative
+	/*0x2e*/ { BODY_ELVISWAISTCOAT,   L_MPWEAPONS_158, HEAD_ELVIS,        0    }, // Elton
+	/*0x2f*/ { BODY_TESTCHR,          L_OPTIONS_036,   HEAD_GREY,         0    }, // Assault Trooper
+	/*0x30*/ { BODY_DARK_TRENCH,      L_OPTIONS_017,   HEAD_DARK_COMBAT,  0xff }, // Bond (Classic)
+	/*0x31*/ { BODY_DARK_FROCK,       L_OPTIONS_018,   HEAD_DARK_FROCK,   0xff }, // Developer
+	/*0x32*/ { BODY_DARK_RIPPED,      L_OPTIONS_019,   HEAD_DARK_FROCK,   0xff }, // Developer
+	/*0x33*/ { BODY_DARK_AF1,         L_OPTIONS_020,   HEAD_DARK_COMBAT,  0xff }, // Baron Samedi (Death)
+	/*0x34*/ { BODY_DARKWET,          L_OPTIONS_021,   HEAD_DARKAQUA,     0xff }, // Santa Claus
+	/*0x35*/ { BODY_DARKAQUALUNG,     L_OPTIONS_022,   HEAD_DARKAQUA,     0xff }, // Joanna Aqualung
+	/*0x36*/ { BODY_DARKSNOW,         L_OPTIONS_020,   HEAD_BIOTECH,      0    }, // Baron Samedi (Death)
+	/*0x37*/ { BODY_DARK_TRENCH,      L_OPTIONS_021,   HEAD_DARK_FROCK,   0    }, // Santa Claus
+	/*0x38*/ { BODY_ELVIS1,           L_OPTIONS_026,   HEAD_ELVIS,        0xff }, // Maian
+	/*0x39*/ { BODY_CONNERY,          L_OPTIONS_017,   HEAD_NEIL2,        0    }, // Bond (Classic)
+	/*0x3a*/ { BODY_DARK_NEGOTIATOR,  L_OPTIONS_017,   HEAD_TRENT,        0    }, // Bond (Classic)
+	/*0x3b*/ { BODY_MOORE,            L_OPTIONS_017,   HEAD_MURCHIE,      0    }, // Bond (Classic)
+	/*0x3c*/ { BODY_DALTON,           L_OPTIONS_017,   HEAD_JON,          0    }, // Bond (Classic)
 #endif
 };
 
