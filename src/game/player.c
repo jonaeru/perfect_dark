@@ -3107,6 +3107,9 @@ void playerAutoWalk(s16 aimpad, u8 walkspeed, u8 turnspeed, u8 lookup, u8 dist)
 {
 	playerSetTickMode(TICKMODE_AUTOWALK);
 
+	// Prevents momentum from being preserved. Fixes potential softlock during The Duel.
+	g_Vars.currentplayer->resetheadpos = true;
+
 	g_Vars.currentplayer->autocontrol_aimpad = aimpad;
 	g_Vars.currentplayer->autocontrol_walkspeed = walkspeed;
 	g_Vars.currentplayer->autocontrol_turnspeed = turnspeed;

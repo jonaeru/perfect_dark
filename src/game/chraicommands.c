@@ -2114,14 +2114,18 @@ bool aiIfGunUnclaimed(void)
 			g_Vars.aioffset += 5;
 		}
 	} else {
-		struct weaponobj *weapon = g_Vars.chrdata->gunprop->weapon;
+		struct prop *prop = g_Vars.chrdata->gunprop;
 
-		if (weapon && weapon->base.prop) {
-			weapon->base.flags |= OBJFLAG_FORCENOBOUNCE;
-			g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[4]);
-		} else {
-			g_Vars.aioffset += 5;
+		if (prop && prop->weapon && prop->parent == NULL && prop->type == PROPTYPE_WEAPON) {
+			struct weaponobj *weapon = prop->weapon;
+			if (weapon->base.prop) {
+				weapon->base.flags |= OBJFLAG_FORCENOBOUNCE;
+				g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[4]);
+				return false;
+			}
 		}
+
+		g_Vars.aioffset += 5;
 	}
 
 	return false;
@@ -5944,7 +5948,7 @@ bool aiSetTarget(void)
  */
 bool aiIfPresetsTargetIsNotMyTarget(void)
 {
-	s32 mypresetchrstarget;
+	s32 mypresetchrstarget = -1;
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 
 	if (g_Vars.chrdata->chrpreset1 != -1) {
