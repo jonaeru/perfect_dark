@@ -169,15 +169,17 @@ static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuit
 		if (x < 0.f) {
 			data->slider.value = 0;
 		} else if (x > 10.f) {
-			data->slider.value = 100;
+			data->slider.value = 1000;
 		} else {
-			data->slider.value = x * 10.f + 0.5f;
+			data->slider.value = x * 100.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
 		inputMouseGetSpeed(&x, &y);
-		inputMouseSetSpeed((f32)data->slider.value / 10.f, y);
+		inputMouseSetSpeed((f32)data->slider.value / 100.f, y);
 		break;
+	case MENUOP_GETSLIDERLABEL:
+		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
 	}
 
 	return 0;
@@ -193,15 +195,17 @@ static MenuItemHandlerResult menuhandlerMouseSpeedY(s32 operation, struct menuit
 		if (y < 0.f) {
 			data->slider.value = 0;
 		} else if (y > 10.f) {
-			data->slider.value = 100;
+			data->slider.value = 1000;
 		} else {
-			data->slider.value = y * 10.f + 0.5f;
+			data->slider.value = y * 100.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
 		inputMouseGetSpeed(&x, &y);
-		inputMouseSetSpeed(x, (f32)data->slider.value / 10.f);
+		inputMouseSetSpeed(x, (f32)data->slider.value / 100.f);
 		break;
+	case MENUOP_GETSLIDERLABEL:
+		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
 	}
 
 	return 0;
@@ -214,14 +218,16 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedX(s32 operation, struct men
 		if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx < 0.f) {
 			data->slider.value = 0;
 		} else if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx > 10.f) {
-			data->slider.value = 100;
+			data->slider.value = 1000;
 		} else {
-			data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx * 10.f + 0.5f;
+			data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx * 100.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx = (f32)data->slider.value / 100.f;
 		break;
+	case MENUOP_GETSLIDERLABEL:
+		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
 	}
 
 	return 0;
@@ -234,14 +240,16 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedY(s32 operation, struct men
 		if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy < 0.f) {
 			data->slider.value = 0;
 		} else if (g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy > 10.f) {
-			data->slider.value = 100;
+			data->slider.value = 1000;
 		} else {
-			data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy * 10.f + 0.5f;
+			data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy * 100.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy = (f32)data->slider.value / 100.f;
 		break;
+	case MENUOP_GETSLIDERLABEL:
+		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
 	}
 
 	return 0;
@@ -254,14 +262,16 @@ static MenuItemHandlerResult menuhandlerRadialMenuSpeed(s32 operation, struct me
 		if (g_PlayerExtCfg[0].radialmenuspeed < 0.f) {
 			data->slider.value = 0;
 		} else if (g_PlayerExtCfg[0].radialmenuspeed > 10.f) {
-			data->slider.value = 100;
+			data->slider.value = 1000;
 		} else {
-			data->slider.value = g_PlayerExtCfg[0].radialmenuspeed * 10.f + 0.5f;
+			data->slider.value = g_PlayerExtCfg[0].radialmenuspeed * 100.f + 0.5f;
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[0].radialmenuspeed = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[0].radialmenuspeed = (f32)data->slider.value / 100.f;
 		break;
+	case MENUOP_GETSLIDERLABEL:
+		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
 	}
 
 	return 0;
@@ -313,7 +323,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Mouse Speed X",
-		100,
+		1000,
 		menuhandlerMouseSpeedX,
 	},
 	{
@@ -321,7 +331,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Mouse Speed Y",
-		100,
+		1000,
 		menuhandlerMouseSpeedY,
 	},
 	{
@@ -329,7 +339,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Crosshair Speed X",
-		100,
+		1000,
 		menuhandlerMouseAimSpeedX,
 	},
 	{
@@ -337,7 +347,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Crosshair Speed Y",
-		100,
+		1000,
 		menuhandlerMouseAimSpeedY,
 	},
 	{
@@ -345,7 +355,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Radial Menu Speed",
-		100,
+		1000,
 		menuhandlerRadialMenuSpeed,
 	},
 	{
