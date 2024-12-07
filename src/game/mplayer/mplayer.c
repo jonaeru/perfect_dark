@@ -2015,13 +2015,13 @@ struct mpbody g_MpBodies[] = {
 	/*0x13*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   HEAD_SHAUN,        0    }, // Russian Infantry
 	/*0x14*/ { BODY_CILABTECH,        L_OPTIONS_033,   HEAD_SCOTT_H,      0    }, // Russian Commandant
 	/*0x15*/ { BODY_DD_LABTECH,       L_OPTIONS_057,   HEAD_BEAU5,        0    }, // Male Scientist
-	/*0x16*/ { BODY_CIFEMTECH,        L_OPTIONS_034,   HEAD_JULIANNE,     0    }, // Female Scientist [broken]
+	/*0x16*/ { BODY_CIFEMTECH,        L_OPTIONS_034,   HEAD_JULIANNE,     0    }, // Female Scientist
 	/*0x17*/ { BODY_PRES_SECURITY,    L_OPTIONS_066,   HEAD_KEN,          0    }, // Janus Marine
 	/*0x18*/ { BODY_PRESIDENT,        L_OPTIONS_050,   HEAD_DARKAQUA,     0    }, // Naval Officer
 	/*0x19*/ { BODY_PILOTAF1,         L_OPTIONS_060,   HEAD_FEM_GUARD,    0    }, // Helicopter Pilot
 	/*0x1a*/ { BODY_JONATHAN,         L_OPTIONS_032,   HEAD_PENNY,        0    }, // St. Petersburg Guard
-	/*0x1b*/ { BODY_FEM_GUARD,        L_OPTIONS_037,   HEAD_LAURA,        0    }, // Female Civilian (Jeans) [broken]
-	/*0x1c*/ { BODY_FEMLABTECH,       L_OPTIONS_056,   HEAD_DAVEC,        0    }, // Female Civilian (Skirt) [broken]
+	/*0x1b*/ { BODY_FEM_GUARD,        L_OPTIONS_037,   HEAD_LAURA,        0    }, // Female Civilian (Jeans)
+	/*0x1c*/ { BODY_FEMLABTECH,       L_OPTIONS_056,   HEAD_DAVEC,        0    }, // Female Civilian (Skirt)
 	/*0x1d*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_VD,           0    }, // Male Civilian (Vest)
 	/*0x1e*/ { BODY_FBIGUY,           L_OPTIONS_049,   HEAD_BEAU6,        0    }, // Male Civilian (Plaid)
 	/*0x1f*/ { BODY_A51TROOPER,       L_OPTIONS_051,   HEAD_BEAU3,        0    }, // Male Civilian (Red)
@@ -2034,8 +2034,8 @@ struct mpbody g_MpBodies[] = {
 	/*0x26*/ { BODY_OFFICEWORKER2,    L_OPTIONS_043,   HEAD_JOEL,         0    }, // Jungle Commando
 	/*0x27*/ { BODY_G5_SWAT_GUARD,    L_OPTIONS_054,   HEAD_A51FACEPLATE, 0    }, // Janus Special Forces
 	/*0x28*/ { BODY_NSA_LACKEY,       L_OPTIONS_065,   HEAD_WINNER,       0    }, // Male Moonraker Elite
-	/*0x29*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_COOK,         0    }, // Female Moonraker Elite [broken]
-	/*0x2a*/ { BODY_STEWARDESS,       L_OPTIONS_062,   HEAD_LAURA,        0    }, // Rosika [broken]
+	/*0x29*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_COOK,         0    }, // Female Moonraker Elite
+	/*0x2a*/ { BODY_STEWARDESS,       L_OPTIONS_062,   HEAD_LAURA,        0    }, // Rosika
 	/*0x2b*/ { BODY_DARK_LEATHER,     L_OPTIONS_018,   HEAD_BEAU1,        0xff }, // Developer
 	/*0x2c*/ { BODY_DARK_COMBAT,      L_OPTIONS_016,   HEAD_DARK_COMBAT,  0    }, // Female Special Operative
 	/*0x2d*/ { BODY_CISOLDIER,        L_OPTIONS_035,   HEAD_JONATHAN,     0    }, // Male Special Operative
