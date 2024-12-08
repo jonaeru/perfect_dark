@@ -9,6 +9,7 @@
 #include "game/mainmenu.h"
 #include "game/menu.h"
 #include "game/gamefile.h"
+#include "game/player.h"
 #include "video.h"
 #include "input.h"
 #include "config.h"
@@ -990,6 +991,7 @@ static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuit
 			g_PlayerExtCfg[g_ExtMenuPlayer].fovy = data->slider.value;
 			if (g_PlayerExtCfg[g_ExtMenuPlayer].fovzoom) {
 				g_PlayerExtCfg[g_ExtMenuPlayer].fovzoommult = g_PlayerExtCfg[g_ExtMenuPlayer].fovy / 60.f;
+				playerClampGunZoomFovY(g_ExtMenuPlayer);
 			}
 		}
 		break;
