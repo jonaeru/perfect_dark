@@ -96,18 +96,34 @@ struct menudialogdef g_PakRepairSuccessMenuDialog;
 #if VERSION >= VERSION_JPN_FINAL
 const struct menucolourpalette g_MenuColours[] = {
 	{ 0x20202000, 0x20202000, 0x20202000, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x00000000, 0x00000000 },
+#ifdef PLATFORM_N64
 	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f9f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f },
+#else // GoldenEye X Mod (Blue -> Green)
+	{ 0x00bf007f, 0x0050007f, 0x00ff007f, 0xffff00ff, 0x002f009f, 0x00ff0028, 0x55ff55ff, 0x006f00af, 0xffffffff, 0x00000000, 0x004400ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0x44ff447f }, // Menu Colors Blue
+#endif
 	{ 0xbf00007f, 0x5000007f, 0xff00007f, 0xffff00ff, 0x2f00009f, 0x6f00007f, 0xff9070ff, 0x7f0000ff, 0xffff00ff, 0xffa090ff, 0x440000ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0xff44447f },
+#ifdef PLATFORM_N64
 	{ 0x00bf007f, 0x0050007f, 0x00ff007f, 0xffff00ff, 0x002f009f, 0x00ff0028, 0x55ff55ff, 0x006f00af, 0xffffffff, 0x00000000, 0x004400ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0x44ff447f },
+#else // GoldenEye X Mod (Green -> Blue)
+	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f9f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f }, // Menu Colors Green
+#endif
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff9f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 	{ 0xaaaaaaff, 0xaaaaaa7f, 0xaaaaaaff, 0xffffffff, 0xffffff9f, 0xffffffff, 0xffffffff, 0xffffffff, 0xff8888ff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 };
 #else
 const struct menucolourpalette g_MenuColours[] = {
 	{ 0x20202000, 0x20202000, 0x20202000, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x00000000, 0x00000000 },
+#ifdef PLATFORM_N64
 	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f7f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f },
+#else // GoldenEye X Mod (Blue -> Green)
+	{ 0x00bf007f, 0x0050007f, 0x00ff007f, 0xffff00ff, 0x002f007f, 0x00ff0028, 0x55ff55ff, 0x006f00af, 0xffffffff, 0x00000000, 0x004400ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0x44ff447f }, // Menu Colors Blue
+#endif
 	{ 0xbf00007f, 0x5000007f, 0xff00007f, 0xffff00ff, 0x2f00007f, 0x6f00007f, 0xff7050ff, 0x7f0000ff, 0xffff00ff, 0xff9070ff, 0x440000ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0xff44447f },
+#ifdef PLATFORM_N64
 	{ 0x00bf007f, 0x0050007f, 0x00ff007f, 0xffff00ff, 0x002f007f, 0x00ff0028, 0x55ff55ff, 0x006f00af, 0xffffffff, 0x00000000, 0x004400ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0x44ff447f },
+#else // GoldenEye X Mod (Green -> Blue)
+	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f7f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f }, // Menu Colors Green
+#endif
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 	{ 0xaaaaaaff, 0xaaaaaa7f, 0xaaaaaaff, 0xffffffff, 0xffffff2f, 0xffffffff, 0xffffffff, 0xffffffff, 0xff8888ff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 };
@@ -115,18 +131,34 @@ const struct menucolourpalette g_MenuColours[] = {
 
 const struct menucolourpalette g_MenuWave1Colours[] = {
 	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x4f4f4f00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 },
+#ifdef PLATFORM_N64
 	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x006f6faf, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 },
+#else // GoldenEye X Mod (Blue -> Green)
+	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xff7f0000, 0xffffff00, 0xffffff00, 0x00ffff00, 0x006f6faf, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 }, // Menu Colors Blue
+#endif
 	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x006f6faf, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 },
+#ifdef PLATFORM_N64
 	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xff7f0000, 0xffffff00, 0xffffff00, 0x00ffff00, 0x006f6faf, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 },
+#else // GoldenEye X Mod (Green -> Blue)
+	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x006f6faf, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 }, // Menu Colors Green
+#endif
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 };
 
 const struct menucolourpalette g_MenuWave2Colours[] = {
 	{ 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x4f4f4f00, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x00000000 },
+#ifdef PLATFORM_N64
 	{ 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x006f6faf, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x00000000 },
+#else // GoldenEye X Mod (Blue -> Green)
+	{ 0x44444400, 0x44444400, 0x44444400, 0x00ff0000, 0x44444400, 0x44444400, 0xffff0000, 0x006f6faf, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x00000000 }, // Menu Colors Blue
+#endif
 	{ 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x006f6faf, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x00000000 },
+#ifdef PLATFORM_N64
 	{ 0x44444400, 0x44444400, 0x44444400, 0x00ff0000, 0x44444400, 0x44444400, 0xffff0000, 0x006f6faf, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x00000000 },
+#else // GoldenEye X Mod (Green -> Blue)
+	{ 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x006f6faf, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x44444400, 0x00000000 }, // Menu Colors Green
+#endif
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 };
@@ -354,7 +386,11 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	gdl = text0f153838(gdl);
 
 	// Top and bottom borders (light blue)
+#ifdef PLATFORM_N64
 	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
+#else // GoldenEye X Mod
+	gdl = textSetPrimColour(gdl, 0xffb0007f); // Purple Menu Line Color
+#endif
 	gDPFillRectangleScaled(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
 	gDPFillRectangleScaled(gdl++, x1, bannertop - 4, x2, bannertop - 2);
 	gdl = text0f153838(gdl);
@@ -2475,14 +2511,22 @@ void menuGetTeamTitlebarColours(u32 *top, u32 *middle, u32 *bottom)
 {
 	const u32 colours[][3] = {
 		// top, middle, bottom
-		{ 0xbf000000, 0x50000000, 0xff000000 },
-		{ 0xbfbf0000, 0x50500000, 0xffff0000 },
-		{ 0x0000bf00, 0x00005000, 0x0000ff00 },
-		{ 0xbf00bf00, 0x50005000, 0xff00ff00 },
-		{ 0x00bfbf00, 0x00505000, 0x00ffff00 },
-		{ 0xff885500, 0x7f482000, 0xff885500 },
-		{ 0xff888800, 0x7f484800, 0xff888800 },
-		{ 0x88445500, 0x48242000, 0x88445500 },
+		{ 0xbf000000, 0x50000000, 0xff000000 }, // Red
+		{ 0xbfbf0000, 0x50500000, 0xffff0000 }, // Yellow
+		{ 0x0000bf00, 0x00005000, 0x0000ff00 }, // Blue
+#ifdef PLATFORM_N64
+		{ 0xbf00bf00, 0x50005000, 0xff00ff00 }, // Magenta
+		{ 0x00bfbf00, 0x00505000, 0x00ffff00 }, // Cyan
+		{ 0xff885500, 0x7f482000, 0xff885500 }, // Orange
+		{ 0xff888800, 0x7f484800, 0xff888800 }, // Pink
+		{ 0x88445500, 0x48242000, 0x88445500 }, // Brown
+#else // GoldenEye X Mod
+		{ 0x008f0000, 0x00200000, 0x00cf0000 }, // Magenta -> Green
+		{ 0x7800bf00, 0x28005000, 0x8800ff00 }, // Cyan -> Purple
+		{ 0x00bfbf00, 0x00505000, 0x00ffff00 }, // Orange -> Cyan
+		{ 0xff888800, 0x00BFBF00, 0xff888800 }, // Pink
+		{ 0xd0c07000, 0x60503000, 0xd0c07000 }, // Brown -> Beige
+#endif
 	};
 
 	*top = colours[g_PlayerConfigsArray[g_MpPlayerNum].base.team][0] | (*top & 0xff);
@@ -2847,7 +2891,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 				&& !g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog) {
 			gSPSetGeometryMode(gdl++, G_ZBUFFER);
 
-			gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_DEFAULT);
+			gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_DEFAULT); //  Menu Color Bank?
 
 			gSPClearGeometryMode(gdl++, G_ZBUFFER);
 
@@ -3660,7 +3704,11 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 
 	switch (root) {
 	case MENUROOT_MPSETUP:
+#ifdef PLATFORM_N64
 		menuSetBackground(MENUBG_CONEALPHA);
+#else // GoldenEye X Mod
+		menuSetBackground(MENUBG_BLUR);
+#endif
 		break;
 	case MENUROOT_4MBFILEMGR:
 		musicStartMenu();
@@ -5610,7 +5658,11 @@ Gfx *menuRender(Gfx *gdl)
 							x = viewleft + 2;
 						}
 
+#ifdef PLATFORM_N64
 						gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, g_MenuData.playerjoinalpha[i] | 0x5070ff00, viGetWidth(), viGetHeight(), 0, 0);
+#else // GoldenEye X Mod
+						gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, g_MenuData.playerjoinalpha[i] | 0x50ff7000, viGetWidth(), viGetHeight(), 0, 0); // Player # Color
+#endif
 
 						if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL && g_Vars.waitingtojoin[i]) {
 							// "Ready!"
@@ -5620,12 +5672,16 @@ Gfx *menuRender(Gfx *gdl)
 							colour = 0xffffffff;
 #else
 							strcpy(text, langGet(L_MISC_461));
-							colour = g_MenuData.playerjoinalpha[i] | 0xd00020ff;
+							colour = g_MenuData.playerjoinalpha[i] | 0xd00020ff; // Ready Text Color
 #endif
 						} else {
 							// "Press START!"
 							strcpy(text, langGet(L_MPMENU_483));
+#ifdef PLATFORM_N64
 							colour = colourBlend(0x00ffff00, 0xffffff00, weight) | g_MenuData.playerjoinalpha[i];
+#else // GoldenEye X Mod
+							colour = colourBlend(0xffff0000, 0xffffff00, weight) | g_MenuData.playerjoinalpha[i]; // Press Start!
+#endif
 						}
 
 						gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
@@ -5744,7 +5800,11 @@ u32 menuChooseMusic(void)
 	}
 
 	if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
+#ifdef PLATFORM_N64
 		return MUSIC_COMBATSIM_MENU;
+#else // GoldenEye X Mod
+		return MUSIC_MAINMENU;
+#endif
 	}
 
 	if (g_MenuData.root == MENUROOT_MPPAUSE) {

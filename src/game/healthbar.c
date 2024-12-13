@@ -175,9 +175,17 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	static s32 len1 = 170; // x pos of right side radius centre
 	static s32 len2 = 47;  // x pos of the left side of armour
 	static s32 len3 = 40;  // x pos of the right side of trauma (left side is 0)
+#ifdef PLATFORM_N64
 	static u32 shieldcol = 0x10500090;
+#else // GoldenEye X Mod
+	static u32 shieldcol = 0x00668890; // Blue Shield Color
+#endif
+#ifdef PLATFORM_N64
 	static u32 armourcol = 0x00c00060;
-	static u32 traumacol = 0xff000060;
+#else // GoldenEye X Mod
+	static u32 armourcol = 0xff6e0060; // Green Health Color
+#endif
+	static u32 traumacol = 0xff000060; // Red Health Color
 	static u32 bgcol = 0x00000080;
 	static s32 offx = -85;
 	static s32 offy = -185;

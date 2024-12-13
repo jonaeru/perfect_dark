@@ -250,7 +250,9 @@ void menuTick(void)
 				g_MpPlayerNum = 0;
 
 				if (g_MpSetup.chrslots & 0xf) {
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 					sndStart(var80095200, SFX_EXPLOSION_8098, 0, -1, -1, -1, -1, -1);
+#endif
 
 					playerPause(IS4MB() ? MENUROOT_4MBMAINMENU : MENUROOT_MPSETUP);
 				}
@@ -576,7 +578,9 @@ void menuTick(void)
 
 				if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
 					startmusic = true;
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 					sndStart(var80095200, SFX_EXPLOSION_8098, 0, -1, -1, -1, -1, -1);
+#endif
 				}
 
 				if (g_MenuData.root == MENUROOT_MAINMENU || g_MenuData.root == MENUROOT_TRAINING) {

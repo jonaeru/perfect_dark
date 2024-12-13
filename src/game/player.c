@@ -1239,8 +1239,13 @@ void playerChooseBodyAndHead(s32 *bodynum, s32 *headnum, s32 *arg2)
 	switch (outfit) {
 	default:
 	case OUTFIT_DEFAULT:
+#ifdef PLATFORM_N64
 		*bodynum = BODY_DARK_COMBAT;
 		*headnum = solo ? HEAD_DARK_COMBAT : HEAD_VD;
+#else // GoldenEye X Mod
+		*bodynum = BODY_AREA51GUARD;
+		*headnum = solo ? HEAD_ROSS : HEAD_BRIAN;
+#endif
 		break;
 	case OUTFIT_ELVIS:
 		*bodynum = BODY_THEKING;

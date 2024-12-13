@@ -454,13 +454,25 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_DARK_COMBAT;
 		break;
 	case 1:
+#ifdef PLATFORM_N64
 		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_CASSANDRA;
+#else // GoldenEye X Mod
+		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_DARK_LEATHER;
+#endif
 		break;
 	case 2:
+#ifdef PLATFORM_N64
 		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_CARRINGTON;
+#else // GoldenEye X Mod
+		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_DARKAQUALUNG;
+#endif
 		break;
 	case 3:
+#ifdef PLATFORM_N64
 		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_CILABTECH;
+#else // GoldenEye X Mod
+		g_PlayerConfigsArray[playernum].base.mpbodynum = MPBODY_DARKSNOW;
+#endif
 		break;
 	}
 
@@ -1345,7 +1357,11 @@ Gfx *mpRenderModalText(Gfx *gdl)
 #if VERSION >= VERSION_JPN_FINAL
 		gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
 #else
+#ifdef PLATFORM_N64
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
+#else // GoldenEye X Mod
+		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0x00a000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0); // Press Start
+#endif
 #endif
 
 		if (g_Vars.currentplayer->deadtimer > 0) {
@@ -1365,7 +1381,11 @@ Gfx *mpRenderModalText(Gfx *gdl)
 #if VERSION >= VERSION_JPN_FINAL
 			gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
 #else
+#ifdef PLATFORM_N64
 			gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
+#else // GoldenEye X Mod
+			gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0x00a000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
+#endif
 #endif
 		}
 
@@ -1770,85 +1790,86 @@ struct mphead g_MpHeads[] = {
 #endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
 #else // GoldenEye X Mod
-	{ /*0x00*/ HEAD_CARRINGTON,   0 },
-	{ /*0x01*/ HEAD_ROSS,         0 },
-	{ /*0x02*/ HEAD_PRYCE,        0 },
-	{ /*0x03*/ HEAD_MRBLONDE,     0 },
-	{ /*0x04*/ HEAD_CASSANDRA,    0 },
-	{ /*0x05*/ HEAD_SILKE,        0 },
-	{ /*0x06*/ HEAD_GRAHAM,       0 },
-	{ /*0x07*/ HEAD_SMITH,        0 },
-	{ /*0x08*/ HEAD_ALEX,         0 },
-	{ /*0x09*/ HEAD_GARETH,       0 },
-	{ /*0x0a*/ HEAD_SECRETARY,    0 },
-	{ /*0x0b*/ HEAD_ROBERT,       0 },
-	{ /*0x0c*/ HEAD_MARK2,        0 },
-	{ /*0x0d*/ HEAD_FEM_GUARD,    0 },
-	{ /*0x0e*/ HEAD_FEM_GUARD2,   0 },
-	{ /*0x0f*/ HEAD_DARK_SNOW,    0 },
-	{ /*0x10*/ HEAD_PRESIDENT,    0 },
-	{ /*0x11*/ HEAD_ANDY_R,       0 },
-	{ /*0x12*/ HEAD_STEVE_K,      0 },
-	{ /*0x13*/ HEAD_CARTER,       0 },
-	{ /*0x14*/ HEAD_PEER_S,       0 },
-	{ /*0x15*/ HEAD_BEN_R,        0 },
-	{ /*0x16*/ HEAD_SHAUN,        0 },
-	{ /*0x17*/ HEAD_SCOTT_H,      0 },
-	{ /*0x18*/ HEAD_SANCHEZ,      0 },
-	{ /*0x19*/ HEAD_BEAU5,        0 },
-	{ /*0x1a*/ HEAD_DARKAQUA,     0 },
-	{ /*0x1b*/ HEAD_BEAU4,        0 },
-	{ /*0x1c*/ HEAD_KEN,          0 },
-	{ /*0x1d*/ HEAD_BEAU6,        0 },
-	{ /*0x1e*/ HEAD_VD,           0 },
-	{ /*0x1f*/ HEAD_PENNY,        0 },
-	{ /*0x20*/ HEAD_BEAU2,        0 },
-	{ /*0x21*/ HEAD_EILEEN_H,     0 },
-	{ /*0x22*/ HEAD_DDSNIPER,     0 },
-	{ /*0x23*/ HEAD_BEAU3,        0 },
-	{ /*0x24*/ HEAD_GRIFFEY,      0 },
-	{ /*0x25*/ HEAD_MOTO,         0 },
-	{ /*0x26*/ HEAD_KEITH,        0 },
-	{ /*0x27*/ HEAD_WINNER,       0 },
-	{ /*0x28*/ HEAD_A51FACEPLATE, 0 },
-	{ /*0x29*/ HEAD_ELVIS_GOGS,   0 },
-	{ /*0x2a*/ HEAD_STEVEM,       0 },
-	{ /*0x2b*/ HEAD_JOEL,         0 },
-	{ /*0x2c*/ HEAD_TIM,          0 },
-	{ /*0x2d*/ HEAD_GRANT,        0 },
-	{ /*0x2e*/ HEAD_ROBIN,        0 },
-	{ /*0x2f*/ HEAD_JULIANNE,     0 },
-	{ /*0x30*/ HEAD_LAURA,        0 },
-	{ /*0x31*/ HEAD_DAVEC,        0 },
-	{ /*0x32*/ HEAD_COOK,         0 },
-	{ /*0x33*/ HEAD_DUNCAN2,      0 },
-	{ /*0x34*/ HEAD_DARK_COMBAT,  0 },
-	{ /*0x35*/ HEAD_DUNCAN2,      0 },
-	{ /*0x36*/ HEAD_DUNCAN2,      0 },
-	{ /*0x37*/ HEAD_JONATHAN,     0 },
-	{ /*0x38*/ HEAD_ELVIS,        0 },
-	{ /*0x39*/ HEAD_DUNCAN2,      0 },
-	{ /*0x3a*/ HEAD_GREY,         0 },
-	{ /*0x3b*/ HEAD_DUNCAN2,      0 },
-	{ /*0x3c*/ HEAD_DUNCAN2,      0 },
-	{ /*0x3d*/ HEAD_DUNCAN2,      0 },
-	{ /*0x3e*/ HEAD_DUNCAN2,      0 },
-	{ /*0x3f*/ HEAD_DUNCAN2,      0 },
-	{ /*0x40*/ HEAD_DUNCAN2,      0 },
-	{ /*0x41*/ HEAD_DUNCAN2,      0 },
-	{ /*0x42*/ HEAD_DUNCAN2,      0 },
-	{ /*0x43*/ HEAD_DUNCAN2,      0 },
-	{ /*0x44*/ HEAD_BIOTECH,      0 },
-	{ /*0x45*/ HEAD_DARK_FROCK,   0 },
-	{ /*0x46*/ HEAD_NEIL2,        0 },
-	{ /*0x47*/ HEAD_TRENT,        0 },
-	{ /*0x48*/ HEAD_MURCHIE,      0 },
-	{ /*0x49*/ HEAD_JON,          0 },
-	{ /*0x4a*/ HEAD_WONG,         0 },
+	{ /*0x00*/ HEAD_CARRINGTON,   0    },
+	{ /*0x01*/ HEAD_ROSS,         0    },
+	{ /*0x02*/ HEAD_PRYCE,        0    },
+	{ /*0x03*/ HEAD_MRBLONDE,     0    },
+	{ /*0x04*/ HEAD_CASSANDRA,    0    },
+	{ /*0x05*/ HEAD_SILKE,        0    },
+	{ /*0x06*/ HEAD_GRAHAM,       0    },
+	{ /*0x07*/ HEAD_SMITH,        0    },
+	{ /*0x08*/ HEAD_ALEX,         0    },
+	{ /*0x09*/ HEAD_GARETH,       0    },
+	{ /*0x0a*/ HEAD_SECRETARY,    0    },
+	{ /*0x0b*/ HEAD_ROBERT,       0    },
+	{ /*0x0c*/ HEAD_MARK2,        0    },
+	{ /*0x0d*/ HEAD_FEM_GUARD,    0    },
+	{ /*0x0e*/ HEAD_FEM_GUARD2,   0    },
+	{ /*0x0f*/ HEAD_DARK_SNOW,    0    },
+	{ /*0x10*/ HEAD_PRESIDENT,    0    },
+	{ /*0x11*/ HEAD_ANDY_R,       0    },
+	{ /*0x12*/ HEAD_STEVE_K,      0    },
+	{ /*0x13*/ HEAD_CARTER,       0    },
+	{ /*0x14*/ HEAD_PEER_S,       0    },
+	{ /*0x15*/ HEAD_BEN_R,        0    },
+	{ /*0x16*/ HEAD_SHAUN,        0    },
+	{ /*0x17*/ HEAD_SCOTT_H,      0    },
+	{ /*0x18*/ HEAD_SANCHEZ,      0    },
+	{ /*0x19*/ HEAD_BEAU5,        0    },
+	{ /*0x1a*/ HEAD_DARKAQUA,     0    },
+	{ /*0x1b*/ HEAD_BEAU4,        0    },
+	{ /*0x1c*/ HEAD_KEN,          0    },
+	{ /*0x1d*/ HEAD_BEAU6,        0    },
+	{ /*0x1e*/ HEAD_VD,           0    },
+	{ /*0x1f*/ HEAD_PENNY,        0    },
+	{ /*0x20*/ HEAD_BEAU2,        0    },
+	{ /*0x21*/ HEAD_EILEEN_H,     0    },
+	{ /*0x22*/ HEAD_DDSNIPER,     0    },
+	{ /*0x23*/ HEAD_BEAU3,        0    },
+	{ /*0x24*/ HEAD_GRIFFEY,      0    },
+	{ /*0x25*/ HEAD_MOTO,         0    },
+	{ /*0x26*/ HEAD_KEITH,        0    },
+	{ /*0x27*/ HEAD_WINNER,       0    },
+	{ /*0x28*/ HEAD_A51FACEPLATE, 0    },
+	{ /*0x29*/ HEAD_ELVIS_GOGS,   0    },
+	{ /*0x2a*/ HEAD_STEVEM,       0    },
+	{ /*0x2b*/ HEAD_JOEL,         0    },
+	{ /*0x2c*/ HEAD_TIM,          0    },
+	{ /*0x2d*/ HEAD_GRANT,        0    },
+	{ /*0x2e*/ HEAD_ROBIN,        0    },
+	{ /*0x2f*/ HEAD_JULIANNE,     0    },
+	{ /*0x30*/ HEAD_LAURA,        0    },
+	{ /*0x31*/ HEAD_DAVEC,        0    },
+	{ /*0x32*/ HEAD_COOK,         0    },
+	{ /*0x33*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x34*/ HEAD_DARK_COMBAT,  0    },
+	{ /*0x35*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x36*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x37*/ HEAD_JONATHAN,     0    },
+	{ /*0x38*/ HEAD_ELVIS,        0    },
+	{ /*0x39*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x3a*/ HEAD_GREY,         0    },
+	{ /*0x3b*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x3c*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x3d*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x3e*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x3f*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x40*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x41*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x42*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x43*/ HEAD_DUNCAN2,      0xff },
+	{ /*0x44*/ HEAD_BIOTECH,      0    },
+	{ /*0x45*/ HEAD_DARK_FROCK,   0    },
+	{ /*0x46*/ HEAD_NEIL2,        0    },
+	{ /*0x47*/ HEAD_TRENT,        0    },
+	{ /*0x48*/ HEAD_MURCHIE,      0    },
+	{ /*0x49*/ HEAD_JON,          0    },
+	{ /*0x4a*/ HEAD_WONG,         0xff },
 #endif
 };
 
 u32 g_BotHeads[] = {
+#ifdef PLATFORM_N64
 	MPHEAD_JON,
 	MPHEAD_BEAU1,
 	MPHEAD_ROSS,
@@ -1903,6 +1924,61 @@ u32 g_BotHeads[] = {
 	MPHEAD_GRIFFEY,
 #if VERSION != VERSION_JPN_FINAL
 	MPHEAD_MOTO,
+#endif
+#else // GoldenEye X Mod
+	MPHEAD_DARK_COMBAT,
+	MPHEAD_DARK_FROCK,
+	MPHEAD_DARKAQUA,
+	MPHEAD_DARK_SNOW,
+	MPHEAD_ELVIS,
+	MPHEAD_ELVIS_GOGS,
+	MPHEAD_CARRINGTON,
+	MPHEAD_MRBLONDE,
+	MPHEAD_CASSANDRA,
+	MPHEAD_TRENT,
+	MPHEAD_JONATHAN,
+	MPHEAD_VD,
+	MPHEAD_PRESIDENT,
+	MPHEAD_DDSHOCK,
+	MPHEAD_BIOTECH,
+	MPHEAD_DDSNIPER,
+	MPHEAD_A51FACEPLATE,
+	MPHEAD_SECRETARY,
+	MPHEAD_FEM_GUARD,
+	MPHEAD_FEM_GUARD2,
+	MPHEAD_MAIAN_S,
+	MPHEAD_JON,
+	MPHEAD_BEAU1,
+	MPHEAD_ROSS,
+	MPHEAD_MARK2,
+	MPHEAD_CHRIST,
+	MPHEAD_RUSS,
+	MPHEAD_DARLING,
+	MPHEAD_BRIAN,
+	MPHEAD_JAMIE,
+	MPHEAD_DUNCAN2,
+	MPHEAD_KEITH,
+	MPHEAD_STEVEM,
+	MPHEAD_GRANT,
+	MPHEAD_PENNY,
+	MPHEAD_DAVEC,
+	MPHEAD_JONES,
+	MPHEAD_GRAHAM,
+	MPHEAD_ROBERT,
+	MPHEAD_NEIL2,
+	MPHEAD_SHAUN,
+	MPHEAD_ROBIN,
+	MPHEAD_COOK,
+	MPHEAD_PRYCE,
+	MPHEAD_SILKE,
+	MPHEAD_SMITH,
+	MPHEAD_GARETH,
+	MPHEAD_MURCHIE,
+	MPHEAD_WONG,
+	MPHEAD_CARTER,
+	MPHEAD_TINTIN,
+	MPHEAD_CHRIST,
+	MPHEAD_SECRETARY,
 #endif
 };
 
@@ -2058,6 +2134,7 @@ struct mpbody g_MpBodies[] = {
 };
 
 u32 g_MpMaleHeads[] = {
+#ifdef PLATFORM_N64
 	HEAD_JON,
 	HEAD_BEAU1,
 	HEAD_ROSS,
@@ -2103,6 +2180,56 @@ u32 g_MpMaleHeads[] = {
 	HEAD_JOEL,
 #if VERSION != VERSION_JPN_FINAL
 	HEAD_MOTO,
+#endif
+#else // GoldenEye X Mod
+	HEAD_SHAUN,
+	HEAD_BEAU2,
+	HEAD_EILEEN_H,
+	HEAD_SCOTT_H,
+	HEAD_SANCHEZ,
+	HEAD_DARKAQUA,
+	HEAD_DDSNIPER,
+	HEAD_BEAU3,
+	HEAD_BEAU4,
+	HEAD_BEAU5,
+	HEAD_BEAU6,
+	HEAD_GRIFFEY,
+	HEAD_MOTO,
+	HEAD_KEITH,
+	HEAD_WINNER,
+	HEAD_A51FACEPLATE,
+	HEAD_ELVIS_GOGS,
+	HEAD_STEVEM,
+	HEAD_VD,
+	HEAD_KEN,
+	HEAD_JOEL,
+	HEAD_TIM,
+	HEAD_ROBIN,
+	HEAD_PENNY,
+	HEAD_FEM_GUARD,
+	HEAD_FEM_GUARD2,
+	HEAD_CARRINGTON,
+	HEAD_ROSS,
+	HEAD_MRBLONDE,
+	HEAD_SILKE,
+	HEAD_GRAHAM,
+	HEAD_SMITH,
+	HEAD_ALEX,
+	HEAD_SECRETARY,
+	HEAD_ROBERT,
+	HEAD_MARK2,
+	HEAD_ANDY_R,
+	HEAD_BEN_R,
+	HEAD_STEVE_K,
+	HEAD_PEER_S,
+	HEAD_CARTER,
+	HEAD_JULIANNE,
+	HEAD_LAURA,
+	HEAD_DAVEC,
+	HEAD_COOK,
+	HEAD_PRYCE,
+	HEAD_CASSANDRA,
+	HEAD_GARETH,
 #endif
 };
 
@@ -2847,7 +2974,7 @@ void mpCalculateLockIfLastWinnerOrLoser(void)
 
 struct mptrack g_MpTracks[] = {
 	// Audio ID, duration, name, unlock after stage
-	/*0x00*/ { MUSIC_DARK_COMBAT,     160, L_MISC_124, -1 }, // "Dark Combat"
+#ifdef PLATFORM_N64	/*0x00*/ { MUSIC_DARK_COMBAT,     160, L_MISC_124, -1 }, // "Dark Combat"
 	/*0x01*/ { MUSIC_SKEDAR_MYSTERY,  170, L_MISC_125, -1 }, // "Skedar Mystery"
 	/*0x02*/ { MUSIC_CI_OPERATIVE,    170, L_MISC_126, -1 }, // "CI Operative"
 	/*0x03*/ { MUSIC_DATADYNE_ACTION, 180, L_MISC_127, -1 }, // "dataDyne Action"
@@ -2893,6 +3020,52 @@ struct mptrack g_MpTracks[] = {
 	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_261, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Warrior" (Skedar Leader)
 #else
 	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_041, SOLOSTAGEINDEX_SKEDARRUINS }, // "E R R O R" (can't find a good approximation for Skedar Leader)
+#endif
+#else // GoldenEye X Mod
+	/*0x00*/ { MUSIC_DARK_COMBAT,     127, L_MISC_124, -1 }, // Dam
+	/*0x01*/ { MUSIC_SKEDAR_MYSTERY,  124, L_MISC_125, -1 }, // Dam X
+	/*0x02*/ { MUSIC_CI_OPERATIVE,    120, L_MISC_126, -1 }, // Facility
+	/*0x03*/ { MUSIC_DATADYNE_ACTION, 120, L_MISC_127, -1 }, // Facility X
+	/*0x04*/ { MUSIC_MAIAN_TEARS,     120, L_MISC_128, -1 }, // Runway
+	/*0x05*/ { MUSIC_ALIEN_CONFLICT,  128, L_MISC_129, -1 }, // Runway X
+	/*0x06*/ { MUSIC_CI,              127, L_MISC_130, -1 }, // Surface
+	/*0x07*/ { MUSIC_DEFECTION,       128, L_MISC_131, -1 }, // Bunker
+	/*0x08*/ { MUSIC_DEFECTION_X,     123, L_MISC_132, -1 }, // Bunker X
+	/*0x09*/ { MUSIC_INVESTIGATION,   132, L_MISC_133, -1 }, // Silo
+	/*0x0a*/ { MUSIC_INVESTIGATION_X, 131, L_MISC_134, -1 }, // Silo X
+	/*0x0b*/ { MUSIC_EXTRACTION,      127, L_MISC_135, -1 }, // Frigate
+	/*0x0c*/ { MUSIC_EXTRACTION_X,    125, L_MISC_136, -1 }, // Frigate X
+	/*0x0d*/ { MUSIC_VILLA,           124, L_MISC_137, -1 }, // Surface II
+	/*0x0e*/ { MUSIC_VILLA_X,         122, L_MISC_138, -1 }, // Surface II X
+	/*0x0f*/ { MUSIC_CHICAGO,         128, L_MISC_139, -1 }, // Bunker II
+	/*0x10*/ { MUSIC_CHICAGO_X,       123, L_MISC_140, -1 }, // Bunker II X
+	/*0x11*/ { MUSIC_G5,              124, L_MISC_141, -1 }, // Statue
+	/*0x12*/ { MUSIC_G5_X,            126, L_MISC_142, -1 }, // Statue X
+	/*0x13*/ { MUSIC_INFILTRATION,    123, L_MISC_143, -1 }, // Archives
+	/*0x14*/ { MUSIC_INFILTRATION_X,  125, L_MISC_144, -1 }, // Archives X
+	/*0x15*/ { MUSIC_RESCUE,          123, L_MISC_145, -1 }, // Streets
+	/*0x16*/ { MUSIC_RESCUE_X,        121, L_MISC_146, -1 }, // Streets X
+	/*0x17*/ { MUSIC_ESCAPE,          129, L_MISC_147, -1 }, // Depot
+	/*0x18*/ { MUSIC_ESCAPE_X,        131, L_MISC_148, -1 }, // Depot X
+	/*0x19*/ { MUSIC_AIRBASE,         130, L_MISC_149, -1 }, // Train
+	/*0x1a*/ { MUSIC_AIRBASE_X,       126, L_MISC_150, -1 }, // Train X
+	/*0x1b*/ { MUSIC_AIRFORCEONE,     133, L_MISC_151, -1 }, // Jungle
+	/*0x1c*/ { MUSIC_AIRFORCEONE_X,   125, L_MISC_152, -1 }, // Jungle X
+	/*0x1d*/ { MUSIC_CRASHSITE,       120, L_MISC_153, -1 }, // Control
+	/*0x1e*/ { MUSIC_CRASHSITE_X,     128, L_MISC_154, -1 }, // Control X
+	/*0x1f*/ { MUSIC_PELAGIC,         127, L_MISC_155, -1 }, // Caverns
+	/*0x20*/ { MUSIC_PELAGIC_X,       128, L_MISC_156, -1 }, // Caverns X
+	/*0x21*/ { MUSIC_DEEPSEA,         126, L_MISC_157, -1 }, // Cradle
+	/*0x22*/ { MUSIC_DEEPSEA_X,       126, L_MISC_158, -1 }, // Cradle X
+	/*0x23*/ { MUSIC_DEFENSE,         131, L_MISC_159, -1 }, // Aztec
+	/*0x24*/ { MUSIC_DEFENSE_X,       128, L_MISC_160, -1 }, // Aztec X
+	/*0x25*/ { MUSIC_ATTACKSHIP,      133, L_MISC_161, -1 }, // Egyptian
+	/*0x26*/ { MUSIC_ATTACKSHIP_X,    125, L_MISC_162, -1 }, // Egyptian X
+	/*0x27*/ { MUSIC_SKEDARRUINS,     128, L_MISC_163, -1 }, // Citadel
+	/*0x28*/ { MUSIC_SKEDARRUINS_X,   133, L_MISC_164, -1 }, // Perimeter
+	/*0x29*/ { MUSIC_CRASHSITE_INTRO, 133, L_MISC_435, -1 }, // Elevator 1
+	/*0x2a*/ { MUSIC_PELAGIC_INTRO,   125, L_MISC_436, -1 }, // Elevator 2
+	/*0x2b*/ { MUSIC_CREDITS,         121, L_MISC_165, -1 }, // End Credits
 #endif
 };
 
