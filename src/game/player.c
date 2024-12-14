@@ -1250,8 +1250,13 @@ void playerChooseBodyAndHead(s32 *bodynum, s32 *headnum, s32 *arg2)
 	switch (outfit) {
 	default:
 	case OUTFIT_DEFAULT:
+#ifdef PLATFORM_N64
 		*bodynum = BODY_DARK_COMBAT;
 		*headnum = solo ? HEAD_DARK_COMBAT : HEAD_VD;
+#else // GoldenEye X Mod
+		*bodynum = BODY_AREA51GUARD;
+		*headnum = solo ? HEAD_ROSS : HEAD_BRIAN;
+#endif
 		break;
 	case OUTFIT_ELVIS:
 		*bodynum = BODY_THEKING;
@@ -2121,6 +2126,22 @@ void playerTickCutscene(bool arg0)
 f32 playerGetCutsceneBlurFrac(void)
 {
 	return g_CutsceneBlurFrac;
+}
+
+void playerClampGunZoomFovY(s32 playernum)
+{
+	struct player *player = g_Vars.players[playernum];
+	if (!player) {
+		return;
+	}
+
+	for (s32 index = 0; index < ARRAYCOUNT(player->gunzoomfovs); ++index) {
+		if (player->gunzoomfovs[index] < ADJUST_ZOOM_FOV(2)) {
+			player->gunzoomfovs[index] = ADJUST_ZOOM_FOV(2);
+		} else if (player->gunzoomfovs[index] > ADJUST_ZOOM_FOV(60)) {
+			player->gunzoomfovs[index] = ADJUST_ZOOM_FOV(60);
+		}
+	}
 }
 
 void playerSetZoomFovY(f32 fovy, f32 timemax)
@@ -3132,6 +3153,9 @@ void playerUpdateShake(void)
 void playerAutoWalk(s16 aimpad, u8 walkspeed, u8 turnspeed, u8 lookup, u8 dist)
 {
 	playerSetTickMode(TICKMODE_AUTOWALK);
+
+	// Prevents momentum from being preserved. Fixes potential softlock during The Duel.
+	g_Vars.currentplayer->resetheadpos = true;
 
 	g_Vars.currentplayer->autocontrol_aimpad = aimpad;
 	g_Vars.currentplayer->autocontrol_walkspeed = walkspeed;
