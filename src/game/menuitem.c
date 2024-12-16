@@ -22,6 +22,9 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
+#include "input.h"
+#endif
 
 u8 g_MpSelectedPlayersForStats[MAX_PLAYERS];
 
@@ -1059,6 +1062,15 @@ Gfx *menuitemDropdownOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menu
 	return gdl;
 }
 
+#ifndef PLATFORM_N64
+static s32 menuitemKeyboardGetNumRows(s32 rows, s32 usingcontroller)
+{
+	return rows + !usingcontroller;
+}
+#else
+#define menuitemKeyboardGetNumRows(rows, usingcontroller) (rows)
+#endif
+
 bool menuitemKeyboardIsStringEmptyOrSpaces(char *text)
 {
 	s32 i;
@@ -1110,6 +1122,9 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 	u32 alpha;
 	s32 textheight;
 	s32 textwidth;
+#ifndef PLATFORM_N64
+	s32 usingcontroller = inputGetAssignedControllerId(g_MpPlayerNum) != -1;
+#endif
 
 	label[1] = '\n';
 	label[2] = '\0';
@@ -1164,7 +1179,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 	gdl = text0f153838(gdl);
 
 	// Render horizontal grid lines
-	for (row = 0; row < 6; row++) {
+	for (row = 0; row < menuitemKeyboardGetNumRows(6, usingcontroller); row++) {
 		gdl = menugfxDrawFilledRect(gdl, context->x + 4, context->y + row * 11 + 13,
 				context->x + 124, context->y + row * 11 + 14, 0x00ffff7f, 0x00ffff7f);
 	}
@@ -1177,6 +1192,12 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 			rowspan = 4;
 		}
 
+#ifndef PLATFORM_N64
+		if (!usingcontroller && (col == 0 || col == 10)) {
+			rowspan = 6;
+		}
+#endif
+
 		gdl = menugfxDrawFilledRect(gdl, context->x + col * 12 + 4, context->y + 13,
 				context->x + col * 12 + 5, context->y + rowspan * 11 + 14, 0x00ffff7f, 0x00ffff7f);
 	}
@@ -1187,7 +1208,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 	y = context->y + 2;
 
 	for (col = 0; col < 10; col++) {
-		for (row = 0; row < 5; row++) {
+		for (row = 0; row < menuitemKeyboardGetNumRows(5, usingcontroller); row++) {
 			if (context->dialog->transitionfrac < 0) {
 				textcolour = g_MenuColours[context->dialog->type].item_unfocused;
 			} else {
@@ -1205,6 +1226,12 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 				// CAPS button - make it yellow
 				textcolour = (textcolour & 0xff) | 0xffff0000;
 			}
+
+#ifndef PLATFORM_N64
+			if (g_MenuTypeWithKeyboard && !usingcontroller && col == 0 && row == 5) {
+				textcolour = (textcolour & 0xff) | 0xffff0000;
+			}
+#endif
 
 			// If this button is the focused one, set highlighted colour
 			if (col == data->col && row == data->row) {
@@ -1262,6 +1289,33 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 					textMeasure(&textheight, &textwidth, langGet(labels[index]), g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 					x = (buttonwidth - textwidth) / 2 + x;
 
+#ifndef PLATFORM_N64
+					// Dim the CAPSLOCK button if typing with keyboard
+					if (index == 1 && g_MenuTypeWithKeyboard && !usingcontroller) {
+						if (data->capseffective) {
+							// CAPS button - make it yellow
+							textcolour = (textcolour & 0xff) | 0x7f7f0000;
+						} else {
+							if (context->dialog->transitionfrac < 0) {
+								textcolour = g_MenuColours[context->dialog->type].item_disabled;
+							} else {
+								textcolour = colourBlend(
+										g_MenuColours[context->dialog->type2].item_disabled,
+										g_MenuColours[context->dialog->type].item_disabled,
+										context->dialog->colourweight);
+							}
+
+							if (context->dialog->dimmed) {
+								textcolour = (colourBlend(textcolour, 0, 127) & 0xffffff00) | (textcolour & 0xff);
+							}
+
+							textSetWaveColours(
+									g_MenuWave2Colours[context->dialog->type].item_disabled,
+									g_MenuWave1Colours[context->dialog->type].item_disabled);
+						}
+					}
+#endif
+
 					// Dim the OK button if string is empty
 					if (index == 3 && menuitemKeyboardIsStringEmptyOrSpaces(data->string)) {
 						if (context->dialog->transitionfrac < 0) {
@@ -1284,13 +1338,29 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 					gdl = textRenderProjected(gdl, &x, &y, langGet(labels[index]), g_CharsHandelGothicXs, g_FontHandelGothicXs, textcolour, context->width, context->height, 0, 0);
 
-					if (index == 3 && menuitemKeyboardIsStringEmptyOrSpaces(data->string)) {
+					if ((index == 3 && menuitemKeyboardIsStringEmptyOrSpaces(data->string))
+#ifndef PLATFORM_N64
+						|| (index == 1 && !usingcontroller && g_MenuTypeWithKeyboard)
+#endif
+						) {
 						textSetWaveColours(
 								g_MenuWave2Colours[context->dialog->type].item_unfocused,
 								g_MenuWave1Colours[context->dialog->type].item_unfocused);
 					}
 				}
-			} else {
+			}
+#ifndef PLATFORM_N64
+			else if (row == 5) {
+				static char *kbtext = "TYPE WITH KEYBOARD";
+				if (col == 0) {
+					++y;
+					textMeasure(&textheight, &textwidth, kbtext, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
+					x = context->x + (context->width - textwidth) / 2;
+					gdl = textRenderProjected(gdl, &x, &y, kbtext, g_CharsHandelGothicXs, g_FontHandelGothicXs, textcolour, context->width, context->height, 0, 0);
+				}
+			}
+#endif
+			else {
 				// Alpha-numeric cell
 				label[0] = g_KeyboardKeys[row][col];
 
@@ -1333,6 +1403,14 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 			}
 		}
 
+#ifndef PLATFORM_N64
+		if (data->row == 5 && !usingcontroller) {
+			if (data->col == 0) {
+				x2 += 108;
+			}
+		}
+#endif
+
 		gdl = menugfxDrawLine(gdl, x1, y1, x2, y1 + 1, -1, -1); // top
 		gdl = menugfxDrawLine(gdl, x2, y1, x2 + 1, y2 + 1, -1, -1); // right
 		gdl = menugfxDrawLine(gdl, x1, y2, x2, y2 + 1, -1, -1); // bottom
@@ -1361,6 +1439,9 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 	struct menuitemdata_keyboard *kb = &data->keyboard;
 	union handlerdata handlerdata;
 	s32 delete = false;
+#ifndef PLATFORM_N64
+	s32 usingcontroller = inputGetAssignedControllerId(g_MpPlayerNum) != -1;
+#endif
 
 	if (tickflags & MENUTICKFLAG_ITEMISFOCUSED) {
 		s16 prevcol = kb->col;
@@ -1373,7 +1454,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 			const s32 dleft = dialog->x + 4;
 			const s32 dright = dleft + 12 * 10;
 			const s32 dtop = menuitemGetTop(item, dialog) + 12;
-			const s32 dbottom = dtop + 11 * 5;
+			const s32 dbottom = dtop + 11 * (5 + !usingcontroller);
 			const s32 mx = inputs->mousex;
 			const s32 my = inputs->mousey;
 			if (mx > dleft && mx < dright && my > dtop && my < dbottom) {
@@ -1390,57 +1471,80 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 						kb->col = 8;
 					}
 				}
+				if (kb->row == 5 && !usingcontroller) {
+					kb->col = 0;
+				}
 			}
 		}
+
+		if (usingcontroller && kb->row == 5) {
+			kb->row = 4;
+			kb->col = 0;
+		}
+
+		if (g_MenuTypeWithKeyboard && !usingcontroller) {
+			inputStartTextInput();
+		} else
 #endif
+		{
+			// Handle left/right movement
+			// In most cases the loop only runs once, but on row 4 the buttons span
+			// across multiple columns so the loop will run again until the column
+			// number is valid.
+			if (inputs->leftright != 0) {
+				do {
+					kb->col += inputs->leftright;
 
-		// Handle left/right movement
-		// In most cases the loop only runs once, but on row 4 the buttons span
-		// across multiple columns so the loop will run again until the column
-		// number is valid.
-		if (inputs->leftright != 0) {
-			do {
-				kb->col += inputs->leftright;
+					if (kb->col < 0) {
+						kb->col = 9;
+					}
 
-				if (kb->col < 0) {
-					kb->col = 9;
-				}
-
-				if (kb->col > 9) {
-					kb->col = 0;
-				}
-			} while (kb->row == 4 && kb->col != 0 && kb->col != 2 && kb->col != 5 && kb->col != 8);
-		}
-
-		// Handle up/down movement
-		if (inputs->updown) {
-			kb->row += inputs->updown;
-
-			if (kb->row < 0) {
-				kb->row = 4;
+					if (kb->col > 9) {
+						kb->col = 0;
+					}
+				} while ((kb->row == 4 && kb->col != 0 && kb->col != 2 && kb->col != 5 && kb->col != 8)
+#ifndef PLATFORM_N64
+						|| (!usingcontroller && kb->row == 5 && kb->col != 0)
+#endif
+						);
 			}
 
-			if (kb->row > 4) {
-				kb->row = 0;
-			}
+			// Handle up/down movement
+			if (inputs->updown) {
+				kb->row += inputs->updown;
 
-			// If moving onto row 4, bump column to a valid one
-			if (kb->row == 4) {
-				if (kb->col == 9) {
-					kb->col = 8;
+				if (kb->row < 0) {
+					kb->row = menuitemKeyboardGetNumRows(4, usingcontroller);
 				}
 
-				if (kb->col == 7 || kb->col == 6) {
-					kb->col = 5;
+				if (kb->row > menuitemKeyboardGetNumRows(4, usingcontroller)) {
+					kb->row = 0;
 				}
 
-				if (kb->col == 3 || kb->col == 4) {
-					kb->col = 2;
+				// If moving onto row 4, bump column to a valid one
+				if (kb->row == 4) {
+					if (kb->col == 9) {
+						kb->col = 8;
+					}
+
+					if (kb->col == 7 || kb->col == 6) {
+						kb->col = 5;
+					}
+
+					if (kb->col == 3 || kb->col == 4) {
+						kb->col = 2;
+					}
+
+					if (kb->col == 1) {
+						kb->col = 0;
+					}
 				}
 
-				if (kb->col == 1) {
+#ifndef PLATFORM_N64
+				if (kb->row == 5 && !usingcontroller) {
 					kb->col = 0;
 				}
+#endif
 			}
 		}
 
@@ -1462,6 +1566,10 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				menuPopDialog();
 
 				item->handler(MENUOP_SET, item, &handlerdata);
+
+#ifndef PLATFORM_N64
+				inputStopTextInput();
+#endif
 			}
 
 			inputs->start = false;
@@ -1475,7 +1583,12 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				}
 
 				// CAPS
-				if (kb->col == 2) {
+
+				if (kb->col == 2
+#ifndef PLATFORM_N64
+					&& (!g_MenuTypeWithKeyboard || usingcontroller)
+#endif
+					) {
 					kb->capslock = 1 - kb->capslock;
 				}
 
@@ -1502,9 +1615,30 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 						}
 
 						inputs->select = false;
+
+#ifndef PLATFORM_N64
+						inputStopTextInput();
+#endif
 					}
 				}
-			} else {
+			}
+#ifndef PLATFORM_N64
+			else if (!usingcontroller && kb->row == 5 && kb->col == 0) {
+				g_MenuTypeWithKeyboard ^= 1;
+
+				if (g_MenuTypeWithKeyboard) {
+					menuPlaySound(MENUSOUND_TOGGLEON);
+					inputStartTextInput();
+				} else {
+					if (kb->capslock) {
+						kb->capslock = 0;
+					}
+					menuPlaySound(MENUSOUND_TOGGLEOFF);
+					inputStopTextInput();
+				}
+			}
+#endif
+			else {
 				// Pressed A on number or letter
 				s32 appended = false;
 				s32 i;
@@ -1543,6 +1677,43 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				}
 			}
 		}
+#ifndef PLATFORM_N64
+		else if (g_MenuTypeWithKeyboard && !usingcontroller) {
+			delete = g_MenuTypeBackspace;
+			kb->capslock = (inputGetModState() & KM_CAPS) ? 1 : 0;
+
+			if (strlen(inputGetTextInput())) {
+				s32 textwidth, textheight, charwidth;
+				size_t insertidx = strlen(kb->string);
+				textMeasure(&textheight, &textwidth, kb->string, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
+				char *textinput = inputGetTextInput();
+				size_t textinputlen = textinput ? strlen(textinput) : 0;
+
+				for (size_t j = 0; j < textinputlen && insertidx < sizeof kb->string - 1; ++j) {
+					u8 key[2] = {0};
+					key[0] = textinput[j];
+
+					if ((key[0] >= ' ' && key[0] <= '!') ||
+						(key[0] == '.') ||
+						(key[0] >= '0' && key[0] <= '9') ||
+						(key[0] == '?') ||
+						(key[0] >= 'A' && key[0] <= 'Z') ||
+						(key[0] >= 'a' && key[0] <= 'z')) {
+						textMeasure(&textheight, &charwidth, key, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
+						textwidth += charwidth;
+
+						if (textwidth <= 58) {
+							kb->string[insertidx++] = key[0];
+						}
+
+						menuPlaySound(MENUSOUND_FOCUS);
+					}
+				}
+
+				inputSetTextInput(NULL);
+			}
+		}
+#endif
 
 		// Handle deleting
 		if (delete && kb->string[0] != '\0') {
@@ -1567,7 +1738,11 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 		u32 prev = kb->capseffective;
 		kb->capseffective = kb->capslock;
 
-		if (inputs->shoulder) {
+		if (inputs->shoulder
+#ifndef PLATFORM_N64
+			|| (g_MenuTypeWithKeyboard && !usingcontroller && (inputGetModState() & KM_SHIFT))
+#endif
+			) {
 			// Invert
 			kb->capseffective = 1 - kb->capseffective;
 		}

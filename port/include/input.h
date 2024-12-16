@@ -21,6 +21,7 @@ enum virtkey {
 	VK_KEYBOARD_BEGIN = 0,
 	VK_RETURN = 40,
 	VK_ESCAPE = 41,
+	VK_BACKSPACE = 42,
 	VK_DELETE = 76,
 
 	/* same order as SDL mouse buttons */
@@ -87,6 +88,14 @@ enum mouselockmode {
 	MLOCK_AUTO = 2
 };
 
+enum keymod {
+	/* same order as SDL keymods */
+	KM_LSHIFT = 0x0001,
+	KM_RSHIFT = 0x0002,
+	KM_CAPS = 0x2000,
+	KM_SHIFT = KM_LSHIFT | KM_RSHIFT
+};
+
 // returns bitmask of connected controllers or -1 if failed
 s32 inputInit(void);
 
@@ -139,6 +148,9 @@ s32 inputAssignController(s32 cidx, s32 id);
 // vk is a value from the virtkey enum above
 s32 inputKeyPressed(u32 vk);
 s32 inputKeyJustPressed(u32 vk);
+
+// same as inputKeyJustPressed but returns true again if key repeat activates
+s32 inputKeyJustPressedWithRepeat(u32 vk);
 
 // idx is controller index, contbtn is one of the CONT_ constants
 s32 inputButtonPressed(s32 idx, u32 contbtn);
@@ -216,5 +228,19 @@ s32 inputAutoLockMouse(s32 wantlock);
 
 // show/hide mouse cursor; if mouse lock is on the cursor is always hidden
 void inputMouseShowCursor(s32 show);
+
+// enables/disables/queries text input event processing, respectively
+void inputStartTextInput(void);
+void inputStopTextInput(void);
+s32 inputIsTextInputActive(void);
+
+// fills textInputBuffer with textInput chars
+void inputSetTextInput(char *textInput);
+
+// returns pointer to textInputBuffer
+char *inputGetTextInput(void);
+
+// returns keymod values
+u32 inputGetModState(void);
 
 #endif

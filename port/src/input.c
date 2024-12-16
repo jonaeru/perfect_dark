@@ -87,6 +87,10 @@ static f32 mouseSensX = 1.5f;
 static f32 mouseSensY = 1.5f;
 
 static s32 lastKey = 0;
+static s32 keyRepeat = 0;
+
+// buffer used to store text input during a text input event
+static char textInputBuffer[11] = {0};
 
 static const char *ckNames[CK_TOTAL_COUNT] = {
 	"R_CBUTTONS",
@@ -496,6 +500,7 @@ static int inputEventFilter(void *data, SDL_Event *event)
 			if (!lastKey) {
 				lastKey = VK_KEYBOARD_BEGIN + event->key.keysym.scancode;
 			}
+			keyRepeat = event->key.repeat;
 			break;
 
 		case SDL_CONTROLLERBUTTONDOWN:
@@ -520,6 +525,9 @@ static int inputEventFilter(void *data, SDL_Event *event)
 					}
 				}
 			}
+			break;
+		case SDL_TEXTINPUT:
+			inputSetTextInput(event->text.text);
 			break;
 
 		default:
@@ -657,6 +665,9 @@ s32 inputInit(void)
 	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
 		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
+
+	// SDL enables text input event handling by default
+	inputStopTextInput();
 
 	// try to load controller db from an external file in the save folder
 	if (fsFileSize("$S/" CONTROLLERDB_FNAME)) {
@@ -1114,6 +1125,11 @@ s32 inputKeyJustPressed(u32 vk)
 	return result;
 }
 
+s32 inputKeyJustPressedWithRepeat(u32 vk)
+{
+	return inputKeyJustPressed(vk) || (keyRepeat && inputKeyPressed(vk));
+}
+
 static inline u32 inputContToContKey(const u32 cont)
 {
 	if (cont == 0) {
@@ -1314,6 +1330,44 @@ void inputClearLastKey(void)
 s32 inputGetLastKey(void)
 {
 	return lastKey;
+}
+
+void inputStartTextInput(void)
+{
+	SDL_StartTextInput();
+}
+
+void inputStopTextInput(void)
+{
+	SDL_StopTextInput();
+	textInputBuffer[0] = '\0';
+}
+
+s32 inputIsTextInputActive(void)
+{
+	return SDL_IsTextInputActive();
+}
+
+void inputSetTextInput(char *textInput)
+{
+	for (size_t i = 0; i < sizeof textInputBuffer - 1; ++i) {
+		if (textInput && i < strlen(textInput)) {
+			textInputBuffer[i] = textInput[i];
+		} else {
+			textInputBuffer[i] = '\0';
+		}
+	}
+}
+
+char *inputGetTextInput(void)
+{
+	return textInputBuffer;
+}
+
+
+u32 inputGetModState(void)
+{
+	return SDL_GetModState();
 }
 
 PD_CONSTRUCTOR static void inputConfigInit(void)
