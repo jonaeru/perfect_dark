@@ -4701,7 +4701,7 @@ Gfx *menuitemOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menuitem *it
 s32 menuitemGetTop(struct menuitem *item, struct menudialog *dialog)
 {
 	struct menu *menu = &g_Menus[g_MpPlayerNum];
-	s32 dtop = dialog->y + LINEHEIGHT + 1;
+	s32 dtop = dialog->y + LINEHEIGHT + 1 + dialog->dstscroll;
 
 	for (s32 i = 0; i < dialog->numcols; ++i) {
 		const s32 colindex = i + dialog->colstart;
