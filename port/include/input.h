@@ -19,10 +19,29 @@
 enum virtkey {
 	/* same order as SDL scancodes */
 	VK_KEYBOARD_BEGIN = 0,
+	VK_A = 4,
+	VK_Z = 29,
+	VK_1 = 30,
+	VK_9 = 38,
+	VK_0 = 39,
 	VK_RETURN = 40,
 	VK_ESCAPE = 41,
 	VK_BACKSPACE = 42,
+	VK_SPACE = 44,
+	VK_MINUS = 45,
+	VK_LEFTBRACKET = 47,
+	VK_RIGHTBRACKET = 48,
+	VK_SEMICOLON = 51,
+	VK_GRAVE = 53,
+	VK_COMMA = 54,
+	VK_PERIOD = 55,
+	VK_F1 = 58,
+	VK_F9 = 66,
 	VK_DELETE = 76,
+	VK_LCTRL = 224,
+	VK_LSHIFT = 225,
+	VK_RCTRL = 228,
+	VK_RSHIFT = 229,
 
 	/* same order as SDL mouse buttons */
 	VK_MOUSE_BEGIN = 512,
@@ -44,6 +63,17 @@ enum virtkey {
 	VK_JOY4_BEGIN = VK_JOY3_BEGIN + INPUT_MAX_CONTROLLER_BUTTONS,
 
 	VK_TOTAL_COUNT = VK_JOY_BEGIN + INPUT_MAX_CONTROLLERS * INPUT_MAX_CONTROLLER_BUTTONS,
+};
+
+enum keymod {
+	/* same order as SDL keymods */
+	KM_LSHIFT = 0x0001,
+	KM_RSHIFT = 0x0002,
+	KM_LCTRL = 0x0040,
+	KM_RCTRL = 0x0080,
+	KM_CAPS = 0x2000,
+	KM_CTRL = KM_LCTRL | KM_RCTRL,
+	KM_SHIFT = KM_LSHIFT | KM_RSHIFT
 };
 
 enum contkey {
@@ -86,14 +116,6 @@ enum mouselockmode {
 	MLOCK_OFF = 0,
 	MLOCK_ON = 1,
 	MLOCK_AUTO = 2
-};
-
-enum keymod {
-	/* same order as SDL keymods */
-	KM_LSHIFT = 0x0001,
-	KM_RSHIFT = 0x0002,
-	KM_CAPS = 0x2000,
-	KM_SHIFT = KM_LSHIFT | KM_RSHIFT
 };
 
 // returns bitmask of connected controllers or -1 if failed
@@ -148,9 +170,6 @@ s32 inputAssignController(s32 cidx, s32 id);
 // vk is a value from the virtkey enum above
 s32 inputKeyPressed(u32 vk);
 s32 inputKeyJustPressed(u32 vk);
-
-// same as inputKeyJustPressed but returns true again if key repeat activates
-s32 inputKeyJustPressedWithRepeat(u32 vk);
 
 // idx is controller index, contbtn is one of the CONT_ constants
 s32 inputButtonPressed(s32 idx, u32 contbtn);
@@ -229,18 +248,19 @@ s32 inputAutoLockMouse(s32 wantlock);
 // show/hide mouse cursor; if mouse lock is on the cursor is always hidden
 void inputMouseShowCursor(s32 show);
 
-// enables/disables/queries text input event processing, respectively
 void inputStartTextInput(void);
 void inputStopTextInput(void);
 s32 inputIsTextInputActive(void);
 
-// fills textInputBuffer with textInput chars
-void inputSetTextInput(char *textInput);
+void inputClearLastTextChar(void);
+char inputGetLastTextChar(void);
 
-// returns pointer to textInputBuffer
-char *inputGetTextInput(void);
+s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol, s32 oskCharsOnly);
+
+void inputClearClipboard(void);
+const char *inputGetClipboard(void);
 
 // returns keymod values
-u32 inputGetModState(void);
+u32 inputGetKeyModState(void);
 
 #endif

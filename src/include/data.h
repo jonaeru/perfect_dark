@@ -538,6 +538,7 @@ extern const struct weathercfg g_DefaultWeatherConfig;
 extern const struct weathercfg *g_CurWeatherConfig;
 
 extern s32 g_MenuUsingMouse;
+extern s32 g_MenuKeyboardPlayer;
 
 extern f32 g_ViShakeIntensityMult;
 extern u32 g_TexFilter2D;
@@ -554,8 +555,6 @@ extern s32 g_TickExtraSleep;
 extern s32 g_MusicDisableMpDeath;
 extern s32 g_BgunGeMuzzleFlashes;
 extern s32 g_FileAutoSelect;
-extern s32 g_MenuTypeWithKeyboard;
-extern s32 g_MenuTypeBackspace;
 
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)

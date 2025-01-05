@@ -87,10 +87,10 @@ static f32 mouseSensX = 1.5f;
 static f32 mouseSensY = 1.5f;
 
 static s32 lastKey = 0;
-static s32 keyRepeat = 0;
+static char lastChar = 0;
+static s32 textInput = 0;
 
-// buffer used to store text input during a text input event
-static char textInputBuffer[11] = {0};
+static char *clipboardText = NULL;
 
 static const char *ckNames[CK_TOTAL_COUNT] = {
 	"R_CBUTTONS",
@@ -500,7 +500,6 @@ static int inputEventFilter(void *data, SDL_Event *event)
 			if (!lastKey) {
 				lastKey = VK_KEYBOARD_BEGIN + event->key.keysym.scancode;
 			}
-			keyRepeat = event->key.repeat;
 			break;
 
 		case SDL_CONTROLLERBUTTONDOWN:
@@ -526,8 +525,11 @@ static int inputEventFilter(void *data, SDL_Event *event)
 				}
 			}
 			break;
+
 		case SDL_TEXTINPUT:
-			inputSetTextInput(event->text.text);
+			if (!lastChar && event->text.text[0] && (u8)event->text.text[0] < 0x80) {
+				lastChar = event->text.text[0];
+			}
 			break;
 
 		default:
@@ -666,9 +668,6 @@ s32 inputInit(void)
 		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
 
-	// SDL enables text input event handling by default
-	inputStopTextInput();
-
 	// try to load controller db from an external file in the save folder
 	if (fsFileSize("$S/" CONTROLLERDB_FNAME)) {
 		const char *dbpath = fsFullPath("$S/" CONTROLLERDB_FNAME);
@@ -741,6 +740,14 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 	}
 
 	npad->button = 0;
+
+	if (textInput) {
+		npad->stick_x = 0;
+		npad->stick_y = 0;
+		npad->rstick_x = 0;
+		npad->rstick_y = 0;
+		return 0;
+	}
 
 	for (u32 i = 0; i < CONT_NUM_BUTTONS; ++i) {
 		if (inputBindPressed(idx, i)) {
@@ -1125,11 +1132,6 @@ s32 inputKeyJustPressed(u32 vk)
 	return result;
 }
 
-s32 inputKeyJustPressedWithRepeat(u32 vk)
-{
-	return inputKeyJustPressed(vk) || (keyRepeat && inputKeyPressed(vk));
-}
-
 static inline u32 inputContToContKey(const u32 cont)
 {
 	if (cont == 0) {
@@ -1334,38 +1336,110 @@ s32 inputGetLastKey(void)
 
 void inputStartTextInput(void)
 {
+	lastChar = 0;
+	lastKey = 0;
+	textInput = 1;
 	SDL_StartTextInput();
+}
+
+void inputClearLastTextChar(void)
+{
+	lastChar = 0;
+}
+
+char inputGetLastTextChar(void)
+{
+	return lastChar;
+}
+
+static inline s32 filterChar(const char ch)
+{
+	return isalnum(ch) || ch == ' ' || ch == '?' || ch == '!' || ch == '.';
+}
+
+s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol, s32 oskCharsOnly)
+{
+	const s32 ctrlHeld = inputGetKeyModState() & KM_CTRL;
+
+	if (!ctrlHeld) {
+		const char chr = inputGetLastTextChar();
+		inputClearLastTextChar();
+		const s32 valid = chr && (oskCharsOnly ? filterChar(chr) : isprint(chr));
+		if (valid) {
+			if (*curCol < outSize - 1) {
+				out[(*curCol)++] = chr;
+				out[*curCol] = '\0';
+			}
+		}
+	}
+
+	const s32 key = inputGetLastKey();
+	inputClearLastKey();
+	if (ctrlHeld && (key == VK_A + ('v' - 'a'))) {
+		// CTRL+V; paste from clipboard
+		const char *clip = inputGetClipboard();
+		if (clip) {
+			const s32 remain = outSize - *curCol - 1;
+			inputClearClipboard();
+			*curCol += snprintf(out + *curCol, remain, "%s", clip);
+			if (*curCol > outSize) {
+				*curCol = outSize;
+			}
+		}
+	} else if (key == VK_BACKSPACE) {
+		if (*curCol) {
+			out[--*curCol] = '\0';
+		} else {
+			out[0] = '\0';
+		}
+	} else if (key == VK_RETURN) {
+		if (out[0] && *curCol) {
+			return 1;
+		}
+	} else if (key == VK_ESCAPE) {
+		return -1;
+	}
+
+	return 0;
+}
+
+void inputClearClipboard(void)
+{
+	if (clipboardText) {
+		SDL_free(clipboardText);
+		clipboardText = NULL;
+	}
+}
+
+const char *inputGetClipboard(void)
+{
+	if (!clipboardText) {
+		char *text = SDL_GetClipboardText();
+		if (text) {
+			clipboardText = text;
+			// remove non-printable and multibyte chars
+			for (; *text; ++text) {
+				if ((u8)*text < 0x20 || (u8)*text >= 0x7F) {
+					*text = '?';
+				}
+			}
+		}
+	}
+	return clipboardText;
 }
 
 void inputStopTextInput(void)
 {
 	SDL_StopTextInput();
-	textInputBuffer[0] = '\0';
+	textInput = 0;
 }
 
 s32 inputIsTextInputActive(void)
 {
-	return SDL_IsTextInputActive();
+	return textInput;
 }
 
-void inputSetTextInput(char *textInput)
-{
-	for (size_t i = 0; i < sizeof textInputBuffer - 1; ++i) {
-		if (textInput && i < strlen(textInput)) {
-			textInputBuffer[i] = textInput[i];
-		} else {
-			textInputBuffer[i] = '\0';
-		}
-	}
-}
-
-char *inputGetTextInput(void)
-{
-	return textInputBuffer;
-}
-
-
-u32 inputGetModState(void)
+u32 inputGetKeyModState(void)
 {
 	return SDL_GetModState();
 }

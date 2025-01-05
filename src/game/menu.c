@@ -141,8 +141,7 @@ s32 g_MpPlayerNum = 0;
 #ifndef PLATFORM_N64
 s32 g_MenuMouseControl = true;
 s32 g_MenuUsingMouse = false;
-s32 g_MenuTypeWithKeyboard = false;
-s32 g_MenuTypeBackspace = false;
+s32 g_MenuKeyboardPlayer = -1;
 #endif
 
 void menuPlaySound(s32 menusound)
@@ -605,7 +604,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 	case MENUITEMTYPE_KEYBOARD:
 		*width = 130;
 #ifndef PLATFORM_N64
-		*height = inputGetAssignedControllerId(g_MpPlayerNum) == -1 ? 84 : 73;
+		*height = 84;
 #else
 		*height = 73;
 #endif
@@ -4701,8 +4700,6 @@ void menuProcessInput(void)
 	inputs.back2 = 0;
 
 #ifndef PLATFORM_N64
-	s32 usingcontroller = inputGetAssignedControllerId(g_MpPlayerNum) != -1;
-
 	inputs.mousemoved = false;
 	inputs.mousescroll = 0;
 	inputs.mousex = 0;
@@ -4711,11 +4708,6 @@ void menuProcessInput(void)
 	if (menu->playernum == 0) {
 		// ESC always acts as back
 		inputs.back = inputKeyJustPressed(VK_ESCAPE);
-		if (inputs.back && g_MenuTypeWithKeyboard) {
-			if (inputIsTextInputActive()) {
-				inputStopTextInput();
-			}
-		}
 		if (inputMouseIsEnabled() && !inputMouseIsLocked() && g_MenuMouseControl) {
 			inputs.mousemoved = inputMouseGetPosition(&inputs.mousex, &inputs.mousey);
 			inputs.mousescroll = inputKeyPressed(VK_MOUSE_WHEEL_DN) - inputKeyPressed(VK_MOUSE_WHEEL_UP);
@@ -4726,11 +4718,11 @@ void menuProcessInput(void)
 		if (dialog && inputs.mousemoved) {
 			g_MenuUsingMouse = true;
 		}
-		g_MenuTypeBackspace = inputKeyJustPressedWithRepeat(VK_BACKSPACE);
-
-		if (usingcontroller && g_MenuTypeWithKeyboard) {
-			g_MenuTypeWithKeyboard = false;
-			if (inputIsTextInputActive()) {
+		if (inputs.back && g_MenuKeyboardPlayer != -1) {
+			// eat the back input so that other menus don't quit when we hit ESC
+			inputs.back = false;
+			if (g_MenuKeyboardPlayer == menu->playernum) {
+				g_MenuKeyboardPlayer = -1;
 				inputStopTextInput();
 			}
 		}
@@ -4804,11 +4796,7 @@ void menuProcessInput(void)
 #endif
 
 			if (buttonsnow & B_BUTTON) {
-#ifndef PLATFORM_N64
-				inputs.back = inputIsTextInputActive() && !usingcontroller ? 0 : 1;
-#else
 				inputs.back = 1;
-#endif
 			}
 
 			if (buttonsnow & Z_TRIG) {
@@ -4820,11 +4808,7 @@ void menuProcessInput(void)
 			}
 
 			if (buttons & R_TRIG) {
-#ifndef PLATFORM_N64
-				inputs.shoulder = inputIsTextInputActive() && !usingcontroller ? 0 : 1;
-#else
 				inputs.shoulder = 1;
-#endif
 			}
 
 			if ((stickx < 0 ? -stickx : stickx) < (thisstickx < 0 ? -thisstickx : thisstickx)) {
