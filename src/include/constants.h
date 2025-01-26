@@ -2651,10 +2651,17 @@
 #define MPBODY_PRESIDENT_CLONE2 0x36
 #define MPBODY_PELAGIC_GUARD    0x37
 #define MPBODY_MAIAN_SOLDIER    0x38
+#ifdef PLATFORM_N64
 #define MPBODY_CONNERY          0x39
 #define MPBODY_MOORE            0x3a
 #define MPBODY_DALTON           0x3b
 #define MPBODY_DJBOND           0x3c
+#else // PD Plus Mod
+#define MPBODY_CONNERY          0x3b
+#define MPBODY_MOORE            0x3c
+#define MPBODY_DALTON           0x3d
+#define MPBODY_DJBOND           0x3e
+#endif
 
 #define MPCONFIG_TEMPLE      0x00
 #define MPCONFIG_PISTOLS     0x01
@@ -4030,6 +4037,10 @@
 #define STAGE_CREDITS       0x5c
 #define STAGE_4MBMENU       0x5d
 
+#define STAGE_MP_RANDOM_MULTI 0x02
+#define STAGE_MP_RANDOM_SOLO  0x03
+#define STAGE_MP_RANDOM_GEX   0x04
+
 #define STAGEFLAG_CI_IN_TRAINING            0x00000001
 #define STAGEFLAG_CI_HOLO_FAILED            0x00000002
 #define STAGEFLAG_CI_DEVICE_ABORTING        0x00000004
@@ -4752,6 +4763,12 @@ enum weaponnum {
 #define CROSSHAIR_HEALTH_ON_WHITE 2
 
 #define EXTRA_SLEEP_TIME 1000LL // 100us
+
+// Mod
+#define MOD_NORMAL 0
+#define MOD_GEX 1
+#define MOD_KAKARIKO 2
+#define MOD_DARKNOON 3
 
 #endif
 

@@ -3852,6 +3852,37 @@ void chrChoke(struct chrdata *chr, s32 choketype)
 				nextindexdrcaroll = 0;
 			}
 		}
+#ifndef PLATFORM_N64 // PD Plus Mod
+	} else if (chr->bodynum == BODY_TESTCHR) { // Dr. Caroll
+		s16 sounds[] = {
+			SFX_ARGH_DRCAROLL_0240,
+			SFX_ARGH_DRCAROLL_024C,
+			SFX_ARGH_DRCAROLL_0250,
+			SFX_ARGH_DRCAROLL_0251,
+			SFX_ARGH_DRCAROLL_0259,
+			SFX_ARGH_DRCAROLL_025A,
+		};
+
+		soundnum = sounds[nextindexdrcaroll];
+		nextindexdrcaroll++;
+
+		if (nextindexdrcaroll >= ARRAYCOUNT(sounds)) {
+			nextindexdrcaroll = 0;
+		}
+	} else if (chr->bodynum == BODY_PRESIDENT_CLONE) { // Skedar
+		s16 sounds[] = {
+			SFX_SKEDAR_ROAR_052D,
+			SFX_SKEDAR_ROAR_052E,
+			SFX_SKEDAR_ROAR_052F,
+		};
+
+		soundnum = sounds[rngRandom() % 3];
+		nextindexskedar++;
+
+		if (nextindexskedar >= ARRAYCOUNT(sounds)) {
+			nextindexskedar = 0;
+		}
+#endif
 	} else if (chr->headnum == HEAD_THEKING
 			|| chr->headnum == HEAD_ELVIS
 			|| chr->headnum == HEAD_MAIAN_S
