@@ -87,6 +87,10 @@ static f32 mouseSensX = 1.5f;
 static f32 mouseSensY = 1.5f;
 
 static s32 lastKey = 0;
+static char lastChar = 0;
+static s32 textInput = 0;
+
+static char *clipboardText = NULL;
 
 static const char *ckNames[CK_TOTAL_COUNT] = {
 	"R_CBUTTONS",
@@ -329,6 +333,14 @@ static inline void inputInitController(const s32 cidx, const s32 jidx)
 
 	sysLogPrintf(LOG_NOTE, "input: assigned controller '%d: (%s)' (id %d) to player %d",
 		jidx, SDL_GameControllerName(pads[cidx]), inputControllerGetId(pads[cidx]), cidx);
+
+	SDL_Joystick* joy = SDL_GameControllerGetJoystick(pads[cidx]);
+	if (joy) {
+		char guidStr[1024] = "";
+		SDL_JoystickGUID guid = SDL_JoystickGetGUID(joy);
+		SDL_JoystickGetGUIDString(guid, guidStr, sizeof(guidStr));
+		sysLogPrintf(LOG_NOTE, "input: GUID for controller %d: %s", jidx, guidStr);
+	}
 }
 
 static inline void inputCloseController(const s32 cidx)
@@ -519,6 +531,12 @@ static int inputEventFilter(void *data, SDL_Event *event)
 						lastKey += idx * INPUT_MAX_CONTROLLER_BUTTONS;
 					}
 				}
+			}
+			break;
+
+		case SDL_TEXTINPUT:
+			if (!lastChar && event->text.text[0] && (u8)event->text.text[0] < 0x80) {
+				lastChar = event->text.text[0];
 			}
 			break;
 
@@ -731,6 +749,14 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 
 	npad->button = 0;
 
+	if (textInput) {
+		npad->stick_x = 0;
+		npad->stick_y = 0;
+		npad->rstick_x = 0;
+		npad->rstick_y = 0;
+		return 0;
+	}
+
 	for (u32 i = 0; i < CONT_NUM_BUTTONS; ++i) {
 		if (inputBindPressed(idx, i)) {
 			npad->button |= 1U << i;
@@ -802,8 +828,12 @@ static inline void inputUpdateMouse(void)
 
 	mouseWheel = 0;
 
+	s32 mdx = 0;
+	s32 mdy = 0;
+	SDL_GetRelativeMouseState(&mdx, &mdy);
 	if (mouseLocked) {
-		SDL_GetRelativeMouseState(&mouseDX, &mouseDY);
+		mouseDX = mdx;
+		mouseDY = mdy;
 	} else {
 		mouseDX = mx - mouseX;
 		mouseDY = my - mouseY;
@@ -1310,6 +1340,116 @@ void inputClearLastKey(void)
 s32 inputGetLastKey(void)
 {
 	return lastKey;
+}
+
+void inputStartTextInput(void)
+{
+	lastChar = 0;
+	lastKey = 0;
+	textInput = 1;
+	SDL_StartTextInput();
+}
+
+void inputClearLastTextChar(void)
+{
+	lastChar = 0;
+}
+
+char inputGetLastTextChar(void)
+{
+	return lastChar;
+}
+
+static inline s32 filterChar(const char ch)
+{
+	return isalnum(ch) || ch == ' ' || ch == '?' || ch == '!' || ch == '.';
+}
+
+s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol, s32 oskCharsOnly)
+{
+	const s32 ctrlHeld = inputGetKeyModState() & KM_CTRL;
+
+	if (!ctrlHeld) {
+		const char chr = inputGetLastTextChar();
+		inputClearLastTextChar();
+		const s32 valid = chr && (oskCharsOnly ? filterChar(chr) : isprint(chr));
+		if (valid) {
+			if (*curCol < outSize - 1) {
+				out[(*curCol)++] = chr;
+				out[*curCol] = '\0';
+			}
+		}
+	}
+
+	const s32 key = inputGetLastKey();
+	inputClearLastKey();
+	if (ctrlHeld && (key == VK_A + ('v' - 'a'))) {
+		// CTRL+V; paste from clipboard
+		const char *clip = inputGetClipboard();
+		if (clip) {
+			const s32 remain = outSize - *curCol - 1;
+			inputClearClipboard();
+			*curCol += snprintf(out + *curCol, remain, "%s", clip);
+			if (*curCol > outSize) {
+				*curCol = outSize;
+			}
+		}
+	} else if (key == VK_BACKSPACE) {
+		if (*curCol) {
+			out[--*curCol] = '\0';
+		} else {
+			out[0] = '\0';
+		}
+	} else if (key == VK_RETURN) {
+		if (out[0] && *curCol) {
+			return 1;
+		}
+	} else if (key == VK_ESCAPE) {
+		return -1;
+	}
+
+	return 0;
+}
+
+void inputClearClipboard(void)
+{
+	if (clipboardText) {
+		SDL_free(clipboardText);
+		clipboardText = NULL;
+	}
+}
+
+const char *inputGetClipboard(void)
+{
+	if (!clipboardText) {
+		char *text = SDL_GetClipboardText();
+		if (text) {
+			clipboardText = text;
+			// remove non-printable and multibyte chars
+			for (; *text; ++text) {
+				if ((u8)*text < 0x20 || (u8)*text >= 0x7F) {
+					*text = '?';
+				}
+			}
+		}
+	}
+	return clipboardText;
+}
+
+void inputStopTextInput(void)
+{
+	SDL_StopTextInput();
+	textInput = 0;
+}
+
+s32 inputIsTextInputActive(void)
+{
+	return textInput;
+}
+
+u32 inputGetKeyModState(void)
+{
+	return SDL_GetModState();
 }
 
 PD_CONSTRUCTOR static void inputConfigInit(void)
