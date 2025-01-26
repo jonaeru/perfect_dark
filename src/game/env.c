@@ -135,11 +135,12 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 #ifdef PLATFORM_N64
 	{ STAGE_TEST_MP6,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP7,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-#else // PD Plus Mod, Dark Noon Mod
+	{ STAGE_TEST_MP8,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#else // PD Plus Mod, Dark Noon Mod, GoldenEye X Mod
 	{ STAGE_TEST_MP6,      15, 20000,   0,  0,  0, RGB(0x001050), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
 	{ STAGE_TEST_MP7,      10, 14096,   0,  0,  0, RGB(0x110015), NO_SUNS,            0, RGB(0x3a1100),  3000,   0, 0, RGB(0x000000),      0,    0, 0, 0 }, // Valley
+	{ STAGE_TEST_MP8,      10,  6000,   0,  0,  0, RGB(0x080008), NO_SUNS,            1, RGB(0x7c7c7c),  7500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Ciff Base
 #endif
-	{ STAGE_TEST_MP8,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_RUINS,      15, 10000,   0,  0,  0, RGB(0x030000), NO_SUNS,            1, RGB(0x82e6aa),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_SEWERS,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x646464),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_FELICITY,   10, 10000,   0,  0,  0, RGB(0x040500), NO_SUNS,            1, RGB(0x64d282),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },

@@ -157,12 +157,13 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_FORTRESS + 0x60,   0, L_MPMENU_309 }, // Stack
 	{ STAGE_MP_CARPARK + 0x60,    0, L_MPMENU_311 }, // Facility
 	{ STAGE_TEST_MP6 + 0x60,      0, L_MPMENU_300 }, // Bunker
-	{ STAGE_MP_TEMPLE + 0x60,     0, L_MPMENU_299 }, // Archives
+	{ STAGE_ESCAPE + 0x60,        0, L_MPMENU_299 }, // Archives
 	{ STAGE_MP_RUINS + 0x60,      0, L_MPMENU_305 }, // Caverns
 	{ STAGE_MP_FELICITY + 0x60,   0, L_MPMENU_312 }, // Egyptian
-	{ STAGE_TEST_MP17 + 0x60,     0, L_MPMENU_307 }, // Fac Backzone
+	{ STAGE_TEST_MP17 + 0x60,     0, L_MPMENU_307 }, // Facility BZ
 	{ STAGE_MP_RAVINE + 0x60,     0, L_MPMENU_298 }, // Frigate
-	{ STAGE_TEST_MP16 + 0x60,     0, L_MPMENU_314 }, // Archives 1F
+	{ STAGE_TEST_SILO + 0x60,     0, L_MPMENU_314 }, // Archives 1F (GE-X 5e)
+	{ STAGE_TEST_MP16 + 0x60,     0, L_MPMENU_322 }, // Archives BZ
 	{ STAGE_TEST_MP14 + 0x60,     0, L_MPMENU_315 }, // Streets
 	{ STAGE_MP_G5BUILDING + 0x60, 0, L_MPMENU_310 }, // Train
 	{ STAGE_TEST_MP18 + 0x60,     0, L_MPMENU_304 }, // Cradle
@@ -170,6 +171,7 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP20 + 0x60,     0, L_MPMENU_308 }, // Citadel
 	{ STAGE_TEST_MP19 + 0x60,     0, L_MPMENU_301 }, // Labyrinth
 	{ STAGE_TEST_MP2 + 0x60,      0, L_MPMENU_316 }, // Icicle Pyramid
+	{ STAGE_TEST_MP8 + 0x60,      0, L_MPMENU_323 }, // Cliff Base
 	// Kakariko Village Mod
 	{ STAGE_24,                   0, L_MPMENU_319 }, // Kakariko Village (Stormy)
 	// Dark Noon Mod
@@ -186,8 +188,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (55 Stage + 4 Random)
-	return 59;
+#else // All Solos in Multi Mod (57 Stage + 4 Random)
+	return 61;
 #endif
 }
 
@@ -200,7 +202,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 55; i++) {
+	for (i = 0; i < 57; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -212,7 +214,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 55; i++) {
+	for (i = 0; i < 57; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -234,7 +236,7 @@ s16 mpChooseRandomMultiStage(void)
 	s32 index;
 
 	for (i = 0; i < 32; i++) {
-		if ((i <= 12 || (i >= 27 && i <= 31)) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+		if ((i <= 12 || i >= 27) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
 	}
@@ -242,7 +244,7 @@ s16 mpChooseRandomMultiStage(void)
 	index = rngRandom() % numchallengescomplete;
 
 	for (i = 0; i < 32; i++) {
-		if ((i <= 12 || (i >= 27 && i <= 31)) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+		if ((i <= 12 || i >= 27) && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
 			}
@@ -287,16 +289,16 @@ s16 mpChooseRandomGexStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
-	for (i = 0; i < 53; i++) {
-		if (i >= 32 && i <= 52 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+	for (i = 0; i < 55; i++) {
+		if (i >= 32 && i <= 54 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
 	}
 
 	index = rngRandom() % numchallengescomplete;
 
-	for (i = 0; i < 53; i++) {
-		if (i >= 32 && i <= 52 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+	for (i = 0; i < 55; i++) {
+		if (i >= 32 && i <= 54 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
 			}
@@ -322,9 +324,9 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 27, L_MPMENU_117  }, // "Classic"
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
-		{ 53, L_MPMENU_318  }, // "Zelda"
-		{ 54, L_MPMENU_320  }, // "Dark Noon"
-		{ 55, L_MPMENU_118  }, // "Random"
+		{ 55, L_MPMENU_318  }, // "Zelda"
+		{ 56, L_MPMENU_320  }, // "Dark Noon"
+		{ 57, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
