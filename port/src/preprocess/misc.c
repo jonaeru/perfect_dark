@@ -89,6 +89,30 @@ u8 *preprocessTexturesList(u8* data, u32 size, u32* outSize)
 		const u8 tmp = tex->soundsurfacetype;
 		tex->soundsurfacetype = tex->surfacetype;
 		tex->surfacetype = tmp;
+
+		// GoldenEye X Mod
+		if (i == 0x073c) {
+			tex->surfacetype = SURFACETYPE_DEFAULT;
+		} else if (i == 0x073d) {
+			tex->surfacetype = SURFACETYPE_DEFAULT;
+		} else if (i == 0x073e) {
+			tex->soundsurfacetype = SURFACETYPE_METAL;
+		} else if (i == 0x073f) {
+			tex->soundsurfacetype = SURFACETYPE_METAL;
+		} else if (i == 0x0740) {
+			tex->soundsurfacetype = SURFACETYPE_METAL;
+		} else if (i == 0x0741) {
+			tex->soundsurfacetype = SURFACETYPE_METAL;
+		} else if (i == 0x0745) {
+			tex->surfacetype = SURFACETYPE_DEFAULT;
+		} else if (i == 0x0746) {
+			tex->soundsurfacetype = SURFACETYPE_SHALLOWWATER;
+			tex->surfacetype = SURFACETYPE_SHALLOWWATER;
+		} else if (i == 0x0bde) {
+			// Icicle Pyramid
+			tex->soundsurfacetype = SURFACETYPE_GLASS;
+			tex->surfacetype = SURFACETYPE_GLASS;
+		}
 	}
 
 	return NULL;

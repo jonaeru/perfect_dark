@@ -100,6 +100,7 @@ struct menudialogdef g_MpDropOutMenuDialog = {
 
 struct mparena g_MpArenas[] = {
 	// Stage, unlock, name
+#ifdef PLATFORM_N64
 	{ STAGE_MP_SKEDAR,     0,                          L_MPMENU_119 },
 	{ STAGE_MP_PIPES,      0,                          L_MPMENU_120 },
 	{ STAGE_MP_RAVINE,     MPFEATURE_STAGE_RAVINE,     L_MPMENU_121 },
@@ -117,11 +118,39 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_COMPLEX,    MPFEATURE_STAGE_COMPLEX,    L_MPMENU_134 },
 	{ STAGE_MP_FELICITY,   MPFEATURE_STAGE_FELICITY,   L_MPMENU_135 },
 	{ 1,                   0,                          L_MPMENU_136 }, // "Random"
+#else // GoldenEye X Mod
+	{ STAGE_MP_SKEDAR,     0, L_MPMENU_133 }, // Tample
+	{ STAGE_MP_COMPLEX,    0, L_MPMENU_134 }, // Complex
+	{ STAGE_MP_AREA52,     0, L_MPMENU_127 }, // Caves
+	{ STAGE_MP_WAREHOUSE,  0, L_MPMENU_124 }, // Library
+	{ STAGE_MP_SEWERS,     0, L_MPMENU_123 }, // Basement
+	{ STAGE_MP_FORTRESS,   0, L_MPMENU_130 }, // Stack
+	{ STAGE_MP_CARPARK,    0, L_MPMENU_132 }, // Facility
+	{ STAGE_TEST_MP6,      0, L_MPMENU_121 }, // Bunker
+	{ STAGE_MP_TEMPLE,     0, L_MPMENU_120 }, // Archives
+	{ STAGE_MP_RUINS,      0, L_MPMENU_126 }, // Caverns
+	{ STAGE_MP_FELICITY,   0, L_MPMENU_135 }, // Egyptian
+	{ STAGE_TEST_MP17,     0, L_MPMENU_128 }, // Fac Backzone
+	{ STAGE_MP_RAVINE,     0, L_MPMENU_119 }, // Frigate
+	{ STAGE_TEST_MP16,     0, L_MPMENU_409 }, // Archives 1F
+	{ STAGE_TEST_MP14,     0, L_MPMENU_410 }, // Streets
+	{ STAGE_MP_G5BUILDING, 0, L_MPMENU_131 }, // Train
+	{ STAGE_TEST_MP18,     0, L_MPMENU_125 }, // Cradle
+	{ STAGE_MP_PIPES,      0, L_MPMENU_408 }, // Aztec
+	{ STAGE_TEST_MP20,     0, L_MPMENU_129 }, // Citadel
+	{ STAGE_TEST_MP19,     0, L_MPMENU_122 }, // Labyrinth
+	{ STAGE_TEST_MP2,      0, L_MPMENU_371 }, // Icicle Pyramid
+	{ 1,                   0, L_MPMENU_136 }, // "Random"
+#endif
 };
 
 s32 mpGetNumStages(void)
 {
+#ifdef PLATFORM_N64
 	return 17;
+#else // GoldenEye X Mod
+	return 22;
+#endif
 }
 
 s16 mpChooseRandomStage(void)
@@ -130,7 +159,11 @@ s16 mpChooseRandomStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
+#ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
+#else // GoldenEye X Mod
+	for (i = 0; i < 21; i++) {
+#endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
@@ -138,7 +171,11 @@ s16 mpChooseRandomStage(void)
 
 	index = rngRandom() % numchallengescomplete;
 
+#ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
+#else // GoldenEye X Mod
+	for (i = 0; i < 21; i++) {
+#endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
@@ -155,8 +192,13 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 {
 	struct optiongroup groups[] = {
 		{ 0,  L_MPMENU_116 }, // "Dark"
+#ifdef PLATFORM_N64
 		{ 13, L_MPMENU_117 }, // "Classic"
 		{ 16, L_MPMENU_118 }, // "Random"
+#else // GoldenEye X Mod
+		{ 11, L_MPMENU_117 }, // "Classic"
+		{ 21, L_MPMENU_118 }, // "Random"
+#endif
 	};
 
 	s32 i;
@@ -211,31 +253,37 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 	case MENUOP_GETOPTGROUPCOUNT:
 		data->list.value = 3;
 
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 		if (!challengeIsFeatureUnlocked(MPFEATURE_STAGE_COMPLEX)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_TEMPLE)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_FELICITY)) {
 			data->list.value--;
 		}
+#endif
 		break;
 	case MENUOP_GETOPTGROUPTEXT:
 		count = data->list.value;
 
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 		if (!challengeIsFeatureUnlocked(MPFEATURE_STAGE_COMPLEX)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_TEMPLE)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_FELICITY)
 				&& count > 0) {
 			count++;
 		}
+#endif
 		return (uintptr_t)langGet(groups[count].name);
 	case MENUOP_GETGROUPSTARTINDEX:
 		groupindex = data->list.value;
 
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 		if (!challengeIsFeatureUnlocked(MPFEATURE_STAGE_COMPLEX)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_TEMPLE)
 				&& !challengeIsFeatureUnlocked(MPFEATURE_STAGE_FELICITY)
 				&& groupindex == 1) {
 			groupindex++;
 		}
+#endif
 
 		for (i = 0; i < groups[groupindex].offset; i++) {
 			if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
