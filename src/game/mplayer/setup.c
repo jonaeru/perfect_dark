@@ -157,7 +157,7 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_MP_FORTRESS + 0x60,   0, L_MPMENU_309 }, // Stack
 	{ STAGE_MP_CARPARK + 0x60,    0, L_MPMENU_311 }, // Facility
 	{ STAGE_TEST_MP6 + 0x60,      0, L_MPMENU_300 }, // Bunker
-	{ STAGE_ESCAPE + 0x60,        0, L_MPMENU_299 }, // Archives
+	{ STAGE_MP_TEMPLE + 0x60,     0, L_MPMENU_299 }, // Archives
 	{ STAGE_MP_RUINS + 0x60,      0, L_MPMENU_305 }, // Caverns
 	{ STAGE_MP_FELICITY + 0x60,   0, L_MPMENU_312 }, // Egyptian
 	{ STAGE_TEST_MP17 + 0x60,     0, L_MPMENU_307 }, // Facility BZ
