@@ -466,7 +466,11 @@ Gfx *htbRenderHud(Gfx *gdl)
 
 #if VERSION >= VERSION_NTSC_1_0
 		gdl = text0f153990(gdl, x, y, textwidth, textheight);
+#ifdef PLATFORM_N64
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
+#else // GoldenEye X Mod
+		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0xffb000a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0); // Timer Color
+#endif
 #else
 		gdl = text0f153858(gdl, &x, &y, &textwidth, &textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0x88, viGetWidth(), viGetHeight(), 0, 0);
@@ -521,7 +525,11 @@ Gfx *htbRadarExtra(Gfx *gdl)
 		dist.x = g_ScenarioData.htb.pos.x - g_Vars.currentplayer->prop->pos.x;
 		dist.y = g_ScenarioData.htb.pos.y - g_Vars.currentplayer->prop->pos.y;
 		dist.z = g_ScenarioData.htb.pos.z - g_Vars.currentplayer->prop->pos.z;
+#ifdef PLATFORM_N64
 		gdl = radarDrawDot(gdl, g_ScenarioData.htb.token, &dist, 0x00ff0000, 0, 1);
+#else // GoldenEye X Mod
+		gdl = radarDrawDot(gdl, g_ScenarioData.htb.token, &dist, 0xff800000, 0, 1);
+#endif
 	}
 
 	return gdl;
@@ -542,7 +550,11 @@ bool htbRadarChr(Gfx **gdl, struct prop *prop)
 				u32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htb.token, &dist, colour, 0, 1);
 			} else {
+#ifdef PLATFORM_N64
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htb.token, &dist, 0x00ff0000, 0, 1);
+#else // GoldenEye X Mod
+				*gdl = radarDrawDot(*gdl, g_ScenarioData.htb.token, &dist, 0xff800000, 0, 1);
+#endif
 			}
 
 			return true;
@@ -555,8 +567,13 @@ bool htbRadarChr(Gfx **gdl, struct prop *prop)
 bool htbHighlightProp(struct prop *prop, s32 *colour)
 {
 	if ((g_MpSetup.options & MPOPTION_HTB_HIGHLIGHTBRIEFCASE) && prop == g_ScenarioData.htb.token) {
+#ifdef PLATFORM_N64
 		colour[0] = 0;
 		colour[1] = 0xff;
+#else // GoldenEye X Mod
+		colour[0] = 0xff;
+		colour[1] = 0x80;
+#endif
 		colour[2] = 0;
 		colour[3] = 0x40;
 

@@ -627,12 +627,20 @@ Gfx *htmRenderHud(Gfx *gdl)
 		s1 = barleft + (s32) (a1 * (dltime / TICKS(4800.0f)));
 
 		gdl = text0f153628(gdl);
+#ifdef PLATFORM_N64
 		gdl = textSetPrimColour(gdl, 0x60000060);
+#else // GoldenEye X Mod
+		gdl = textSetPrimColour(gdl, 0x00600060); // Hacker Central Bar Color?
+#endif
 
 		gDPFillRectangle(gdl++, barleft, viewtop + 8, barright, viewtop + 16);
 
 		gdl = text0f153838(gdl);
+#ifdef PLATFORM_N64
 		gdl = textSetPrimColour(gdl, 0xc00000d0);
+#else // GoldenEye X Mod
+		gdl = textSetPrimColour(gdl, 0x00c000d0); // Hacker Central Remaining Color?
+#endif
 
 		v1 = barleft + 1;
 		a0 = barleft;
@@ -709,7 +717,11 @@ Gfx *htmRadarExtra(Gfx *gdl)
 			dist.y = data->uplink->pos.y - g_Vars.currentplayer->prop->pos.y;
 			dist.z = data->uplink->pos.z - g_Vars.currentplayer->prop->pos.z;
 
+#ifdef PLATFORM_N64
 			gdl = radarDrawDot(gdl, data->uplink, &dist, 0x00ff0000, 0x00000000, true);
+#else // GoldenEye X Mod
+			gdl = radarDrawDot(gdl, data->uplink, &dist, 0xff800000, 0x00000000, true);
+#endif
 		}
 
 		// Show the terminal
@@ -720,8 +732,13 @@ Gfx *htmRadarExtra(Gfx *gdl)
 				sp88.z = data->terminals[i].prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 				if (data->terminals[i].team == 255) {
+#ifdef PLATFORM_N64
 					rf = 0;
 					gf = 255;
+#else // GoldenEye X Mod
+					rf = 255;
+					gf = 128;
+#endif
 					bf = 0;
 					af = 0;
 				} else if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
@@ -731,8 +748,13 @@ Gfx *htmRadarExtra(Gfx *gdl)
 					bf = ((colour >> 8) & 0xff);
 					af = colour & 0xff;
 				} else {
+#ifdef PLATFORM_N64
 					rf = 0;
 					gf = 255;
+#else // GoldenEye X Mod
+					rf = 255;
+					gf = 128;
+#endif
 					bf = 0;
 					af = 0;
 				}
@@ -782,7 +804,11 @@ bool htmRadarChr(Gfx **gdl, struct prop *prop)
 				u32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htm.uplink, &dist, colour, 0, 1);
 			} else {
+#ifdef PLATFORM_N64
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htm.uplink, &dist, 0x00ff0000, 0, 1);
+#else // GoldenEye X Mod
+				*gdl = radarDrawDot(*gdl, g_ScenarioData.htm.uplink, &dist, 0xff800000, 0, 1);
+#endif
 			}
 
 			return true;
@@ -811,8 +837,13 @@ bool htmHighlightProp(struct prop *prop, s32 *colour)
 		}
 
 		if (highlight) {
+#ifdef PLATFORM_N64
 			colour[0] = 0;
 			colour[1] = 0xff;
+#else // GoldenEye X Mod
+			colour[0] = 0xff;
+			colour[1] = 0x80;
+#endif
 			colour[2] = 0;
 			colour[3] = 0x40;
 

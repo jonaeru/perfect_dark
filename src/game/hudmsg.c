@@ -182,7 +182,11 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 
 	textcolour = textcolour * 160 / 255;
 	if (g_Is4Mb);
+#ifdef PLATFORM_N64
 	textcolour |= 0x00ff0000;
+#else // GoldenEye X Mod
+	textcolour |= 0xffb00000; // Mission Timer Color
+#endif
 
 	formatTime(buffer, playerGetMissionTime(), TIMEPRECISION_HUNDREDTHS);
 

@@ -1491,7 +1491,7 @@ Gfx *lvRender(Gfx *gdl)
 					// Slayer rocket shows static when flying out of bounds
 					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKET
 							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-						gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff);
+						gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff); // Slayer View Color1?, Slayer View Color2?
 
 						if (g_Vars.currentplayer->badrockettime > 0) {
 							u32 slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
@@ -1500,13 +1500,13 @@ Gfx *lvRender(Gfx *gdl)
 								slayerstatic = 255;
 							}
 
-							gdl = bviewDrawStatic(gdl, 0x4fffffff, slayerstatic);
+							gdl = bviewDrawStatic(gdl, 0x4fffffff, slayerstatic); // Slayer Destroying Color?
 						}
 					}
 
 #if VERSION >= VERSION_NTSC_1_0
 					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKETSTATIC) {
-						gdl = bviewDrawStatic(gdl, 0x4fffffff, 255);
+						gdl = bviewDrawStatic(gdl, 0x4fffffff, 255); // Slayer Destroying Color?
 						g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
 					}
 #endif

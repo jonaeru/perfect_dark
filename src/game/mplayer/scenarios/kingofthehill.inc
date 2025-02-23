@@ -536,9 +536,15 @@ void kohTick(void)
 
 		// Calculate what colour the hill should tween towards
 		if (g_ScenarioData.koh.occupiedteam == -1) {
+#ifdef PLATFORM_N64
 			targetr = 0.25f;
 			targetg = 1;
 			targetb = 0.25f;
+#else // GoldenEye X Mod
+			targetr = 1;
+			targetg = 0.5f;
+			targetb = 0;
+#endif
 		} else {
 			u32 colour = g_TeamColours[g_ScenarioData.koh.occupiedteam];
 			targetr = ((s32)(colour >> 24 & 0xff) + 0xff) * (1.0f / 512.0f);
@@ -632,7 +638,11 @@ Gfx *kohRenderHud(Gfx *gdl)
 
 #if VERSION >= VERSION_NTSC_1_0
 		gdl = text0f153990(gdl, x, y, textwidth, textheight);
+#ifdef PLATFORM_N64
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
+#else // GoldenEye X Mod
+		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0xffb000a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0); // Timer Color
+#endif
 #else
 		gdl = text0f153858(gdl, &x, &y, &textwidth, &textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0x88, viGetWidth(), viGetHeight(), 0, 0);
@@ -684,7 +694,11 @@ Gfx *kohRadarExtra(Gfx *gdl)
 		dist.z = g_ScenarioData.koh.hillpos.z - g_Vars.currentplayer->prop->pos.z;
 
 		if (g_ScenarioData.koh.occupiedteam == -1) {
+#ifdef PLATFORM_N64
 			colour = 0x00ff0000;
+#else // GoldenEye X Mod
+			colour = 0xff800000;
+#endif
 		} else {
 			colour = g_TeamColours[g_ScenarioData.koh.occupiedteam];
 		}
