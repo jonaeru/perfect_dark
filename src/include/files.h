@@ -2011,13 +2011,31 @@
 #define FILE_AP16_03_JOM             0x07db
 #define FILE_ACARRBYE02M             0x07dc
 #define FILE_ASAUCEREXP1M            0x07dd
+#if VERSION >= VERSION_JPN_FINAL
 #define FILE_PJPNLOGO                0x07de
 #define FILE_PJPNPD                  0x07df
+#endif
+
+// PD Plus Mod
+#ifndef PLATFORM_N64
+#define FILE_CDRCARROLL2             (VERSION == VERSION_JPN_FINAL ? 0x07e0 : 0x07de)
+#define FILE_CSKEDAR2                (VERSION == VERSION_JPN_FINAL ? 0x07e1 : 0x07df)
+#define FILE_GHAND_DRCARROLL         (VERSION == VERSION_JPN_FINAL ? 0x07e2 : 0x07e0)
+#define FILE_GHAND_SKEDAR            (VERSION == VERSION_JPN_FINAL ? 0x07e3 : 0x07e1)
+#endif
 
 #if VERSION >= VERSION_JPN_FINAL
+#ifdef PLATFORM_N64
 #define NUM_FILES 2016
+#else
+#define NUM_FILES 2020 // PD Plus Mod (+ 4)
+#endif
 #elif VERSION >= VERSION_NTSC_1_0
+#ifdef PLATFORM_N64
 #define NUM_FILES 2014
+#else
+#define NUM_FILES 2018 // PD Plus Mod (+ 4)
+#endif
 #else
 #define NUM_FILES 2013
 #endif
