@@ -28,8 +28,9 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+
+#ifndef PLATFORM_N64 // All in One Mod
 #include "system.h"
-#ifndef PLATFORM_N64
 #include "mod.h"
 #endif
 

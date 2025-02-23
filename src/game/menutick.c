@@ -27,7 +27,8 @@
 #include "lib/snd.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
+
+#ifndef PLATFORM_N64 // All in One Mod
 #include "system.h"
 #include "mod.h"
 #endif

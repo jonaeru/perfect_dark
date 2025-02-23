@@ -33,6 +33,7 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+
 #ifndef PLATFORM_N64 // All Solos in Multi Mod
 #include "romdata.h"
 #endif
@@ -44,7 +45,10 @@ struct menudialogdef g_CiControlPlayer2MenuDialog;
 struct menudialogdef g_CinemaMenuDialog;
 #ifndef PLATFORM_N64
 extern struct menudialogdef g_ExtendedMenuDialog;
-bool g_NotLoadMod; // All Solos in Multi Mod
+#endif
+
+#ifndef PLATFORM_N64 // All Solos in Multi Mod
+bool g_NotLoadMod;
 #endif
 
 char *menuTextCurrentStageName(struct menuitem *item)
