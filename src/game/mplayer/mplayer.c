@@ -140,6 +140,7 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	.crosshaircolour = 0x00ff0028, \
 	.crosshairsize = 2, \
 	.crosshairhealth = CROSSHAIR_HEALTH_OFF, \
+	.usereloads = false, \
 }
 
 struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS] = { 
@@ -1403,7 +1404,7 @@ void mpSetRandomWeapons(u8 weapons[])
 	}
 
 	if (index == 0) {
-		weapons[0] = MPWEAPON_NONE;
+		weapons[0] = 0; // optionindex (shifted by unlocked weapons, but usually 0 is "Nothing")
 		g_MpWeaponRandomFilterNum = 1;
 	} else {
 		g_MpWeaponRandomFilterNum = index;
