@@ -4065,6 +4065,22 @@
 #define STAGE_MP_RANDOM_SOLO  0x03
 #define STAGE_MP_RANDOM_GEX   0x04
 
+#define STAGE_GEX_MP1   0x05 // Frigate
+#define STAGE_GEX_MP2   0x06 // Complex
+#define STAGE_GEX_MP3   0x07 // Train
+#define STAGE_GEX_MP4   0x08 // Archives
+#define STAGE_GEX_MP5   0x0a // Aztec
+#define STAGE_GEX_MP6   0x0b // Tample
+#define STAGE_GEX_MP7   0x0c // Icicle Pyramid
+#define STAGE_GEX_MP8   0x0d // Caves
+#define STAGE_GEX_MP9   0x0e // Library
+#define STAGE_GEX_MP10  0x0f // Facility
+#define STAGE_GEX_MP11  0x10 // Bunker
+#define STAGE_GEX_MP12  0x11 // Caverns
+#define STAGE_GEX_MP13  0x12 // Basement
+#define STAGE_GEX_MP14  0x13 // Egyptian
+#define STAGE_GEX_MP15  0x15 // Stack
+
 #define STAGEFLAG_CI_IN_TRAINING            0x00000001
 #define STAGEFLAG_CI_HOLO_FAILED            0x00000002
 #define STAGEFLAG_CI_DEVICE_ABORTING        0x00000004

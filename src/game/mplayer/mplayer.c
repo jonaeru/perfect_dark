@@ -261,16 +261,43 @@ void mpStartMatch(void)
 	}
 
 	// Mod Switch (MP Start)
-	if (stagenum >= 0x60) {
+	switch (stagenum) {
+	case STAGE_TEST_SILO:
+	case STAGE_TEST_MP8:
+	case STAGE_TEST_MP14:
+	case STAGE_TEST_MP16:
+	case STAGE_TEST_MP17:
+	case STAGE_TEST_MP18:
+	case STAGE_TEST_MP19:
+	case STAGE_TEST_MP20:
+	case STAGE_GEX_MP1:
+	case STAGE_GEX_MP2:
+	case STAGE_GEX_MP3:
+	case STAGE_GEX_MP4:
+	case STAGE_GEX_MP5:
+	case STAGE_GEX_MP6:
+	case STAGE_GEX_MP7:
+	case STAGE_GEX_MP8:
+	case STAGE_GEX_MP9:
+	case STAGE_GEX_MP10:
+	case STAGE_GEX_MP11:
+	case STAGE_GEX_MP12:
+	case STAGE_GEX_MP13:
+	case STAGE_GEX_MP14:
+	case STAGE_GEX_MP15:
 		g_ModNum = MOD_GEX;
-		stagenum = stagenum - 0x60;
-	} else if (stagenum == STAGE_24) {
+		break;
+	case STAGE_24:
 		g_ModNum = MOD_KAKARIKO;
-	} else if (stagenum == STAGE_TEST_MP7) {
+		break;
+	case STAGE_TEST_MP7:
 		g_ModNum = MOD_DARKNOON;
-	} else {
+		break;
+	default:
 		g_ModNum = MOD_NORMAL;
+		break;
 	}
+
 	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
 	modConfigLoad(MOD_CONFIG_FNAME);
 	// Set textures surfacetype
