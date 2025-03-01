@@ -162,6 +162,23 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ STAGE_TEST_ARCH,     "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
 	{ STAGE_TEST_LEN,      "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 	{ STAGE_TITLE,         "-ml0 -me0 -mgfx80 -mvtx20 -ma001"              },
+#ifndef PLATFORM_N64 // GoldenEye X Mod
+	{ STAGE_GEX_MP1,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP2,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP3,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP4,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP5,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP6,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP7,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP8,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP9,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP10,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP11,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP12,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP13,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP14,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+	{ STAGE_GEX_MP15,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
+#endif
 	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 };
 
