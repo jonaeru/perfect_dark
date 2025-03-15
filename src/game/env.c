@@ -68,13 +68,13 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ 300,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 	{ 400,                    10,  5000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 #ifndef PLATFORM_N64 // GoldenEye X Mod
-	{ STAGE_GEX_MP6,          10,  6000,    0,    0,    0, 996, 1000, RGB(0x181818), NO_SUNS,             1, 10000,    0, RGB(0x787878), 0,  -1000,  0, RGB(0x000000), 0  }, // 19 Temple
-	{ STAGE_GEX_MP2,          10,  5000,    0,    0,    0, 996, 1000, RGB(0x280000), NO_SUNS,             1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // 1A Complex
-	{ STAGE_GEX_MP12,         10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // 1B Caverns
-	{ STAGE_TEST_MP14,        10, 20000, 5000, 6000, 1000, 996, 1000, RGB(0x101820), NO_SUNS,             1,  5000,    0, RGB(0xe1af64), 0,  -1000,  0, RGB(0x000000), 0  }, // 1C Streets (Fixed far from 7500 to 20000, clouds_height from 25 to 0)
-	{ STAGE_TEST_MP18,        10,  9500, 3333, 4444,  800, 996, 1000, RGB(0x6080A0), NO_SUNS,             1,  5000,    0, RGB(0xffff00), 0, -10000,  0, RGB(0x000000), 0  }, // 1D Cradle
-	{ STAGE_TEST_MP20,        10, 10000,    0,    0,    0, 996, 1000, RGB(0x08040C), NO_SUNS,             1,  7500,    0, RGB(0x403444), 0,  -1000,  0, RGB(0x000000), 0  }, // 1E Citadel
-	{ STAGE_TEST_MP19,        10,  6000,    0,    0,    0, 996, 1000, RGB(0x103060), NO_SUNS,             1,  5000,    0, RGB(0xffffff), 0,  -1000,  0, RGB(0x000000), 0  }, // 1F Labyrinth
+	{ STAGE_GEX_MP2,          10,  5000,    0,    0,    0, 996, 1000, RGB(0x280000), NO_SUNS,             1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Complex
+	{ STAGE_GEX_MP6,          10,  6000,    0,    0,    0, 996, 1000, RGB(0x181818), NO_SUNS,             1, 10000,    0, RGB(0x787878), 0,  -1000,  0, RGB(0x000000), 0  }, // Temple
+	{ STAGE_GEX_MP12,         10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // Caverns
+	{ STAGE_TEST_MP14,        10, 20000, 5000, 6000, 1000, 996, 1000, RGB(0x101820), NO_SUNS,             1,  5000,    0, RGB(0xe1af64), 0,  -1000,  0, RGB(0x000000), 0  }, // Streets (Fixed far from 7500 to 20000, clouds_height from 25 to 0)
+	{ STAGE_TEST_MP18,        10,  9500, 3333, 4444,  800, 996, 1000, RGB(0x6080A0), NO_SUNS,             1,  5000,    0, RGB(0xffff00), 0, -10000,  0, RGB(0x000000), 0  }, // Cradle
+	{ STAGE_TEST_MP19,        10,  6000,    0,    0,    0, 996, 1000, RGB(0x103060), NO_SUNS,             1,  5000,    0, RGB(0xffffff), 0,  -1000,  0, RGB(0x000000), 0  }, // Labyrinth
+	{ STAGE_TEST_MP20,        10, 10000,    0,    0,    0, 996, 1000, RGB(0x08040C), NO_SUNS,             1,  7500,    0, RGB(0x403444), 0,  -1000,  0, RGB(0x000000), 0  }, // Citadel
 #endif
 	{ 0,                       0,     0,    0,    0,   0,   0,    0, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 };
