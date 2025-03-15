@@ -13664,7 +13664,11 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	}
 
 	if (obj->type != OBJTYPE_TINTEDGLASS) {
+#ifdef PLATFORM_N64
 		frac = objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(obj->model));
+#else // All in One Mod
+		frac = 1.0f;
+#endif
 
 		if (prop->timetoregen > 0 && prop->timetoregen < TICKS(60)) {
 			frac *= (TICKS(60.0f) - prop->timetoregen) * (PAL ? 0.019999999552965f : 0.016666667535901f);
@@ -20014,7 +20018,11 @@ bool func0f08e8ac(struct prop *prop, struct coord *pos, f32 arg2, bool arg3)
 
 	while (roomnum != -1) {
 		if (g_Rooms[roomnum].flags & ROOMFLAG_ONSCREEN) {
+#ifdef PLATFORM_N64
 			if (envIsPosInFogMaxDistance(pos, arg2) && (!arg3 || posIsInObjFadeDistance(pos, arg2))) {
+#else // All in One Mod
+			{
+#endif
 				result = camIsPosInFovAndVisibleRoom(prop->rooms, pos, arg2);
 
 				if (result) {

@@ -3393,7 +3393,9 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 	chrGetBloodColour(chr->bodynum, spec, NULL);
 	chr0f0246e4(spec);
+#ifdef PLATFORM_N64 // All in One Mod
 	alpha *= objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(model));
+#endif
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		f32 fadedist;
