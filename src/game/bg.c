@@ -1037,6 +1037,9 @@ Gfx *bgRenderScene(Gfx *gdl)
 				|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id
 				|| stagenum == g_Stages[STAGEINDEX_TEST_OLD].id
+#ifndef PLATFORM_N64 // Suburb Mod
+				|| stagenum == g_Stages[STAGEINDEX_TEST_ARCH].id // Suburb
+#endif
 				|| stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id)) {
 		gdl = envStopFog(gdl);
 		gdl = vi0000ab78(gdl);
@@ -1059,7 +1062,13 @@ Gfx *bgRenderScene(Gfx *gdl)
 			roomnum = 0x01;
 		} else if (stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id) {
 			roomnum = 0x71;
+#ifdef PLATFORM_N64
 		}
+#else // Suburb Mod
+		} else if (stagenum == g_Stages[STAGEINDEX_TEST_ARCH].id) { // Suburb
+			roomnum = 0x01;
+		}
+#endif
 
 		if (PLAYERCOUNT() == 1
 				&& (stagenum == STAGE_DEFECTION
@@ -1067,6 +1076,9 @@ Gfx *bgRenderScene(Gfx *gdl)
 					|| stagenum == STAGE_TEST_OLD
 					|| stagenum == STAGE_INFILTRATION
 					|| stagenum == STAGE_ESCAPE
+#ifndef PLATFORM_N64  // Suburb Mod
+					|| stagenum == STAGE_TEST_ARCH // Suburb
+#endif
 					|| stagenum == STAGE_ATTACKSHIP)) {
 			gdl = text0f153628(gdl);
 
@@ -5851,6 +5863,9 @@ void bgTickPortals(void)
 							&& ((g_StageIndex != STAGEINDEX_INFILTRATION && g_StageIndex != STAGEINDEX_RESCUE && g_StageIndex != STAGEINDEX_ESCAPE) || room != 0xf)
 							&& (g_StageIndex != STAGEINDEX_SKEDARRUINS || room != 0x02)
 							&& ((g_StageIndex != STAGEINDEX_DEFECTION && g_StageIndex != STAGEINDEX_EXTRACTION) || room != 0x01)
+#ifndef PLATFORM_N64 // Suburb Mod
+							&& (g_StageIndex != STAGEINDEX_TEST_ARCH || room != 0x01) // Suburb
+#endif
 							&& (g_StageIndex != STAGEINDEX_ATTACKSHIP || room != 0x71)) {
 						bgSetRoomOnscreen(room, 0, &box);
 					}

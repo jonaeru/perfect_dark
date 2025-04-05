@@ -93,9 +93,15 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_ATTACKSHIP,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
 	{ STAGE_INFILTRATION,  15, 12000,   0,  0,  0, RGB(0x000000), SUNS(suns_area51),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_ESCAPE,        15, 10000,   0,  0,  0, RGB(0x000000), SUNS(suns_area51),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
+#ifdef PLATFORM_N64
 	{ STAGE_TEST_ARCH,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
+#else // Suburb Mod
+	{ STAGE_TEST_ARCH,     10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 }, // Suburb
+#endif
 	{ STAGE_DEEPSEA,       15, 10000,   0,  0,  0, RGB(0x050000), NO_SUNS,            0, RGB(0x9b9b9b),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
-	{ STAGE_TEST_DEST,     15, 10000,   0,  0,  0, RGB(0x103060), NO_SUNS,            1, RGB(0xe6e6e6),  3000,   0, 1, RGB(0xffff96),   -150,    2, 0, 0 },
+#ifdef PLATFORM_N64 // Training Day Mod
+	{ STAGE_TEST_DEST,     15, 10000,   0,  0,  0, RGB(0x103060), NO_SUNS,            1, RGB(0xe6e6e6),  3000,   0, 1, RGB(0xffff96),   -150,    2, 0, 0 }, // Training Day
+#endif
 	{ STAGE_TEST_LEN,      15, 10000,   0,  0,  0, RGB(0x304010), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
 	{ STAGE_TEST_ASH,      15, 25000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_DEFENSE,       15, 10000,   0,  0,  0, RGB(0x65b2ff), SUNS(suns_ci),      0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
