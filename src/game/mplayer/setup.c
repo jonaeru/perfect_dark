@@ -145,7 +145,7 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_SKEDARRUINS,     0, (VERSION == VERSION_JPN_FINAL ? L_OPTIONS_166 : L_OPTIONS_165) }, // Skedar Ruins
 	{ STAGE_MP_TEMPLE,       0, L_MPMENU_133  }, // Temple
 	{ STAGE_MP_COMPLEX,      0, L_MPMENU_134  }, // Complex
-	{ STAGE_TEST_MP6,        0, L_MPMENU_411  }, // Caves (PD Plus)
+	{ STAGE_TEST_MP6,        0, L_MPMENU_306  }, // Caves (PD Plus)
 	{ STAGE_TEST_MP2,        0, L_MPMENU_129  }, // Stack (PD Plus)
 	{ STAGE_MP_FELICITY,     0, L_MPMENU_135  }, // Felicity
 	// GoldenEye X Mod
@@ -172,10 +172,11 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP19,       0, L_MPMENU_301 }, // Labyrinth
 	{ STAGE_GEX_MP7,         0, L_MPMENU_316 }, // Icicle Pyramid
 	{ STAGE_TEST_MP8,        0, L_MPMENU_323 }, // Cliff Base
-	// Kakariko Village Mod
+	// Bonus
 	{ STAGE_24,              0, L_MPMENU_319 }, // Kakariko Village (Stormy)
-	// Dark Noon Mod
-	{ STAGE_TEST_MP7,        0, L_MPMENU_321 }, // Valley
+	{ STAGE_TEST_MP7,        0, L_MPMENU_321 }, // Dark Noon Mod Valley
+	{ STAGE_TEST_ARCH,       0, L_MPMENU_324 }, // Suburb
+	{ STAGE_TEST_DEST,       0, L_MPMENU_325 }, // Training Day
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -188,8 +189,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (57 Stage + 4 Random)
-	return 61;
+#else // All Solos in Multi Mod (59 Stage + 4 Random)
+	return 63;
 #endif
 }
 
@@ -202,7 +203,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 57; i++) {
+	for (i = 0; i < 59; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -214,7 +215,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 57; i++) {
+	for (i = 0; i < 59; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -324,9 +325,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 27, L_MPMENU_117  }, // "Classic"
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
-		{ 55, L_MPMENU_318  }, // "Zelda"
-		{ 56, L_MPMENU_320  }, // "Dark Noon"
-		{ 57, L_MPMENU_118  }, // "Random"
+		{ 55, L_MPMENU_326  }, // "Bonus"
+		{ 59, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -383,7 +383,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #ifdef PLATFORM_N64
 		data->list.value = 3;
 #else // All Solos in Multi Mod
-		data->list.value = 8;
+		data->list.value = 7;
 #endif
 
 #ifdef PLATFORM_N64 // All Solos in Multi Mod
