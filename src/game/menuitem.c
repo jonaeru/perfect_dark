@@ -51,6 +51,8 @@ u8 g_KeyboardKeys[5][10] = {
 	{ '1','2','1','2','1','2','3','1','2','3' },
 };
 
+static s32 deferredindex = -1;
+
 s32 func0f0e5ce0(s32 value)
 {
 	if (value < var800711a4) {
@@ -2269,7 +2271,7 @@ Gfx* menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context)
 	return gdl;
 }
 
-#endif 
+#endif
 
 Gfx *menuitemSelectableRender(Gfx *gdl, struct menurendercontext *context)
 {
@@ -2430,8 +2432,15 @@ Gfx *menuitemSliderRender(Gfx *gdl, struct menurendercontext *context)
 	extray = 0;
 
 	if (context->item->handler != NULL) {
-		context->item->handler(MENUOP_GETSLIDER, context->item, &data);
-		slidervalue = (s16) data.slider.value;
+		if ((context->item->flags & MENUITEMFLAG_SLIDER_DEFERRED) &&
+			deferredindex != -1 &&
+			context->dialog->dimmed &&
+			context->focused) {
+			slidervalue = (s16) deferredindex;
+		} else {
+			context->item->handler(MENUOP_GETSLIDER, context->item, &data);
+			slidervalue = (s16) data.slider.value;
+		}
 	} else {
 		slidervalue = 0;
 	}
@@ -2553,7 +2562,7 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 
 	if ((tickflags & MENUTICKFLAG_ITEMISFOCUSED)) {
 #ifndef PLATFORM_N64
-		if (g_MenuUsingMouse && inputs->select) {
+		if (g_AllowMouseHeld && g_MenuUsingMouse && (inputs->select || inputs->mouseheld)) {
 			// handle mouse
 			struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
 			if (dialog) {
@@ -2562,19 +2571,27 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 				const s32 size = right - left;
 				const s32 delta = inputs->mousex - left;
 				if (delta >= -8 && delta <= size + 8) {
-					index = (delta / (f32)size) * item->param3;
-					if (index < 0) {
-						index = 0;
+					if ((tickflags & MENUTICKFLAG_DIALOGISDIMMED) == 0) {
+						g_MouseDimmedMode = true;
+					} else {
+						index = (delta / (f32)size) * item->param3;
+						if (index < 0) {
+							index = 0;
+						}
+						if (index > item->param3) {
+							index = item->param3;
+						}
+						if (item->handler) {
+							if (item->flags & MENUITEMFLAG_SLIDER_DEFERRED) {
+								deferredindex = index;
+							} else {
+								item->handler(MENUOP_GET, item, &handlerdata);
+								handlerdata.slider.value = index;
+								item->handler(MENUOP_SET, item, &handlerdata);
+							}
+						}
+						return true;
 					}
-					if (index > item->param3) {
-						index = item->param3;
-					}
-					if (item->handler) {
-						item->handler(MENUOP_GET, item, &handlerdata);
-						handlerdata.slider.value = index;
-						item->handler(MENUOP_SET, item, &handlerdata);
-					}
-					return true;
 				}
 			}
 		}
@@ -2582,11 +2599,31 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 
 		if (tickflags & MENUTICKFLAG_DIALOGISDIMMED) {
 			if (item->handler) {
-				item->handler(MENUOP_GETSLIDER, item, &handlerdata);
-				index = (s16) handlerdata.slider.value;
+				if (item->flags & MENUITEMFLAG_SLIDER_DEFERRED) {
+					if (deferredindex == -1) {
+						item->handler(MENUOP_GETSLIDER, item, &handlerdata);
+						deferredindex = (s16) handlerdata.slider.value;
+					}
+					index = deferredindex;
+				} else {
+					item->handler(MENUOP_GETSLIDER, item, &handlerdata);
+					index = (s16) handlerdata.slider.value;
+				}
+
 			} else {
 				index = 0;
 			}
+
+#ifndef PLATFORM_N64
+			if (g_MenuUsingMouse && inputs->mousescroll) {
+				if ((item->flags & MENUITEMFLAG_SLIDER_FAST) == 0) {
+					index += -inputs->mousescroll;
+				} else {
+					s32 mult = item->param3 / 40;
+					index += -inputs->mousescroll * (mult ? mult : 1);
+				}
+			}
+#endif
 
 			if ((item->flags & MENUITEMFLAG_SLIDER_FAST) == 0
 					&& g_Menus[g_MpPlayerNum].xrepeatmode == MENUREPEATMODE_SLOW) {
@@ -2663,11 +2700,22 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 			inputs->leftright = 0;
 			handlerdata.slider.value = index;
 
-			if (item->handler) {
-				item->handler(MENUOP_SET, item, &handlerdata);
+			if (item->flags & MENUITEMFLAG_SLIDER_DEFERRED) {
+				deferredindex = index;
+			} else {
+				if (item->handler) {
+					item->handler(MENUOP_SET, item, &handlerdata);
+				}
 			}
 
-			if (inputs->select) {
+			if (inputs->select || g_MouseEndDeferredSlider) {
+				g_MouseEndDeferredSlider = false;
+				if (item->flags & MENUITEMFLAG_SLIDER_DEFERRED) {
+					deferredindex = -1;
+					if (item->handler) {
+						item->handler(MENUOP_SET, item, &handlerdata);
+					}
+				}
 				dialog->dimmed = false;
 			}
 		} else {
@@ -2707,7 +2755,7 @@ Gfx *menuitemCarouselRender(Gfx *gdl, struct menurendercontext *context)
 
 #ifdef PLATFORM_N64
 	s16 chevronOffset = 0;
-#else 
+#else
 	s16 chevronOffset = 3;
 #endif
 

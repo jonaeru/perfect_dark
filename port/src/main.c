@@ -91,6 +91,7 @@ static void cleanup(void)
 	netDisconnect();
 	inputSaveBinds();
 	configSave(CONFIG_PATH);
+	videoShutdown();
 	crashShutdown();
 	// TODO: actually shut down all subsystems
 }
