@@ -221,14 +221,14 @@ static inline void netClientRecordMove(struct netclient *cl, const struct player
 		move->ucmd |= UCMD_SQUAT;
 	}
 
-	if (pl->gunctrl.switchtoweaponnum >= 0) {
+	if (pl->gunctrl.switchtoweaponnum >= 0 && !pl->gunctrl.throwing) {
 		move->ucmd |= UCMD_SELECT;
 		move->weaponnum = pl->gunctrl.switchtoweaponnum;
 	} else {
 		move->weaponnum = -1;
 	}
 
-	if (pl->gunctrl.dualwielding) {
+	if (pl->gunctrl.dualwielding && !pl->gunctrl.throwing) {
 		move->ucmd |= UCMD_SELECT_DUAL;
 		if ((move->ucmd ^ cl->outmove[1].ucmd) & UCMD_SELECT_DUAL) {
 			move->ucmd |= UCMD_SELECT;

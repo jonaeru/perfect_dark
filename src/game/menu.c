@@ -148,6 +148,33 @@ s32 g_MouseDimmedMode = false;
 s32 g_MouseEndDeferredSlider = false;
 #endif
 
+s32 menuAlt1Pressed(s32 playerNum)
+{
+	const s32 rshoulderKey = VK_JOY1_RSHOULDER + playerNum * INPUT_MAX_CONTROLLER_BUTTONS;
+
+	if (playerNum == 0) {
+		return inputKeyJustPressed(VK_LCTRL) || inputKeyJustPressed(rshoulderKey);
+	}
+
+	return inputKeyJustPressed(rshoulderKey);
+}
+
+s32 menuAlt2Pressed(s32 playerNum)
+{
+	const s32 lshoulderKey = VK_JOY1_LSHOULDER + playerNum * INPUT_MAX_CONTROLLER_BUTTONS;
+
+	if (playerNum == 0) {
+		return inputKeyJustPressed(VK_LALT) || inputKeyJustPressed(lshoulderKey);
+	}
+
+	return inputKeyJustPressed(lshoulderKey);
+}
+
+s32 menuAltAnyPressed(s32 playerNum)
+{
+	return menuAlt1Pressed(playerNum) || menuAlt2Pressed(playerNum);
+}
+
 void menuPlaySound(s32 menusound)
 {
 	s32 sound = -1;

@@ -135,14 +135,6 @@ struct menuitem g_GameFiles4MbMenuItems[] = {
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
-		1,
-		0,
-		L_OPTIONS_104, // "Combat Simulator Settings File"
-		0,
-		filemgrOpenCopyFileMenuHandler,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
 		2,
 		0,
 		L_OPTIONS_105, // "Combat Simulator Player File"
@@ -170,14 +162,6 @@ struct menuitem g_GameFiles4MbMenuItems[] = {
 		0,
 		0,
 		L_OPTIONS_103, // "Single Player Agent File"
-		0,
-		filemgrOpenDeleteFileMenuHandler,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		1,
-		0,
-		L_OPTIONS_104, // "Combat Simulator Settings File"
 		0,
 		filemgrOpenDeleteFileMenuHandler,
 	},

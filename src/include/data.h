@@ -573,6 +573,9 @@ extern s32 g_FileAutoSelect;
 extern u8 g_MpWeaponSetRandomFilters[NUM_MPWEAPONS];
 extern s32 g_MpWeaponRandomFilterNum;
 
+extern struct mpsetupfile g_MpSetupFile;
+extern s16 g_MpCurrentSetup;
+
 extern s32 g_NetMode;
 
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]

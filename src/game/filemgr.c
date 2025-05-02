@@ -499,11 +499,6 @@ char *filemgrMenuTextFileType(struct menuitem *item)
 	case FILEOP_LOAD_GAME:
 	case FILEOP_READ_GAME:
 		return langGet(names[0]);
-	case FILEOP_SAVE_MPSETUP:
-	case FILEOP_WRITE_MPSETUP:
-	case FILEOP_LOAD_MPSETUP:
-	case FILEOP_READ_MPSETUP:
-		return langGet(names[1]);
 	case FILEOP_SAVE_MPPLAYER:
 	case FILEOP_WRITE_MPPLAYER:
 	case FILEOP_LOAD_MPPLAYER:
@@ -816,12 +811,6 @@ bool filemgrAttemptOperation(s32 device, bool closeonsuccess)
 				g_Menus[g_MpPlayerNum].fm.fileid,
 				g_Menus[g_MpPlayerNum].fm.deviceserial);
 		break;
-	case FILEOP_SAVE_MPSETUP:
-		errnum = mpsetupfileSave(device,
-				g_Menus[g_MpPlayerNum].fm.fileid,
-				g_Menus[g_MpPlayerNum].fm.deviceserial);
-		showfilesaved = true;
-		break;
 	case FILEOP_WRITE_GAME:
 	case FILEOP_WRITE_MPSETUP:
 	case FILEOP_WRITE_MPPLAYER:
@@ -842,11 +831,6 @@ bool filemgrAttemptOperation(s32 device, bool closeonsuccess)
 		errnum = mpplayerfileLoad(
 				(s32) g_Menus[g_MpPlayerNum].fm.unke44,
 				device,
-				g_Menus[g_MpPlayerNum].fm.fileid,
-				g_Menus[g_MpPlayerNum].fm.deviceserial);
-		break;
-	case FILEOP_LOAD_MPSETUP:
-		errnum = mpsetupfileLoad(device,
 				g_Menus[g_MpPlayerNum].fm.fileid,
 				g_Menus[g_MpPlayerNum].fm.deviceserial);
 		break;
@@ -2780,7 +2764,7 @@ MenuDialogHandlerResult filemgrMainMenuDialog(s32 operation, struct menudialogde
 		g_Menus[g_MpPlayerNum].fm.filetypeplusone = 0;
 
 		filelistCreate(0, FILETYPE_GAME);
-		mpInit();
+		mpInit(true);
 
 		// Set MP player names to "Player 1" through 4 if blank
 		for (i = 0; i < MAX_LOCAL_PLAYERS; i++) {
@@ -3309,14 +3293,6 @@ struct menuitem g_FilemgrOperationsMenuItems[] = {
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
-		FILETYPE_MPSETUP,
-		0,
-		L_OPTIONS_104, // "Combat Simulator Settings File"
-		0,
-		filemgrOpenCopyFileMenuHandler,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
 		FILETYPE_MPPLAYER,
 		0,
 		L_OPTIONS_105, // "Combat Simulator Player File"
@@ -3344,14 +3320,6 @@ struct menuitem g_FilemgrOperationsMenuItems[] = {
 		FILETYPE_GAME,
 		0,
 		L_OPTIONS_103, // "Single Player Agent File"
-		0,
-		filemgrOpenDeleteFileMenuHandler,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		FILETYPE_MPSETUP,
-		0,
-		L_OPTIONS_104, // "Combat Simulator Settings File"
 		0,
 		filemgrOpenDeleteFileMenuHandler,
 	},

@@ -12,6 +12,7 @@
 #include "video.h"
 #include "input.h"
 #include "config.h"
+#include "mpsetups.h"
 #include "net/net.h"
 
 extern MenuItemHandlerResult menuhandlerMainMenuCombatSimulator(s32 operation, struct menuitem *item, union handlerdata *data);
@@ -60,6 +61,9 @@ MenuItemHandlerResult menuhandlerHostStart(s32 operation, struct menuitem *item,
 {
 	if (operation == MENUOP_SET) {
 		if (netStartServer(g_NetMenuPort, g_NetMenuMaxPlayers) == 0) {
+			// load the setup file when entering the Combat Simulator
+			mpsetupCopyAllFromPak();
+			mpsetupLoadCurrentFile();
 			menuhandlerMainMenuCombatSimulator(MENUOP_SET, NULL, NULL);
 			menuhandlerMpAdvancedSetup(MENUOP_SET, NULL, NULL);
 		}

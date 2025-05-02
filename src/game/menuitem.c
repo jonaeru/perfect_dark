@@ -615,6 +615,15 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 							height = 0;
 						}
 
+						// reuse the label color flag here
+						if (context->item->flags & MENUITEMFLAG_LABEL_CUSTOMCOLOUR) {
+							u32 savedunk04 = sp15c.list.unk04;
+							sp15c.list.unk04 = colour;
+							context->item->handler(MENUOP_GETCOLOUR, context->item, &sp15c);
+							colour = sp15c.list.unk04;
+							sp15c.list.unk04 = savedunk04;
+						}
+
 						gdl = textRenderProjected(gdl, &x, &y, text2, chars, font, colour, context->width - left + context->x, height, sp128, 0);
 
 						// Consider a checkbox
@@ -1521,6 +1530,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 			inputs->start = false;
 		}
 
+		u8 maxlen = item->param == 0 ? 10 : item->param;
 #ifndef PLATFORM_N64
 		if (g_MenuKeyboardPlayer == g_MpPlayerNum) {
 			// match caps state to keyboard shift/caps if typing with keyboard
@@ -1532,7 +1542,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 			// handle text input
 			s32 prevpos = strlen(kb->string);
 			s32 pos = prevpos;
-			s32 result = inputTextHandler(kb->string, sizeof(kb->string), &pos, true);
+			s32 result = inputTextHandler(kb->string, maxlen-1, &pos, true);
 			if (result == -1) {
 				// cancel
 				kb->row = 5;
@@ -1611,7 +1621,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				s32 textwidth;
 				s32 textheight;
 
-				if (kb->string[9] == '\0') {
+				if (kb->string[maxlen-1] == '\0') {
 					// String is not full
 					i = 0;
 
@@ -1647,7 +1657,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 		// Handle deleting
 		if (delete && kb->string[0] != '\0') {
 			s32 deleted = false;
-			s32 i = 10;
+			s32 i = maxlen;
 
 			menuPlaySound(MENUSOUND_FOCUS);
 

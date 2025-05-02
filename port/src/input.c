@@ -74,6 +74,9 @@ static s32 connectedMask = 0;
 
 static s32 numJoysticks = 0;
 
+static s32 useHIDAPI = 1;
+static s32 useRawInput = 1;
+
 static s32 mouseEnabled = 1;
 static s32 mouseX, mouseY;
 static s32 mouseDX, mouseDY;
@@ -85,8 +88,8 @@ static s32 mouseLockMode = MLOCK_AUTO;
 static u64 mouseCursorTime = 0;
 static s32 mouseShowCursor = 1;
 
-static f32 mouseSensX = 1.5f;
-static f32 mouseSensY = 1.5f;
+static f32 mouseSensX = 2.5f;
+static f32 mouseSensY = 2.5f;
 
 static s32 lastKey = 0;
 static char lastChar = 0;
@@ -674,6 +677,38 @@ static inline void inputLoadBinds(void)
 
 s32 inputInit(void)
 {
+	// Set SDL hints before initializing the controller subsystem.
+	if (useHIDAPI) {
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE, "1");
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5, "1");
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 22)
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_SWITCH, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS, "1");
+		// the two hints below enable Rumble and Motion Sensor for PS4/5 pads connected via bluetooth
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4_RUMBLE, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE, "1");
+#endif
+#if SDL_VERSION_ATLEAST(2, 23, 2)
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS, "1");
+#endif
+#if SDL_VERSION_ATLEAST(2, 25, 1)
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS3, "1");
+#endif
+#if SDL_VERSION_ATLEAST(2, 26, 0)
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_WII, "1");
+#endif
+	}
+	if (useRawInput) {
+		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1");
+	}
+
 	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
 		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 	}
@@ -1204,32 +1239,28 @@ void inputMouseGetRawDelta(s32 *dx, s32 *dy)
 	if (dy) *dy = mouseDY;
 }
 
-void inputMouseGetScaledDelta(f32 *dx, f32 *dy)
+void inputMouseGetScaledDelta(f32* dx, f32* dy)
 {
-	f32 mdx, mdy;
-	if (mouseLocked) {
-		mdx = mouseSensX * (f32)mouseDX / 100.0f;
-		mdy = mouseSensY * (f32)mouseDY / 100.0f;
-	} else {
-		mdx = 0.f;
-		mdy = 0.f;
-	}
-	if (dx) *dx = mdx;
-	if (dy) *dy = mdy;
+		f32 mdx = 0.f, mdy = 0.f;
+
+		if (mouseLocked) {
+				mdx = mouseSensX * ((f32)mouseDX / 3.5f) * 0.022f;
+				mdy = mouseSensY * ((f32)mouseDY / 3.5f) * 0.022f;
+		}
+		if (dx) *dx = mdx;
+		if (dy) *dy = mdy;
 }
 
-void inputMouseGetAbsScaledDelta(f32 *dx, f32 *dy)
+void inputMouseGetAbsScaledDelta(f32* dx, f32* dy)
 {
-	f32 mdx, mdy;
-	if (mouseLocked) {
-		mdx = fabsf(mouseSensX) * (f32)mouseDX / 100.0f;
-		mdy = fabsf(mouseSensY) * (f32)mouseDY / 100.0f;
-	} else {
-		mdx = 0.f;
-		mdy = 0.f;
-	}
-	if (dx) *dx = mdx;
-	if (dy) *dy = mdy;
+		f32 mdx = 0.f, mdy = 0.f;
+
+		if (mouseLocked) {
+				mdx = fabsf(mouseSensX) * ((f32)mouseDX / 3.5f) * 0.022f;
+				mdy = fabsf(mouseSensY) * ((f32)mouseDY / 3.5f) * 0.022f;
+		}
+		if (dx) *dx = mdx;
+		if (dy) *dy = mdy;
 }
 
 void inputMouseGetSpeed(f32 *x, f32 *y)
@@ -1482,6 +1513,8 @@ PD_CONSTRUCTOR static void inputConfigInit(void)
 	configRegisterFloat("Input.MouseSpeedY", &mouseSensY, -10.f, 10.f);
 	configRegisterInt("Input.FakeGamepads", &fakeControllers, 0, 4);
 	configRegisterInt("Input.FirstGamepadNum", &firstController, 0, 3);
+	configRegisterInt("Input.UseHIDAPI", &useHIDAPI, 0, 1);
+	configRegisterInt("Input.UseRawInput", &useRawInput, 0, 1);
 
 	char secname[] = "Input.Player1.Binds";
 	char keyname[256] = { 0 };

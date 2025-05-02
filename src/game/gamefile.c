@@ -395,8 +395,6 @@ s32 gamefileLoad(s32 device)
 				frSetWeaponFound(WEAPON_REMOTEMINE);
 			}
 #endif
-
-			func0f0d54c4(&buffer);
 			gamefileApplyOptions(&g_GameFile);
 
 			return 0;
@@ -499,7 +497,7 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 
 	if (device >= 0) {
 		savebufferClear(&buffer);
-		func0f0d55a4(&buffer, g_GameFile.name);
+		savebufferWriteString(&buffer, g_GameFile.name);
 
 		savebufferOr(&buffer, g_GameFile.thumbnail, 5);
 		savebufferOr(&buffer, g_GameFile.totaltime, 32);
@@ -555,8 +553,6 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 		for (i = 0; i < 4; i++) {
 			savebufferOr(&buffer, g_GameFile.weaponsfound[i], 8);
 		}
-
-		func0f0d54c4(&buffer);
 
 		ret = pakSaveAtGuid(device, fileid, PAKFILETYPE_GAME, buffer.bytes, &newfileid, 0);
 		g_FilemgrLastPakError = ret;

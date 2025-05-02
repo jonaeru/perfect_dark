@@ -30,6 +30,9 @@
 #include "types.h"
 #ifndef PLATFORM_N64
 #include "net/net.h"
+#include "fs.h"
+#include "system.h"
+#include "mpsetups.h"
 #endif
 
 #ifndef PLATFORM_N64 // All in One Mod
@@ -108,23 +111,25 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 #ifndef PLATFORM_N64
 	// fix X-Ray Scanner model
 	/*0x22*/ { WEAPON_XRAYSCANNER,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_XRAYSCANNER,     MODEL_XRAYSPECS,        256 },
+	/*0x23*/ { WEAPON_NIGHTVISION,      0,                    0,   0,                   0,  1, 0,                                MODEL_CHRNIGHTSIGHT,    256 },
+	/*0x24*/ { WEAPON_IRSCANNER,        0,                    0,   0,                   0,  1, 0,                                MODEL_MISC_IRSPECS,     256 },
 #else
 	/*0x22*/ { WEAPON_XRAYSCANNER,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_XRAYSCANNER,     MODEL_CHRNIGHTSIGHT,    256 },
 #endif
-	/*0x23*/ { WEAPON_CLOAKINGDEVICE,   0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_CLOAKINGDEVICE,  MODEL_CHRCLOAKER,       256 },
-	/*0x24*/ { WEAPON_COMBATBOOST,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_COMBATBOOST,     MODEL_CHRSPEEDPILL,     256 },
+	/*0x25*/ { WEAPON_CLOAKINGDEVICE,   0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_CLOAKINGDEVICE,  MODEL_CHRCLOAKER,       256 },
+	/*0x26*/ { WEAPON_COMBATBOOST,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_COMBATBOOST,     MODEL_CHRSPEEDPILL,     256 },
 #ifndef PLATFORM_N64
-	/*0x25*/ { WEAPON_PP9I,             AMMOTYPE_PISTOL,      80,  0,                   0,  1, 0,                                MODEL_CHRWPPK,          256 },
-	/*0x26*/ { WEAPON_CC13,             AMMOTYPE_PISTOL,      80,  0,                   0,  1, 0,                                MODEL_CHRTT33,          256 },
-	/*0x27*/ { WEAPON_KL01313,          AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRSKORPION,      256 },
-	/*0x28*/ { WEAPON_KF7SPECIAL,       AMMOTYPE_RIFLE,       100, 0,                   0,  1, 0,                                MODEL_CHRKALASH,        256 },
-	/*0x29*/ { WEAPON_ZZT,              AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRUZI,           256 },
-	/*0x2a*/ { WEAPON_DMC,              AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRMP5K,          256 },
-	/*0x2b*/ { WEAPON_AR53,             AMMOTYPE_RIFLE,       150, 0,                   0,  1, 0,                                MODEL_CHRM16,           256 },
-	/*0x2c*/ { WEAPON_RCP45,            AMMOTYPE_SMG,         150, 0,                   0,  1, 0,                                MODEL_CHRFNP90,         256 },
+	/*0x27*/ { WEAPON_PP9I,             AMMOTYPE_PISTOL,      80,  0,                   0,  1, 0,                                MODEL_CHRWPPK,          256 },
+	/*0x28*/ { WEAPON_CC13,             AMMOTYPE_PISTOL,      80,  0,                   0,  1, 0,                                MODEL_CHRTT33,          256 },
+	/*0x29*/ { WEAPON_KL01313,          AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRSKORPION,      256 },
+	/*0x2a*/ { WEAPON_KF7SPECIAL,       AMMOTYPE_RIFLE,       100, 0,                   0,  1, 0,                                MODEL_CHRKALASH,        256 },
+	/*0x2b*/ { WEAPON_ZZT,              AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRUZI,           256 },
+	/*0x2c*/ { WEAPON_DMC,              AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRMP5K,          256 },
+	/*0x2d*/ { WEAPON_AR53,             AMMOTYPE_RIFLE,       150, 0,                   0,  1, 0,                                MODEL_CHRM16,           256 },
+	/*0x2e*/ { WEAPON_RCP45,            AMMOTYPE_SMG,         150, 0,                   0,  1, 0,                                MODEL_CHRFNP90,         256 },
 #endif
-	/*0x2d*/ { WEAPON_MPSHIELD,         0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_SHIELD,          MODEL_CHRSHIELD,        256 },
-	/*0x2e*/ { WEAPON_DISABLED }, // 0x25 on N64
+	/*0x2f*/ { WEAPON_MPSHIELD,         0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_SHIELD,          MODEL_CHRSHIELD,        256 },
+	/*0x30*/ { WEAPON_DISABLED }, // 0x25 on N64
 };
 
 #ifndef PLATFORM_N64
@@ -763,12 +768,6 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 	for (i = 0; i < ARRAYCOUNT(g_PlayerConfigsArray); i++) {
 		g_PlayerConfigsArray[playernum].gunfuncs[i] = 0;
 	}
-
-#ifndef PLATFORM_N64
-	for (i = 0; i < ARRAYCOUNT(g_MpWeapons); i++) {
-		g_MpWeaponSetRandomFilters[i] = 1;
-	}
-#endif
 }
 
 void func0f1881d4(s32 index)
@@ -780,7 +779,7 @@ void func0f1881d4(s32 index)
 	g_BotConfigsArray[index].difficulty = BOTDIFF_DISABLED;
 }
 
-void mpInit(void)
+void mpInit(bool resetplayers)
 {
 	s32 i;
 	s32 j;
@@ -813,8 +812,10 @@ void mpInit(void)
 
 	strcpy(g_MpSetup.name, "");
 
-	for (i = 0; i < ARRAYCOUNT(g_PlayerConfigsArray); i++) {
-		mpPlayerSetDefaults(i, false);
+	if (resetplayers) {
+		for (i = 0; i < ARRAYCOUNT(g_PlayerConfigsArray); i++) {
+			mpPlayerSetDefaults(i, false);
+		}
 	}
 
 	for (i = 0; i < MAX_BOTS; i++) {
@@ -847,6 +848,16 @@ void mpInit(void)
 	}
 
 	g_MpSetup.chrslots = 0;
+
+	for (i = 0; i < ARRAYCOUNT(g_Menus); i++) {
+		g_Menus[i].mpsetup.showpresets = 1;
+	}
+
+#ifndef PLATFORM_N64
+	for (i = 0; i < ARRAYCOUNT(g_MpWeapons); i++) {
+		g_MpWeaponSetRandomFilters[i] = 1;
+	}
+#endif
 }
 
 #if VERSION >= VERSION_PAL_BETA
@@ -3793,7 +3804,7 @@ void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
 	s32 j;
 	u32 stack;
 
-	func0f0d55a4(buffer, g_PlayerConfigsArray[playernum].base.name);
+	savebufferWriteString(buffer, g_PlayerConfigsArray[playernum].base.name);
 
 	if (g_PlayerConfigsArray[playernum].time > 0x0fffffff) { // over 3106 days
 		g_PlayerConfigsArray[playernum].time = 0x0fffffff;
@@ -3944,8 +3955,6 @@ s32 mpplayerfileSave(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 	if (device >= 0) {
 		savebufferClear(&buffer);
 		mpplayerfileSaveWad(playernum, &buffer);
-		func0f0d54c4(&buffer);
-
 		var80075bd0[2] = true;
 
 		ret = pakSaveAtGuid(device, fileid, PAKFILETYPE_MPPLAYER, buffer.bytes, &newfileid, 0);
@@ -3978,8 +3987,6 @@ s32 mpplayerfileLoad(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 			g_PlayerConfigsArray[playernum].fileguid.deviceserial = deviceserial;
 
 			mpplayerfileLoadWad(playernum, &buffer, 1);
-			func0f0d54c4(&buffer);
-
 			g_PlayerConfigsArray[playernum].handicap = 0x80;
 			return 0;
 		}
@@ -4177,21 +4184,54 @@ void mp0f18dec4(s32 slot)
 #endif
 }
 
-void mpsetupfileLoadWad(struct savebuffer *buffer)
+static u64 packWeaponSetRandomFilters()
+{
+	u64 packed = 0;
+	for (int i = 0; i < NUM_MPWEAPONS; ++i) {
+		packed |= g_MpWeaponSetRandomFilters[i] != 0 ? (1LL << i) : 0;
+	}
+
+	return packed;
+}
+
+static void unpackWeaponSetRandomFilters(u64 packed)
+{
+	for (int i = 0; i < NUM_MPWEAPONS; ++i) {
+		g_MpWeaponSetRandomFilters[i] = (packed & (1LL << i)) != 0;
+	}
+}
+
+void mpsetupfileLoadWad(struct savebuffer *buffer, u8 version)
 {
 	s32 i;
 	s32 j;
 
-	savebufferReadString(buffer, g_MpSetup.name, false);
+	if (version > 0) {
+		savebufferReadString_ext(buffer, g_MpSetup.name, false, MPSETUP_MAXNAME + 1);
+	}
+	else {
+		savebufferReadString(buffer, g_MpSetup.name, false);
+	}
+
 	savebufferReadBits(buffer, 4);
 
 	g_MpSetup.stagenum = savebufferReadBits(buffer, 7);
 	g_MpSetup.scenario = savebufferReadBits(buffer, 3);
 
-	scenarioInit();
-	scenarioReadSave(buffer);
+	// version == 0 means we're only reading to convert, so no actions are needed
+	if (version > 0) {
+		scenarioInit();
+	}
 
-	g_MpSetup.options = savebufferReadBits(buffer, 21);
+	scenarioReadSave(buffer, version);
+
+	if (version > 0) {
+		g_MpSetup.options = savebufferReadBits(buffer, 32);
+	}
+	else {
+		g_MpSetup.options = savebufferReadBits(buffer, 21);
+	}
+
 	g_MpSetup.chrslots &= 0x000f;
 
 	for (i = 0; i < MAX_BOTS; i++) {
@@ -4212,13 +4252,20 @@ void mpsetupfileLoadWad(struct savebuffer *buffer)
 		g_BotConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 	}
 
-	mpGenerateBotNames();
+	if (version > 0) {
+		mpGenerateBotNames();
+	}
 
 	for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 		g_MpSetup.weapons[i] = savebufferReadBits(buffer, 7);
 	}
 
-	func0f18913c();
+	if (version > 0) {
+		u64 wpnRndPacked = savebufferReadBits(buffer, 64);
+		unpackWeaponSetRandomFilters(wpnRndPacked);
+	}
+
+	g_MpWeaponSetNum = savebufferReadBits(buffer, 8);
 
 	g_MpSetup.timelimit = savebufferReadBits(buffer, 6);
 	g_MpSetup.scorelimit = savebufferReadBits(buffer, 7);
@@ -4237,7 +4284,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	s32 mpbodynum;
 	s32 i;
 
-	func0f0d55a4(buffer, g_MpSetup.name);
+	savebufferWriteString_ext(buffer, g_MpSetup.name, MPSETUP_MAXNAME + 1);
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		if (g_MpSetup.chrslots & (1 << (i + MAX_PLAYERS))) {
@@ -4251,7 +4298,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 
 	scenarioWriteSave(buffer);
 
-	savebufferOr(buffer, g_MpSetup.options, 21);
+	savebufferOr(buffer, g_MpSetup.options, 32);
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		savebufferOr(buffer, g_BotConfigsArray[i].type, 5);
@@ -4284,6 +4331,10 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 		savebufferOr(buffer, g_MpSetup.weapons[i], 7);
 	}
 
+	u64 wpnRndPacked = packWeaponSetRandomFilters();
+	savebufferOr(buffer, wpnRndPacked, 64);
+	savebufferOr(buffer, g_MpWeaponSetNum, 8);
+
 	savebufferOr(buffer, g_MpSetup.timelimit, 6);
 	savebufferOr(buffer, g_MpSetup.scorelimit, 7);
 	savebufferOr(buffer, g_MpSetup.teamscorelimit, 9);
@@ -4297,67 +4348,13 @@ void mpsetupfileGetOverview(char *arg0, char *filename, u16 *numsims, u16 *stage
 {
 	struct savebuffer buffer;
 
-	savebufferWriteData(&buffer, arg0, 15);
+	savebufferWriteData(&buffer, arg0, 22);
 
-	savebufferReadString(&buffer, filename, 0);
+	savebufferReadString_ext(&buffer, filename, 0, MPSETUP_MAXNAME+1);
 
 	*numsims = savebufferReadBits(&buffer, 4);
 	*stagenum = savebufferReadBits(&buffer, 7);
 	*scenarionum = savebufferReadBits(&buffer, 3);
-}
-
-s32 mpsetupfileSave(s32 device, s32 fileid, u16 deviceserial)
-{
-	s32 ret;
-	s32 newfileid;
-	struct savebuffer buffer;
-
-	if (device >= 0) {
-		savebufferClear(&buffer);
-		mpsetupfileSaveWad(&buffer);
-		func0f0d54c4(&buffer);
-
-		ret = pakSaveAtGuid(device, fileid, PAKFILETYPE_MPSETUP, buffer.bytes, &newfileid, 0);
-		var80075bd0[1] = true;
-
-		if (ret == 0) {
-			g_MpSetup.fileguid.fileid = newfileid;
-			g_MpSetup.fileguid.deviceserial = deviceserial;
-			return 0;
-		}
-
-		g_FilemgrLastPakError = ret;
-		return -1;
-	}
-
-	return -1;
-}
-
-s32 mpsetupfileLoad(s32 device, s32 fileid, u16 deviceserial)
-{
-	s32 ret;
-	struct savebuffer buffer;
-
-	if (device >= 0) {
-		savebufferClear(&buffer);
-		ret = pakReadBodyAtGuid(device, fileid, buffer.bytes, 0);
-
-		if (ret == 0) {
-			g_MpSetup.fileguid.fileid = fileid;
-			g_MpSetup.fileguid.deviceserial = deviceserial;
-
-			mpsetupfileLoadWad(&buffer);
-			func0f0d54c4(&buffer);
-
-			return 0;
-		}
-
-		g_FilemgrLastPakError = ret;
-
-		return -1;
-	}
-
-	return -1;
 }
 
 void func0f18e558(void)

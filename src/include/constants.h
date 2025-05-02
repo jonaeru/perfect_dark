@@ -3024,7 +3024,7 @@
 #define MPWEAPON_SHIELD           (VERSION == VERSION_JPN_FINAL ? 0x24 : 0x25)
 #define MPWEAPON_DISABLED         (VERSION == VERSION_JPN_FINAL ? 0x25 : 0x26)
 #define NUM_MPWEAPONS             (VERSION == VERSION_JPN_FINAL ? 0x26 : 0x27)
-#else // add all classic weapons to multiplayer and allow combat knife in JPN
+#else // add all classic weapons to multiplayer and allow combat knife in JPN and add IR Scanner and Night Vision
 #define MPWEAPON_COMBATKNIFE      0x19
 #define MPWEAPON_CROSSBOW         0x1a
 #define MPWEAPON_TRANQUILIZER     0x1b
@@ -3035,19 +3035,21 @@
 #define MPWEAPON_REMOTEMINE       0x20
 #define MPWEAPON_LASER            0x21
 #define MPWEAPON_XRAYSCANNER      0x22
-#define MPWEAPON_CLOAKINGDEVICE   0x23
-#define MPWEAPON_COMBATBOOST      0x24
-#define MPWEAPON_PP9I             0x25
-#define MPWEAPON_CC13             0x26
-#define MPWEAPON_KL01313          0x27
-#define MPWEAPON_KF7SPECIAL       0x28
-#define MPWEAPON_ZZT              0x29
-#define MPWEAPON_DMC              0x2a
-#define MPWEAPON_AR53             0x2b
-#define MPWEAPON_RCP45            0x2c
-#define MPWEAPON_SHIELD           0x2d
-#define MPWEAPON_DISABLED         0x2e
-#define NUM_MPWEAPONS             0x2f
+#define MPWEAPON_NIGHTVISION      0x23
+#define MPWEAPON_IRSCANNER        0x24
+#define MPWEAPON_CLOAKINGDEVICE   0x25
+#define MPWEAPON_COMBATBOOST      0x26
+#define MPWEAPON_PP9I             0x27
+#define MPWEAPON_CC13             0x28
+#define MPWEAPON_KL01313          0x29
+#define MPWEAPON_KF7SPECIAL       0x2a
+#define MPWEAPON_ZZT              0x2b
+#define MPWEAPON_DMC              0x2c
+#define MPWEAPON_AR53             0x2d
+#define MPWEAPON_RCP45            0x2e
+#define MPWEAPON_SHIELD           0x2f
+#define MPWEAPON_DISABLED         0x30
+#define NUM_MPWEAPONS             0x31
 #endif
 
 #define MUSICEVENTTYPE_PLAY        1
@@ -4806,6 +4808,10 @@ enum weaponnum {
 #define CROSSHAIR_HEALTH_ON_WHITE 2
 
 #define EXTRA_SLEEP_TIME 1000LL // 100us
+
+#define MPSETUP_MAXSETUPS 128
+#define MPSETUP_MAXNAME 17
+#define MPSETUP_BLOCKSIZE 80
 
 #define NETMODE_NONE 0
 #define NETMODE_SERVER 1

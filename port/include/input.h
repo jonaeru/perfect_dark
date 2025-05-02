@@ -40,6 +40,7 @@ enum virtkey {
 	VK_DELETE = 76,
 	VK_LCTRL = 224,
 	VK_LSHIFT = 225,
+	VK_LALT = 226,
 	VK_RCTRL = 228,
 	VK_RSHIFT = 229,
 
@@ -56,6 +57,8 @@ enum virtkey {
 	/* same order as SDL gamecontroller buttons plus two buttons for triggers */
 	VK_JOY_BEGIN,
 	VK_JOY1_BEGIN = VK_JOY_BEGIN,
+	VK_JOY1_LSHOULDER = VK_JOY1_BEGIN + 9,
+	VK_JOY1_RSHOULDER = VK_JOY1_BEGIN + 10,
 	VK_JOY1_LTRIG = VK_JOY1_BEGIN + 30,
 	VK_JOY1_RTRIG = VK_JOY1_BEGIN + 31,
 	VK_JOY2_BEGIN = VK_JOY1_BEGIN + INPUT_MAX_CONTROLLER_BUTTONS,

@@ -3301,7 +3301,7 @@ struct menuitemdata_dropdown {
 };
 
 struct menuitemdata_keyboard {
-	char string[11];
+	char string[MPSETUP_MAXNAME+1];
 	s8 col;
 	s8 row;
 	u8 capslock : 1;      // Pressed A on caps button
@@ -3780,6 +3780,7 @@ struct menudata_main {
 struct menudata_mpsetup {
 	u32 slotindex;
 	u32 slotcount;
+	u8 showpresets;
 	u32 unke24;
 };
 
@@ -3988,13 +3989,14 @@ struct menu {
 	union {
 		struct menudata_endscreen endscreen;
 		struct menudata_main main;
-		struct menudata_mpsetup mpsetup;
 		struct menudata_mppause mppause;
 		struct menudata_mpend mpend;
 		struct menudata_filemgr fm;
 		struct menudata_main4mb main4mb;
 		struct menudata_training training;
 	};
+
+	struct menudata_mpsetup mpsetup;
 };
 
 struct gamefile {
@@ -4089,7 +4091,7 @@ struct missionconfig {
 };
 
 struct mpsetup {
-	/*0x800acb88*/ char name[12];
+	/*0x800acb88*/ char name[MPSETUP_MAXNAME+1];
 	/*0x800acb94*/ u32 options;
 	/*0x800acb98*/ u8 scenario;
 	/*0x800acb99*/ u8 stagenum;
@@ -6169,6 +6171,17 @@ struct extplayerconfig {
 	u32 crosshairsize;
 	s32 crosshairhealth;
 	s32 usereloads;
+};
+
+struct setupblock {
+	u8 bytes[MPSETUP_BLOCKSIZE];
+};
+
+struct mpsetupfile {
+	u8 version;
+	u8 defaultsetup;
+	u8 numsetups;
+	struct setupblock setups[MPSETUP_MAXSETUPS];
 };
 
 #endif

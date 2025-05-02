@@ -22,5 +22,6 @@ FILE *fsFileOpenRead(const char *name);
 void fsFileFree(FILE *f);
 
 const char *fsGetModDir(void);
+s32 fsCreateDir(const char *path);
 
 #endif

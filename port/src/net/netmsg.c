@@ -31,6 +31,20 @@
 
 /* utils */
 
+static inline u32 netbufReadHidden(struct netbuf *buf)
+{
+	u32 hidden = netbufReadU32(buf);
+
+	// swap owner player numbers to match server
+	const u8 ownerclid = (hidden & 0xf0000000) >> 28;
+	if (ownerclid < NET_MAX_CLIENTS) {
+		const u8 ownerplayernum = g_NetClients[ownerclid].playernum;
+		hidden = (hidden & 0x0fffffff) | (ownerplayernum << 28);
+	}
+
+	return hidden;
+}
+
 static inline u32 netbufWriteRooms(struct netbuf *buf, const s16 *rooms, const s32 num)
 {
 	for (s32 i = 0; i < num; ++i) {
@@ -930,6 +944,7 @@ u32 netmsgSvcPropSpawnWrite(struct netbuf *dst, struct prop *prop)
 				const u8 ownerplayernum = (prop->obj->hidden & 0xf0000000) >> 28;
 				netbufWriteU8(dst, autogun->ammoquantity);
 				netbufWriteU8(dst, autogun->firecount);
+				netbufWriteU8(dst, autogun->targetteam);
 				netbufWriteU8(dst, g_Vars.players[ownerplayernum]->client->id);
 			}
 			break;
@@ -1049,9 +1064,13 @@ u32 netmsgSvcPropSpawnRead(struct netbuf *src, struct netclient *srccl)
 			// thrown laptop?
 			const u8 ammocount = netbufReadU8(src);
 			const u8 firecount = netbufReadU8(src);
+			const u8 targetteam = netbufReadU8(src);
 			const u8 clid = netbufReadU8(src);
 			struct chrdata *ownerchr = g_NetClients[clid].player->prop->chr;
 			struct autogunobj *obj = laptopDeploy(modelnum, NULL, ownerchr);
+			obj->ammoquantity = ammocount;
+			obj->firecount = firecount;
+			obj->targetteam = targetteam;
 			prop = obj->base.prop;
 		}
 	}
@@ -1086,7 +1105,7 @@ u32 netmsgSvcPropSpawnRead(struct netbuf *src, struct netclient *srccl)
 		const u32 flags = netbufReadU32(src);
 		const u32 flags2 = netbufReadU32(src);
 		const u32 flags3 = netbufReadU32(src);
-		u32 hidden = netbufReadU32(src);
+		const u32 hidden = netbufReadHidden(src);
 		const u8 hidden2 = netbufReadU8(src);
 		const u16 extrascale = netbufReadU16(src);
 		const s16 pad = netbufReadS16(src);
@@ -1115,15 +1134,11 @@ u32 netmsgSvcPropSpawnRead(struct netbuf *src, struct netclient *srccl)
 					prop->obj->projectile->powerlimit240 = TICKS(1200);
 					prop->obj->projectile->smoketimer240 = TICKS(24);
 				}
-				if (type == PROPTYPE_WEAPON && (prop->obj->projectile->flags & PROJECTILEFLAG_00000002)) {
+				if ((type == PROPTYPE_WEAPON && (prop->obj->projectile->flags & PROJECTILEFLAG_00000002)) || objtype == OBJTYPE_AUTOGUN) {
 					// this is a thrown projectile, play throw sound
 					psCreate(NULL, prop, SFX_THROW, -1, -1, 0, 0, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 				}
 			}
-			// swap owner player numbers to match server
-			u8 ownerplayernum = (hidden & 0xf0000000) >> 28;
-			ownerplayernum = g_NetClients[ownerplayernum].playernum;
-			hidden = (hidden & 0x0fffffff) | (ownerplayernum << 28);
 			prop->obj->flags = flags;
 			prop->obj->flags2 = flags2;
 			prop->obj->flags3 = flags3;
@@ -1167,7 +1182,7 @@ u32 netmsgSvcPropDamageRead(struct netbuf *src, struct netclient *srccl)
 	const f32 damage = netbufReadF32(src);
 	const s8 weaponnum = netbufReadS8(src);
 	const s8 playernum = netbufReadS8(src);
-	const u32 hidden = netbufReadU32(src);
+	const u32 hidden = netbufReadHidden(src);
 	if (srccl->state < CLSTATE_GAME) {
 		return src->error;
 	}
@@ -1284,7 +1299,7 @@ u32 netmsgSvcPropDoorRead(struct netbuf *src, struct netclient *srccl)
 	const u8 clid = netbufReadU8(src);
 	const s8 doormode = netbufReadS8(src);
 	const u32 flags = netbufReadU32(src);
-	const u32 hidden = netbufReadU32(src);
+	const u32 hidden = netbufReadHidden(src);
 
 	struct netclient *actcl = (clid == NET_NULL_CLIENT) ? NULL : &g_NetClients[clid];
 

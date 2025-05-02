@@ -1627,9 +1627,9 @@ void propCalculateShadeColour(struct prop *prop, u8 *nextcol, u16 floorcol)
 	{
 		s32 shade = func0f068fc8(prop, 0);
 
-		// fix props flickering in split screen when one of the players has night vision on
+		// fix props flickering in split screen when one of the players has night vision or IR Goggles on
 		if (prop->type != PROPTYPE_PLAYER || g_Vars.currentplayer->prop != prop) {
-			if (USINGDEVICE(DEVICE_NIGHTVISION)) {
+			if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
 				if (prop->rooms[0] >= 0) {
 					shade = g_Rooms[prop->rooms[0]].br_settled_regional;
 				}
@@ -6692,6 +6692,12 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 				}
 
 				if (projectile->speed.f[0] == 0.0f && projectile->speed.f[2] == 0.0f && projectile->unk0dc == 0.0f) {
+#ifndef PLATFORM_N64
+					if (g_NetMode == NETMODE_SERVER) {
+						// sliding object has stopped, sync the final position just in case
+						netmsgSvcPropMoveWrite(&g_NetMsgRel, prop, NULL);
+					}
+#endif
 					objFreeProjectile(obj);
 				}
 
@@ -15427,6 +15433,11 @@ void objDamage(struct defaultobj *obj, f32 damage, struct coord *pos, s32 weapon
 			damage = -damage;
 		} else {
 			return;
+		}
+	} else if (g_NetMode == NETMODE_SERVER) {
+		if (obj->prop && obj->prop->type != PROPTYPE_CHR) {
+			// chr damage is handled by a separate message
+			netmsgSvcPropDamageWrite(&g_NetMsgRel, obj->prop, damage, pos, weaponnum, playernum);
 		}
 	}
 #endif

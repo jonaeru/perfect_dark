@@ -516,7 +516,6 @@ void menuTick(void)
 				(g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU)) {
 			var80062948 = 1;
 			filelistCreate(0, FILETYPE_MPPLAYER);
-			filelistCreate(1, FILETYPE_MPSETUP);
 		}
 
 		if (var80062944) {
