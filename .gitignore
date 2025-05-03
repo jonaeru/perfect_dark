@@ -25,3 +25,4 @@ tools/mkrom/mkrom
 /.vs
 CppProperties.json
 .idea
+cmake-build-debug

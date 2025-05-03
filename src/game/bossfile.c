@@ -138,8 +138,6 @@ void bossfileLoad(void)
 		g_BossFile.usingmultipletunes = savebufferReadBits(&buffer, 1);
 		g_AltTitleUnlocked = savebufferReadBits(&buffer, 1);
 		g_AltTitleEnabled = savebufferReadBits(&buffer, 1);
-
-		func0f0d54c4(&buffer);
 	}
 
 	if (failed) {
@@ -168,7 +166,7 @@ void bossfileSave(void)
 	savebufferOr(&buffer, g_Vars.language, 4);
 
 	for (i = 0; i < ARRAYCOUNT(g_BossFile.teamnames); i++) {
-		func0f0d55a4(&buffer, g_BossFile.teamnames[i]);
+		savebufferWriteString(&buffer, g_BossFile.teamnames[i]);
 	}
 
 	if (g_BossFile.tracknum == -1) {
@@ -184,8 +182,6 @@ void bossfileSave(void)
 	savebufferOr(&buffer, g_BossFile.usingmultipletunes, 1);
 	savebufferOr(&buffer, g_AltTitleUnlocked, 1);
 	savebufferOr(&buffer, g_AltTitleEnabled, 1);
-
-	func0f0d54c4(&buffer);
 
 	fileid = bossfileFindFileId();
 

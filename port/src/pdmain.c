@@ -276,7 +276,7 @@ void mainInit(void)
 	frametimeInit();
 	profileInit();
 	smokesInit();
-	mpInit();
+	mpInit(true);
 	pheadInit();
 	paksInit();
 	pheadInit2();

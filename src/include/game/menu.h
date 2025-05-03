@@ -113,6 +113,10 @@ MenuItemHandlerResult menuhandlerRepairPak(s32 operation, struct menuitem *item,
 MenuItemHandlerResult menuhandlerRetrySavePak(s32 operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerWarnRepairPak(s32 operation, struct menuitem *item, union handlerdata *data);
 
+s32 menuAlt1Pressed(s32 playerNum);
+s32 menuAlt2Pressed(s32 playerNum);
+s32 menuAltAnyPressed(s32 playerNum);
+
 extern const char var7f1b2658[];
 extern const char var7f1b265c[];
 extern const char var7f1b2660[];
