@@ -8477,7 +8477,7 @@ glabel var7f1aca90
 /*  f0a71e4:	100002d5 */ 	b	.L0f0a7d3c
 /*  f0a71e8:	8fbf0034 */ 	lw	$ra,0x34($sp)
 .L0f0a71ec:
-/*  f0a71ec:	0fc5d9ad */ 	jal	zbufDrawArtifactsOffscreen
+/*  f0a71ec:	0fc5d9ad */ 	jal	zbufSaveArtifactDepths
 /*  f0a71f0:	8fa4014c */ 	lw	$a0,0x14c($sp)
 /*  f0a71f4:	afa2014c */ 	sw	$v0,0x14c($sp)
 /*  f0a71f8:	0c002ca0 */ 	jal	viPrepareZbuf
@@ -9318,7 +9318,7 @@ glabel var7f1aca90
 /*  f0a71e4:	100002d5 */ 	b	.L0f0a7d3c
 /*  f0a71e8:	8fbf0034 */ 	lw	$ra,0x34($sp)
 .L0f0a71ec:
-/*  f0a71ec:	0fc5d9ad */ 	jal	zbufDrawArtifactsOffscreen
+/*  f0a71ec:	0fc5d9ad */ 	jal	zbufSaveArtifactDepths
 /*  f0a71f0:	8fa4014c */ 	lw	$a0,0x14c($sp)
 /*  f0a71f4:	afa2014c */ 	sw	$v0,0x14c($sp)
 /*  f0a71f8:	0c002ca0 */ 	jal	viPrepareZbuf
@@ -10159,7 +10159,7 @@ glabel var7f1aca90
 /*  f0a4f30:	100002cd */ 	beqz	$zero,.NB0f0a5a68
 /*  f0a4f34:	8fbf0034 */ 	lw	$ra,0x34($sp)
 .NB0f0a4f38:
-/*  f0a4f38:	0fc5c4d5 */ 	jal	zbufDrawArtifactsOffscreen
+/*  f0a4f38:	0fc5c4d5 */ 	jal	zbufSaveArtifactDepths
 /*  f0a4f3c:	8fa40144 */ 	lw	$a0,0x144($sp)
 /*  f0a4f40:	afa20144 */ 	sw	$v0,0x144($sp)
 /*  f0a4f44:	0c002d00 */ 	jal	viPrepareZbuf
@@ -10957,7 +10957,7 @@ void bgunRender(Gfx **gdlptr)
 	}
 
 #ifdef PLATFORM_N64 // TODO
-	gdl = zbufDrawArtifactsOffscreen(gdl);
+	gdl = zbufSaveArtifactDepths(gdl);
 #endif
 	gdl = viPrepareZbuf(gdl);
 	gdl = vi0000b1d0(gdl);

@@ -21,6 +21,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # On first build set the build type to RelWithDebInfo if it's not already set
 if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
@@ -187,6 +188,7 @@ add_compile_options(
   -Wno-unused-but-set-variable
   -Wno-unused-value
   -Wno-unused-variable
+  -fdiagnostics-color=always
 )
 
 # C specific flags

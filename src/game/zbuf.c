@@ -177,23 +177,31 @@ u16 *zbufGetArtifactsCfb(s32 index)
 	return addr;
 }
 
-Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
+/**
+ * This method is designed to save artifact depths
+ * prior to drawing the hands and weapon on-screen
+ * since drawing them requires clearing the zbuffer
+ * to avoid clipping the gun model on floors and walls.
+ *
+ * TODO: determine if this works with the PC port
+ */
+Gfx *zbufSaveArtifactDepths(Gfx *gdl)
 {
 	struct artifact *artifacts = schedGetWriteArtifacts();
 	u32 stack;
-	u16 *sp4c = g_ZbufPtr1;
-	u32 s4 = 0;
-	u16 *sp44;
-	u16 *s2;
-	u16 *image;
+	u16 *zbuf = g_ZbufPtr1;
+	u32 numsamples = 0;
+	u16 *samples;
+	u16 *thissample;
+	u16 *zbufrow;
 	s32 i;
 
 	viGetBackBuffer();
-	sp44 = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
+	samples = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
 	g_SchedSpecialArtifactIndexes[g_SchedWriteArtifactsIndex] = 1;
 
 	gDPPipeSync(gdl++);
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), OS_PHYSICAL_TO_K0(sp44));
+	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), OS_PHYSICAL_TO_K0(samples));
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_320, SCREEN_240);
 	gDPSetCycleType(gdl++, G_CYC_COPY);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -220,24 +228,24 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 		if (1);
 
 		if (artifacts[i].type != ARTIFACTTYPE_FREE) {
-			s2 = &sp44[s4];
-			image = &sp4c[artifacts[i].unk0c.u16_1 * viGetWidth()];
+			thissample = &samples[numsamples];
+			zbufrow = &zbuf[artifacts[i].screeny * viGetWidth()];
 
 			gDPPipeSync(gdl++);
-			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_320, image);
+			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_320, zbufrow);
 			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, 5, 0, 0, viGetWidth() - 1, 0);
 			gDPPipeSync(gdl++);
 
 			gSPTextureRectangle(gdl++,
-					s4 << 2, 0,
-					(s4 + 3) << 2, 0,
-					G_TX_RENDERTILE, (artifacts[i].unk0c.u16_2 * 32) + 16, 0x0010, 0x1000, 0);
+					numsamples << 2, 0,
+					(numsamples + 3) << 2, 0,
+					G_TX_RENDERTILE, (artifacts[i].screenx * 32) + 16, 0x0010, 0x1000, 0);
 
-			artifacts[i].unk0c.u16p = s2;
-			s4++;
+			artifacts[i].depthptr = thissample;
+			numsamples++;
 
-			if (s2);
+			if (thissample);
 		}
 	}
 
@@ -251,7 +259,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
 
-	if (sp44);
+	if (samples);
 
 	return gdl;
 }

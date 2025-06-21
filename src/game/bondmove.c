@@ -329,11 +329,11 @@ void bmoveUpdateSpeedTheta(void)
 f32 bmoveGetSpeedVertaLimit(f32 value)
 {
 	if (value > 0) {
-		return (viGetFovY() * value * -0.7f) / 60.0f;
+		return (viGetFovY() * value * -0.7f) / PLAYER_DEFAULT_FOV;
 	}
 
 	if (value < 0) {
-		return (viGetFovY() * -value * 0.7f) / 60.0f;
+		return (viGetFovY() * -value * 0.7f) / PLAYER_DEFAULT_FOV;
 	}
 
 	return 0;
@@ -341,7 +341,7 @@ f32 bmoveGetSpeedVertaLimit(f32 value)
 
 void bmoveUpdateSpeedVerta(f32 value)
 {
-	f32 mult = viGetFovY() / 60.0f;
+	f32 mult = viGetFovY() / PLAYER_DEFAULT_FOV;
 	f32 limit = bmoveGetSpeedVertaLimit(value);
 
 	if (value > 0) {
@@ -384,11 +384,11 @@ void bmoveUpdateSpeedVerta(f32 value)
 f32 bmoveGetSpeedThetaControlLimit(f32 value)
 {
 	if (value > 0) {
-		return (viGetFovY() * value * -0.7f) / 60.0f;
+		return (viGetFovY() * value * -0.7f) / PLAYER_DEFAULT_FOV;
 	}
 
 	if (value < 0) {
-		return (viGetFovY() * -value * 0.7f) / 60.0f;
+		return (viGetFovY() * -value * 0.7f) / PLAYER_DEFAULT_FOV;
 	}
 
 	return 0;
@@ -396,7 +396,7 @@ f32 bmoveGetSpeedThetaControlLimit(f32 value)
 
 void bmoveUpdateSpeedThetaControl(f32 value)
 {
-	f32 mult = viGetFovY() / 60.0f;
+	f32 mult = viGetFovY() / PLAYER_DEFAULT_FOV;
 	f32 limit = bmoveGetSpeedThetaControlLimit(value);
 
 	if (value > 0) {
@@ -2032,7 +2032,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			}
 		} else {
 			if (movedata.cannaturalpitch) {
-				tmp = viGetFovY() / 60.0f;
+				tmp = viGetFovY() / PLAYER_DEFAULT_FOV;
 				fVar25 = movedata.analogpitch / 70.0f;
 
 				if (fVar25 > 1) {
@@ -2073,7 +2073,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 	}
 
 	if (movedata.cannaturalturn) {
-		tmp = viGetFovY() / 60.0f;
+		tmp = viGetFovY() / PLAYER_DEFAULT_FOV;
 		fVar25 = movedata.analogturn / 70.0f;
 
 		if (fVar25 > 1) {

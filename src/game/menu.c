@@ -4011,7 +4011,7 @@ void menuReset(void)
 	g_MenuData.root = 0;
 	g_MenuData.unk010 = 0;
 	g_MenuData.bg = 0;
-	g_MenuData.unk5d5_06 = false;
+	g_MenuData.isdialogopen = false;
 	g_MenuData.nextbg = 255;
 	g_MenuData.bannernum = -1;
 

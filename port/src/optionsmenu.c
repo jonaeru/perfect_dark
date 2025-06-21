@@ -170,8 +170,6 @@ static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuit
 		inputMouseGetSpeed(&x, &y);
 		if (x < 0.f) {
 			data->slider.value = 0;
-		} else if (x > 10.f) {
-			data->slider.value = 1000;
 		} else {
 			data->slider.value = x * 100.f + 0.5f;
 		}
@@ -182,6 +180,7 @@ static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuit
 		break;
 	case MENUOP_GETSLIDERLABEL:
 		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		break;
 	}
 
 	return 0;
@@ -196,8 +195,6 @@ static MenuItemHandlerResult menuhandlerMouseSpeedY(s32 operation, struct menuit
 		inputMouseGetSpeed(&x, &y);
 		if (y < 0.f) {
 			data->slider.value = 0;
-		} else if (y > 10.f) {
-			data->slider.value = 1000;
 		} else {
 			data->slider.value = y * 100.f + 0.5f;
 		}
@@ -208,6 +205,7 @@ static MenuItemHandlerResult menuhandlerMouseSpeedY(s32 operation, struct menuit
 		break;
 	case MENUOP_GETSLIDERLABEL:
 		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		break;
 	}
 
 	return 0;
@@ -325,7 +323,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Mouse Speed X",
-		1000,
+		3000,
 		menuhandlerMouseSpeedX,
 	},
 	{
@@ -333,7 +331,7 @@ struct menuitem g_ExtendedMouseMenuItems[] = {
 		0,
 		MENUITEMFLAG_LITERAL_TEXT | MENUITEMFLAG_SLIDER_WIDE,
 		(uintptr_t)"Mouse Speed Y",
-		1000,
+		3000,
 		menuhandlerMouseSpeedY,
 	},
 	{

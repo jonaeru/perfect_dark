@@ -859,6 +859,11 @@ PakErr2 pakReadHeaderAtOffset(s8 device, u32 offset, struct pakfileheader *heade
 		return PAK_ERR2_BADOFFSET;
 	}
 
+	if (offset > g_Paks[device].pdnumbytes - sizeof(sp38)) {
+		// not enough bytes left for a header
+		return PAK_ERR2_BADOFFSET;
+	}
+
 	if (!pakRetrieveHeaderFromCache(device, blocknum, headerptr)) {
 		result = pakReadWriteBlock(device, PFS(device), g_Paks[device].pdnoteindex, 0, offset, sizeof(sp38), sp38);
 

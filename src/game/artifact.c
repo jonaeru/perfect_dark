@@ -7,7 +7,7 @@
 #include "game/game_0b2150.h"
 #include "game/tex.h"
 #include "game/sky.h"
-#include "game/game_13c510.h"
+#include "game/artifact.h"
 #include "game/bg.h"
 #include "game/stagetable.h"
 #include "game/room.h"
@@ -22,6 +22,70 @@
 #include "game/player.h"
 #include "game/prop.h"
 #endif
+
+/**
+ * Artifacts are points of interest in the z-buffer.
+ *
+ * They correspond to:
+ * - Individual circles in the lens flare effect from the sun.
+ * - Individual corners of each light fixture's box.
+ *
+ * The game needs to do line of sight checks to these points. The collision
+ * system would normally be used for line of sight checks, but it only works
+ * with basic geometric volumes and also doesn't take into account the player's
+ * gun. Instead, the checks are done by reading from the previous frame's
+ * z-buffer.
+ *
+ * Typically, the z-buffer would be read by the scheduler after a graphics frame
+ * is rendered, but this only works if the z-buffer is a complete image.
+ * PD draws the scene, then clears the z-buffer before drawing the player's gun,
+ * so the z-buffer at the end only contains the player's gun. To work around
+ * this, the GPU is given commands to read the z-buffer as a texture and copy
+ * depth values to a safe place before clearing it. Then once the frame is
+ * rendered, the scheduler compares the saved depths with the current z-buffer
+ * and updates the artifact, applying the minimum of the two depths.
+ *
+ * The scheduler maintains 3 arrays of artifacts, each referenced by indexes
+ * which rotate between them.
+ * - Artifacts are written by the main thread using the write index.
+ *   The write and front indexes are then incremented.
+ * - The same artifacts are updated by the scheduler using the pending index.
+ *   The pending index is then updated.
+ * - The artifacts are then rendered on a later frame using the front index.
+ *
+ * In each artifacts array, the first several slots are reserved for the sun
+ * flare artifacts. The quantity depends on the number of suns in the stage
+ * (Skedar Ruins has 3) and there are 8 artifacts per sun. The remaining slots
+ * are used for light fixture corners. The array is big enough to handle at
+ * least 90 lights on screen at a time.
+ *
+ * The initial state of the indexes are write=0, front=1, pending=0.
+ * These are set in sched_reset_artifacts.
+ *
+ * The detailed workflow is:
+ * - CPU: Light artifacts are determined and added to write artifacts (0) array
+ * - CPU: Constructs the gdl in this order:
+ *     - Render scene
+ *     - Copy relevant parts of z-buffer to write depths (0) array
+ *     - Clear z-buffer and render gun
+ *     - Render artifacts by reading from front artifacts (1) array
+ * - CPU: increments write (0 -> 1) and front (1 -> 2) indexes
+ * - GPU: Executes above task. g_ArtifactDepths0 now contains depths, and is
+ *       pointed to by pending.
+ * - Scheduler: Reads the z-buffer, which at this point only contains the gun
+ *       depth information, and updates the artifact with the minimum of the two
+ * - Scheduler: Increments pending (0 -> 1)
+ *
+ * It appears that the front index should be initialised to 2 instead, so that
+ * it's one frame behind the others rather than two frames behind.
+ *
+ * There's no doubt this went through several iterations before landing on this
+ * implementation. It's likely that this was implemented using a single and full
+ * z-buffer and it worked well until they decided to clear the z-buffer before
+ * rendering the gun. There is evidence in zbuf.c that they allocated a second
+ * z-buffer and swapped it. But when memory got too tight they had to change it
+ * to this texture read method.
+ */
 
 u8 *var800a41a0;
 u32 var800a41a4;
@@ -44,11 +108,25 @@ void artifactsTick(void)
 	schedIncrementFrontArtifacts();
 }
 
-u16 func0f13c574(f32 arg0)
+u16 floatToN64Depth(f32 arg0)
 {
+	/**
+	 * Method to convert a 32 bit floating point depth value to the
+	 * unsigned 16 bit integer format used by the zbuffer on the N64.
+	 * The argument arg0 represents z normalized to [0, 1] * 32704.0f.
+	 *
+	 * It works by converting the depth value to a large, unsigned 32 bit
+	 * integer before scaling back down to an unsigned 16 bit integer.
+	 * The scaling is done using bit shift operations on the most & least
+	 * significant bytes of the resulting 16 bit integer, likely because
+	 * bit shift operations are faster than division. The segmentation of
+	 * this calculation at values 0x3f800, 0x3f000, etc. is probably
+	 * intended to reduce z-fighting by adding more differentiation for
+	 * distant z values.
+	 */
 	u32 value = arg0 * 8.0f;
-	u32 left;
-	u32 right = value;
+	u32 left; // forms the most significant byte of the final u16
+	u32 right = value; // forms the least significant byte of the final u16
 
 	if (value > 0x3f800) {
 		right = value & 0x7ff;
@@ -87,7 +165,7 @@ u16 func0f13c574(f32 arg0)
 	return left << 13 | (right << 2);
 }
 
-s32 func0f13c710(f32 arg0)
+s32 artifactsFloatToInt(f32 arg0)
 {
 	if (arg0 > 0.0f) {
 		if (arg0 > 2147483520.0f) {
@@ -232,8 +310,8 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 
 					if (spdc[3] > 0.0001f) {
 						f20 = 1.0f / spdc[3];
-						x = func0f13c710(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
-						y = func0f13c710(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
+						x = artifactsFloatToInt(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
+						y = artifactsFloatToInt(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
 						f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 						if (f0 < 32576.0f) {
@@ -335,8 +413,8 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 								f20 = -9999.0f;
 							}
 
-							xi = func0f13c710(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
-							yi = func0f13c710(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
+							xi = artifactsFloatToInt(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
+							yi = artifactsFloatToInt(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
 							f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 							if (g_ZbufPtr1
@@ -357,14 +435,20 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 
 								if (index < MAX_ARTIFACTS) {
 #ifndef PLATFORM_N64
-									artifact->unk02 = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
+									artifact->visiblelos = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
 #endif
-									artifact->unk04 = func0f13c574(f0) >> 2;
-									artifact->unk08 = &g_ZbufPtr1[viGetWidth() * yi + xi];
+									/**
+									 * the original game performs artifact depth comparison
+									 * using the N64 depth values divided by 4. This is
+									 * accomplished by bit shifting the N64 depth value
+									 * to the right using >> 2
+									 */
+									artifact->expecteddepth = floatToN64Depth(f0) >> 2;
+									artifact->zbufptr = &g_ZbufPtr1[viGetWidth() * yi + xi];
 									artifact->light = &roomlights[i];
 									artifact->type = ARTIFACTTYPE_GLARE;
-									artifact->unk0c.u16_2 = xi;
-									artifact->unk0c.u16_1 = yi;
+									artifact->screenx = xi;
+									artifact->screeny = yi;
 								}
 							}
 						}
@@ -375,7 +459,7 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 	}
 }
 
-u8 func0f13d3c4(u8 arg0, u8 arg1)
+u8 artifactsClamp(u8 arg0, u8 arg1)
 {
 	if (arg1 >= arg0 + 7) {
 		return arg0 + 7;
@@ -423,18 +507,18 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 	u16 min;
 	u16 max;
 	f32 lightop_cur_frac;
-	s32 t2;
+	s32 numgood;
 	struct light *light;
 	u8 *s3;
 	s32 k;
 	s32 count;
-	u16 t4;
+	u16 actualdepth;
 	f32 add;
 	s32 l;
 	f32 brightness;
-	s32 avg;
+	s32 tolerance;
 	f32 f0;
-	s32 v1;
+	s32 difference;
 	s32 r;
 	s32 g;
 	s32 b;
@@ -460,6 +544,12 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 		struct light *light2 = artifacts[i].light;
 		count = 0;
 
+		/**
+		 * light arifacts are created from several, closely spaced
+		 * textures that give the appearance of a dynamic light glare
+		 * as the character moves. Loop to count all the sub-artifacts
+		 * in this light.
+		 */
 		for (j = i; j < MAX_ARTIFACTS && artifacts[j].type == ARTIFACTTYPE_GLARE && artifacts[j].light == light2; j++) {
 			count++;
 		}
@@ -470,51 +560,65 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 			if (roomnum == light->roomnum) {
 				lightindex = ((uintptr_t)light - (uintptr_t)g_BgLightsFileData) / sizeof(struct light);
 				s3 = &var800a41a0[lightindex * 3];
-				t2 = 0;
+				numgood = 0;
 				min = 0xffff;
 				max = 0;
 
+				/**
+				 * loop to determine the min & max depth of
+				 * the sub-artifacts composing this room light.
+				 */
 				for (k = i; k < i + count; k++) {
-					if (artifacts[k].unk04 > max) {
-						max = artifacts[k].unk04;
+					if (artifacts[k].expecteddepth > max) {
+						max = artifacts[k].expecteddepth;
 					}
 
-					if (artifacts[k].unk04 < min) {
-						min = artifacts[k].unk04;
+					if (artifacts[k].expecteddepth < min) {
+						min = artifacts[k].expecteddepth;
 					}
 				}
 
-				avg = (max - min) >> 1;
+				/**
+				 * Define a depth tolerance from the min & max
+				 * depths of sub-artifacts for a given light.
+				 * This will be used to determine which light
+				 * artifacts are visible when comparing depth
+				 * values of lights to other items rendered
+				 * on screen. Without this, the lights would
+				 * constantly flicker due to z-fighting caused
+				 * by the low precision of the N64 depth.
+				 */
+				tolerance = (max - min) >> 1;
 
-				if (avg < 25) {
-					avg = 25;
+				if (tolerance < 25) {
+					tolerance = 25;
 				}
 
 				for (k = i; k < i + count; k++) {
 #ifdef PLATFORM_N64
-					u16 tmp;
-					t4 = (artifacts[k].unk02 & 0xfffc) >> 2;
-					tmp = artifacts[k].unk04;
+					u16 expecteddepth;
+					actualdepth = (artifacts[k].actualdepth & 0xfffc) >> 2;
+					expecteddepth = artifacts[k].expecteddepth;
 
-					if (tmp < t4) {
-						v1 = t4 - tmp;
+					if (expecteddepth < actualdepth) {
+						difference = actualdepth - expecteddepth;
 					} else {
-						v1 = tmp - t4;
+						difference = expecteddepth - actualdepth;
 					}
 
-					if (avg >= v1) {
-						t2++;
+					if (difference <= tolerance) {
+						numgood++;
 					}
 #else
-					t2 += artifacts[k].unk02;
+					numgood += artifacts[k].visiblelos;
 #endif
 
 					artifacts[k].type = ARTIFACTTYPE_FREE;
 				}
 
-				s3[0] = func0f13d3c4(s3[0], t2 * 2);
+				s3[0] = artifactsClamp(s3[0], numgood * 2);
 
-				if (t2 > 0) {
+				if (numgood > 0) {
 					brightness = viGetFovY() * 0.017453292f;
 					add = cosf(brightness) / sinf(brightness) * 14.6f;
 

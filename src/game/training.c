@@ -1544,7 +1544,7 @@ bool frIsAmmoWasted(void)
 		}
 
 		// Check if there are any explosions
-		for (i = 0; i != MAX_EXPLOSIONS; i++) {
+		for (i = 0; i != g_MaxExplosions; i++) {
 			if (g_Explosions[i].prop) {
 				return false;
 			}

@@ -19,6 +19,7 @@
 #include "lib/str.h"
 #include "data.h"
 #include "types.h"
+#include "mpsetups.h"
 
 // bss
 struct fileguid g_FilemgrFileToCopy;
@@ -2732,6 +2733,10 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(s32 operation, struct me
 				g_GameFileGuid.fileid = file->fileid;
 				g_GameFileGuid.deviceserial = file->deviceserial;
 				filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_LOAD_GAME, 0);
+
+				// load the setup file when loading the agent
+				mpsetupCopyAllFromPak();
+				mpsetupLoadCurrentFile();
 			}
 		}
 		break;

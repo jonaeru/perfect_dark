@@ -64,7 +64,7 @@ void menuTick(void)
 	s32 i;
 	s32 j;
 	s32 k;
-	s32 sp344;
+	s32 isdialogopen;
 	s32 sp340 = true;
 	s32 anyopen = false;
 
@@ -490,15 +490,15 @@ void menuTick(void)
 	}
 
 	g_MpPlayerNum = 0;
-	sp344 = false;
+	isdialogopen = false;
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus); i++) {
 		if (g_Menus[i].curdialog) {
-			sp344 = true;
+			isdialogopen = true;
 		}
 	}
 
-	if ((g_MenuData.unk5d5_06 || g_MenuData.prevmenuroot != -1) && sp344 == false) {
+	if ((g_MenuData.isdialogopen || g_MenuData.prevmenuroot != -1) && isdialogopen == false) {
 		if ((g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU)
 				&& g_MenuData.prevmenuroot == -1) {
 			if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL) {
@@ -546,17 +546,17 @@ void menuTick(void)
 								setCurrentPlayerNum(playernum);
 								endscreenPushCoop();
 								setCurrentPlayerNum(prevplayernum);
-								sp344 = true;
+								isdialogopen = true;
 							}
 						} else if (g_Vars.antiplayernum >= 0) {
 							s32 prevplayernum = g_Vars.currentplayernum;
 							setCurrentPlayerNum(playernum);
 							endscreenPushAnti();
 							setCurrentPlayerNum(prevplayernum);
-							sp344 = true;
+							isdialogopen = true;
 						} else {
 							mpPushEndscreenDialog(playernum, i);
-							sp344 = true;
+							isdialogopen = true;
 
 							if (g_PlayerConfigsArray[i].fileguid.fileid && g_PlayerConfigsArray[i].fileguid.deviceserial) {
 								func0f0fd548(i);
@@ -576,7 +576,7 @@ void menuTick(void)
 			} else {
 				bool startmusic = false;
 				menuPushRootDialog(g_MenuData.prevmenudialog, g_MenuData.prevmenuroot);
-				sp344 = true;
+				isdialogopen = true;
 
 				if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
 					startmusic = true;
@@ -925,5 +925,5 @@ void menuTick(void)
 	}
 
 	g_ScaleX = 1;
-	g_MenuData.unk5d5_06 = sp344 ? true : false;
+	g_MenuData.isdialogopen = isdialogopen ? true : false;
 }

@@ -10,6 +10,6 @@ void zbufAllocate(void);
 void zbufSwap(void);
 Gfx *zbufConfigureRdp(Gfx *gdl);
 Gfx *zbufClear(Gfx *gdl);
-Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl);
+Gfx *zbufSaveArtifactDepths(Gfx *gdl);
 
 #endif

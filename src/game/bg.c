@@ -15,7 +15,7 @@
 #include "game/sky.h"
 #include "game/stars.h"
 #include "game/dyntex.h"
-#include "game/game_13c510.h"
+#include "game/artifact.h"
 #include "game/game_1531a0.h"
 #include "game/gfxmemory.h"
 #include "game/gfxreplace.h"

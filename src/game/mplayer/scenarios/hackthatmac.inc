@@ -7,6 +7,8 @@
  * cannot use weapons while uplinking.
  */
 
+extern struct menudialogdef g_ExtGameOptionsMenuDialog;
+
 #define HTM_NUM_TERMINALS 1
 
 struct menuitem g_HtmOptionsMenuItems[] = {
@@ -58,40 +60,6 @@ struct menuitem g_HtmOptionsMenuItems[] = {
 		MPOPTION_NOAUTOAIM,
 		menuhandlerMpCheckboxOption,
 	},
-#ifndef PLATFORM_N64
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"Start Armed",
-		MPOPTION_SPAWNWITHWEAPON,
-		menuhandlerMpCheckboxOption,
-	},
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"No Drug Blur",
-		MPOPTION_NODRUGBLUR,
-		menuhandlerMpCheckboxOption,
-	},
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR,
-		L_OPTIONS_257, // "Friendly Fire"
-		MPOPTION_FRIENDLYFIRE,
-		menuhandlerMpDisplayTeam,
-	},
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"No Player on Radar",
-		MPOPTION_NOPLAYERONRADAR,
-		menuhandlerMpCheckboxOption,
-	},
-#endif
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -149,7 +117,7 @@ struct menudialogdef g_HtmOptionsMenuDialog = {
 	g_HtmOptionsMenuItems,
 	mpOptionsMenuDialog,
 	MENUDIALOGFLAG_MPLOCKABLE,
-	NULL,
+	&g_ExtGameOptionsMenuDialog,
 };
 
 struct weaponobj g_HtmUplinkObj;

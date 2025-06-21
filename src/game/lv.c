@@ -28,7 +28,7 @@
 #include "game/portal.h"
 #include "game/fmb.h"
 #include "game/sky.h"
-#include "game/game_13c510.h"
+#include "game/artifact.h"
 #include "game/game_1531a0.h"
 #include "game/zbuf.h"
 #include "game/challenge.h"

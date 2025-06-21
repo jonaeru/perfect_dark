@@ -35,7 +35,7 @@
 #endif
 
 struct explosion *g_Explosions;
-s32 g_MaxExplosions;
+s32 g_MaxExplosions = MAX_EXPLOSIONS_DEFAULT;
 
 s32 g_ExplosionShakeTotalTimer = 0;
 s32 g_ExplosionShakeIntensityTimer = 0;

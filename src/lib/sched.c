@@ -540,20 +540,20 @@ void schedUpdatePendingArtifacts(void)
 		struct artifact *artifact = &artifacts[i];
 
 		if (artifact->type != ARTIFACTTYPE_FREE) {
-			u16 *unk08 = artifact->unk08;
-			u16 value08 = unk08[0];
+			u16 *currdepthptr = artifact->zbufptr;
+			u16 currdepth = *currdepthptr;
 
 			if (g_SchedSpecialArtifactIndexes[g_SchedPendingArtifactsIndex] == 1) {
-				u16 *unk0c = artifact->unk0c.u16p;
-				u16 value0c = unk0c[0];
+				u16 *prevdepthptr = artifact->depthptr;
+				u16 prevdepth = *prevdepthptr;
 
-				if (value0c > value08) {
-					artifact->unk02 = value08;
+				if (currdepth < prevdepth) {
+					artifact->actualdepth = currdepth;
 				} else {
-					artifact->unk02 = value0c;
+					artifact->actualdepth = prevdepth;
 				}
 			} else {
-				artifact->unk02 = value08;
+				artifact->actualdepth = currdepth;
 			}
 		}
 	}

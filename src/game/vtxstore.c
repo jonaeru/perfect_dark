@@ -58,14 +58,16 @@ void vtxstoreFixRefs(void *find, void *replacement)
 			struct modeldef *modeldef = model->definition;
 			struct modelnode *node = modeldef->rootnode;
 			struct modelrodata_dl *rodata;
+			struct modelrwdata_dl *rwdata;
 
 			while (node) {
 				switch (node->type & 0xff) {
 				case MODELNODETYPE_DL:
 					rodata = &node->rodata->dl;
+					rwdata = (struct modelrwdata_dl *)&model->rwdatas[rodata->rwdataindex];
 
-					if (model->rwdatas[rodata->rwdataindex] == (uintptr_t) find) {
-						model->rwdatas[rodata->rwdataindex] = (uintptr_t) replacement;
+					if (rwdata->vertices == find) {
+						rwdata->vertices = replacement;
 					}
 					break;
 				case MODELNODETYPE_DISTANCE:
