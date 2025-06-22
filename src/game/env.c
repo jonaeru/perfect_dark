@@ -68,10 +68,10 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ 300,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 	{ 400,                    10,  5000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 #ifndef PLATFORM_N64 // GoldenEye X Mod
-	{ STAGE_GEX_MP2,          10,  5000,    0,    0,    0, 996, 1000, RGB(0x280000), NO_SUNS,             1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Complex
-	{ STAGE_GEX_MP6,          10,  6000,    0,    0,    0, 996, 1000, RGB(0x181818), NO_SUNS,             1, 10000,    0, RGB(0x787878), 0,  -1000,  0, RGB(0x000000), 0  }, // Temple
-	{ STAGE_GEX_MP12,         10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // Caverns
-	{ STAGE_GEX_MP14,         10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000,  0, RGB(0x000000), 0  }, // Egyptian
+	{ STAGE_EXTRA2,           10,  5000,    0,    0,    0, 996, 1000, RGB(0x280000), NO_SUNS,             1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Complex
+	{ STAGE_EXTRA6,           10,  6000,    0,    0,    0, 996, 1000, RGB(0x181818), NO_SUNS,             1, 10000,    0, RGB(0x787878), 0,  -1000,  0, RGB(0x000000), 0  }, // Temple
+	{ STAGE_EXTRA12,          10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // Caverns
+	{ STAGE_EXTRA14,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000,  0, RGB(0x000000), 0  }, // Egyptian
 	{ STAGE_TEST_MP14,        10, 20000, 5000, 6000, 1000, 996, 1000, RGB(0x101820), NO_SUNS,             1,  5000,    0, RGB(0xe1af64), 0,  -1000,  0, RGB(0x000000), 0  }, // Streets (Fixed far from 7500 to 20000, clouds_height from 25 to 0)
 	{ STAGE_TEST_MP18,        10,  9500, 3333, 4444,  800, 996, 1000, RGB(0x6080A0), NO_SUNS,             1,  5000,    0, RGB(0xffff00), 0, -10000,  0, RGB(0x000000), 0  }, // Cradle
 	{ STAGE_TEST_MP19,        10,  6000,    0,    0,    0, 996, 1000, RGB(0x103060), NO_SUNS,             1,  5000,    0, RGB(0xffffff), 0,  -1000,  0, RGB(0x000000), 0  }, // Labyrinth
@@ -146,7 +146,7 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_TEST_MP7,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP8,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 #else // PD Plus Mod, Dark Noon Mod, GoldenEye X Mod
-	{ STAGE_GEX_MP11,      15, 20000,   0,  0,  0, RGB(0x001050), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
+	{ STAGE_EXTRA11,       15, 20000,   0,  0,  0, RGB(0x001050), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
 	{ STAGE_TEST_MP7,      10, 14096,   0,  0,  0, RGB(0x110015), NO_SUNS,            0, RGB(0x3a1100),  3000,   0, 0, RGB(0x000000),      0,    0, 0, 0 }, // Valley
 	{ STAGE_TEST_MP8,      15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Cliff Base
 #endif
@@ -167,11 +167,11 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_TEST_MP20,     15, 20000,   0,  0,  0, RGB(0x00103c), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 #endif
 #ifndef PLATFORM_N64 // GoldenEye X Mod
-	{ STAGE_GEX_MP7,       15, 20000,   0,  0,  0, RGB(0x2020ff), NO_SUNS,            1, RGB(0x8860d0), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Icicle Pyramid
-	{ STAGE_GEX_MP8,       15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
-	{ STAGE_GEX_MP9,       15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Library
-	{ STAGE_GEX_MP10,      15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Facility
-	{ STAGE_GEX_MP11,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Bunker
+	{ STAGE_EXTRA7,        15, 20000,   0,  0,  0, RGB(0x2020ff), NO_SUNS,            1, RGB(0x8860d0), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Icicle Pyramid
+	{ STAGE_EXTRA8,        15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
+	{ STAGE_EXTRA9,        15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Library
+	{ STAGE_EXTRA10,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Facility
+	{ STAGE_EXTRA11,       15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Bunker
 #endif
 	{ 0 },
 };
