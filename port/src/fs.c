@@ -24,9 +24,11 @@ static char modDir[FS_MAXPATH + 1];  // replaces $M
 static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
-static char gexModDir[FS_MAXPATH + 1];  // GoldenEye X Mod
-static char kakarikoModDir[FS_MAXPATH + 1];  // Kakariko Village Mod
-static char darknoonModDir[FS_MAXPATH + 1];  // Dark Moon Mod
+
+static char gexModDir[FS_MAXPATH + 1];          // GoldenEye X Mod
+static char kakarikoModDir[FS_MAXPATH + 1];     // Kakariko Village Mod
+static char darknoonModDir[FS_MAXPATH + 1];     // Dark Moon Mod
+static char goldfinger64ModDir[FS_MAXPATH + 1]; // Goldfinger 64 Mod
 
 u32 g_ModNum = 0;
 
@@ -102,6 +104,11 @@ const char *fsFullPath(const char *relPath)
 		}
 	} else if (darknoonModDir[0] && g_ModNum == MOD_DARKNOON) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", darknoonModDir, relPath);
+		if (fsFileSize(pathBuf) >= 0) {
+			return pathBuf;
+		}
+	} else if (goldfinger64ModDir[0] && g_ModNum == MOD_GOLDFINGER_64) {
+		snprintf(pathBuf, FS_MAXPATH, "%s/%s", goldfinger64ModDir, relPath);
 		if (fsFileSize(pathBuf) >= 0) {
 			return pathBuf;
 		}
@@ -241,6 +248,30 @@ s32 fsInit(void)
 		}
 	}
 
+	// Goldfinger 64 Mod Dir
+	path = sysArgGetString("--goldfinger64moddir");
+	if (path) {
+		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
+			// path is explicit; check as-is
+			if (fsFileSize(path) >= 0) {
+				strncpy(goldfinger64ModDir, fsFullPath(path), FS_MAXPATH);
+			}
+		} else {
+			// path is relative to workdir; try to find it
+			const char *priority[] = { ".", "$E", "$H" };
+			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
+				char *tmp = strFmt("%s/%s", priority[i], path);
+				if (fsFileSize(tmp) >= 0) {
+					strncpy(goldfinger64ModDir, fsFullPath(tmp), FS_MAXPATH);
+					break;
+				}
+			}
+		}
+		if (!goldfinger64ModDir[0]) {
+			sysLogPrintf(LOG_WARNING, "could not find specified goldfinger64moddir `%s`", path);
+		}
+	}
+
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
 	if (!path) {
@@ -280,6 +311,9 @@ s32 fsInit(void)
 	if (darknoonModDir[0]) {
 		sysLogPrintf(LOG_NOTE, " darknoon mod dir: %s", darknoonModDir);
 	}
+	if (goldfinger64ModDir[0]) {
+		sysLogPrintf(LOG_NOTE, " goldfinger64 mod dir: %s", goldfinger64ModDir);
+	}
 	sysLogPrintf(LOG_NOTE, "base dir: %s", baseDir);
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
 
@@ -294,6 +328,8 @@ const char *fsGetModDir(void)
 		return kakarikoModDir[0] ? kakarikoModDir : NULL;
 	} else if (g_ModNum == MOD_DARKNOON) {
 		return darknoonModDir[0] ? darknoonModDir : NULL;
+	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+		return goldfinger64ModDir[0] ? goldfinger64ModDir : NULL;
 	} else {
 		return modDir[0] ? modDir : NULL;
 	}

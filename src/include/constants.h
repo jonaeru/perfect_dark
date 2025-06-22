@@ -4798,4 +4798,5 @@ enum weaponnum {
 #define MOD_GEX 1
 #define MOD_KAKARIKO 2
 #define MOD_DARKNOON 3
+#define MOD_GOLDFINGER_64 4
 #endif
