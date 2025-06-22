@@ -157,28 +157,28 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP2,        0, L_MPMENU_129  }, // Stack (PD Plus)
 	{ STAGE_MP_FELICITY,     0, L_MPMENU_135  }, // Felicity
 	// GoldenEye X Mod
-	{ STAGE_GEX_MP6,         0, L_MPMENU_133 }, // Tample
-	{ STAGE_GEX_MP2,         0, L_MPMENU_134 }, // Complex
-	{ STAGE_GEX_MP8,         0, L_MPMENU_306 }, // Caves
-	{ STAGE_GEX_MP9,         0, L_MPMENU_303 }, // Library
-	{ STAGE_GEX_MP13,        0, L_MPMENU_302 }, // Basement
-	{ STAGE_GEX_MP15,        0, L_MPMENU_309 }, // Stack
-	{ STAGE_GEX_MP10,        0, L_MPMENU_311 }, // Facility
-	{ STAGE_GEX_MP11,        0, L_MPMENU_300 }, // Bunker
-	{ STAGE_GEX_MP4,         0, L_MPMENU_299 }, // Archives
-	{ STAGE_GEX_MP12,        0, L_MPMENU_305 }, // Caverns
-	{ STAGE_GEX_MP14,        0, L_MPMENU_312 }, // Egyptian
+	{ STAGE_EXTRA6,          0, L_MPMENU_133 }, // Tample
+	{ STAGE_EXTRA2,          0, L_MPMENU_134 }, // Complex
+	{ STAGE_EXTRA8,          0, L_MPMENU_306 }, // Caves
+	{ STAGE_EXTRA9,          0, L_MPMENU_303 }, // Library
+	{ STAGE_EXTRA13,         0, L_MPMENU_302 }, // Basement
+	{ STAGE_EXTRA15,         0, L_MPMENU_309 }, // Stack
+	{ STAGE_EXTRA10,         0, L_MPMENU_311 }, // Facility
+	{ STAGE_EXTRA11,         0, L_MPMENU_300 }, // Bunker
+	{ STAGE_EXTRA4,          0, L_MPMENU_299 }, // Archives
+	{ STAGE_EXTRA12,         0, L_MPMENU_305 }, // Caverns
+	{ STAGE_EXTRA14,         0, L_MPMENU_312 }, // Egyptian
 	{ STAGE_TEST_MP17,       0, L_MPMENU_307 }, // Facility BZ
-	{ STAGE_GEX_MP1,         0, L_MPMENU_298 }, // Frigate
+	{ STAGE_EXTRA1,          0, L_MPMENU_298 }, // Frigate
 	{ STAGE_TEST_SILO,       0, L_MPMENU_314 }, // Archives 1F (GE-X 5e)
 	{ STAGE_TEST_MP16,       0, L_MPMENU_322 }, // Archives BZ
 	{ STAGE_TEST_MP14,       0, L_MPMENU_315 }, // Streets
-	{ STAGE_GEX_MP3,         0, L_MPMENU_310 }, // Train
+	{ STAGE_EXTRA3,          0, L_MPMENU_310 }, // Train
 	{ STAGE_TEST_MP18,       0, L_MPMENU_304 }, // Cradle
-	{ STAGE_GEX_MP5,         0, L_MPMENU_313 }, // Aztec
+	{ STAGE_EXTRA5,          0, L_MPMENU_313 }, // Aztec
 	{ STAGE_TEST_MP20,       0, L_MPMENU_308 }, // Citadel
 	{ STAGE_TEST_MP19,       0, L_MPMENU_301 }, // Labyrinth
-	{ STAGE_GEX_MP7,         0, L_MPMENU_316 }, // Icicle Pyramid
+	{ STAGE_EXTRA7,          0, L_MPMENU_316 }, // Icicle Pyramid
 	{ STAGE_TEST_MP8,        0, L_MPMENU_323 }, // Cliff Base
 	// Bonus
 	{ STAGE_24,              0, L_MPMENU_319 }, // Kakariko Village (Stormy)

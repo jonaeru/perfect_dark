@@ -209,21 +209,21 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_MBR:           bank = LANGBANK_WAX; break;
 	case STAGE_TEST_SILO:     bank = LANGBANK_SILO; break;
 #ifndef PLATFORM_N64 // GoldenEye X Mod
-	case STAGE_GEX_MP1:       bank = LANGBANK_AREC; break;
-	case STAGE_GEX_MP2:       bank = LANGBANK_REF; break;
-	case STAGE_GEX_MP3:       bank = LANGBANK_CRYP; break;
-	case STAGE_GEX_MP4:       bank = LANGBANK_JUN; break;
-	case STAGE_GEX_MP5:       bank = LANGBANK_CRAD; break;
-	case STAGE_GEX_MP6:       bank = LANGBANK_OAT; break;
-	case STAGE_GEX_MP7:       bank = LANGBANK_MP2; break;
-	case STAGE_GEX_MP8:       bank = LANGBANK_MP3; break;
-	case STAGE_GEX_MP9:       bank = LANGBANK_MP4; break;
-	case STAGE_GEX_MP10:      bank = LANGBANK_MP5; break;
-	case STAGE_GEX_MP11:      bank = LANGBANK_MP6; break;
-	case STAGE_GEX_MP12:      bank = LANGBANK_MP9; break;
-	case STAGE_GEX_MP13:      bank = LANGBANK_MP10; break;
-	case STAGE_GEX_MP14:      bank = LANGBANK_MP11; break;
-	case STAGE_GEX_MP15:      bank = LANGBANK_MP12; break;
+	case STAGE_EXTRA1:        bank = LANGBANK_AREC; break;
+	case STAGE_EXTRA2:        bank = LANGBANK_REF; break;
+	case STAGE_EXTRA3:        bank = LANGBANK_CRYP; break;
+	case STAGE_EXTRA4:        bank = LANGBANK_JUN; break;
+	case STAGE_EXTRA5:        bank = LANGBANK_CRAD; break;
+	case STAGE_EXTRA6:        bank = LANGBANK_OAT; break;
+	case STAGE_EXTRA7:        bank = LANGBANK_MP2; break;
+	case STAGE_EXTRA8:        bank = LANGBANK_MP3; break;
+	case STAGE_EXTRA9:        bank = LANGBANK_MP4; break;
+	case STAGE_EXTRA10:       bank = LANGBANK_MP5; break;
+	case STAGE_EXTRA11:       bank = LANGBANK_MP6; break;
+	case STAGE_EXTRA12:       bank = LANGBANK_MP9; break;
+	case STAGE_EXTRA13:       bank = LANGBANK_MP10; break;
+	case STAGE_EXTRA14:       bank = LANGBANK_MP11; break;
+	case STAGE_EXTRA15:       bank = LANGBANK_MP12; break;
 #endif
 	default:
 		while (true) {

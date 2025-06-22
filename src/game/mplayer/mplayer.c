@@ -249,21 +249,21 @@ void mpStartMatch(void)
 	case STAGE_TEST_MP18:
 	case STAGE_TEST_MP19:
 	case STAGE_TEST_MP20:
-	case STAGE_GEX_MP1:
-	case STAGE_GEX_MP2:
-	case STAGE_GEX_MP3:
-	case STAGE_GEX_MP4:
-	case STAGE_GEX_MP5:
-	case STAGE_GEX_MP6:
-	case STAGE_GEX_MP7:
-	case STAGE_GEX_MP8:
-	case STAGE_GEX_MP9:
-	case STAGE_GEX_MP10:
-	case STAGE_GEX_MP11:
-	case STAGE_GEX_MP12:
-	case STAGE_GEX_MP13:
-	case STAGE_GEX_MP14:
-	case STAGE_GEX_MP15:
+	case STAGE_EXTRA1:
+	case STAGE_EXTRA2:
+	case STAGE_EXTRA3:
+	case STAGE_EXTRA4:
+	case STAGE_EXTRA5:
+	case STAGE_EXTRA6:
+	case STAGE_EXTRA7:
+	case STAGE_EXTRA8:
+	case STAGE_EXTRA9:
+	case STAGE_EXTRA10:
+	case STAGE_EXTRA11:
+	case STAGE_EXTRA12:
+	case STAGE_EXTRA13:
+	case STAGE_EXTRA14:
+	case STAGE_EXTRA15:
 		g_ModNum = MOD_GEX;
 		break;
 	case STAGE_24:
