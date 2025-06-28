@@ -1436,7 +1436,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							movedata.speedvertadown += vertadown;
 						}
 					} else {
-						// Reset mouse/gyro aim position when not aiming
+						// Reset mouse aim position when not aiming
 						g_Vars.currentplayer->swivelpos[0] = 0.f;
 						g_Vars.currentplayer->swivelpos[1] = 0.f;
 					}
