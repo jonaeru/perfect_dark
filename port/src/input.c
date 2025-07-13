@@ -677,45 +677,45 @@ static inline void inputLoadBinds(void)
 
 s32 inputInit(void)
 {
-    // Set SDL hints before initializing the controller subsystem.
-    if (useHIDAPI) {
+	// Set SDL hints before initializing the controller subsystem.
+	if (useHIDAPI) {
 #if SDL_VERSION_ATLEAST(2, 0, 12)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE, "1");
 #endif
 #if SDL_VERSION_ATLEAST(2, 0, 14)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5, "1");
 #endif
 #if SDL_VERSION_ATLEAST(2, 0, 22)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI, "1");
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4, "1");
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_SWITCH, "1");
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS, "1");
-        // the two hints below enable Rumble and Motion Sensor for PS4/5 pads connected via bluetooth
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4_RUMBLE, "1");
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE, "1");
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAM, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_SWITCH, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS, "1");
+		// the two hints below enable Rumble and Motion Sensor for PS4/5 pads connected via bluetooth
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS4_RUMBLE, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS5_RUMBLE, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAM, "1");
 #endif
 #if SDL_VERSION_ATLEAST(2, 23, 2)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS, "1");
 #endif
 #if SDL_VERSION_ATLEAST(2, 25, 1)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS3, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_PS3, "1");
 #endif
 #if SDL_VERSION_ATLEAST(2, 26, 0)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_WII, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_WII, "1");
 #endif
 #if SDL_VERSION_ATLEAST(2, 30, 0)
-        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAMDECK, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAMDECK, "1");
 #endif
-    }
-    if (useRawInput) {
-        SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT, "1");
-        SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1");
-    }
+	}
+	if (useRawInput) {
+		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT, "1");
+		SDL_SetHint(SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1");
+	}
 
-    if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
-        SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
-    }
+	if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC)) {
+		SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
+	}
 
 	// try to load controller db from an external file in the save folder
 	if (fsFileSize("$S/" CONTROLLERDB_FNAME)) {
