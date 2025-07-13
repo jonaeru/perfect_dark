@@ -185,6 +185,14 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_TEST_MP7,        0, L_MPMENU_321 }, // Dark Noon Mod Valley
 	{ STAGE_TEST_ARCH,       0, L_MPMENU_324 }, // Suburb
 	{ STAGE_TEST_DEST,       0, L_MPMENU_325 }, // Training Day
+	{ STAGE_EXTRA16,         0, L_MPMENU_327 }, // Runway
+	{ STAGE_EXTRA17,         0, L_MPMENU_328 }, // Control
+	{ STAGE_EXTRA18,         0, L_MPMENU_329 }, // Tawfret Ruins
+	{ STAGE_EXTRA19,         0, L_MPMENU_330 }, // Targitzan's Temple
+	{ STAGE_EXTRA20,         0, L_MPMENU_331 }, // Junkyard
+	{ STAGE_EXTRA21,         0, L_MPMENU_332 }, // Steel Mill
+	{ STAGE_EXTRA22,         0, L_MPMENU_333 }, // Mall
+	{ STAGE_EXTRA23,         0, L_MPMENU_334 }, // Tunnels
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -197,8 +205,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (59 Stage + 4 Random)
-	return 63;
+#else // All Solos in Multi Mod (67 Stage + 4 Random)
+	return 71;
 #endif
 }
 
@@ -211,7 +219,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 59; i++) {
+	for (i = 0; i < 67; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -223,7 +231,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 59; i++) {
+	for (i = 0; i < 67; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -298,16 +306,18 @@ s16 mpChooseRandomGexStage(void)
 	s32 numchallengescomplete = 0;
 	s32 index;
 
-	for (i = 0; i < 55; i++) {
-		if (i >= 32 && i <= 54 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+	for (i = 0; i < 61; i++) {
+		if (((i >= 32 && i <= 54) || (i >= 59 && i <= 60))
+				&& challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
 		}
 	}
 
 	index = rngRandom() % numchallengescomplete;
 
-	for (i = 0; i < 55; i++) {
-		if (i >= 32 && i <= 54 && challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
+	for (i = 0; i < 61; i++) {
+		if (((i >= 32 && i <= 54) || (i >= 59 && i <= 60))
+				&& challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
 				return g_MpArenas[i].stagenum;
 			}
@@ -316,7 +326,7 @@ s16 mpChooseRandomGexStage(void)
 		}
 	}
 
-	return STAGE_MP_SKEDAR + 0x60;
+	return STAGE_EXTRA6; // Temple
 }
 #endif
 
@@ -334,7 +344,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 55, L_MPMENU_326  }, // "Bonus"
-		{ 59, L_MPMENU_118  }, // "Random"
+		{ 67, L_MPMENU_118  }, // "Random"
 #endif
 	};
 

@@ -67,7 +67,8 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ 200,                    10,  7500,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 	{ 300,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 	{ 400,                    10,  5000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
-#ifndef PLATFORM_N64 // GoldenEye X Mod
+#ifndef PLATFORM_N64
+	// GoldenEye X Mod
 	{ STAGE_EXTRA2,           10,  5000,    0,    0,    0, 996, 1000, RGB(0x280000), NO_SUNS,             1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Complex
 	{ STAGE_EXTRA6,           10,  6000,    0,    0,    0, 996, 1000, RGB(0x181818), NO_SUNS,             1, 10000,    0, RGB(0x787878), 0,  -1000,  0, RGB(0x000000), 0  }, // Temple
 	{ STAGE_EXTRA12,          10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // Caverns
@@ -76,6 +77,10 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ STAGE_TEST_MP18,        10,  9500, 3333, 4444,  800, 996, 1000, RGB(0x6080A0), NO_SUNS,             1,  5000,    0, RGB(0xffff00), 0, -10000,  0, RGB(0x000000), 0  }, // Cradle
 	{ STAGE_TEST_MP19,        10,  6000,    0,    0,    0, 996, 1000, RGB(0x103060), NO_SUNS,             1,  5000,    0, RGB(0xffffff), 0,  -1000,  0, RGB(0x000000), 0  }, // Labyrinth
 	{ STAGE_TEST_MP20,        10, 10000,    0,    0,    0, 996, 1000, RGB(0x08040C), NO_SUNS,             1,  7500,    0, RGB(0x403444), 0,  -1000,  0, RGB(0x000000), 0  }, // Citadel
+	{ STAGE_EXTRA16,          10, 30000, 6000, 8000,  800, 996, 1000, RGB(0x103040), SUNS(suns_area51),   1,  5000,    0, RGB(0x191919), 0,      0,  0, RGB(0x000000), 0  }, // Runway (Fixed far from 15000 to 30000, clouds_height from 30 to 0)
+	// Goldfinger 64 Mod
+	{ STAGE_EXTRA20,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000,  0, RGB(0x000000), 0  }, // Junkyard (Same as Egyptian)
+	{ STAGE_EXTRA21,          10,  5000,    0,    0,    0,  996, 1000, RGB(0x280000), NO_SUNS,            1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Steel Mill (Same as Complex)
 #endif
 	{ 0,                       0,     0,    0,    0,   0,   0,    0, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 };
@@ -166,12 +171,16 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_TEST_MP19,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP20,     15, 20000,   0,  0,  0, RGB(0x00103c), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 #endif
-#ifndef PLATFORM_N64 // GoldenEye X Mod
+#ifndef PLATFORM_N64
+	// GoldenEye X Mod
 	{ STAGE_EXTRA7,        15, 20000,   0,  0,  0, RGB(0x2020ff), NO_SUNS,            1, RGB(0x8860d0), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Icicle Pyramid
 	{ STAGE_EXTRA8,        15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
 	{ STAGE_EXTRA9,        15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Library
 	{ STAGE_EXTRA10,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Facility
 	{ STAGE_EXTRA11,       15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Bunker
+	// Kakariko Village Mod
+	{ STAGE_EXTRA18,       15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Tawfret Ruins
+	{ STAGE_EXTRA19,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x50280a),  5000,   0, 0, RGB(0x000000), -31000,    0, 0, 1 }, // Targitzan's Temple
 #endif
 	{ 0 },
 };

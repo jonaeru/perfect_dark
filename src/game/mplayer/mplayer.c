@@ -264,13 +264,23 @@ void mpStartMatch(void)
 	case STAGE_EXTRA13:
 	case STAGE_EXTRA14:
 	case STAGE_EXTRA15:
+	case STAGE_EXTRA16:
+	case STAGE_EXTRA17:
 		g_ModNum = MOD_GEX;
 		break;
 	case STAGE_24:
+	case STAGE_EXTRA18:
+	case STAGE_EXTRA19:
 		g_ModNum = MOD_KAKARIKO;
 		break;
 	case STAGE_TEST_MP7:
 		g_ModNum = MOD_DARKNOON;
+		break;
+	case STAGE_EXTRA20:
+	case STAGE_EXTRA21:
+	case STAGE_EXTRA22:
+	case STAGE_EXTRA23:
+		g_ModNum = MOD_GOLDFINGER_64;
 		break;
 	default:
 		g_ModNum = MOD_NORMAL;
@@ -279,7 +289,7 @@ void mpStartMatch(void)
 
 	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
 	modConfigLoad(MOD_CONFIG_FNAME);
-	// Set textures surfacetype
+	// Set textures surfacetype (Resets when multiplayer ends)
 	if (g_ModNum == MOD_GEX) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
@@ -293,6 +303,19 @@ void mpStartMatch(void)
 		// Icicle Pyramid
 		g_Textures[0x0bde].surfacetype = SURFACETYPE_GLASS;
 		g_Textures[0x0bde].soundsurfacetype = SURFACETYPE_GLASS;
+
+		g_Textures[0x06ff].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0716].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0716].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a16].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a16].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a17].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a17].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0208].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0208].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x06fc].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x065a].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x065a].soundsurfacetype = SURFACETYPE_METAL;
 	} else if (g_ModNum == MOD_KAKARIKO) {
 		g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DIRT;
 		g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_MUD;
@@ -439,6 +462,9 @@ void mpStartMatch(void)
 		g_Textures[0x0065].surfacetype = SURFACETYPE_WOOD;
 		g_Textures[0x0067].surfacetype = SURFACETYPE_WOOD;
 		g_Textures[0x0068].surfacetype = SURFACETYPE_WOOD;
+	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+		g_Textures[0x0281].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0281].soundsurfacetype = SURFACETYPE_DEFAULT;
 	}
 #endif
 

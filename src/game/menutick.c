@@ -678,6 +678,20 @@ void menuTick(void)
 							// Icicle Pyramid
 							g_Textures[0x0bde].surfacetype = SURFACETYPE_DEFAULT;
 							g_Textures[0x0bde].soundsurfacetype = SURFACETYPE_DEFAULT;
+
+							g_Textures[0x06ff].surfacetype = SURFACETYPE_MUD;
+							g_Textures[0x0716].surfacetype = SURFACETYPE_METAL;
+							g_Textures[0x0716].soundsurfacetype = SURFACETYPE_METAL;
+							g_Textures[0x0a16].surfacetype = SURFACETYPE_MUD;
+							g_Textures[0x0a16].soundsurfacetype = SURFACETYPE_STONE;
+							g_Textures[0x0a17].surfacetype = SURFACETYPE_STONE;
+							g_Textures[0x0a17].soundsurfacetype = SURFACETYPE_STONE;
+							g_Textures[0x0208].surfacetype = SURFACETYPE_METAL;
+							g_Textures[0x0208].soundsurfacetype = SURFACETYPE_METAL;
+							g_Textures[0x06ff].surfacetype = SURFACETYPE_MUD;
+							g_Textures[0x06fc].surfacetype = SURFACETYPE_MUD;
+							g_Textures[0x065a].surfacetype = SURFACETYPE_METAL;
+							g_Textures[0x065a].soundsurfacetype = SURFACETYPE_METAL;
 						} else if (g_ModNum == MOD_KAKARIKO) {
 							g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DEFAULT;
 							g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_DEFAULT;
@@ -824,6 +838,9 @@ void menuTick(void)
 							g_Textures[0x0065].surfacetype = SURFACETYPE_DEFAULT;
 							g_Textures[0x0067].surfacetype = SURFACETYPE_DEFAULT;
 							g_Textures[0x0068].surfacetype = SURFACETYPE_MUD;
+						} else if (g_ModNum == MOD_GOLDFINGER_64) {
+							g_Textures[0x0281].surfacetype = SURFACETYPE_MUD;
+							g_Textures[0x0281].soundsurfacetype = SURFACETYPE_STONE;
 						}
 					}
 #endif

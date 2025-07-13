@@ -208,7 +208,8 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_TEST_MP20:     bank = LANGBANK_MP20; break;
 	case STAGE_MBR:           bank = LANGBANK_WAX; break;
 	case STAGE_TEST_SILO:     bank = LANGBANK_SILO; break;
-#ifndef PLATFORM_N64 // GoldenEye X Mod
+#ifndef PLATFORM_N64
+	// GoldenEye X Mod
 	case STAGE_EXTRA1:        bank = LANGBANK_AREC; break;
 	case STAGE_EXTRA2:        bank = LANGBANK_REF; break;
 	case STAGE_EXTRA3:        bank = LANGBANK_CRYP; break;
@@ -224,6 +225,16 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_EXTRA13:       bank = LANGBANK_MP10; break;
 	case STAGE_EXTRA14:       bank = LANGBANK_MP11; break;
 	case STAGE_EXTRA15:       bank = LANGBANK_MP12; break;
+	case STAGE_EXTRA16:       bank = LANGBANK_ARK; break;
+	case STAGE_EXTRA17:       bank = LANGBANK_LEE; break;
+	// Kakariko Village Mod
+	case STAGE_EXTRA18:       bank = LANGBANK_REF; break;
+	case STAGE_EXTRA19:       bank = LANGBANK_AREC; break;
+	// Goldfinger 64 Mod
+	case STAGE_EXTRA20:       bank = LANGBANK_MP11; break;
+	case STAGE_EXTRA21:       bank = LANGBANK_REF; break;
+	case STAGE_EXTRA22:       bank = LANGBANK_CRAD; break;
+	case STAGE_EXTRA23:       bank = LANGBANK_AREC; break;
 #endif
 	default:
 		while (true) {

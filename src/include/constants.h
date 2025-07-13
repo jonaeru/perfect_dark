@@ -4060,6 +4060,14 @@
 #define STAGE_EXTRA13 0x12 // Basement
 #define STAGE_EXTRA14 0x13 // Egyptian
 #define STAGE_EXTRA15 0x15 // Stack
+#define STAGE_EXTRA16 0x51 // Runway
+#define STAGE_EXTRA17 0x52 // Control
+#define STAGE_EXTRA18 0x53 // Tawfret Ruins
+#define STAGE_EXTRA19 0x54 // Targitzan's Temple
+#define STAGE_EXTRA20 0x55 // Junkyard
+#define STAGE_EXTRA21 0x56 // Steel Mill
+#define STAGE_EXTRA22 0x57 // Mall
+#define STAGE_EXTRA23 0x58 // Tunnels
 
 #define STAGEFLAG_CI_IN_TRAINING            0x00000001
 #define STAGEFLAG_CI_HOLO_FAILED            0x00000002
