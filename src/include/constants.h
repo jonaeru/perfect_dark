@@ -4036,9 +4036,9 @@
 #define STAGE_TEST_OLD      0x4e
 #define STAGE_DUEL          0x4f
 #define STAGE_TEST_LAM      0x50
-#define STAGE_TITLE         0x5a
-#define STAGE_BOOTPAKMENU   0x5b
-#define STAGE_CREDITS       0x5c
+#define STAGE_TITLE         0x5c
+#define STAGE_BOOTPAKMENU   0x5d
+#define STAGE_CREDITS       0x5e
 #define STAGE_4MBMENU       0x5d
 
 #define STAGE_MP_RANDOM_MULTI 0x02
@@ -4068,6 +4068,9 @@
 #define STAGE_EXTRA21 0x56 // Steel Mill
 #define STAGE_EXTRA22 0x57 // Mall
 #define STAGE_EXTRA23 0x58 // Tunnels
+#define STAGE_EXTRA24 0x59 // Paradox
+#define STAGE_EXTRA25 0x5a // Rogue
+#define STAGE_EXTRA26 0x5b // War Colors
 
 #define STAGEFLAG_CI_IN_TRAINING            0x00000001
 #define STAGEFLAG_CI_HOLO_FAILED            0x00000002

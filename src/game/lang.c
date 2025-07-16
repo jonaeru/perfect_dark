@@ -235,6 +235,10 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_EXTRA21:       bank = LANGBANK_REF; break;
 	case STAGE_EXTRA22:       bank = LANGBANK_CRAD; break;
 	case STAGE_EXTRA23:       bank = LANGBANK_AREC; break;
+	// Additional
+	case STAGE_EXTRA24:       bank = LANGBANK_MP13; break;
+	case STAGE_EXTRA25:       bank = LANGBANK_STAT; break;
+	case STAGE_EXTRA26:       bank = LANGBANK_MP13; break;
 #endif
 	default:
 		while (true) {

@@ -193,6 +193,10 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_EXTRA21,         0, L_MPMENU_332 }, // Steel Mill
 	{ STAGE_EXTRA22,         0, L_MPMENU_333 }, // Mall
 	{ STAGE_EXTRA23,         0, L_MPMENU_334 }, // Tunnels
+	{ STAGE_EXTRA24,         0, L_MPMENU_335 }, // Rogue
+	{ STAGE_EXTRA25,         0, L_MPMENU_336 }, // Paradox
+	{ STAGE_EXTRA26,         0, L_MPMENU_337 }, // War Colors
+	{ STAGE_TEST_LAM,        0, L_MPMENU_338 }, // Grand Library
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -205,8 +209,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (67 Stage + 4 Random)
-	return 71;
+#else // All Solos in Multi Mod (71 Stage + 4 Random)
+	return 75;
 #endif
 }
 
@@ -219,7 +223,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 67; i++) {
+	for (i = 0; i < 71; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -231,7 +235,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 67; i++) {
+	for (i = 0; i < 71; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -344,7 +348,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 55, L_MPMENU_326  }, // "Bonus"
-		{ 67, L_MPMENU_118  }, // "Random"
+		{ 71, L_MPMENU_118  }, // "Random"
 #endif
 	};
 

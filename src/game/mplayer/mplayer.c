@@ -242,6 +242,7 @@ void mpStartMatch(void)
 	// Mod Switch (MP Start)
 	switch (stagenum) {
 	case STAGE_TEST_SILO:
+	case STAGE_TEST_LAM:
 	case STAGE_TEST_MP8:
 	case STAGE_TEST_MP14:
 	case STAGE_TEST_MP16:
@@ -266,11 +267,14 @@ void mpStartMatch(void)
 	case STAGE_EXTRA15:
 	case STAGE_EXTRA16:
 	case STAGE_EXTRA17:
+	case STAGE_EXTRA24:
+	case STAGE_EXTRA25:
 		g_ModNum = MOD_GEX;
 		break;
 	case STAGE_24:
 	case STAGE_EXTRA18:
 	case STAGE_EXTRA19:
+	case STAGE_EXTRA26:
 		g_ModNum = MOD_KAKARIKO;
 		break;
 	case STAGE_TEST_MP7:

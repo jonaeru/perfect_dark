@@ -189,6 +189,10 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ STAGE_EXTRA21,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Steel Mill
 	{ STAGE_EXTRA22,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Mall
 	{ STAGE_EXTRA23,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Tunnels
+	// Additional
+	{ STAGE_EXTRA24,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Rogue
+	{ STAGE_EXTRA25,       "-ml0 -me0 -mgfx120 -mvtx200 -ma400"            }, // Paradox
+	{ STAGE_EXTRA26,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // War Colors
 #endif
 	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 };
