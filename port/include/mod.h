@@ -17,4 +17,5 @@ void *modAnimationLoadData(u16 num);
 void *modSequenceLoad(u16 num, u32 *outSize);
 
 void modResetTextureSurfaceType(void);
+void modResetTextureSurfaceType2(void);
 #endif
