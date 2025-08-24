@@ -4805,9 +4805,11 @@ enum weaponnum {
 
 #ifndef PLATFORM_N64 // All in One Mod
 // Mod
-#define MOD_NORMAL 0
-#define MOD_GEX 1
-#define MOD_KAKARIKO 2
-#define MOD_DARKNOON 3
-#define MOD_GOLDFINGER_64 4
+#define MOD_NONE -1
+#define MOD_NORMAL 0 // All-in-One Mod
+#define MOD_GEX 1    // GEX Mod
+#define MOD_KAKARIKO 2 // Kakariko Mod
+#define MOD_DARKNOON 3 // Dark Noon Mod
+#define MOD_GOLDFINGER_64 4  // Goldfinger 64 Mod
+#define MOD_FOJO 5 // Friends of Joanna Mod
 #endif

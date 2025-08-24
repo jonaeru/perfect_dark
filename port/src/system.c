@@ -128,6 +128,20 @@ s32 sysArgCheck(const char *arg)
 
 const char *sysArgGetString(const char *arg)
 {
+	// default mod directories
+	if (strcmp("--aiomoddir", arg) == 0) {
+		return "mod_aio";
+	} else if (strcmp("--kakarikomoddir", arg) == 0) {
+		return "mod_kakariko";
+	} else if (strcmp("--darknoonmoddir", arg) == 0) {
+		return "mod_darknoon";
+	} else if (strcmp("--goldfinger64moddir", arg) == 0) {
+		return "mod_goldfinger64";
+	} else if (strcmp("--gexmoddir", arg) == 0) {
+		return "mod_gex";
+	} else if (strcmp("--fojomoddir", arg) == 0) {
+		return "mod_fojo";
+	}
 	for (s32 i = 1; i < sysArgc; ++i) {
 		if (!strcasecmp(sysArgv[i], arg)) {
 			if (i < sysArgc - 1) {

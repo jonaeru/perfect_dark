@@ -29,6 +29,8 @@ static char gexModDir[FS_MAXPATH + 1];          // GoldenEye X Mod
 static char kakarikoModDir[FS_MAXPATH + 1];     // Kakariko Village Mod
 static char darknoonModDir[FS_MAXPATH + 1];     // Dark Moon Mod
 static char goldfinger64ModDir[FS_MAXPATH + 1]; // Goldfinger 64 Mod
+static char fojoModDir[FS_MAXPATH + 1];         // Friends of Joanna Mod
+static char aioModDir[FS_MAXPATH + 1];          // All in One Mod
 
 u32 g_ModNum = 0;
 
@@ -59,6 +61,68 @@ s32 fsPathIsCwdRelative(const char *path)
 {
 	// ., .., ./, ../
 	return (path[0] == '.' && (path[1] == '.' || path[1] == '/' || path[1] == '\\' || path[1] == '\0'));
+}
+static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
+{
+	switch (g_ModNum) {
+		case MOD_GEX:
+			if (gexModDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+		case MOD_KAKARIKO:
+			if (kakarikoModDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", kakarikoModDir, relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+		case MOD_DARKNOON:
+			if (darknoonModDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", darknoonModDir, relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+		case MOD_GOLDFINGER_64:
+			if (goldfinger64ModDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", goldfinger64ModDir, relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+		case MOD_FOJO:
+			if (fojoModDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", fojoModDir,
+					relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+		case MOD_NORMAL:
+			if (aioModDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", aioModDir, relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+		default:
+			if (modDir[0]) {
+				snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
+				if (fsFileSize(pathBuf) >= 0) {
+					return true;
+				}
+			}
+			break;
+	}
 }
 
 const char *fsFullPath(const char *relPath)
@@ -92,36 +156,42 @@ const char *fsFullPath(const char *relPath)
 	}
 
 	// path relative to mod or base dir; this will be a read request, so check where the file actually is
-	if (gexModDir[0] && g_ModNum == MOD_GEX) {
-		snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
-			return pathBuf;
-		}
-	} else if (kakarikoModDir[0] && g_ModNum == MOD_KAKARIKO) {
-		snprintf(pathBuf, FS_MAXPATH, "%s/%s", kakarikoModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
-			return pathBuf;
-		}
-	} else if (darknoonModDir[0] && g_ModNum == MOD_DARKNOON) {
-		snprintf(pathBuf, FS_MAXPATH, "%s/%s", darknoonModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
-			return pathBuf;
-		}
-	} else if (goldfinger64ModDir[0] && g_ModNum == MOD_GOLDFINGER_64) {
-		snprintf(pathBuf, FS_MAXPATH, "%s/%s", goldfinger64ModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
-			return pathBuf;
-		}
-	} else if (modDir[0]) {
-		snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
-			return pathBuf;
-		}
+	if (fsModFullPath(&pathBuf, relPath)) {
+		// found in mod dir
+		return pathBuf;
 	}
 
 	// fall back to basedir
 	snprintf(pathBuf, FS_MAXPATH, "%s/%s", baseDir, relPath);
 	return pathBuf;
+}
+
+
+
+static inline void modInit(char* path, char* outModDir, s32 portable){
+	if (path) {
+		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
+			// path is explicit; check as-is
+			if (fsFileSize(path) >= 0) {
+				strncpy(outModDir, fsFullPath(path), FS_MAXPATH);
+			}
+		} else {
+			// path is relative to workdir; try to find it
+			const char *priority[] = { "$M",".", "$E", "$H" };
+			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
+				sysLogPrintf(LOG_NOTE,"looking for moddir `%s` in: %s\n", path, priority[i]);
+				char *tmp = strFmt("%s/%s", priority[i], path);
+				if (fsFileSize(tmp) >= 0) {
+					strncpy(outModDir, fsFullPath(tmp), FS_MAXPATH);
+					break;
+				}
+			}
+		}
+		if (!outModDir[0]) {
+			sysLogPrintf(LOG_WARNING, "could not find specified moddir `%s`", path);
+			sysLogPrintf(LOG_WARNING, "outModDir: %s\n", outModDir);
+		}
+	}
 }
 
 s32 fsInit(void)
@@ -154,123 +224,31 @@ s32 fsInit(void)
 	// get path to mod dir and expand it if needed
 	// mod directory is overlaid on top of base directory
 	path = sysArgGetString("--moddir");
-	if (path) {
-		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
-			// path is explicit; check as-is
-			if (fsFileSize(path) >= 0) {
-				strncpy(modDir, fsFullPath(path), FS_MAXPATH);
-			}
-		} else {
-			// path is relative to workdir; try to find it
-			const char *priority[] = { ".", "$E", "$H" };
-			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
-				char *tmp = strFmt("%s/%s", priority[i], path);
-				if (fsFileSize(tmp) >= 0) {
-					strncpy(modDir, fsFullPath(tmp), FS_MAXPATH);
-					break;
-				}
-			}
-		}
-		if (!modDir[0]) {
-			sysLogPrintf(LOG_WARNING, "could not find specified moddir `%s`", path);
-		}
-	}
+	modInit(path, &modDir, portable);
+
+	// All in One Mod Dir
+	path = sysArgGetString("--aiomoddir");
+	modInit(path, &aioModDir, portable);
+
+	// Friends of Joanna Mod Dir
+	path = sysArgGetString("--fojomoddir");
+	modInit(path, &fojoModDir, portable);
 
 	// GoldenEye X Mod Dir
 	path = sysArgGetString("--gexmoddir");
-	if (path) {
-		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
-			// path is explicit; check as-is
-			if (fsFileSize(path) >= 0) {
-				strncpy(gexModDir, fsFullPath(path), FS_MAXPATH);
-			}
-		} else {
-			// path is relative to workdir; try to find it
-			const char *priority[] = { ".", "$E", "$H" };
-			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
-				char *tmp = strFmt("%s/%s", priority[i], path);
-				if (fsFileSize(tmp) >= 0) {
-					strncpy(gexModDir, fsFullPath(tmp), FS_MAXPATH);
-					break;
-				}
-			}
-		}
-		if (!gexModDir[0]) {
-			sysLogPrintf(LOG_WARNING, "could not find specified gexmoddir `%s`", path);
-		}
-	}
+	modInit(path, &gexModDir, portable);
 
 	// Kakariko Village Mod Dir
 	path = sysArgGetString("--kakarikomoddir");
-	if (path) {
-		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
-			// path is explicit; check as-is
-			if (fsFileSize(path) >= 0) {
-				strncpy(kakarikoModDir, fsFullPath(path), FS_MAXPATH);
-			}
-		} else {
-			// path is relative to workdir; try to find it
-			const char *priority[] = { ".", "$E", "$H" };
-			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
-				char *tmp = strFmt("%s/%s", priority[i], path);
-				if (fsFileSize(tmp) >= 0) {
-					strncpy(kakarikoModDir, fsFullPath(tmp), FS_MAXPATH);
-					break;
-				}
-			}
-		}
-		if (!kakarikoModDir[0]) {
-			sysLogPrintf(LOG_WARNING, "could not find specified kakarikomoddir `%s`", path);
-		}
-	}
+	modInit(path, &kakarikoModDir, portable);
 
 	// Dark Moon Mod Dir
 	path = sysArgGetString("--darknoonmoddir");
-	if (path) {
-		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
-			// path is explicit; check as-is
-			if (fsFileSize(path) >= 0) {
-				strncpy(darknoonModDir, fsFullPath(path), FS_MAXPATH);
-			}
-		} else {
-			// path is relative to workdir; try to find it
-			const char *priority[] = { ".", "$E", "$H" };
-			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
-				char *tmp = strFmt("%s/%s", priority[i], path);
-				if (fsFileSize(tmp) >= 0) {
-					strncpy(darknoonModDir, fsFullPath(tmp), FS_MAXPATH);
-					break;
-				}
-			}
-		}
-		if (!darknoonModDir[0]) {
-			sysLogPrintf(LOG_WARNING, "could not find specified darknoonmoddir `%s`", path);
-		}
-	}
+	modInit(path, &darknoonModDir, portable);
 
 	// Goldfinger 64 Mod Dir
 	path = sysArgGetString("--goldfinger64moddir");
-	if (path) {
-		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
-			// path is explicit; check as-is
-			if (fsFileSize(path) >= 0) {
-				strncpy(goldfinger64ModDir, fsFullPath(path), FS_MAXPATH);
-			}
-		} else {
-			// path is relative to workdir; try to find it
-			const char *priority[] = { ".", "$E", "$H" };
-			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
-				char *tmp = strFmt("%s/%s", priority[i], path);
-				if (fsFileSize(tmp) >= 0) {
-					strncpy(goldfinger64ModDir, fsFullPath(tmp), FS_MAXPATH);
-					break;
-				}
-			}
-		}
-		if (!goldfinger64ModDir[0]) {
-			sysLogPrintf(LOG_WARNING, "could not find specified goldfinger64moddir `%s`", path);
-		}
-	}
+	modInit(path, &goldfinger64ModDir, portable);
 
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
