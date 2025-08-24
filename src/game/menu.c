@@ -52,6 +52,9 @@
 #include "video.h"
 #include "input.h"
 #include "platform.h"
+#include "mod.h"
+#include "system.h"
+#include "net/net.h"
 #define BLUR_OFS 10
 #else
 #define BLUR_OFS 30
@@ -3702,6 +3705,13 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	switch (root) {
 	case MENUROOT_MPSETUP:
 		menuSetBackground(MENUBG_CONEALPHA);
+		if (g_ModNum > MOD_NONE) {
+			g_ModNum = 0;
+			sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
+			modConfigLoad(MOD_CONFIG_FNAME);
+			// Reset textures surfacetype
+			modResetTextureSurfaceType();
+		}
 		break;
 	case MENUROOT_4MBFILEMGR:
 		musicStartMenu();

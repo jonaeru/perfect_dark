@@ -660,7 +660,7 @@ void menuTick(void)
 
 #ifndef PLATFORM_N64 // GoldenEye X Mod
 					// Mod Switch (MP End)
-					if (g_ModNum > MOD_NORMAL) {
+					if (g_ModNum > MOD_NONE) {
 						g_ModNum = 0;
 						sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
 						modConfigLoad(MOD_CONFIG_FNAME);

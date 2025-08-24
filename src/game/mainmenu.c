@@ -1869,6 +1869,8 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 	s32 stageindex;
 	union handlerdata spdc;
 
+	g_ModNum = MOD_FOJO;
+
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
 		data->list.value = 0;

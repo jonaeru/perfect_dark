@@ -9,6 +9,7 @@
 #include <PR/ultratypes.h>
 #include "constants.h"
 #include "config.h"
+#include "mod.h"
 #include "system.h"
 #include "platform.h"
 #include "utils.h"
@@ -32,7 +33,7 @@ static char goldfinger64ModDir[FS_MAXPATH + 1]; // Goldfinger 64 Mod
 static char fojoModDir[FS_MAXPATH + 1];         // Friends of Joanna Mod
 static char aioModDir[FS_MAXPATH + 1];          // All in One Mod
 
-u32 g_ModNum = 0;
+u32 g_ModNum = MOD_FOJO;
 
 static s32 fsPathIsWritable(const char *path)
 {
@@ -276,22 +277,12 @@ s32 fsInit(void)
 	}
 
 	strncpy(saveDir, fsFullPath(path), FS_MAXPATH);
+	sysLogPrintf(LOG_NOTE, " mod dir: %s", modDir);
+	sysLogPrintf(LOG_NOTE, " gex mod dir: %s", gexModDir);
+	sysLogPrintf(LOG_NOTE, " kakariko mod dir: %s", kakarikoModDir);
+	sysLogPrintf(LOG_NOTE, " darknoon mod dir: %s", darknoonModDir);
+	sysLogPrintf(LOG_NOTE, " goldfinger64 mod dir: %s", goldfinger64ModDir);
 
-	if (modDir[0]) {
-		sysLogPrintf(LOG_NOTE, " mod dir: %s", modDir);
-	}
-	if (gexModDir[0]) {
-		sysLogPrintf(LOG_NOTE, " gex mod dir: %s", gexModDir);
-	}
-	if (kakarikoModDir[0]) {
-		sysLogPrintf(LOG_NOTE, " kakariko mod dir: %s", kakarikoModDir);
-	}
-	if (darknoonModDir[0]) {
-		sysLogPrintf(LOG_NOTE, " darknoon mod dir: %s", darknoonModDir);
-	}
-	if (goldfinger64ModDir[0]) {
-		sysLogPrintf(LOG_NOTE, " goldfinger64 mod dir: %s", goldfinger64ModDir);
-	}
 	sysLogPrintf(LOG_NOTE, "base dir: %s", baseDir);
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
 

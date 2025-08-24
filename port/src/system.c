@@ -134,9 +134,9 @@ const char *sysArgGetString(const char *arg)
 	} else if (strcmp("--kakarikomoddir", arg) == 0) {
 		return "mod_kakariko";
 	} else if (strcmp("--darknoonmoddir", arg) == 0) {
-		return "mod_darknoon";
+		return "mod_dark_noon";
 	} else if (strcmp("--goldfinger64moddir", arg) == 0) {
-		return "mod_goldfinger64";
+		return "mod_goldfinger_64";
 	} else if (strcmp("--gexmoddir", arg) == 0) {
 		return "mod_gex";
 	} else if (strcmp("--fojomoddir", arg) == 0) {

@@ -15,7 +15,7 @@
  * asset files and ROM segments can be replaced by optional external files,
  * but asset filenames still have to be either pulled from the ROM or from an
  * external file, so stuff can't be completely custom
- * 
+ *
  * all data is assumed to be big endian, so it has to be byteswapped
  * at load time, which is fucking terrible
  */
@@ -94,12 +94,13 @@ static const struct romfilepatch filePatches[] = {
 	{ 0x92b0, 1, "\x6c", "\x99" },
 };
 
-static struct romfile fileSlots[5][ROMDATA_MAX_FILES] = {
+static struct romfile fileSlots[][ROMDATA_MAX_FILES] = {
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // GoldenEye X Mod
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Kakariko Village Mod
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Dark Moon Mod
 	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Goldfinger 64 Mod
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Friends of Joanna Mod
 };
 
 #define ROMSEG_START(n) _ ## n ## SegmentRomStart
@@ -310,7 +311,7 @@ static inline void romdataInitSegment(struct romfile *seg)
 			seg->data = newData;
 			romdataUpdateSegStartEnd(seg);
 		}
-		
+
 		seg->preprocessed = 1;
 	}
 }
@@ -379,6 +380,10 @@ static inline void romdataInitFiles(void)
 			fileSlots[MOD_GOLDFINGER_64][i].size = nextofs - ofs;
 			fileSlots[MOD_GOLDFINGER_64][i].source = SRC_UNLOADED;
 			fileSlots[MOD_GOLDFINGER_64][i].preprocessed = 0;
+			fileSlots[MOD_FOJO][i].data = g_RomFile + ofs;
+			fileSlots[MOD_FOJO][i].size = nextofs - ofs;
+			fileSlots[MOD_FOJO][i].source = SRC_UNLOADED;
+			fileSlots[MOD_FOJO][i].preprocessed = 0;
 		}
 	}
 
@@ -391,6 +396,7 @@ static inline void romdataInitFiles(void)
 		fileSlots[MOD_KAKARIKO][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 		fileSlots[MOD_DARKNOON][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 		fileSlots[MOD_GOLDFINGER_64][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
+		fileSlots[MOD_FOJO][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 	}
 
 	// Model Slot Expansion
