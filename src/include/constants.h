@@ -4807,6 +4807,7 @@ enum weaponnum {
 // Mod
 #define MOD_NONE -1
 #define MOD_NORMAL 0 // All-in-One Mod
+#define MOD_AIO MOD_NORMAL
 #define MOD_GEX 1    // GEX Mod
 #define MOD_KAKARIKO 2 // Kakariko Mod
 #define MOD_DARKNOON 3 // Dark Noon Mod
