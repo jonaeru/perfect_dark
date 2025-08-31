@@ -54,7 +54,6 @@
 #include "platform.h"
 #include "mod.h"
 #include "system.h"
-#include "net/net.h"
 #define BLUR_OFS 10
 #else
 #define BLUR_OFS 30
