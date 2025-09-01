@@ -63,65 +63,49 @@ s32 fsPathIsCwdRelative(const char *path)
 	// ., .., ./, ../
 	return (path[0] == '.' && (path[1] == '.' || path[1] == '/' || path[1] == '\\' || path[1] == '\0'));
 }
+static inline const bool fsModFullPathCheck(const char *relPath, const char *modDir, char *pathBuf)
+{
+	if (modDir[0]) {
+		if (!fsPathIsAbsolute(relPath)) {
+			snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
+		}
+		if (fsFileSize(pathBuf) >= 0) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 {
+	// if relPath doesn't contain textures/ or files/ subdir, don't even try to look in mod dirs
+	// and return false
+	if (!strstr(relPath, "textures") && !strstr(relPath, "files") && !strstr(relPath, "modconfig.txt") && !strstr(relPath, "sequences")) {
+		printf("fsModFullPath ret false: relPath=%s\n", relPath);
+		return false;
+	}
 	switch (g_ModNum) {
 		case MOD_GEX:
-			if (gexModDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return fsModFullPathCheck(relPath, gexModDir, pathBuf);
 			break;
 		case MOD_KAKARIKO:
-			if (kakarikoModDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", kakarikoModDir, relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return fsModFullPathCheck(relPath, kakarikoModDir, pathBuf);
 			break;
 		case MOD_DARKNOON:
-			if (darknoonModDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", darknoonModDir, relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return fsModFullPathCheck(relPath, darknoonModDir, pathBuf);
 			break;
 		case MOD_GOLDFINGER_64:
-			if (goldfinger64ModDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", goldfinger64ModDir, relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return fsModFullPathCheck(relPath, goldfinger64ModDir, pathBuf);
 			break;
 		case MOD_FOJO:
-			if (fojoModDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", fojoModDir,
-					relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return fsModFullPathCheck(relPath, fojoModDir, pathBuf);
 			break;
 		case MOD_NORMAL:
-			if (aioModDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", aioModDir, relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return fsModFullPathCheck(relPath, aioModDir, pathBuf);
 			break;
 		default:
-			if (modDir[0]) {
-				snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
-				if (fsFileSize(pathBuf) >= 0) {
-					return true;
-				}
-			}
+			return false;
 			break;
 	}
 }
