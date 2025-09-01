@@ -114,8 +114,6 @@ const char *fsFullPath(const char *relPath)
 {
 	static char pathBuf[FS_MAXPATH + 1];
 
-	bool istexture = (strstr(relPath, "textures") != NULL);
-
 	if (relPath[0] == '$') {
 		// expandable placeholder $X; will be replaced with the corresponding path, if any
 		const char *expStr = NULL;
@@ -132,31 +130,19 @@ const char *fsFullPath(const char *relPath)
 			if (len > 0) {
 				memcpy(pathBuf, expStr, len);
 				strncpy(pathBuf + len, relPath + 2, FS_MAXPATH - len);
-				if (istexture) {
-					sysLogPrintf(LOG_NOTE, "fsFullPath: texture expanded path: %s", pathBuf);
-				}
 				return pathBuf;
 			}
 		}
 		// couldn't expand anything, return as is
-		if (istexture) {
-			sysLogPrintf(LOG_WARNING, "fsFullPath: texture invalid path (not expanded): %s", relPath);
-		}
 		return relPath;
 	} else if (!baseDir[0] || fsPathIsAbsolute(relPath) || fsPathIsCwdRelative(relPath)) {
 		// user explicitly wants working directory or this is an absolute path or we have no baseDir set up yet
-		if (istexture) {
-			sysLogPrintf(LOG_NOTE, "fsFullPath: texture explicit path: %s", relPath);
-		}
 		return relPath;
 	}
 
 	// path relative to mod or base dir; this will be a read request, so check where the file actually is
 	if (fsModFullPath(pathBuf, relPath)) {
 		// found in mod dir
-		if (istexture) {
-			sysLogPrintf(LOG_NOTE, "fsFullPath: texture mod path: %s", pathBuf);
-		}
 		return pathBuf;
 	}
 
@@ -304,9 +290,6 @@ const char *fsGetModDir(void)
 
 s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
 {
-	if (strstr(name, "textures")) {
-		sysLogPrintf(LOG_NOTE, "fsFileLoadTo: loading texture %s to %p (size %u)", name, dst, dstSize);
-	}
 	const char *fullName = fsFullPath(name);
 
 	FILE *f = fopen(fullName, "rb");
