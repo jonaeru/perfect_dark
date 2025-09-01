@@ -430,7 +430,7 @@ s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
 
 	const s32 ret = fsFileLoadTo(path, dst, dstSize);
 	if (ret > 0) {
-		sysLogPrintf(LOG_NOTE, "mod: loaded external texture %04x", num);
+		sysLogPrintf(LOG_NOTE, "mod: loaded external texture %04x, path: %s,  dst: %s", num, path, dst);
 	} else {
 		sysLogPrintf(LOG_ERROR, "mod: failed to load external texture %04x from %s", num, path);
 		sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
