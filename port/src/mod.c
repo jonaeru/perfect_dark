@@ -534,7 +534,7 @@ s32 modAnimationLoadDescriptor(u16 num, struct animtableentry *anim)
 }
 
 // mplayer
-void modResetTextureSurfaceType2(void) {
+void modUnloadTextureSurfaceType(void) {
 	if (g_ModNum == MOD_GEX) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
@@ -715,7 +715,7 @@ void modResetTextureSurfaceType2(void) {
 }
 
 // menutick
-void modResetTextureSurfaceType(void) {
+void modLoadTextureSurfaceType(void) {
 	// Reset textures surfacetype
 	if (g_ModNum == MOD_GEX) {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;

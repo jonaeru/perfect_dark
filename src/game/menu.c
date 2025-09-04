@@ -3709,7 +3709,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 			sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
 			modConfigLoad(MOD_CONFIG_FNAME);
 			// Reset textures surfacetype
-			modResetTextureSurfaceType();
+			modLoadTextureSurfaceType();
 		}
 		break;
 	case MENUROOT_4MBFILEMGR:

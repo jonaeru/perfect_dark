@@ -665,7 +665,7 @@ void menuTick(void)
 						sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
 						modConfigLoad(MOD_CONFIG_FNAME);
 						// Reset textures surfacetype
-						modResetTextureSurfaceType2();
+						modUnloadTextureSurfaceType();
 					}
 #endif
 				}

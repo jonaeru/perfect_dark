@@ -293,7 +293,7 @@ void mpStartMatch(void)
 
 	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
 	modConfigLoad(MOD_CONFIG_FNAME);
-	modResetTextureSurfaceType();
+	modLoadTextureSurfaceType();
 	// Set textures surfacetype (Resets when multiplayer ends)
 #endif
 
