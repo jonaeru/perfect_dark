@@ -534,8 +534,9 @@ s32 modAnimationLoadDescriptor(u16 num, struct animtableentry *anim)
 }
 
 // mplayer
-void modUnloadTextureSurfaceType(void) {
-	if (g_ModNum == MOD_GEX) {
+//
+
+void modUnloadTextgureSurfaceTypeGEX() {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_METAL;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_METAL;
 		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_DEFAULT;
@@ -562,7 +563,9 @@ void modUnloadTextureSurfaceType(void) {
 		g_Textures[0x06fc].surfacetype = SURFACETYPE_MUD;
 		g_Textures[0x065a].surfacetype = SURFACETYPE_METAL;
 		g_Textures[0x065a].soundsurfacetype = SURFACETYPE_METAL;
-	} else if (g_ModNum == MOD_KAKARIKO) {
+}
+
+void modUnloadTextgureSurfaceTypeKakariko(void){
 		g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0c3c].soundsurfacetype = SURFACETYPE_DEFAULT;
@@ -708,16 +711,31 @@ void modUnloadTextureSurfaceType(void) {
 		g_Textures[0x0065].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0067].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0068].surfacetype = SURFACETYPE_MUD;
-	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+
+}
+
+void UnloadTextureSurfaceTypeGoldfinger64(void){
 		g_Textures[0x0281].surfacetype = SURFACETYPE_MUD;
 		g_Textures[0x0281].soundsurfacetype = SURFACETYPE_STONE;
+}
+
+void modUnloadTextureSurfaceType(void) {
+	if (g_ModNum == MOD_GEX) {
+		modUnloadTextgureSurfaceTypeGEX();
+	} else if (g_ModNum == MOD_KAKARIKO) {
+		modUnloadTextgureSurfaceTypeKakariko();
+	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+		UnloadTextureSurfaceTypeGoldfinger64();
 	}
 }
 
-// menutick
-void modLoadTextureSurfaceType(void) {
-	// Reset textures surfacetype
-	if (g_ModNum == MOD_GEX) {
+
+// refactor modLoadTextureSurfaceType anndd modUnloadTextureSurfaceType  into
+// per-mod functions, called from modLoad and modUnload
+//
+//
+
+void modLoadTextureSurfaceTypeGEX() {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;
@@ -743,7 +761,9 @@ void modLoadTextureSurfaceType(void) {
 		g_Textures[0x06fc].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x065a].surfacetype = SURFACETYPE_METAL;
 		g_Textures[0x065a].soundsurfacetype = SURFACETYPE_METAL;
-	} else if (g_ModNum == MOD_KAKARIKO) {
+}
+
+void modLoadTextureSurfaceTypeKakariko(void) {
 		g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DIRT;
 		g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_MUD;
 		g_Textures[0x0c3c].soundsurfacetype = SURFACETYPE_MUD;
@@ -889,9 +909,29 @@ void modLoadTextureSurfaceType(void) {
 		g_Textures[0x0065].surfacetype = SURFACETYPE_WOOD;
 		g_Textures[0x0067].surfacetype = SURFACETYPE_WOOD;
 		g_Textures[0x0068].surfacetype = SURFACETYPE_WOOD;
-	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+}
+
+void modLoadTextureSurfaceTypeGoldfinger64(void) {
 		g_Textures[0x0281].surfacetype = SURFACETYPE_DEFAULT;
 		g_Textures[0x0281].soundsurfacetype = SURFACETYPE_DEFAULT;
+}
+
+
+// TODO: add N(mods) dimensions to g_Textures
+// and store original surface types for each mod
+// at boot, capture vanilla surface types
+// TODO: setup table to call the right function
+// called from modLoad and modUnload
+
+// menutick
+void modLoadTextureSurfaceType(void) {
+	// Reset textures surfacetype
+	if (g_ModNum == MOD_GEX) {
+		modLoadTextureSurfaceTypeGEX();
+	} else if (g_ModNum == MOD_KAKARIKO) {
+		modLoadTextureSurfaceTypeKakariko();
+	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+		modLoadTextureSurfaceTypeGoldfinger64();
 	}
 
 }
