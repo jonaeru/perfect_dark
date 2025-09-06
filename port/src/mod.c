@@ -731,12 +731,6 @@ void modLoadTextureSurfaceTypeGoldfinger64(void) {
 }
 
 
-// TODO: add N(mods) dimensions to g_Textures
-// and store original surface types for each mod
-// at boot, capture vanilla surface types
-// TODO: setup table to call the right function
-// called from modLoad and modUnload
-
 // menutick
 void modLoadTextureSurfaceType(void) {
 	// Reset textures surfacetype
