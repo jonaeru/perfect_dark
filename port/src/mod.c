@@ -18,6 +18,8 @@
 extern struct stagemusic g_StageTracks[];
 extern struct stageallocation g_StageAllocations8Mb[];
 
+struct texturesurfaceconfig g_VanillaTextures[NUM_TEXTURES];
+
 #define PARSE_STAGE_FLOAT(sec, name, v, min, max) \
 	p = modConfigParseFloatValue(p, token, &v); \
 	if (!p || v < (min) || v > (max)) { \

@@ -73,6 +73,7 @@
 #include "data.h"
 #include "types.h"
 #include "system.h"
+#include "mod.h"
 
 extern u8 *g_MempHeap;
 extern u32 g_MempHeapSize;
@@ -282,6 +283,13 @@ void mainInit(void)
 	challengesInit();
 	utilsInit();
 	texInit();
+	// capture vanilla surface types
+	// so we can restore them later if needed
+	extern struct texturesurfaceconfig g_VanillaTextures[NUM_TEXTURES];
+	for (s32 i = 0; i < NUM_TEXTURES; i++) {
+		g_VanillaTextures[i].surfacetype = g_Textures[i].surfacetype;
+		g_VanillaTextures[i].soundsurfacetype = g_Textures[i].soundsurfacetype;
+	}
 	langInit();
 	lvInit();
 	cheatsInit();

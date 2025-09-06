@@ -6173,6 +6173,11 @@ struct mpsetupfile {
 	struct setupblock setups[MPSETUP_MAXSETUPS];
 };
 
+struct texturesurfaceconfig {
+	u32 surfacetype: 4;
+	u32 soundsurfacetype: 4;
+};
+
 #endif
 
 #endif

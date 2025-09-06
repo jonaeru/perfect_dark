@@ -596,6 +596,9 @@ extern bool g_NotLoadMod;
 
 #define TEX_FILTER_2D G_TF_BILERP
 #define ADJUST_ZOOM_FOV(x) (x)
+
+extern struct texturesurfaceconfig g_VanillaTextures[NUM_TEXTURES];
+
 #define PLAYER_DEFAULT_FOV 60.f
 
 #endif // PLATFORM_N64
