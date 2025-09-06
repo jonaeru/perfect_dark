@@ -3705,11 +3705,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	case MENUROOT_MPSETUP:
 		menuSetBackground(MENUBG_CONEALPHA);
 		if (g_ModNum > MOD_NONE) {
-			g_ModNum = 0;
-			sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
-			modConfigLoad(MOD_CONFIG_FNAME);
-			// Reset textures surfacetype
-			modLoadTextureSurfaceType();
+			modSwitch(MOD_AIO, -1);
 		}
 		break;
 	case MENUROOT_4MBFILEMGR:

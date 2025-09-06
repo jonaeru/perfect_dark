@@ -935,3 +935,75 @@ void modLoadTextureSurfaceType(void) {
 	}
 
 }
+
+void modSwitch(s32 modnum, s32 stagenum) {
+	// this essentially reloads you back to the boot mod
+	modUnloadTextureSurfaceType();
+
+	// TODO: add to modconfig
+	// needs to declare stagenums
+	if (stagenum >= 0 && modnum < 0) {
+		switch (stagenum) {
+		case STAGE_TEST_SILO:
+		case STAGE_TEST_LAM:
+		case STAGE_TEST_MP8:
+		case STAGE_TEST_MP14:
+		case STAGE_TEST_MP16:
+		case STAGE_TEST_MP17:
+		case STAGE_TEST_MP18:
+		case STAGE_TEST_MP19:
+		case STAGE_TEST_MP20:
+		case STAGE_EXTRA1:
+		case STAGE_EXTRA2:
+		case STAGE_EXTRA3:
+		case STAGE_EXTRA4:
+		case STAGE_EXTRA5:
+		case STAGE_EXTRA6:
+		case STAGE_EXTRA7:
+		case STAGE_EXTRA8:
+		case STAGE_EXTRA9:
+		case STAGE_EXTRA10:
+		case STAGE_EXTRA11:
+		case STAGE_EXTRA12:
+		case STAGE_EXTRA13:
+		case STAGE_EXTRA14:
+		case STAGE_EXTRA15:
+		case STAGE_EXTRA16:
+		case STAGE_EXTRA17:
+		case STAGE_EXTRA24:
+		case STAGE_EXTRA25:
+			modnum = MOD_GEX;
+			break;
+		case STAGE_24:
+		case STAGE_EXTRA18:
+		case STAGE_EXTRA19:
+		case STAGE_EXTRA26:
+			modnum = MOD_KAKARIKO;
+			break;
+		case STAGE_TEST_MP7:
+			modnum = MOD_DARKNOON;
+			break;
+		case STAGE_EXTRA20:
+		case STAGE_EXTRA21:
+		case STAGE_EXTRA22:
+		case STAGE_EXTRA23:
+			modnum = MOD_GOLDFINGER_64;
+			break;
+		default:
+			modnum = MOD_NORMAL;
+			break;
+		}
+	}
+
+	if (modnum >= 0) {
+		g_ModNum = modnum;
+	}
+
+
+
+	// g_ModNum = MOD_AIO;
+	sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
+	modConfigLoad(MOD_CONFIG_FNAME);
+	modLoadTextureSurfaceType();
+	// Reset textures surfacetype
+}
