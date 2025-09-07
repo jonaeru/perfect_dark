@@ -815,7 +815,7 @@ void modSwitch(s32 modnum, s32 stagenum) {
 	// this essentially reloads you back to the boot mod
 	modUnloadTextureSurfaceType();
 
-	if (modNumFromStage(stagenum) > 0) {
+	if (modNumFromStage(stagenum) > 0 && modnum < 0) {
 		g_ModNum = modNumFromStage(stagenum);
 	} else {
 		g_ModNum = modnum;
