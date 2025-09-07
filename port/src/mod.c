@@ -754,7 +754,7 @@ s32 modNumFromStage(s32 stagenum) {
 	// TODO: add to modconfig
 	// needs to declare stagenums
 	s32 modnum = -1;
-	if (g_ModStageNums[stagenum] > 0) {
+	if (g_ModStageNums[stagenum] > -1) {
 		modnum = g_ModStageNums[stagenum];
 	}
 	// switch (stagenum) {
@@ -815,7 +815,7 @@ void modSwitch(s32 modnum, s32 stagenum) {
 	// this essentially reloads you back to the boot mod
 	modUnloadTextureSurfaceType();
 
-	if (modNumFromStage(stagenum) > 0 && modnum < 0) {
+	if (modNumFromStage(stagenum) > -1 && modnum < 0) {
 		g_ModNum = modNumFromStage(stagenum);
 	} else {
 		g_ModNum = modnum;
