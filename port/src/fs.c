@@ -153,7 +153,7 @@ const char *fsFullPath(const char *relPath)
 
 
 
-static inline void modInit(char* path, char* outModDir, s32 portable){
+static inline void modDirInit(char* path, char* outModDir, s32 portable){
 	if (path) {
 		if (fsPathIsAbsolute(path) || fsPathIsCwdRelative(path) || path[0] == '$') {
 			// path is explicit; check as-is
@@ -209,31 +209,31 @@ s32 fsInit(void)
 	// get path to mod dir and expand it if needed
 	// mod directory is overlaid on top of base directory
 	path = sysArgGetString("--moddir");
-	modInit(path, modDir, portable);
+	modDirInit(path, modDir, portable);
 
 	// All in One Mod Dir
 	path = sysArgGetString("--aiomoddir");
-	modInit(path, aioModDir, portable);
+	modDirInit(path, aioModDir, portable);
 
 	// Friends of Joanna Mod Dir
 	path = sysArgGetString("--fojomoddir");
-	modInit(path, fojoModDir, portable);
+	modDirInit(path, fojoModDir, portable);
 
 	// GoldenEye X Mod Dir
 	path = sysArgGetString("--gexmoddir");
-	modInit(path, gexModDir, portable);
+	modDirInit(path, gexModDir, portable);
 
 	// Kakariko Village Mod Dir
 	path = sysArgGetString("--kakarikomoddir");
-	modInit(path, kakarikoModDir, portable);
+	modDirInit(path, kakarikoModDir, portable);
 
 	// Dark Moon Mod Dir
 	path = sysArgGetString("--darknoonmoddir");
-	modInit(path, darknoonModDir, portable);
+	modDirInit(path, darknoonModDir, portable);
 
 	// Goldfinger 64 Mod Dir
 	path = sysArgGetString("--goldfinger64moddir");
-	modInit(path, goldfinger64ModDir, portable);
+	modDirInit(path, goldfinger64ModDir, portable);
 
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");

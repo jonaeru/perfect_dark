@@ -20,6 +20,8 @@ extern struct stageallocation g_StageAllocations8Mb[];
 
 struct texturesurfaceconfig g_VanillaTextures[NUM_TEXTURES];
 
+s32 g_ModStageNums[STAGE_4MBMENU];
+
 #define PARSE_STAGE_FLOAT(sec, name, v, min, max) \
 	p = modConfigParseFloatValue(p, token, &v); \
 	if (!p || v < (min) || v > (max)) { \
@@ -286,13 +288,17 @@ static char *modConfigParseStageWeather(char *p, char *token, s32 stagenum)
 	return p;
 }
 
-static char *modConfigParseStage(char *p, char *token)
+static char *modConfigParseStage(char *p, char *token, s32 modnum)
 {
 	// stage number
 	p = strParseToken(p, token, NULL);
 	const s32 stagenum = strtol(token, NULL, 0);
 	if (stagenum <= 0x01 || stagenum > 0x50) {
 		return NULL;
+	}
+
+	if (g_ModStageNums[stagenum] < 0) {
+		g_ModStageNums[stagenum] = modnum;
 	}
 
 	// eat opening bracket
@@ -392,6 +398,8 @@ s32 modConfigLoad(const char *fname)
 		return false;
 	}
 
+	s32 modnum = g_ModNum;
+
 	s32 success = true;
 	char token[UTIL_MAX_TOKEN + 1] = { 0 };
 	char *end = data + dataLen;
@@ -400,7 +408,7 @@ s32 modConfigLoad(const char *fname)
 		if (!strcmp(token, "stage")) {
 			// stage NUMBER { KEYVALUES... }
 			char *prev = p;
-			p = modConfigParseStage(p, token);
+			p = modConfigParseStage(p, token, modnum);
 			if (!p) {
 				sysLogPrintf(LOG_ERROR, "modconfig: malformed stage block at offset %d", prev - data);
 				success = false;
@@ -546,8 +554,6 @@ void modUnloadTextureSurfaceType(void) {
 
 // refactor modLoadTextureSurfaceType anndd modUnloadTextureSurfaceType  into
 // per-mod functions, called from modLoad and modUnload
-//
-//
 
 void modLoadTextureSurfaceTypeGEX() {
 		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
@@ -744,69 +750,76 @@ void modLoadTextureSurfaceType(void) {
 
 }
 
+s32 modNumFromStage(s32 stagenum) {
+	// TODO: add to modconfig
+	// needs to declare stagenums
+	s32 modnum = -1;
+	if (g_ModStageNums[stagenum] > 0) {
+		modnum = g_ModStageNums[stagenum];
+	}
+	// switch (stagenum) {
+	// case STAGE_TEST_SILO:
+	// case STAGE_TEST_LAM:
+	// case STAGE_TEST_MP8:
+	// case STAGE_TEST_MP14:
+	// case STAGE_TEST_MP16:
+	// case STAGE_TEST_MP17:
+	// case STAGE_TEST_MP18:
+	// case STAGE_TEST_MP19:
+	// case STAGE_TEST_MP20:
+	// case STAGE_EXTRA1:
+	// case STAGE_EXTRA2:
+	// case STAGE_EXTRA3:
+	// case STAGE_EXTRA4:
+	// case STAGE_EXTRA5:
+	// case STAGE_EXTRA6:
+	// case STAGE_EXTRA7:
+	// case STAGE_EXTRA8:
+	// case STAGE_EXTRA9:
+	// case STAGE_EXTRA10:
+	// case STAGE_EXTRA11:
+	// case STAGE_EXTRA12:
+	// case STAGE_EXTRA13:
+	// case STAGE_EXTRA14:
+	// case STAGE_EXTRA15:
+	// case STAGE_EXTRA16:
+	// case STAGE_EXTRA17:
+	// case STAGE_EXTRA24:
+	// case STAGE_EXTRA25:
+	// 	modnum = MOD_GEX;
+	// 	break;
+	// case STAGE_24:
+	// case STAGE_EXTRA18:
+	// case STAGE_EXTRA19:
+	// case STAGE_EXTRA26:
+	// 	modnum = MOD_KAKARIKO;
+	// 	break;
+	// case STAGE_TEST_MP7:
+	// 	modnum = MOD_DARKNOON;
+	// 	break;
+	// case STAGE_EXTRA20:
+	// case STAGE_EXTRA21:
+	// case STAGE_EXTRA22:
+	// case STAGE_EXTRA23:
+	// 	modnum = MOD_GOLDFINGER_64;
+	// 	break;
+	// default:
+	// 	modnum = MOD_NORMAL;
+	// 	break;
+	// }
+
+	return modnum;
+}
+
 void modSwitch(s32 modnum, s32 stagenum) {
 	// this essentially reloads you back to the boot mod
 	modUnloadTextureSurfaceType();
 
-	// TODO: add to modconfig
-	// needs to declare stagenums
-	if (stagenum >= 0 && modnum < 0) {
-		switch (stagenum) {
-		case STAGE_TEST_SILO:
-		case STAGE_TEST_LAM:
-		case STAGE_TEST_MP8:
-		case STAGE_TEST_MP14:
-		case STAGE_TEST_MP16:
-		case STAGE_TEST_MP17:
-		case STAGE_TEST_MP18:
-		case STAGE_TEST_MP19:
-		case STAGE_TEST_MP20:
-		case STAGE_EXTRA1:
-		case STAGE_EXTRA2:
-		case STAGE_EXTRA3:
-		case STAGE_EXTRA4:
-		case STAGE_EXTRA5:
-		case STAGE_EXTRA6:
-		case STAGE_EXTRA7:
-		case STAGE_EXTRA8:
-		case STAGE_EXTRA9:
-		case STAGE_EXTRA10:
-		case STAGE_EXTRA11:
-		case STAGE_EXTRA12:
-		case STAGE_EXTRA13:
-		case STAGE_EXTRA14:
-		case STAGE_EXTRA15:
-		case STAGE_EXTRA16:
-		case STAGE_EXTRA17:
-		case STAGE_EXTRA24:
-		case STAGE_EXTRA25:
-			modnum = MOD_GEX;
-			break;
-		case STAGE_24:
-		case STAGE_EXTRA18:
-		case STAGE_EXTRA19:
-		case STAGE_EXTRA26:
-			modnum = MOD_KAKARIKO;
-			break;
-		case STAGE_TEST_MP7:
-			modnum = MOD_DARKNOON;
-			break;
-		case STAGE_EXTRA20:
-		case STAGE_EXTRA21:
-		case STAGE_EXTRA22:
-		case STAGE_EXTRA23:
-			modnum = MOD_GOLDFINGER_64;
-			break;
-		default:
-			modnum = MOD_NORMAL;
-			break;
-		}
-	}
-
-	if (modnum >= 0) {
+	if (modNumFromStage(stagenum) > 0) {
+		g_ModNum = modNumFromStage(stagenum);
+	} else {
 		g_ModNum = modnum;
 	}
-
 
 
 	// g_ModNum = MOD_AIO;

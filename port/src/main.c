@@ -114,7 +114,13 @@ int main(int argc, const char **argv)
 	gameInit();
 
 	if (fsGetModDir()) {
-		modConfigLoad(MOD_CONFIG_FNAME);
+		// load all mods, then load MOD_AIO (0) again
+		for (s32 i = 0; i < MOD_FOJO; ++i) {
+			g_ModNum = i;
+			modConfigLoad(MOD_CONFIG_FNAME);
+		}
+			g_ModNum = 0;
+			modConfigLoad(MOD_CONFIG_FNAME);
 	}
 
 	atexit(cleanup);

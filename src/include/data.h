@@ -592,6 +592,9 @@ extern struct modelstate g_Goldfinger64ModelStates[NUM_MODELS];
 // All Solos in Multi Mod
 extern bool g_NotLoadMod;
 
+extern s32 g_ModStageNums[STAGE_4MBMENU];
+
+
 #else // PLATFORM_N64
 
 #define TEX_FILTER_2D G_TF_BILERP

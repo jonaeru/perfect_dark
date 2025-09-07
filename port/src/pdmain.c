@@ -253,6 +253,10 @@ void mainInit(void)
 	dmaInit();
 	amgrInit();
 	varsInit();
+	// stagenum init for mod loading
+	for (s32 i = 0; i < ARRAYCOUNT(g_ModStageNums); ++i) {
+		g_ModStageNums[i] = -1;
+	}
 	mempInit();
 	memaInit();
 	joyInit();
@@ -316,6 +320,10 @@ void mainInit(void)
 void mainProc(void)
 {
 	mainInit();
+	for (s32 i = 0; i < MOD_FOJO; i++) {
+		modSwitch(i, -1);
+	}
+	modSwitch(MOD_NORMAL, -1);
 	rdpInit();
 	sndInit();
 
