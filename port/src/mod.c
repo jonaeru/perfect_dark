@@ -293,7 +293,8 @@ static char *modConfigParseStage(char *p, char *token, s32 modnum)
 	// stage number
 	p = strParseToken(p, token, NULL);
 	const s32 stagenum = strtol(token, NULL, 0);
-	if (stagenum <= 0x01 || stagenum > 0x50) {
+	if (stagenum <= 0x01 || stagenum > 0xff) {
+		sysLogPrintf(LOG_ERROR, "modconfig: invalid stage number: %x", stagenum);
 		return NULL;
 	}
 
@@ -411,6 +412,7 @@ s32 modConfigLoad(const char *fname)
 			p = modConfigParseStage(p, token, modnum);
 			if (!p) {
 				sysLogPrintf(LOG_ERROR, "modconfig: malformed stage block at offset %d", prev - data);
+				sysLogPrintf(LOG_ERROR, "modconfig: stage block skipped: %s", token);
 				success = false;
 				break;
 			}
