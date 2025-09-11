@@ -262,6 +262,7 @@ s32 fsInit(void)
 
 	strncpy(saveDir, fsFullPath(path), FS_MAXPATH);
 	sysLogPrintf(LOG_NOTE, " mod dir: %s", modDir);
+	sysLogPrintf(LOG_NOTE, " aio mod dir: %s", aioModDir);
 	sysLogPrintf(LOG_NOTE, " gex mod dir: %s", gexModDir);
 	sysLogPrintf(LOG_NOTE, " kakariko mod dir: %s", kakarikoModDir);
 	sysLogPrintf(LOG_NOTE, " darknoon mod dir: %s", darknoonModDir);
