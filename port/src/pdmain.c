@@ -74,6 +74,7 @@
 #include "types.h"
 #include "system.h"
 #include "mod.h"
+#include "fs.h"
 
 extern u8 *g_MempHeap;
 extern u32 g_MempHeapSize;
@@ -294,6 +295,15 @@ void mainInit(void)
 	for (s32 i = 0; i < NUM_TEXTURES; i++) {
 		g_VanillaTextures[i].surfacetype = g_Textures[i].surfacetype;
 		g_VanillaTextures[i].soundsurfacetype = g_Textures[i].soundsurfacetype;
+	}
+	if (fsGetModDir()) {
+		// load all mods, then load MOD_AIO (0) again
+		for (s32 i = 0; i < MOD_FOJO; ++i) {
+			g_ModNum = i;
+			modConfigLoad(MOD_CONFIG_FNAME);
+		}
+			g_ModNum = 0;
+			modConfigLoad(MOD_CONFIG_FNAME);
 	}
 	langInit();
 	lvInit();

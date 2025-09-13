@@ -81,10 +81,12 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 {
 	// if relPath doesn't contain textures/ or files/ subdir, don't even try to look in mod dirs
 	// and return false
+	// sysLogPrintf(LOG_NOTE, "fsModFullPath: relPath=%s\n", relPath);
 	if (!strstr(relPath, "textures") && !strstr(relPath, "files") && !strstr(relPath, "modconfig.txt") && !strstr(relPath, "sequences")) {
 		printf("fsModFullPath ret false: relPath=%s\n", relPath);
 		return false;
 	}
+	// sysLogPrintf(LOG_NOTE, "fsModFullPath: relPath=%s. Switch on g_ModNum\n", relPath, g_ModNum);
 	switch (g_ModNum) {
 		case MOD_GEX:
 			return fsModFullPathCheck(relPath, gexModDir, pathBuf);
@@ -295,6 +297,7 @@ s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
 
 	FILE *f = fopen(fullName, "rb");
 	if (!f) {
+		// sysLogPrintf(LOG_ERROR, "fsFileLoadTo: could not find file: %s", fullName);
 		return -1;
 	}
 
