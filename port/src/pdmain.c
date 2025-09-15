@@ -302,7 +302,7 @@ void mainInit(void)
 			g_ModNum = i;
 			modConfigLoad(MOD_CONFIG_FNAME);
 		}
-			g_ModNum = 0;
+			g_ModNum = MOD_FOJO;
 			modConfigLoad(MOD_CONFIG_FNAME);
 	}
 	langInit();
@@ -334,7 +334,7 @@ void mainProc(void)
 	for (s32 i = 0; i <= MOD_FOJO; i++) {
 		modSwitch(i, -1);
 	}
-	modSwitch(MOD_NORMAL, -1);
+	modSwitch(MOD_FOJO, -1);
 	rdpInit();
 	sndInit();
 
