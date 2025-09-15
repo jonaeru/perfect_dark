@@ -86,30 +86,51 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 		printf("fsModFullPath ret false: relPath=%s\n", relPath);
 		return false;
 	}
-	// sysLogPrintf(LOG_NOTE, "fsModFullPath: relPath=%s. Switch on g_ModNum\n", relPath, g_ModNum);
-	switch (g_ModNum) {
-		case MOD_GEX:
-			return fsModFullPathCheck(relPath, gexModDir, pathBuf);
-			break;
-		case MOD_KAKARIKO:
-			return fsModFullPathCheck(relPath, kakarikoModDir, pathBuf);
-			break;
-		case MOD_DARKNOON:
-			return fsModFullPathCheck(relPath, darknoonModDir, pathBuf);
-			break;
-		case MOD_GOLDFINGER_64:
-			return fsModFullPathCheck(relPath, goldfinger64ModDir, pathBuf);
-			break;
-		case MOD_FOJO:
-			return fsModFullPathCheck(relPath, fojoModDir, pathBuf);
-			break;
-		case MOD_NORMAL:
-			return fsModFullPathCheck(relPath, aioModDir, pathBuf);
-			break;
-		default:
-			return false;
-			break;
+	sysLogPrintf(LOG_NOTE, "fsModFullPath: relPath=%s. Switch on g_ModNum\n", relPath, g_ModNum);
+	// iterate over all mods, annd if fsModFullPathCheck returns true, return true immediately
+	// otherwise return false at the end
+	char* modDirs[6] = {
+		aioModDir,
+		gexModDir,
+		kakarikoModDir,
+		darknoonModDir,
+		goldfinger64ModDir,
+		fojoModDir,
+	};
+
+
+
+	// for Lang files and special files, check all mods, starting wiwht mod 0
+	if (strstr(relPath, "files/L") ||
+				strstr(relPath, "files/Ccarroll2Z") ||
+				strstr(relPath, "files/Cskedar2Z") ||
+				strstr(relPath, "files/Ghand_carollZ") ||
+				strstr(relPath, "files/CheadgreyZ")
+				){
+		sysLogPrintf(LOG_NOTE, "fsModFullPath: files - checking current mod first\n");
+		if (fsModFullPathCheck(relPath, modDirs[g_ModNum], pathBuf)) {
+			sysLogPrintf(LOG_NOTE, "fsModFullPath: found in modDir=%s\n", modDirs[g_ModNum]);
+			return true;
+		}
+		sysLogPrintf(LOG_NOTE, "fsModFullPath: not found in current mod, checking all mods in order\n");
+		for (s32 i = 0; i <= MOD_FOJO; ++i) {
+			if (fsModFullPathCheck(relPath, (const char*)modDirs[i], pathBuf)) {
+				sysLogPrintf(LOG_NOTE, "fsModFullPath: found in modDir=%s\n", modDirs[i]);
+				return true;
+			}
+		}
+		sysLogPrintf(LOG_NOTE, "fsModFullPath: not found in any mod\n");
+		return false;
+	} else {
+		sysLogPrintf(LOG_NOTE, "fsModFullPath: checking current mod only\n");
+		if (fsModFullPathCheck(relPath, modDirs[g_ModNum], pathBuf)) {
+			sysLogPrintf(LOG_NOTE, "fsModFullPath: found in modDir=%s\n", modDirs[g_ModNum]);
+			return true;
+		}
+		sysLogPrintf(LOG_NOTE, "fsModFullPath: not found in current mod\n");
+		return false;
 	}
+
 }
 
 const char *fsFullPath(const char *relPath)
