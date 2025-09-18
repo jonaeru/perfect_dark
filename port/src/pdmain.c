@@ -298,7 +298,7 @@ void mainInit(void)
 	}
 	if (fsGetModDir()) {
 		// load all mods, then load MOD_AIO (0) again
-		for (s32 i = 0; i < MOD_FOJO; ++i) {
+		for (s32 i = 0; i <= MOD_FOJO; ++i) {
 			g_ModNum = i;
 			modConfigLoad(MOD_CONFIG_FNAME);
 		}

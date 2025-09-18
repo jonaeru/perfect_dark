@@ -115,7 +115,7 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 		sysLogPrintf(LOG_NOTE, "fsModFullPath: not found in current mod, checking all mods in order\n");
 		for (s32 i = 0; i <= MOD_FOJO; ++i) {
 			if (fsModFullPathCheck(relPath, (const char*)modDirs[i], pathBuf)) {
-				sysLogPrintf(LOG_NOTE, "fsModFullPath: found in modDir=%s\n", modDirs[i]);
+				sysLogPrintf(LOG_NOTE, "fsModFullPath: %s found in modDir=%s\n", relPath, modDirs[i]);
 				return true;
 			}
 		}
