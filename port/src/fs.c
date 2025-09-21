@@ -33,7 +33,7 @@ static char goldfinger64ModDir[FS_MAXPATH + 1]; // Goldfinger 64 Mod
 static char fojoModDir[FS_MAXPATH + 1];         // Friends of Joanna Mod
 static char aioModDir[FS_MAXPATH + 1];          // All in One Mod
 
-u32 g_ModNum = MOD_FOJO;
+u32 g_ModNum = MOD_AIO;
 
 static s32 fsPathIsWritable(const char *path)
 {

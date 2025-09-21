@@ -153,7 +153,7 @@ int main(int argc, const char **argv)
 	mainProc();
 
 	// Mod Switch
-	g_ModNum = MOD_FOJO;
+	g_ModNum = MOD_AIO;
 
 	return 0;
 }
