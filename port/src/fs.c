@@ -105,7 +105,8 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 				strstr(relPath, "files/Ccarroll2Z") ||
 				strstr(relPath, "files/Cskedar2Z") ||
 				strstr(relPath, "files/Ghand_carollZ") ||
-				strstr(relPath, "files/CheadgreyZ")
+				strstr(relPath, "files/CheadgreyZ") ||
+				strstr(relPath, "files/Usetup")
 				){
 		sysLogPrintf(LOG_NOTE, "fsModFullPath: files - checking current mod first\n");
 		if (fsModFullPathCheck(relPath, modDirs[g_ModNum], pathBuf)) {
