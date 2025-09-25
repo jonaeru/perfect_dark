@@ -102,11 +102,9 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 
 	// for Lang files and special files, check all mods, starting wiwht mod 0
 	if (strstr(relPath, "files/L") ||
-				strstr(relPath, "files/Ccarroll2Z") ||
-				strstr(relPath, "files/Cskedar2Z") ||
-				strstr(relPath, "files/Ghand_carollZ") ||
-				strstr(relPath, "files/CheadgreyZ") ||
-				strstr(relPath, "files/Usetup")
+				strstr(relPath, "files/C") ||
+				strstr(relPath, "files/G") ||
+				strstr(relPath, "files/U")
 				){
 		sysLogPrintf(LOG_NOTE, "fsModFullPath: files - checking current mod first\n");
 		if (fsModFullPathCheck(relPath, modDirs[g_ModNum], pathBuf)) {
