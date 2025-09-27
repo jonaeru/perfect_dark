@@ -16,6 +16,8 @@ enum LogLevel {
 void sysInitArgs(s32 argc, const char **argv);
 void sysInit(void);
 
+s32 getModDirCount(const char *arg, int max_values);
+
 s32 sysArgCheck(const char *arg);
 const char *sysArgGetString(const char *arg);
 s32 sysArgGetInt(const char *arg, s32 defval);

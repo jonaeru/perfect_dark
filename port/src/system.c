@@ -13,6 +13,7 @@
 #include <PR/ultratypes.h>
 #include "platform.h"
 #include "system.h"
+#include "fs.h"
 
 #ifdef PLATFORM_WIN32
 
@@ -125,23 +126,24 @@ s32 sysArgCheck(const char *arg)
 	}
 	return 0;
 }
+extern char modDirs[64][FS_MAXPATH + 1];        // mod directories
+s32 getModDirCount(const char *arg, int max_values)
+{
+	int		count = 0;
+	for (s32 i = 1; i < sysArgc; ++i) {
+		if (!strcasecmp(sysArgv[i], arg)) {
+			if (i < sysArgc - 1 && count < max_values) {
+				strcpy(modDirs[count++], sysArgv[i + 1]);
+				printf("Found arg %s: %s\n", arg, sysArgv[i + 1]);
+			}
+		}
+	}
+	return count;
+}
+
 
 const char *sysArgGetString(const char *arg)
 {
-	// default mod directories
-	if (strcmp("--aiomoddir", arg) == 0) {
-		return "mod_aio";
-	} else if (strcmp("--kakarikomoddir", arg) == 0) {
-		return "mod_kakariko";
-	} else if (strcmp("--darknoonmoddir", arg) == 0) {
-		return "mod_dark_noon";
-	} else if (strcmp("--goldfinger64moddir", arg) == 0) {
-		return "mod_goldfinger_64";
-	} else if (strcmp("--gexmoddir", arg) == 0) {
-		return "mod_gex";
-	} else if (strcmp("--fojomoddir", arg) == 0) {
-		return "mod_fojo";
-	}
 	for (s32 i = 1; i < sysArgc; ++i) {
 		if (!strcasecmp(sysArgv[i], arg)) {
 			if (i < sysArgc - 1) {

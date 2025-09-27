@@ -26,6 +26,7 @@ static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
 
+char modDirs[64][FS_MAXPATH + 1];        // mod directories
 static char gexModDir[FS_MAXPATH + 1];          // GoldenEye X Mod
 static char kakarikoModDir[FS_MAXPATH + 1];     // Kakariko Village Mod
 static char darknoonModDir[FS_MAXPATH + 1];     // Dark Moon Mod
@@ -33,7 +34,7 @@ static char goldfinger64ModDir[FS_MAXPATH + 1]; // Goldfinger 64 Mod
 static char fojoModDir[FS_MAXPATH + 1];         // Friends of Joanna Mod
 static char aioModDir[FS_MAXPATH + 1];          // All in One Mod
 
-u32 g_ModNum = MOD_AIO;
+u32 g_ModNum = 0; // ie the boot mod
 
 static s32 fsPathIsWritable(const char *path)
 {
@@ -89,14 +90,6 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 	sysLogPrintf(LOG_NOTE, "fsModFullPath: relPath=%s. Switch on g_ModNum\n", relPath, g_ModNum);
 	// iterate over all mods, annd if fsModFullPathCheck returns true, return true immediately
 	// otherwise return false at the end
-	char* modDirs[6] = {
-		aioModDir,
-		gexModDir,
-		kakarikoModDir,
-		darknoonModDir,
-		goldfinger64ModDir,
-		fojoModDir,
-	};
 
 
 
@@ -230,32 +223,36 @@ s32 fsInit(void)
 
 	// get path to mod dir and expand it if needed
 	// mod directory is overlaid on top of base directory
-	path = sysArgGetString("--moddir");
-	modDirInit(path, modDir, portable);
 
-	// All in One Mod Dir
-	path = sysArgGetString("--aiomoddir");
-	modDirInit(path, aioModDir, portable);
+	s32 numModDirs = getModDirCount("--moddir", sizeof(modDirs)/sizeof(modDirs[0]));
+	// for (s32 i = 0; i < numModDirs; ++i) {
+	// 	modDirInit(modDirs[i], modDirs[i], portable);
+	// 	sysLogPrintf(LOG_NOTE, " mod dir %d: %s", i, modDirs[i]);
+	// }
 
-	// Friends of Joanna Mod Dir
-	path = sysArgGetString("--fojomoddir");
-	modDirInit(path, fojoModDir, portable);
-
-	// GoldenEye X Mod Dir
-	path = sysArgGetString("--gexmoddir");
-	modDirInit(path, gexModDir, portable);
-
-	// Kakariko Village Mod Dir
-	path = sysArgGetString("--kakarikomoddir");
-	modDirInit(path, kakarikoModDir, portable);
-
-	// Dark Moon Mod Dir
-	path = sysArgGetString("--darknoonmoddir");
-	modDirInit(path, darknoonModDir, portable);
-
-	// Goldfinger 64 Mod Dir
-	path = sysArgGetString("--goldfinger64moddir");
-	modDirInit(path, goldfinger64ModDir, portable);
+	// // All in One Mod Dir
+	// path = sysArgGetString("--aiomoddir");
+	// modDirInit(path, aioModDir, portable);
+	//
+	// // Friends of Joanna Mod Dir
+	// path = sysArgGetString("--fojomoddir");
+	// modDirInit(path, fojoModDir, portable);
+	//
+	// // GoldenEye X Mod Dir
+	// path = sysArgGetString("--gexmoddir");
+	// modDirInit(path, gexModDir, portable);
+	//
+	// // Kakariko Village Mod Dir
+	// path = sysArgGetString("--kakarikomoddir");
+	// modDirInit(path, kakarikoModDir, portable);
+	//
+	// // Dark Moon Mod Dir
+	// path = sysArgGetString("--darknoonmoddir");
+	// modDirInit(path, darknoonModDir, portable);
+	//
+	// // Goldfinger 64 Mod Dir
+	// path = sysArgGetString("--goldfinger64moddir");
+	// modDirInit(path, goldfinger64ModDir, portable);
 
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
@@ -283,12 +280,9 @@ s32 fsInit(void)
 	}
 
 	strncpy(saveDir, fsFullPath(path), FS_MAXPATH);
-	sysLogPrintf(LOG_NOTE, " mod dir: %s", modDir);
-	sysLogPrintf(LOG_NOTE, " aio mod dir: %s", aioModDir);
-	sysLogPrintf(LOG_NOTE, " gex mod dir: %s", gexModDir);
-	sysLogPrintf(LOG_NOTE, " kakariko mod dir: %s", kakarikoModDir);
-	sysLogPrintf(LOG_NOTE, " darknoon mod dir: %s", darknoonModDir);
-	sysLogPrintf(LOG_NOTE, " goldfinger64 mod dir: %s", goldfinger64ModDir);
+	for (s32 i = 0; i < numModDirs; ++i) {
+		sysLogPrintf(LOG_NOTE, " mod dir %d: %s", i, modDirs[i]);
+	}
 
 	sysLogPrintf(LOG_NOTE, "base dir: %s", baseDir);
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
@@ -298,17 +292,13 @@ s32 fsInit(void)
 
 const char *fsGetModDir(void)
 {
-	if (g_ModNum == MOD_GEX) {
-		return gexModDir[0] ? gexModDir : NULL;
-	} else if (g_ModNum == MOD_KAKARIKO) {
-		return kakarikoModDir[0] ? kakarikoModDir : NULL;
-	} else if (g_ModNum == MOD_DARKNOON) {
-		return darknoonModDir[0] ? darknoonModDir : NULL;
-	} else if (g_ModNum == MOD_GOLDFINGER_64) {
-		return goldfinger64ModDir[0] ? goldfinger64ModDir : NULL;
-	} else {
-		return modDir[0] ? modDir : NULL;
+	if (g_ModNum >= 0 && g_ModNum <= sizeof(modDirs)/sizeof(modDirs[0])) {
+		if (modDirs[g_ModNum][0]) {
+			return modDirs[g_ModNum];
+		}
 	}
+
+	return NULL;
 }
 
 s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)

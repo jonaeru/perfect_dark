@@ -3,6 +3,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "types.h"
+#include "fs.h"
 
 #ifdef PLATFORM_N64
 #define EXT_SEG
@@ -593,6 +594,8 @@ extern struct modelstate g_Goldfinger64ModelStates[NUM_MODELS];
 extern bool g_NotLoadMod;
 
 extern s32 g_ModStageNums[STAGE_4MBMENU];
+
+extern char modDirs[64][FS_MAXPATH + 1];        // mod directories
 
 
 #else // PLATFORM_N64
