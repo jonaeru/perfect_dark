@@ -28,11 +28,8 @@ static char exeDir[FS_MAXPATH + 1];  // replaces $E
 
 char modDirs[64][FS_MAXPATH + 1];        // mod directories
 static char gexModDir[FS_MAXPATH + 1];          // GoldenEye X Mod
-static char kakarikoModDir[FS_MAXPATH + 1];     // Kakariko Village Mod
-static char darknoonModDir[FS_MAXPATH + 1];     // Dark Moon Mod
-static char goldfinger64ModDir[FS_MAXPATH + 1]; // Goldfinger 64 Mod
-static char fojoModDir[FS_MAXPATH + 1];         // Friends of Joanna Mod
-static char aioModDir[FS_MAXPATH + 1];          // All in One Mod
+
+u32 numModDirs = 0;
 
 u32 g_ModNum = 0; // ie the boot mod
 
@@ -224,35 +221,7 @@ s32 fsInit(void)
 	// get path to mod dir and expand it if needed
 	// mod directory is overlaid on top of base directory
 
-	s32 numModDirs = getModDirCount("--moddir", sizeof(modDirs)/sizeof(modDirs[0]));
-	// for (s32 i = 0; i < numModDirs; ++i) {
-	// 	modDirInit(modDirs[i], modDirs[i], portable);
-	// 	sysLogPrintf(LOG_NOTE, " mod dir %d: %s", i, modDirs[i]);
-	// }
-
-	// // All in One Mod Dir
-	// path = sysArgGetString("--aiomoddir");
-	// modDirInit(path, aioModDir, portable);
-	//
-	// // Friends of Joanna Mod Dir
-	// path = sysArgGetString("--fojomoddir");
-	// modDirInit(path, fojoModDir, portable);
-	//
-	// // GoldenEye X Mod Dir
-	// path = sysArgGetString("--gexmoddir");
-	// modDirInit(path, gexModDir, portable);
-	//
-	// // Kakariko Village Mod Dir
-	// path = sysArgGetString("--kakarikomoddir");
-	// modDirInit(path, kakarikoModDir, portable);
-	//
-	// // Dark Moon Mod Dir
-	// path = sysArgGetString("--darknoonmoddir");
-	// modDirInit(path, darknoonModDir, portable);
-	//
-	// // Goldfinger 64 Mod Dir
-	// path = sysArgGetString("--goldfinger64moddir");
-	// modDirInit(path, goldfinger64ModDir, portable);
+	numModDirs = getModDirCount("--moddir", sizeof(modDirs)/sizeof(modDirs[0]));
 
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
