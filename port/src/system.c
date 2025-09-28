@@ -129,7 +129,7 @@ s32 sysArgCheck(const char *arg)
 extern char modDirs[64][FS_MAXPATH + 1];        // mod directories
 s32 getModDirCount(const char *arg, int max_values)
 {
-	int		count = 0;
+	s32 count = 0;
 	for (s32 i = 1; i < sysArgc; ++i) {
 		if (!strcasecmp(sysArgv[i], arg)) {
 			if (i < sysArgc - 1 && count < max_values) {

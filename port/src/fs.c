@@ -30,7 +30,7 @@ static char exeDir[FS_MAXPATH + 1];  // replaces $E
 char modDirs[64][FS_MAXPATH + 1];        // mod directories
 static char gexModDir[FS_MAXPATH + 1];          // GoldenEye X Mod
 
-u32 numModDirs = 0;
+u32 g_NumModDirs = 0;
 
 u32 g_ModNum = 0; // ie the boot mod
 
@@ -103,7 +103,7 @@ static inline const bool fsModFullPath(char *pathBuf, const char *relPath)
 			return true;
 		}
 		sysLogPrintf(LOG_NOTE, "fsModFullPath: not found in current mod, checking all mods in order\n");
-		for (s32 i = 0; i <= MOD_FOJO; ++i) {
+		for (s32 i = 0; i <= g_NumModDirs; ++i) {
 			if (fsModFullPathCheck(relPath, (const char*)modDirs[i], pathBuf)) {
 				sysLogPrintf(LOG_NOTE, "fsModFullPath: %s found in modDir=%s\n", relPath, modDirs[i]);
 				return true;
@@ -222,7 +222,7 @@ s32 fsInit(void)
 	// get path to mod dir and expand it if needed
 	// mod directory is overlaid on top of base directory
 
-	numModDirs = getModDirCount("--moddir", sizeof(modDirs)/sizeof(modDirs[0]));
+	s32 numModDirs = getModDirCount("--moddir", sizeof(modDirs)/sizeof(modDirs[0]));
 
 	// get path to save dir and expand it if needed
 	path = sysArgGetString("--savedir");
@@ -250,7 +250,7 @@ s32 fsInit(void)
 	}
 
 	strncpy(saveDir, fsFullPath(path), FS_MAXPATH);
-	for (s32 i = 0; i < numModDirs; ++i) {
+	for (s32 i = 0; i < g_NumModDirs; ++i) {
 		sysLogPrintf(LOG_NOTE, " mod dir %d: %s", i, modDirs[i]);
 	}
 
@@ -258,6 +258,7 @@ s32 fsInit(void)
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
 
 	fileSlotsInit(numModDirs);
+	g_NumModDirs = numModDirs;
 
 	return 0;
 }

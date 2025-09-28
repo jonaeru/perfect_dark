@@ -56,6 +56,7 @@
 u8 *g_RomFile;
 u32 g_RomFileSize;
 
+extern u32 g_NumModDirs;
 static u8 *romDataSeg;
 static u32 romDataSegSize;
 static const char *romName = ROMDATA_ROM_NAME;
@@ -96,12 +97,10 @@ static const struct romfilepatch filePatches[] = {
 
 static struct romfile fileSlots[64][ROMDATA_MAX_FILES];
 void fileSlotsInit(u32 numMods) {
-	if (numMods > 0) numMods--;
-	for (s32 i = 0; i < numMods; ++i) {
+	for (s32 i = 0; i < numMods - 1; ++i) {
 		for (s32 j = 0; j < ROMDATA_MAX_FILES; ++j) {
 				fileSlots[i][j].patches = filePatches;
 				fileSlots[i][j].numpatches = 2;
-				// Initialize other fields as needed
 		}
 	}
 }
@@ -364,7 +363,7 @@ static inline void romdataInitFiles(void)
 			const u32 nextofs = PD_BE32(offsets[i + 1]);
 			const u32 ofs = PD_BE32(offsets[i]);
 			int mod;
-			for (mod = MOD_NORMAL; mod <= MOD_FOJO; ++mod) {
+			for (mod = MOD_NORMAL; mod <= g_NumModDirs; ++mod) {
 				fileSlots[mod][i].data = g_RomFile + ofs;
 				fileSlots[mod][i].size = nextofs - ofs;
 				fileSlots[mod][i].source = SRC_UNLOADED;
@@ -377,11 +376,13 @@ static inline void romdataInitFiles(void)
 	const u32 *nameOffsets = (u32 *)(g_RomFile + PD_BE32(offsets[i - 1]));
 	for (i = 1; nameOffsets[i]; ++i) {
 		const u32 ofs = PD_BE32(nameOffsets[i]);
-		for (s32 mod = MOD_NORMAL; mod <= MOD_FOJO; ++mod) {
+		for (s32 mod = MOD_NORMAL; mod <= g_NumModDirs; ++mod) {
 			fileSlots[mod][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 		}
 	}
 
+	// TODO: need to define these files in modconfig,
+	// and overlay them here
 	const struct {
 		int file_index;
 		const char *name;
@@ -403,9 +404,9 @@ static inline void romdataInitFiles(void)
 		fileSlots[MOD_NORMAL][file_index].name = name;
 	}
 
-	for (i = 1; i < (u32)(sizeof(fileSlots[MOD_NORMAL]) / sizeof(fileSlots[MOD_NORMAL][0])); ++i) {
-		for (s32 mod = MOD_GEX; mod <= MOD_FOJO; ++mod) {
-			fileSlots[mod][i] = fileSlots[MOD_NORMAL][i];
+	for (i = 1; i < (u32)(sizeof(fileSlots[0]) / sizeof(fileSlots[0][0])); ++i) {
+		for (s32 mod = 1; mod < (g_NumModDirs - 1); ++mod) {
+			fileSlots[mod][i] = fileSlots[0][i];
 		}
 	}
 }

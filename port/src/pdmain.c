@@ -76,6 +76,7 @@
 #include "mod.h"
 #include "fs.h"
 
+extern u32 g_NumModDirs;
 extern u8 *g_MempHeap;
 extern u32 g_MempHeapSize;
 
@@ -298,11 +299,11 @@ void mainInit(void)
 	}
 	if (fsGetModDir()) {
 		// load all mods, then load MOD_AIO (0) again
-		for (s32 i = 0; i <= MOD_FOJO; ++i) {
+		for (s32 i = 0; i < g_NumModDirs; ++i) {
 			g_ModNum = i;
 			modConfigLoad(MOD_CONFIG_FNAME);
 		}
-			g_ModNum = MOD_AIO;
+			g_ModNum = 0;
 			modConfigLoad(MOD_CONFIG_FNAME);
 	}
 	langInit();
@@ -331,10 +332,10 @@ void mainInit(void)
 void mainProc(void)
 {
 	mainInit();
-	for (s32 i = 0; i <= MOD_FOJO; i++) {
+	for (s32 i = 0; i < g_NumModDirs; i++) {
 		modSwitch(i, -1);
 	}
-	modSwitch(MOD_AIO, -1);
+	modSwitch(0, -1);
 	rdpInit();
 	sndInit();
 
