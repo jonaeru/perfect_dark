@@ -94,14 +94,17 @@ static const struct romfilepatch filePatches[] = {
 	{ 0x92b0, 1, "\x6c", "\x99" },
 };
 
-static struct romfile fileSlots[][ROMDATA_MAX_FILES] = {
-	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
-	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // GoldenEye X Mod
-	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Kakariko Village Mod
-	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Dark Moon Mod
-	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Goldfinger 64 Mod
-	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Friends of Joanna Mod
-};
+static struct romfile fileSlots[64][ROMDATA_MAX_FILES];
+void fileSlotsInit(u32 numMods) {
+	if (numMods > 0) numMods--;
+	for (s32 i = 0; i < numMods; ++i) {
+		for (s32 j = 0; j < ROMDATA_MAX_FILES; ++j) {
+				fileSlots[i][j].patches = filePatches;
+				fileSlots[i][j].numpatches = 2;
+				// Initialize other fields as needed
+		}
+	}
+}
 
 #define ROMSEG_START(n) _ ## n ## SegmentRomStart
 #define ROMSEG_END(n) _ ## n ## SegmentRomEnd

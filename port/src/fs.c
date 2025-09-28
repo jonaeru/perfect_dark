@@ -14,6 +14,7 @@
 #include "platform.h"
 #include "utils.h"
 #include "fs.h"
+#include "romdata.h"
 #ifdef PLATFORM_WIN32
 #include <direct.h>
 #endif
@@ -255,6 +256,8 @@ s32 fsInit(void)
 
 	sysLogPrintf(LOG_NOTE, "base dir: %s", baseDir);
 	sysLogPrintf(LOG_NOTE, "save dir: %s", saveDir);
+
+	fileSlotsInit(numModDirs);
 
 	return 0;
 }

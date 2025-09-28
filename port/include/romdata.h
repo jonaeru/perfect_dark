@@ -26,4 +26,6 @@ u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype);
 
 s32 romdataCheckGbcRom(void);
 
+void fileSlotsInit(u32 numMods);
+
 #endif
