@@ -363,7 +363,7 @@ static inline void romdataInitFiles(void)
 			const u32 nextofs = PD_BE32(offsets[i + 1]);
 			const u32 ofs = PD_BE32(offsets[i]);
 			int mod;
-			for (mod = MOD_NORMAL; mod <= g_NumModDirs; ++mod) {
+			for (mod = 0; mod <= g_NumModDirs; ++mod) {
 				fileSlots[mod][i].data = g_RomFile + ofs;
 				fileSlots[mod][i].size = nextofs - ofs;
 				fileSlots[mod][i].source = SRC_UNLOADED;
@@ -376,7 +376,7 @@ static inline void romdataInitFiles(void)
 	const u32 *nameOffsets = (u32 *)(g_RomFile + PD_BE32(offsets[i - 1]));
 	for (i = 1; nameOffsets[i]; ++i) {
 		const u32 ofs = PD_BE32(nameOffsets[i]);
-		for (s32 mod = MOD_NORMAL; mod <= g_NumModDirs; ++mod) {
+		for (s32 mod = 0; mod <= g_NumModDirs; ++mod) {
 			fileSlots[mod][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 		}
 	}
@@ -397,11 +397,11 @@ static inline void romdataInitFiles(void)
 	for (i = 0; i < sizeof(slot_defs) / sizeof(slot_defs[0]); ++i) {
 		const s32 file_index = slot_defs[i].file_index;
 		const char *name = slot_defs[i].name;
-		fileSlots[MOD_NORMAL][file_index].data = 0;
-		fileSlots[MOD_NORMAL][file_index].size = 0;
-		fileSlots[MOD_NORMAL][file_index].source = SRC_UNLOADED;
-		fileSlots[MOD_NORMAL][file_index].preprocessed = 0;
-		fileSlots[MOD_NORMAL][file_index].name = name;
+		fileSlots[0][file_index].data = 0;
+		fileSlots[0][file_index].size = 0;
+		fileSlots[0][file_index].source = SRC_UNLOADED;
+		fileSlots[0][file_index].preprocessed = 0;
+		fileSlots[0][file_index].name = name;
 	}
 
 	for (i = 1; i < (u32)(sizeof(fileSlots[0]) / sizeof(fileSlots[0][0])); ++i) {

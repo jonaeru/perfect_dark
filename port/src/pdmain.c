@@ -257,8 +257,8 @@ void mainInit(void)
 	varsInit();
 	// stagenum init for mod loading
 	for (s32 i = 0; i < ARRAYCOUNT(g_ModStageNums); ++i) {
-		// Assume any mod-specific stages use the master mod (AIO)'s ssettings
-		g_ModStageNums[i] = MOD_NORMAL;
+		// Assume any mod-specific stages use the master mod's ssettings
+		g_ModStageNums[i] = 0;
 	}
 	mempInit();
 	memaInit();
