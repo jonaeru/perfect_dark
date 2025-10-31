@@ -4706,7 +4706,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				}
 
 				// Create decal depending on the weapon's surface type
-				if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= NUM_TEXTURES) {
+				if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= MAX_TEXTURES) {
 					surfacetype = SURFACETYPE_DEFAULT;
 				} else {
 					surfacetype = g_Textures[hit->hitthing.texturenum].surfacetype;

@@ -2245,7 +2245,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 		tex = texFindInPool(g_TexNumToLoad, pool);
 
 		if (tex == NULL) {
-			if (g_TexNumToLoad >= NUM_TEXTURES) {
+			if (g_TexNumToLoad >= MAX_TEXTURES) {
 				return;
 			}
 
@@ -2260,7 +2260,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 			thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
 			nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;
 
-			if (thisoffset == nextoffset) {
+			if (thisoffset == nextoffset && g_TexNumToLoad < NUM_TEXTURES) {
 				// The texture has no data
 				return;
 			}
@@ -2387,7 +2387,7 @@ void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct te
 	s32 i;
 
 	for (i = 0; i < numconfigs; i++) {
-		if ((uintptr_t)configs[i].texturenum < NUM_TEXTURES) {
+		if ((uintptr_t)configs[i].texturenum < MAX_TEXTURES) {
 			texLoad(&configs[i].texturenum, pool, true);
 			configs[i].unk0b = 1;
 		} else {
