@@ -5750,6 +5750,9 @@ struct hitthing {
 	s16 unk28;
 	s16 texturenum;
 	s16 unk2c;
+#ifndef PLATFORM_N64
+	s16 ignore_xlu;
+#endif
 };
 
 struct hit {
