@@ -4602,10 +4602,6 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, s32 roomnum, st
 	numbatches = g_Rooms[roomnum].numvtxbatches;
 
 	for (i = 0; i < numbatches; batch++, i++) {
-#ifndef PLATFORM_N64
-		if (hitthing->ignore_xlu && batch->type == VTXBATCHTYPE_XLU)
-			continue;
-#endif
 		j = bg0f1612e4(&batch->bbmin, &batch->bbmax, &from, &dist, &sp94, &hitthing->pos);
 
 		if (j == 0) {
