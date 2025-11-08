@@ -995,9 +995,6 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	s16 texturenum;
 	u32 surfacetype;
 
-	// ignore transparent surfaces
-	hitthing.ignore_xlu = 1;
-
 	shotdata.gunpos3d.x = gunpos3d->x;
 	shotdata.gunpos3d.y = gunpos3d->y;
 	shotdata.gunpos3d.z = gunpos3d->z;
