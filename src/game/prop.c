@@ -992,6 +992,8 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	RoomNum spb8[8];
 	RoomNum *roomsptr;
 	struct prop *prop;
+	s16 texturenum;
+	u32 surfacetype;
 
 	shotdata.gunpos3d.x = gunpos3d->x;
 	shotdata.gunpos3d.y = gunpos3d->y;
@@ -1069,10 +1071,11 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 				objTestHit(prop, &shotdata);
 			}
 			if (shotdata.hits[0].prop) {
+				texturenum = shotdata.hits[0].hitthing.texturenum;
+				surfacetype = (texturenum >= 0 && texturenum < NUM_TEXTURES) ? g_Textures[texturenum].surfacetype : SURFACETYPE_DEFAULT;
 				// ignore some glass parts and shields
-				if (shotdata.hits[0].slowsbullet && shotdata.hits[0].hitthing.texturenum != 10000 &&
-				    g_Textures[shotdata.hits[0].hitthing.texturenum].surfacetype != SURFACETYPE_GLASS &&
-				    g_Textures[shotdata.hits[0].hitthing.texturenum].surfacetype != SURFACETYPE_GLASSXLU) {
+				if (shotdata.hits[0].slowsbullet && texturenum != 10000 &&
+				    surfacetype != SURFACETYPE_GLASS && surfacetype != SURFACETYPE_GLASSXLU) {
 					return false;
 				}
 			}
