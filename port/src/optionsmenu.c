@@ -1975,9 +1975,8 @@ void updateMaxAnisotropyLevel()
 	for (int i = 0; i < ARRAYCOUNT(g_ExtendedVideoMenuItems); ++i) {
 		struct menuitem *item = &g_ExtendedVideoMenuItems[i];
 		const char *text = menuResolveParam2Text(item);
-		if (text == NULL) continue;
-
-		if (strstr(text, "Anisotropic Filtering") != NULL) {
+		
+		if (text && strstr(text, "Anisotropic Filtering") != NULL) {
 			item->param3 = videoGetMaxAnisotropyLevel();
 			break;
 		}
