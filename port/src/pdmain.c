@@ -494,6 +494,9 @@ void mainLoop(void)
 		}
 
 		if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
+			if (g_MpSetup.chrslots & 0xfff0) {
+				g_MpSetup.storedbotbits = g_MpSetup.chrslots & 0xfff0;
+			}
 			g_MpSetup.chrslots = 0x03;
 			mpReset();
 		} else if (g_Vars.perfectbuddynum) {

@@ -4107,6 +4107,11 @@ struct mpsetup {
 	/*0x800acba0*/ u8 weapons[NUM_MPWEAPONSLOTS];
 	/*0x800acba6*/ u8 paused;
 	/*0x800acba8*/ struct fileguid fileguid;
+#ifndef PLATFORM_N64
+	// Used to restore the non-player bits of chrslots upon entering Combat
+	// Simulator, after playing Co-Op/Counter-Op with a human sim.
+	u16 storedbotbits;
+#endif
 };
 
 struct bossfile {
