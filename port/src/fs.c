@@ -144,7 +144,7 @@ s32 fsInit(void)
 		if (!portable) {
 			if (fsFileSize("./" DEFAULT_BASEDIR_NAME) >= 0) {
 				path = "./" DEFAULT_BASEDIR_NAME;
-			} else if (fsFileSize("$H/" DEFAULT_BASEDIR_NAME)) {
+			} else if (fsFileSize("$H/" DEFAULT_BASEDIR_NAME) >= 0) {
 				path = "$H/" DEFAULT_BASEDIR_NAME;
 			}
 		}
