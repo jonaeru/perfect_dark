@@ -98,7 +98,7 @@ Controls can be rebound in `pd.ini`. Default control scheme is as follows:
 | Aim mode         | RMB/Z                  | LT                       | R Trigger                 |
 | Use / Cancel     | E                      | N/A                      | B                         |
 | Use / Accept     | N/A                    | A                        | A                         |
-| Crouch cycle     | N/A                    | L3                       | `0x80000000` (Extra)      |
+| Crouch cycle     | N/A                    | LS Click                 | `0x80000000` (Extra)      |
 | Half-Crouch      | Shift                  | N/A                      | `0x40000000` (Extra)      |
 | Full-Crouch      | Control                | N/A                      | `0x20000000` (Extra)      |
 | Reload           | R                      | X                        | X `(0x40)`                |
