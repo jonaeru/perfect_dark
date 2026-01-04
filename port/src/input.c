@@ -195,7 +195,7 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		{ CK_RTRIG,         VK_MOUSE_RIGHT,      SDL_SCANCODE_Z      },
 		{ CK_LTRIG,         SDL_SCANCODE_F,      SDL_SCANCODE_X      },
 		{ CK_ZTRIG,         VK_MOUSE_LEFT,       SDL_SCANCODE_SPACE  },
-		{ CK_START,         SDL_SCANCODE_RETURN, SDL_SCANCODE_TAB    },
+		{ CK_START,         SDL_SCANCODE_TAB,    0                   },
 		{ CK_DPAD_D,        SDL_SCANCODE_Q,      VK_MOUSE_MIDDLE     },
 		{ CK_DPAD_U,        0,                   0                   },
 		{ CK_Y,             VK_MOUSE_WHEEL_DN,   0                   },
@@ -209,7 +209,9 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		{ CK_STICK_YNEG,    SDL_SCANCODE_DOWN,   0                   },
 		{ CK_STICK_YPOS,    SDL_SCANCODE_UP,     0                   },
 		{ CK_4000,          SDL_SCANCODE_LSHIFT, 0                   },
-		{ CK_2000,          SDL_SCANCODE_LCTRL,  0                   }
+		{ CK_2000,          SDL_SCANCODE_LCTRL,  0                   },
+		{ CK_ACCEPT,        SDL_SCANCODE_RETURN, SDL_SCANCODE_E      },
+		{ CK_CANCEL,        VK_MOUSE_RIGHT,      0                   },
 	};
 
 	static const u32 pcjoybinds[][2] = {
