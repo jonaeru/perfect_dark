@@ -1641,11 +1641,18 @@ static void gfx_sp_extra_geometry_mode(uint32_t clear, uint32_t set) {
 
 static void gfx_adjust_viewport_or_scissor(XYWidthHeight* area, bool preserve_aspect = false) {
     // HACK: assume all target framebuffers have the same aspect
-    area->width *= RATIO_X;
-    area->x *= RATIO_X;
-    area->height *= RATIO_Y;
-    area->y = SCREEN_HEIGHT - area->y;
-    area->y *= RATIO_Y;
+    // Use floor/ceil to ensure scissor fully contains the logical region
+    // and prevents sub-pixel gaps at viewport edges
+    float x1 = area->x * RATIO_X;
+    float y1 = (SCREEN_HEIGHT - area->y) * RATIO_Y;
+    float x2 = (area->x + area->width) * RATIO_X;
+    float y2 = (SCREEN_HEIGHT - area->y + area->height) * RATIO_Y;
+    
+    area->x = std::floor(x1);
+    area->y = std::floor(y1);
+    area->width = std::ceil(x2) - area->x;
+    area->height = std::ceil(y2) - area->y;
+    
     if (preserve_aspect) {
         // preserve native aspect ratio
         const float ratio = gfx_current_native_aspect / gfx_current_dimensions.aspect_ratio;
