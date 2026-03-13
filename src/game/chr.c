@@ -4552,7 +4552,10 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 
 			if (hitpart) {
 				if (chrGetShield(chr) > 0.0f) {
-					var8005efc0 = 10.0f / model->scale;
+#ifndef PLATFORM_N64
+					if (g_BgHitXluDisabled == false)
+#endif
+						var8005efc0 = 10.0f / model->scale;
 				}
 
 				child = prop->child;
