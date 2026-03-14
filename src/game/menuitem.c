@@ -1334,7 +1334,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 					// make the button yellow if it's active
 					if (g_MenuKeyboardPlayer == g_MpPlayerNum) {
 						textcolour = (textcolour & 0xff) | 0xffff0000;
-						kbtext = (char *)"ESC: CANCEL  ENTER: OK";
+						kbtext = (char *)"ESC: OK";
 					} else {
 						kbtext = (char *)"TYPE WITH KEYBOARD";
 					}
@@ -1531,6 +1531,14 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 
 		u8 maxlen = item->param == 0 ? 10 : item->param;
 #ifndef PLATFORM_N64
+		if (g_MenuKeyboardPlayer != g_MpPlayerNum && inputKeyJustPressed(VK_A + ('i' - 'a'))) {
+			inputClearLastKey();
+			inputClearLastTextChar();
+			g_MenuKeyboardPlayer = g_MpPlayerNum;
+			inputStartTextInput();
+			menuPlaySound(MENUSOUND_SELECT);
+		}
+
 		if (g_MenuKeyboardPlayer == g_MpPlayerNum) {
 			// match caps state to keyboard shift/caps if typing with keyboard
 			const u32 kmod = inputGetKeyModState();
@@ -1541,7 +1549,7 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 			// handle text input
 			s32 prevpos = strlen(kb->string);
 			s32 pos = prevpos;
-			s32 result = inputTextHandler(kb->string, maxlen-1, &pos, true);
+			s32 result = inputTextHandler(kb->string, maxlen + 1, &pos, true);
 			if (result == -1) {
 				// cancel
 				kb->row = 5;
