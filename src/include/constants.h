@@ -4047,13 +4047,13 @@
 #define STAGE_MP_RANDOM_GEX   0x04
 
 #define STAGE_EXTRA1  0x05 // Frigate
-#define STAGE_EXTRA2  0x06 // Complex
+#define STAGE_EXTRA2  0x06 // Complex (GE-X)
 #define STAGE_EXTRA3  0x07 // Train
 #define STAGE_EXTRA4  0x08 // Archives
 #define STAGE_EXTRA5  0x0a // Aztec
-#define STAGE_EXTRA6  0x0b // Tample
+#define STAGE_EXTRA6  0x0b // Tample (GE-X)
 #define STAGE_EXTRA7  0x0c // Icicle Pyramid
-#define STAGE_EXTRA8  0x0d // Caves
+#define STAGE_EXTRA8  0x0d // Caves (GE-X)
 #define STAGE_EXTRA9  0x0e // Library
 #define STAGE_EXTRA10 0x0f // Facility
 #define STAGE_EXTRA11 0x10 // Bunker
