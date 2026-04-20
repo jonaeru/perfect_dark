@@ -2085,9 +2085,11 @@ struct prop *objInit(struct defaultobj *obj, struct modeldef *modeldef, struct p
 
 #ifdef PLATFORM_N64
 		modelSetScale(obj->model, g_ModelStates[obj->modelnum].scale * (1.0f / 4096.0f));
-#else // GoldenEye X Mod
+#else // All in One Mod
 		if (g_ModNum == MOD_GEX) {
 			modelSetScale(obj->model, g_GexModelStates[obj->modelnum].scale * (1.0f / 4096.0f));
+		} else if (g_ModNum == MOD_DARKNOON) {
+			modelSetScale(obj->model, g_DarkNoonModelStates[obj->modelnum].scale * (1.0f / 4096.0f));
 		} else if (g_ModNum == MOD_GOLDFINGER_64) {
 			modelSetScale(obj->model, g_Goldfinger64ModelStates[obj->modelnum].scale * (1.0f / 4096.0f));
 		} else {
@@ -14799,7 +14801,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, s32 playernum)
 		s16 exptype = g_PropExplosionTypes[8 + obj->modelnum];
 #else // GoldenEye X Mod
 		s16 exptype;
-		if (g_ModNum == MOD_GEX || g_ModNum == MOD_GOLDFINGER_64) {
+		if (g_ModNum == MOD_GEX || g_ModNum == MOD_GOLDFINGER_64 || g_ModNum == MOD_DARKNOON) {
 			exptype = g_GexPropExplosionTypes[8 + obj->modelnum];
 		} else {
 			exptype = g_PropExplosionTypes[8 + obj->modelnum];

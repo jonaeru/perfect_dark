@@ -270,6 +270,11 @@ void mpStartMatch(void)
 	case STAGE_EXTRA17:
 	case STAGE_EXTRA24:
 	case STAGE_EXTRA25:
+	case STAGE_EXTRA27:
+	case STAGE_EXTRA30:
+	case STAGE_EXTRA31:
+	case STAGE_EXTRA32:
+	case STAGE_EXTRA33:
 		g_ModNum = MOD_GEX;
 		break;
 	case STAGE_24:
@@ -279,6 +284,9 @@ void mpStartMatch(void)
 		g_ModNum = MOD_KAKARIKO;
 		break;
 	case STAGE_TEST_MP7:
+	case STAGE_EXTRA34:
+	case STAGE_EXTRA35:
+	case STAGE_EXTRA36:
 		g_ModNum = MOD_DARKNOON;
 		break;
 	case STAGE_EXTRA20:

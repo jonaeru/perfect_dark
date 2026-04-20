@@ -7,7 +7,7 @@
 // When adding or removing items from this table you must also update the
 // STAGEINDEX constants in constants.h.
 // NOTE: extra fields have been appended to stagetableentry in the PC port
-struct stagetableentry g_Stages[87] = {
+struct stagetableentry g_Stages[97] = {
 	//       id,                  ?, lia, liw, lih, ?, bg,               tiles,              pads,              setup,           mpsetp,             ?                0x18,            0x1c, ?, ?,  ?, 0x24,      0x28,   ?,   ?,   ?  ?  alarm                   extragunmem
 	/*0x00*/ STAGE_MAIANSOS,      2, 255, 100, 100, 0, FILE_BG_LUE_SEG,  FILE_BG_LUE_TILES,  FILE_BG_SEV_PADS,  FILE_USETUPSEV,  FILE_UMP_SETUPSEV,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 	/*0x01*/ STAGE_TEST_SILO,     2, 255, 100, 100, 0, FILE_BG_OAT_SEG,  FILE_BG_OAT_TILES,  FILE_BG_OAT_PADS,  FILE_USETUPSILO, FILE_UMP_SETUPSILO, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, 700, 800, 400, 1, SFX_ALARM_DEFAULT,      0,
@@ -101,6 +101,16 @@ struct stagetableentry g_Stages[87] = {
 	/*0x54*/ STAGE_EXTRA24,       2, 255, 100, 100, 0, FILE_BG_MP13_SEG, FILE_BG_MP13_TILES, FILE_BG_MP13_PADS, FILE_USETUPMP13, FILE_UMP_SETUPMP13, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 	/*0x55*/ STAGE_EXTRA25,       2, 255, 100, 100, 0, FILE_BG_STAT_SEG, FILE_BG_STAT_TILES, FILE_BG_STAT_PADS, FILE_USETUPSTAT, FILE_UMP_SETUPSTAT, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 	/*0x56*/ STAGE_EXTRA26,       2, 255, 100, 100, 0, FILE_BG_MP13_SEG, FILE_BG_MP13_TILES, FILE_BG_MP13_PADS, FILE_USETUPMP13, FILE_UMP_SETUPMP13, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x57*/ STAGE_EXTRA27,       2, 255, 100, 100, 0, FILE_BG_CAT_SEG,  FILE_BG_CAT_TILES,  FILE_BG_CAT_PADS,  FILE_USETUPCAT,  FILE_UMP_SETUPCAT,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, 200, 800, 400, 1, SFX_ALARM_DEFAULT,      0,
+	/*0x58*/ STAGE_EXTRA28,       2, 255, 100, 100, 0, FILE_BG_STAT_SEG, FILE_BG_STAT_TILES, FILE_BG_STAT_PADS, FILE_USETUPSTAT, FILE_UMP_SETUPSTAT, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x59*/ STAGE_EXTRA29,       2, 255, 100, 100, 0, FILE_BG_LAM_SEG,  FILE_BG_LAM_TILES,  FILE_BG_LAM_PADS,  FILE_USETUPLAM,  FILE_UMP_SETUPLAM,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x5a*/ STAGE_EXTRA30,       2, 255, 100, 100, 0, FILE_BG_LEN_SEG,  FILE_BG_LEN_TILES,  FILE_BG_LEN_PADS,  FILE_USETUPLEN,  FILE_UMP_SETUPLEN,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x5b*/ STAGE_EXTRA31,       2, 255, 100, 100, 0, FILE_BG_MP7_SEG,  FILE_BG_MP7_TILES,  FILE_BG_MP7_PADS,  FILE_USETUPMP7,  FILE_UMP_SETUPMP7,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x5c*/ STAGE_EXTRA32,       2, 255, 100, 100, 0, FILE_BG_SEV_SEG,  FILE_BG_SEV_TILES,  FILE_BG_SEV_PADS,  FILE_USETUPSEV,  FILE_UMP_SETUPSEV,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x5d*/ STAGE_EXTRA33,       2, 255, 100, 100, 0, FILE_BG_OLD_SEG,  FILE_BG_OLD_TILES,  FILE_BG_OLD_PADS,  FILE_USETUPOLD,  FILE_UMP_SETUPOLD,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x5e*/ STAGE_EXTRA34,       2, 255, 100, 100, 0, FILE_BG_CRAD_SEG, FILE_BG_CRAD_TILES, FILE_BG_CRAD_PADS, FILE_USETUPCRAD, FILE_UMP_SETUPCRAD, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, 700, 800, 400, 1, SFX_ALARM_DEFAULT,      0,
+	/*0x5f*/ STAGE_EXTRA35,       2, 255, 100, 100, 0, FILE_BG_OAT_SEG,  FILE_BG_OAT_TILES,  FILE_BG_OAT_PADS,  FILE_USETUPOAT,  FILE_UMP_SETUPOAT,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, 700, 800, 400, 1, SFX_ALARM_DEFAULT,      0,
+	/*0x60*/ STAGE_EXTRA36,       2, 255, 100, 100, 0, FILE_BG_MP3_SEG,  FILE_BG_MP3_TILES,  FILE_BG_MP3_PADS,  FILE_USETUPMP3,  FILE_UMP_SETUPMP3,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 #endif
 };
 

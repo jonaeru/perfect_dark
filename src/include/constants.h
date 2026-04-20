@@ -4037,10 +4037,10 @@
 #define STAGE_TEST_OLD      0x4e
 #define STAGE_DUEL          0x4f
 #define STAGE_TEST_LAM      0x50
-#define STAGE_TITLE         0x5c
-#define STAGE_BOOTPAKMENU   0x5d
-#define STAGE_CREDITS       0x5e
-#define STAGE_4MBMENU       0x5d
+#define STAGE_TITLE         0x66
+#define STAGE_BOOTPAKMENU   0x67
+#define STAGE_CREDITS       0x68
+#define STAGE_4MBMENU       0x69
 
 #define STAGE_MP_RANDOM_MULTI 0x02
 #define STAGE_MP_RANDOM_SOLO  0x03
@@ -4072,6 +4072,16 @@
 #define STAGE_EXTRA24 0x59 // Paradox
 #define STAGE_EXTRA25 0x5a // Rogue
 #define STAGE_EXTRA26 0x5b // War Colors
+#define STAGE_EXTRA27 0x5c // Arctic Mine
+#define STAGE_EXTRA28 0x5d // Offices
+#define STAGE_EXTRA29 0x5e // Apex
+#define STAGE_EXTRA30 0x5f // Courtyard
+#define STAGE_EXTRA31 0x60 // Frost Valley
+#define STAGE_EXTRA32 0x61 // Void
+#define STAGE_EXTRA33 0x62 // Residence
+#define STAGE_EXTRA34 0x63 // MI6
+#define STAGE_EXTRA35 0x64 // Submarine
+#define STAGE_EXTRA36 0x65 // Silo Surprise
 
 #define STAGEFLAG_CI_IN_TRAINING            0x00000001
 #define STAGEFLAG_CI_HOLO_FAILED            0x00000002

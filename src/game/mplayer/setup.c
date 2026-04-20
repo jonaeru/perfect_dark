@@ -197,6 +197,16 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_EXTRA25,         0, L_MPMENU_336 }, // Paradox
 	{ STAGE_EXTRA26,         0, L_MPMENU_337 }, // War Colors
 	{ STAGE_TEST_LAM,        0, L_MPMENU_338 }, // Grand Library
+	{ STAGE_EXTRA27,         0, L_MPMENU_339 }, // Arctic Mine
+	{ STAGE_EXTRA28,         0, L_MPMENU_340 }, // Offices
+	{ STAGE_EXTRA29,         0, L_MPMENU_341 }, // Apex
+	{ STAGE_EXTRA30,         0, L_MPMENU_342 }, // Courtyard
+	{ STAGE_EXTRA31,         0, L_MPMENU_343 }, // Frost Valley
+	{ STAGE_EXTRA32,         0, L_MPMENU_344 }, // Void
+	{ STAGE_EXTRA33,         0, L_MPMENU_345 }, // Residence
+	{ STAGE_EXTRA34,         0, L_MPMENU_346 }, // MI6
+	{ STAGE_EXTRA35,         0, L_MPMENU_347 }, // Submarine
+	{ STAGE_EXTRA36,         0, L_MPMENU_348 }, // Silo Surprise
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -209,8 +219,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (71 Stage + 4 Random)
-	return 75;
+#else // All Solos in Multi Mod (81 Stage + 4 Random)
+	return 85;
 #endif
 }
 
@@ -223,7 +233,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 71; i++) {
+	for (i = 0; i < 81; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -235,7 +245,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 71; i++) {
+	for (i = 0; i < 81; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -348,7 +358,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 55, L_MPMENU_326  }, // "Bonus"
-		{ 71, L_MPMENU_118  }, // "Random"
+		{ 81, L_MPMENU_118  }, // "Random"
 #endif
 	};
 

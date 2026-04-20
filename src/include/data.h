@@ -438,7 +438,7 @@ extern struct drawslot *g_BgSpecialDrawSlot;
 extern u16 g_BgFrameCount;
 extern s32 g_BgNumPortalCameraCacheItems;
 extern f32 var8007fcb4;
-extern struct stagetableentry g_Stages[87];
+extern struct stagetableentry g_Stages[97];
 extern s32 g_RoomMtxNumSlots;
 extern u32 g_GfxNumSwaps;
 extern s32 g_NumReasonsToEndMpMatch;
@@ -583,10 +583,14 @@ extern s16 g_MpCurrentSetup;
 // 0: Normal
 // 1: GoldenEye X Mod
 // 2: Kakariko Village Mod
+// 3: Dark Noon Mod
+// 4: Goldfinger 64 Mod
 extern s32 g_ModNum;
 // GoldenEye X Mod
 extern struct modelstate g_GexModelStates[NUM_MODELS];
 extern s8 g_GexPropExplosionTypes[];
+// Dark Noon Mod
+extern struct modelstate g_DarkNoonModelStates[NUM_MODELS];
 // Goldfinger 64 Mod
 extern struct modelstate g_Goldfinger64ModelStates[NUM_MODELS];
 // All Solos in Multi Mod

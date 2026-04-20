@@ -193,6 +193,16 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ STAGE_EXTRA24,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Rogue
 	{ STAGE_EXTRA25,       "-ml0 -me0 -mgfx120 -mvtx200 -ma400"            }, // Paradox
 	{ STAGE_EXTRA26,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // War Colors
+	{ STAGE_EXTRA27,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Arctic Mine
+	{ STAGE_EXTRA28,       "-ml0 -me0 -mgfx110 -mgfxtra80 -mvtx100 -ma700" }, // Offices
+	{ STAGE_EXTRA29,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Apex
+	{ STAGE_EXTRA30,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Courtyard
+	{ STAGE_EXTRA31,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Frost Valley
+	{ STAGE_EXTRA32,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Void
+	{ STAGE_EXTRA33,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Residence
+	{ STAGE_EXTRA34,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // MI6
+	{ STAGE_EXTRA35,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Submarine
+	{ STAGE_EXTRA36,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            }, // Silo Surprise
 #endif
 	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 };

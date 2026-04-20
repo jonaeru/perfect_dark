@@ -78,6 +78,9 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ STAGE_EXTRA20,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000, 0, RGB(0x000000), 0  }, // Junkyard (Same as Egyptian)
 	{ STAGE_EXTRA21,          10,  5000,    0,     0,    0, 996, 1000, RGB(0x280000), NO_SUNS,            1, 10000,    0, RGB(0xdc0014), 0,  -1000, 0, RGB(0x000000), 0  }, // Steel Mill (Same as Complex)
 	{ STAGE_EXTRA24,          10,  6000,    0,     0,    0, 993, 1000, RGB(0x080008), NO_SUNS,            0,  5000,    0, RGB(0xffffff), 0,  -3000, 0, RGB(0x00ffff), 0  }, // Rogue (Same as Caverns)
+	{ STAGE_EXTRA30,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000, 0, RGB(0x000000), 0  }, // Courtyard (Same as Egyptian)
+	{ STAGE_EXTRA31,          10, 20000,    0,    0,     0, 990, 1000, RGB(0x000000), NO_SUNS,            0,  5000,    0, RGB(0xffffff), 0,  -1000, 0, RGB(0x000000), 0  }, // Frost Valley
+	{ STAGE_EXTRA32,          10,  5000,    0,    0,     0, 996, 1000, RGB(0x280000), NO_SUNS,            1, 10000,    0, RGB(0xdc0014), 0,  -1000, 0, RGB(0x000000), 0  }, // Void (Same as Complex (GE-X))
 #endif
 	{ 0,                       0,     0,    0,    0,   0,   0,    0, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 };
@@ -177,6 +180,8 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_EXTRA18,       15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Tawfret Ruins
 	{ STAGE_EXTRA19,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x50280a),  5000,   0, 0, RGB(0x000000), -31000,    0, 0, 1 }, // Targitzan's Temple
 	{ STAGE_EXTRA26,       15, 20000,   0,  0,  0, RGB(0x8888dc), NO_SUNS,            1, RGB(0xffaa2a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // War Colors (Same as Villa MP, far from 10000 to 20000)
+	{ STAGE_EXTRA29,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 }, // Apex (Same as Skedar (MP))
+	{ STAGE_EXTRA33,       15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Residence (Same as Area 52 (MP))
 #endif
 	{ 0 },
 };
