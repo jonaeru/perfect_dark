@@ -117,6 +117,9 @@ void roomPopulateMtx(Mtxf *mtx, s32 roomnum)
 			|| ((stagenum == g_Stages[STAGEINDEX_DEFECTION].id
 					|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 					|| stagenum == g_Stages[STAGEINDEX_MBR].id) && roomnum == 0x01)
+#ifndef PLATFORM_N64 // Suburb Mod
+			|| (stagenum == g_Stages[STAGEINDEX_TEST_ARCH].id && roomnum == 0x01) // Suburb
+#endif
 			|| (stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id && roomnum == 0x71)) {
 		mtx->m[3][0] = g_BgRooms[roomnum].pos.x;
 		mtx->m[3][1] = g_BgRooms[roomnum].pos.y;

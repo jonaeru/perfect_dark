@@ -1014,6 +1014,16 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 						dyntexSetCurrentType(DYNTEXTYPE_ARROWS);
 						animated = true;
 					}
+
+#ifndef PLATFORM_N64 // GoldenEye X Mod
+					if (g_ModNum == MOD_GEX) {
+						// Caverns - deep water
+						if (texturenum == TEXTURE_0C90) {
+							dyntexSetCurrentType(DYNTEXTYPE_OCEAN);
+							animated = true;
+						}
+					}
+#endif
 				}
 			}
 

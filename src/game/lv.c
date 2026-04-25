@@ -404,6 +404,9 @@ void lvReset(s32 stagenum)
 	case STAGE_DEFECTION:
 	case STAGE_ATTACKSHIP:
 	case STAGE_TEST_OLD:
+#ifndef PLATFORM_N64
+	case STAGE_TEST_ARCH: // Suburb
+#endif
 		starsReset();
 		break;
 	}

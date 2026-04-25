@@ -170,6 +170,9 @@ int main(int argc, const char **argv)
 
 	mainProc();
 
+	// Mod Switch
+	g_ModNum = 0;
+
 	return 0;
 }
 
