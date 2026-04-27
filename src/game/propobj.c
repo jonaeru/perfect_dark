@@ -15882,7 +15882,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 			s8 spcb = false;
 			bool spc4;
 
-			if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= NUM_TEXTURES) {
+			if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= MAX_TEXTURES) {
 				surfacetype = g_SurfaceTypes[0];
 			} else if (g_Textures[hit->hitthing.texturenum].surfacetype < 15) {
 				surfacetype = g_SurfaceTypes[g_Textures[hit->hitthing.texturenum].surfacetype];

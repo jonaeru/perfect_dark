@@ -891,7 +891,8 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 				spe8 = true;
 			}
 
-			texturenum = ingdl->words.w1 & 0xfff;
+			texturenum = ingdl->words.w1 & (ingdl->unkc0.subcmd == 1 ? 0xfff : 0xffff);
+
 			flag = ingdl->words.w0 & 0x200;
 
 			texLoadFromTextureNum(texturenum, pool);

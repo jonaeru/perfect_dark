@@ -38,6 +38,7 @@
 #define NUM_MPWEAPONSLOTS     6
 #define NUM_SOLOSTAGES        21
 #define NUM_TEXTURES          (VERSION == VERSION_JPN_FINAL ? 3511 : 3503)
+#define MAX_TEXTURES          8192
 
 #define osSyncPrintf
 
