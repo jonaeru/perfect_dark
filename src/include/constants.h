@@ -4749,6 +4749,11 @@ enum weaponnum {
 #define BODY_DARK_LEATHER     0x95
 #define BODY_DARK_NEGOTIATOR  0x96
 
+#ifndef PLATFORM_N64 // All in One Mod
+#define HEAD_NATALYA          0x98
+#define BODY_NATALYA          0x99
+#endif
+
 #define JO_ACTION_ACTIVATE           0x0001
 #define JO_ACTION_RELOAD             0x0002
 
@@ -4821,4 +4826,5 @@ enum weaponnum {
 #define MOD_KAKARIKO 2
 #define MOD_DARKNOON 3
 #define MOD_GOLDFINGER_64 4
+#define NUM_MODS 5
 #endif
