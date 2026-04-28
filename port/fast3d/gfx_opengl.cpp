@@ -726,7 +726,7 @@ static void gfx_opengl_set_sampler_parameters(int tile, bool linear_filter, uint
     mipmaps = mipmaps && (current_mipmap_filter_mode != MIPMAP_DISABLED);
     const int mip_idx = mipmaps ? current_mipmap_filter_mode : 0;
     const GLint min_filter = linear_filter ? min_filters[current_filter_mode][mip_idx] : GL_NEAREST;
-    const GLint max_filter = linear_filter && (current_filter_mode != FILTER_NONE) ? GL_LINEAR : GL_NEAREST;
+    const GLint max_filter = linear_filter && (current_filter_mode == FILTER_LINEAR) ? GL_LINEAR : GL_NEAREST;
 
     glActiveTexture(GL_TEXTURE0 + tile);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
