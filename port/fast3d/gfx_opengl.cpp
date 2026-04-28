@@ -716,27 +716,25 @@ static uint32_t gfx_cm_to_opengl(uint32_t val) {
 }
 
 static void gfx_opengl_set_sampler_parameters(int tile, bool linear_filter, uint32_t cms, uint32_t cmt, bool mipmaps) {
-	const GLint min_filters[3][3] = {
-		// MIPMAP_DISABLED			MIPMAP_NEAREST				MIPMAP_LINEAR
-		{GL_NEAREST, 				GL_NEAREST_MIPMAP_NEAREST, 	GL_NEAREST_MIPMAP_LINEAR}, 	// FILTER_NONE
-		{GL_LINEAR, 				GL_LINEAR_MIPMAP_NEAREST, 	GL_LINEAR_MIPMAP_LINEAR}, 	// FILTER_BILINEAR
-		{GL_LINEAR_MIPMAP_LINEAR, 	GL_LINEAR_MIPMAP_LINEAR, 	GL_LINEAR_MIPMAP_LINEAR}, 	// FILTER_TRILINEAR
-	};
+    const GLint min_filters[3][3] = {
+        // MIPMAP_DISABLED   MIPMAP_NEAREST               MIPMAP_LINEAR
+        {  GL_NEAREST,       GL_NEAREST_MIPMAP_NEAREST,   GL_NEAREST_MIPMAP_LINEAR  }, // FILTER_NONE
+        {  GL_LINEAR,        GL_LINEAR_MIPMAP_NEAREST,    GL_LINEAR_MIPMAP_LINEAR   }, // FILTER_BILINEAR
+        {  GL_NEAREST,       GL_NEAREST_MIPMAP_NEAREST,   GL_NEAREST_MIPMAP_LINEAR  }, // FILTER_THREE_POINT
+    };
 
-	mipmaps = mipmaps && (current_mipmap_filter_mode != MIPMAP_DISABLED);
-	if (linear_filter && current_filter_mode == FILTER_THREE_POINT)
-		linear_filter = false;
-	const int mip_idx = mipmaps ? current_mipmap_filter_mode : 0;
-	const GLint min_filter = linear_filter ? min_filters[current_filter_mode][mip_idx] : GL_NEAREST;
-	const GLint max_filter = linear_filter && (current_filter_mode != FILTER_NONE) ? GL_LINEAR : GL_NEAREST;
+    mipmaps = mipmaps && (current_mipmap_filter_mode != MIPMAP_DISABLED);
+    const int mip_idx = mipmaps ? current_mipmap_filter_mode : 0;
+    const GLint min_filter = linear_filter ? min_filters[current_filter_mode][mip_idx] : GL_NEAREST;
+    const GLint max_filter = linear_filter && (current_filter_mode != FILTER_NONE) ? GL_LINEAR : GL_NEAREST;
 
-	glActiveTexture(GL_TEXTURE0 + tile);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, max_filter);
+    glActiveTexture(GL_TEXTURE0 + tile);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, max_filter);
 
-	if (mipmaps) {
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, current_anisotropy_level);
-	}
+    if (mipmaps) {
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, current_anisotropy_level);
+    }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, gfx_cm_to_opengl(cms));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gfx_cm_to_opengl(cmt));
