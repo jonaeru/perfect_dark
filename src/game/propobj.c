@@ -3299,7 +3299,7 @@ s32 func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 
 					s0 = true;
 
-					if (g_Textures[hitthing.texturenum].surfacetype == SURFACETYPE_DEEPWATER) {
+					if (hitthing.texturenum >= 0 && hitthing.texturenum < NUM_TEXTURES && g_Textures[hitthing.texturenum].surfacetype == SURFACETYPE_DEEPWATER) {
 						struct coord spa4 = {0, 0, 0};
 						s0 = false;
 						sparksCreate(prop->rooms[0], prop, &hitthing.pos, &spa4, &hitthing.unk0c, SPARKTYPE_DEEPWATER);

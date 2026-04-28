@@ -2678,6 +2678,7 @@ void mpCalculateAwards(void)
 				struct mpchrconfig *mpchr = MPCHR(k);
 
 				for (j = 0; j < MAX_MPCHRS; j++) {
+#ifdef PLATFORM_N64
 					// @bug: i should be k. The value of i was incremented after
 					// the last iteration of its loop above so it'll be between
 					// 1 and 4 inclusively depending on the number of players.
@@ -2688,6 +2689,9 @@ void mpCalculateAwards(void)
 					// total kills. Additionally, suicides are counted as kills
 					// while the intention here was to omit them.
 					if (i != j) {
+#else
+					if (k != j) {
+#endif
 						totalkills += mpchr->killcounts[j];
 					}
 				}

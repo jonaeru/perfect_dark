@@ -418,7 +418,8 @@ s32 texModeToGbiMode(s32 txmode)
 
 Gfx *texWriteTileFromDefinition(Gfx *gdl, struct tex *tex, s32 offset, s32 shifts, s32 shiftt, s32 min)
 {
-	struct texture *s0 = &g_Textures[tex->texturenum];
+	struct texture fallback = {0};
+	struct texture *s0 = &fallback;
 	s32 masks;
 	s32 maskt;
 	s32 line;
@@ -427,6 +428,10 @@ Gfx *texWriteTileFromDefinition(Gfx *gdl, struct tex *tex, s32 offset, s32 shift
 	s32 ult;
 	s32 lrs;
 	s32 lrt;
+
+	if (tex->texturenum < NUM_TEXTURES) {
+		s0 = &g_Textures[tex->texturenum];
+	}
 
 	masks = texDimensionToMask(tex->width);
 	maskt = texDimensionToMask(tex->height);

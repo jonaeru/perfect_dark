@@ -893,7 +893,11 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 									break;
 								}
 
-								texnum = g_Textures[sp694.texturenum].surfacetype;
+								if (sp694.texturenum >= 0 && sp694.texturenum < NUM_TEXTURES) {
+									texnum = g_Textures[sp694.texturenum].surfacetype;
+								} else {
+									texnum = SURFACETYPE_DEFAULT;
+								}
 
 								if (texnum == SURFACETYPE_SHALLOWWATER || texnum == SURFACETYPE_DEEPWATER) {
 									sparktype = SPARKTYPE_SHALLOWWATER;
