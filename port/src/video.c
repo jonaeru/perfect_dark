@@ -530,6 +530,11 @@ void videoFreeCachedTexture(const void *texptr)
 	gfx_texture_cache_delete(texptr);
 }
 
+void videoFreeCachedTextures(const void *start, const void *end)
+{
+	gfx_texture_cache_delete_range(start, end);
+}
+
 void videoShutdown(void)
 {
 	free(vidModes);

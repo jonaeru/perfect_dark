@@ -585,6 +585,29 @@ void gfx_texture_cache_delete(const uint8_t* orig_addr) {
     }
 }
 
+void gfx_texture_cache_delete_range(const uint8_t* start, const uint8_t* end) {
+    gfx_flush();
+
+    for (int i = 0; i < 2; ++i) {
+        if (rendering_state.textures[i]
+                && rendering_state.textures[i]->first.texture_addr >= start
+                && rendering_state.textures[i]->first.texture_addr < end) {
+            rdp.textures_changed[i] = true;
+            rendering_state.textures[i] = nullptr;
+        }
+    }
+
+    for (auto it = gfx_texture_cache.map.begin(); it != gfx_texture_cache.map.end(); ) {
+        if (it->first.texture_addr >= start && it->first.texture_addr < end) {
+            gfx_texture_cache.lru.erase(it->second.lru_location);
+            gfx_texture_cache.free_texture_ids.push_back(it->second.texture_id);
+            it = gfx_texture_cache.map.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 static void import_texture_rgba16(int tile, const LoadedTexture& loaded_texture, bool gen_mipmaps) {
     const uint8_t* addr = loaded_texture.addr;
     const uint32_t size_bytes = loaded_texture.size_bytes;

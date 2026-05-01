@@ -74,6 +74,7 @@ s32 videoFramebuffersSupported(void);
 
 void videoResetTextureCache(void);
 void videoFreeCachedTexture(const void *texptr);
+void videoFreeCachedTextures(const void *start, const void *end);
 
 void videoShutdown(void);
 

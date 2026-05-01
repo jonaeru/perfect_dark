@@ -1928,6 +1928,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					totalfilelen += 0x4000;
 #endif
 
+#ifndef PLATFORM_N64
+					videoFreeCachedTextures(menumodel->allocstart, menumodel->allocstart + menumodel->alloclen);
+#endif
+
 					texInitPool(&texpool, menumodel->allocstart + totalfilelen, menumodel->alloclen - totalfilelen);
 
 					menumodel->headnum = headnum;
@@ -1959,6 +1963,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				} else {
 					totalfilelen = ALIGN64(fileGetInflatedSize(menumodel->newparams, LOADTYPE_MODEL)) + 0x4000;
 					if (1);
+
+#ifndef PLATFORM_N64
+					videoFreeCachedTextures(menumodel->allocstart, menumodel->allocstart + menumodel->alloclen);
+#endif
 
 					texInitPool(&texpool, &menumodel->allocstart[(u32)totalfilelen], menumodel->alloclen - totalfilelen);
 
