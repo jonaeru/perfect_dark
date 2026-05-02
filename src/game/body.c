@@ -170,6 +170,9 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 	f32 scale = g_HeadsAndBodies[bodynum].scale * 0.10000001f;
 	f32 animscale = g_HeadsAndBodies[bodynum].animscale;
 	struct modelnode *node = NULL;
+#ifndef PLATFORM_N64 // All in One Mod
+	s32 requiredrwdatalen;
+#endif
 	u32 stack[2];
 
 	if (cheatIsActive(CHEAT_DKMODE)) {
@@ -256,7 +259,17 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 		modelSetScale(model, scale);
 		modelSetAnimScale(model, animscale);
 
+#ifdef PLATFORM_N64
 		if (headmodeldef && !g_HeadsAndBodies[bodynum].unk00_01) {
+#else // All in One Mod
+		if (headmodeldef && !g_HeadsAndBodies[bodynum].unk00_01 && node != NULL) {
+			requiredrwdatalen = bodymodeldef->rwdatalen;
+
+			if (model->rwdatalen >= 0 && requiredrwdatalen > model->rwdatalen) {
+				return model;
+			}
+#endif
+
 			bodymodeldef->rwdatalen -= headmodeldef->rwdatalen;
 
 			modelmgrAttachHead(model, node, headmodeldef);

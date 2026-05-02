@@ -3883,10 +3883,10 @@ struct menumodel {
 	/*0x05e*/ s16 curanimnum;
 	/*0x060*/ struct model bodymodel;
 	/*0x084*/ struct anim bodyanim;
-#ifdef PLATFORM_64BIT
-	/*0x110*/ u32 rwdata[256+128];
-#else
+#ifdef PLATFORM_N64
 	/*0x110*/ u32 rwdata[256];
+#else // All in One Mod
+	/*0x110*/ u32 rwdata[512];
 #endif
 	/*0x510*/ f32 curposx;
 	/*0x514*/ f32 curposy;

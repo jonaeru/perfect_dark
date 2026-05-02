@@ -1429,8 +1429,8 @@ void playerTickChrBody(void)
 			rwdatas = (u32 *)(allocation + offset1);
 			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
-#ifdef PLATFORM_64BIT
-			offset1 += 0x200;
+#ifndef PLATFORM_N64 // All in One Mod
+			offset1 += 0x400;
 #endif
 			offset1 = ALIGN64(offset1);
 
@@ -1450,7 +1450,7 @@ void playerTickChrBody(void)
 			}
 
 			offset2 += 0x4000;
-#ifdef PLATFORM_64BIT
+#ifndef PLATFORM_N64 // All in One Mod
 			offset2 += 0x2000;
 #endif
 			bgunCalculateGunMemCapacity();
@@ -1473,10 +1473,14 @@ void playerTickChrBody(void)
 			modelInit(model, bodymodeldef, rwdatas, false);
 			animInit(model->anim);
 
+#ifdef PLATFORM_N64
 			model->rwdatalen = 256;
+#else // All in One Mod
+			model->rwdatalen = bodymodeldef->rwdatalen;
 
-#ifdef PLATFORM_64BIT
-			model->rwdatalen += 128;
+			if (headmodeldef != NULL) {
+				model->rwdatalen += headmodeldef->rwdatalen;
+			}
 #endif
 
 			texGetPoolLeftPos(&texpool);
