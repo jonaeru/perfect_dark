@@ -430,6 +430,12 @@ s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
 	char path[FS_MAXPATH + 1];
 	snprintf(path, sizeof(path), MOD_TEXTURES_DIR "/%04x.bin", num);
 
+	const s32 size = fsFileSize(path);
+	if (size >= 0 && size > dstSize) {
+		sysLogPrintf(LOG_WARNING, "mod: external texture %04x too large (%d > %u)", num, size, dstSize);
+		return -1;
+	}
+
 	const s32 ret = fsFileLoadTo(path, dst, dstSize);
 	if (ret > 0) {
 		sysLogPrintf(LOG_NOTE, "mod: loaded external texture %04x", num);
