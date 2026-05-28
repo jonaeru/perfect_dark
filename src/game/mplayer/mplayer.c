@@ -4233,8 +4233,14 @@ void mpsetupfileLoadWad(struct savebuffer *buffer, u8 version)
 			g_MpSetup.chrslots |= 1 << (i + 4);
 		}
 
-		g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
-		g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+		if (version > 1) {
+			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 8);
+			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 8);
+		} else {
+			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
+			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+		}
+
 		g_BotConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 	}
 
@@ -4295,7 +4301,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 			savebufferOr(buffer, BOTDIFF_DISABLED, 3);
 		}
 
-		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 7);
+		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 8);
 
 		if (g_BotConfigsArray[i].base.mpbodynum == 0xff) {
 			s32 profilenum = mpFindBotProfile(g_BotConfigsArray[i].type, g_BotConfigsArray[i].difficulty);
@@ -4309,7 +4315,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 			mpbodynum = g_BotConfigsArray[i].base.mpbodynum;
 		}
 
-		savebufferOr(buffer, mpbodynum, 7);
+		savebufferOr(buffer, mpbodynum, 8);
 		savebufferOr(buffer, g_BotConfigsArray[i].base.team, 3);
 	}
 
