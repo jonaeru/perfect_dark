@@ -23,7 +23,7 @@ MP Setup File Format
 	[setup_n{80}]
  */
 
-#define MPSETUP_VERSION 1
+#define MPSETUP_VERSION 2
 
 #define MPSETUP_EXPORTDIR "$S/exported/"
 #define MPSETUP_FILENAME "mpsetups"
