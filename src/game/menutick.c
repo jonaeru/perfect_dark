@@ -291,7 +291,7 @@ void menuTick(void)
 
 		if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
 			if (g_MenuData.prevmenuroot == -1) {
-				g_MpSetup.chrslots &= 0xfff0;
+				g_MpSetup.chrslots &= ~0xf;
 			}
 
 			g_MpNumJoined = 0;

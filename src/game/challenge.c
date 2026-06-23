@@ -682,9 +682,9 @@ void challengeRemoveForceUnlocks(void)
 void challengeApply(void)
 {
 	s32 i;
-	u8 buffer[0x1ca];
+	u8 buffer[sizeof(struct mpconfigfull) + 64] ALIGNED16;
 
-	mpApplyConfig(challengeLoadCurrent(buffer, 0x1ca));
+	mpApplyConfig(challengeLoadCurrent(buffer, sizeof(buffer)));
 	mpSetLock(MPLOCKTYPE_CHALLENGE, 5);
 
 	for (i = 0; i < MAX_PLAYERS; i++) {

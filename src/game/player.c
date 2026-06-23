@@ -115,7 +115,7 @@ f32 g_CutsceneCurTotalFrame60f;
 s32 g_CutsceneTweenDuration60;
 f32 g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when fullscreen
 u32 var8009de34;
-s16 g_SpawnPoints[24];
+s16 g_SpawnPoints[MAX_SPAWN_POINTS];
 s32 g_NumSpawnPoints;
 
 struct vimode g_ViModes[] = {
@@ -218,9 +218,13 @@ s32 g_NumDeathAnimations = 0;
  */
 f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstrooms, struct prop *prop, s16 *pads, s32 numpads)
 {
-	u8 verybadpads[24];
-	u8 badpads[24];
-	f32 padsqdists[24];
+	u8 verybadpads[MAX_SPAWN_POINTS];
+	u8 badpads[MAX_SPAWN_POINTS];
+	f32 padsqdists[MAX_SPAWN_POINTS];
+
+	if (numpads > MAX_SPAWN_POINTS) {
+		numpads = MAX_SPAWN_POINTS;
+	}
 
 	u8 stack1[0x10];
 	f32 xdiff;

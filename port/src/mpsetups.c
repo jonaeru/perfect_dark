@@ -23,7 +23,7 @@ MP Setup File Format
 	[setup_n{80}]
  */
 
-#define MPSETUP_VERSION 2
+#define MPSETUP_VERSION 3
 
 #define MPSETUP_EXPORTDIR "$S/exported/"
 #define MPSETUP_FILENAME "mpsetups"
@@ -362,8 +362,11 @@ static s32 mpsetupDeserialize(FILE *f, struct mpsetupfile *setupfile)
 	rx += fread(&setupfile->defaultsetup, sizeof(setupfile->defaultsetup), 1, f);
 	rx += fread(&setupfile->numsetups, sizeof(setupfile->numsetups), 1, f);
 
+	u32 blocksize = (setupfile->version < 3) ? 80 : MPSETUP_BLOCKSIZE;
+
 	for (int i = 0; i < setupfile->numsetups; ++i) {
-		rx += fread(setupfile->setups[i].bytes, sizeof(setupfile->setups[i].bytes), 1, f);
+		memset(setupfile->setups[i].bytes, 0, MPSETUP_BLOCKSIZE);
+		rx += fread(setupfile->setups[i].bytes, blocksize, 1, f);
 	}
 
 	return rx;
@@ -441,20 +444,276 @@ static s32 mpsetupSaveFile(u8 op, struct mpsetupfile *setupfile)
 	return 0;
 }
 
+static void mpsetupDeleteByName(struct mpsetupfile *setupfile, const char *name)
+{
+	for (int i = 0; i < setupfile->numsetups; i++) {
+		if (strcmp((char *)setupfile->setups[i].bytes, name) == 0) {
+			// Found it! Shift remaining ones up
+			for (int j = i; j < setupfile->numsetups - 1; ++j) {
+				memcpy(setupfile->setups[j].bytes, setupfile->setups[j+1].bytes, MPSETUP_BLOCKSIZE);
+			}
+			setupfile->numsetups--;
+			i--; // Adjust index because we shifted
+		}
+	}
+}
+
+static void mpsetupInjectPreset(struct mpsetupfile *setupfile, const char *name, u32 options, u8 scenario, u8 stagenum, u8 timelimit, u8 scorelimit, const u8 weapons[6], const u8 bot_bodies[MAX_BOTS], const u8 bot_heads[MAX_BOTS], const u8 bot_teams[MAX_BOTS], const char *bot_names[MAX_BOTS])
+{
+	extern s32 g_MpWeaponSetNum;
+
+	// 1. Delete if already exists to ensure it is overwritten and moved to the top slot
+	mpsetupDeleteByName(setupfile, name);
+
+	// 2. Save current multiplayer state
+	struct mpsetup saved_setup;
+	struct mpbotconfig saved_bots[MAX_BOTS];
+	s32 saved_weaponsetnum = g_MpWeaponSetNum;
+	memcpy(&saved_setup, &g_MpSetup, sizeof(g_MpSetup));
+	memcpy(saved_bots, g_BotConfigsArray, sizeof(g_BotConfigsArray));
+
+	// 3. Configure the preset
+	memset(&g_MpSetup, 0, sizeof(g_MpSetup));
+	g_MpWeaponSetNum = WEAPONSET_CUSTOM;
+	strncpy(g_MpSetup.name, name, sizeof(g_MpSetup.name) - 1);
+	g_MpSetup.options = options;
+	g_MpSetup.scenario = scenario;
+	g_MpSetup.stagenum = stagenum;
+	g_MpSetup.timelimit = timelimit;
+	g_MpSetup.scorelimit = scorelimit;
+
+	for (int j = 0; j < 6; j++) {
+		g_MpSetup.weapons[j] = weapons[j];
+	}
+
+	// Enable Player 1
+	g_MpSetup.chrslots = (1 << 0);
+
+	// Configure simulants
+	for (int i = 0; i < MAX_BOTS; i++) {
+		g_MpSetup.chrslots |= (1 << (i + 4));
+		
+		g_BotConfigsArray[i].type = BOTTYPE_GENERAL;
+		g_BotConfigsArray[i].difficulty = BOTDIFF_NORMAL;
+		g_BotConfigsArray[i].base.team = bot_teams[i];
+		g_BotConfigsArray[i].base.mpbodynum = bot_bodies[i];
+		g_BotConfigsArray[i].base.mpheadnum = bot_heads[i];
+		if (bot_names && bot_names[i]) {
+			strncpy(g_BotConfigsArray[i].base.name, bot_names[i], sizeof(g_BotConfigsArray[i].base.name) - 1);
+		} else {
+			sprintf(g_BotConfigsArray[i].base.name, "Sim %d", i + 1);
+		}
+	}
+
+	// 4. Serialize the preset
+	struct savebuffer setup;
+	savebufferClear(&setup);
+	mpsetupfileSaveWad(&setup);
+
+	// 5. Restore the previous state
+	memcpy(&g_MpSetup, &saved_setup, sizeof(g_MpSetup));
+	memcpy(g_BotConfigsArray, saved_bots, sizeof(g_BotConfigsArray));
+	g_MpWeaponSetNum = saved_weaponsetnum;
+
+	// 6. Insert the preset into Slot 0, shifting other presets if necessary
+	if (setupfile->numsetups >= MPSETUP_MAXSETUPS) {
+		setupfile->numsetups = MPSETUP_MAXSETUPS;
+	} else {
+		setupfile->numsetups++;
+	}
+
+	// Shift existing setups to make room at Slot 0
+	for (int i = setupfile->numsetups - 1; i > 0; i--) {
+		memcpy(setupfile->setups[i].bytes, setupfile->setups[i - 1].bytes, MPSETUP_BLOCKSIZE);
+	}
+	
+	// Put the new setup in Slot 0
+	memcpy(setupfile->setups[0].bytes, setup.bytes, MPSETUP_BLOCKSIZE);
+
+	// 7. Save file to disk
+	mpsetupSaveFile(MPSETUP_OP_DEFAULT, setupfile);
+}
+
+static void mpsetupInjectCustomPresets(struct mpsetupfile *setupfile)
+{
+	// Clean up any old presets first so they get replaced fresh
+	mpsetupDeleteByName(setupfile, "WAR!");
+	mpsetupDeleteByName(setupfile, "VILLA DEFENSE");
+	mpsetupDeleteByName(setupfile, "AREA 51 RAID");
+	mpsetupDeleteByName(setupfile, "LICENSE TO KILL");
+	mpsetupDeleteByName(setupfile, "EXPLOSIVE CHAOS");
+	mpsetupDeleteByName(setupfile, "VILLA CAMPAIGN");
+	mpsetupDeleteByName(setupfile, "GEX BUNKER");
+	mpsetupDeleteByName(setupfile, "GEX FACILITY");
+	mpsetupDeleteByName(setupfile, "ZELDA KAKARIKO");
+	mpsetupDeleteByName(setupfile, "DARK NOON");
+
+	// Inject presets in reverse order so they appear in correct 1-to-6 order (from Slot 0 to Slot 5)
+
+	// Preset 6: "DARK NOON" (Dark Noon Mod Valley)
+	{
+		u8 weapons[6] = { MPWEAPON_FALCON2, MPWEAPON_CMP150, MPWEAPON_SHOTGUN, MPWEAPON_K7AVENGER, MPWEAPON_ROCKETLAUNCHER, MPWEAPON_SHIELD };
+		u8 bot_bodies[MAX_BOTS];
+		u8 bot_heads[MAX_BOTS];
+		u8 bot_teams[MAX_BOTS];
+		const char *bot_names[MAX_BOTS];
+		for (int i = 0; i < MAX_BOTS; i++) {
+			if (i < MAX_BOTS / 2) {
+				bot_bodies[i] = 0x0c; // Elvis (g_MpBodies index 0x0c)
+				bot_heads[i] = 0x04;  // HEAD_ELVIS (g_MpHeads index 0x04)
+				bot_teams[i] = 0;     // Red
+				bot_names[i] = "Elvis";
+			} else {
+				bot_bodies[i] = 0x38; // Maian Soldier (g_MpBodies index 0x38)
+				bot_heads[i] = 0x14;  // HEAD_MAIAN_S (g_MpHeads index 0x14)
+				bot_teams[i] = 1;     // Blue
+				bot_names[i] = "Maian";
+			}
+		}
+		// STAGE_TEST_MP7 (0x3f) is Dark Noon Mod Valley
+		mpsetupInjectPreset(setupfile, "DARK NOON", MPOPTION_TEAMSENABLED, MPSCENARIO_COMBAT, STAGE_TEST_MP7, 60, 100, weapons, bot_bodies, bot_heads, bot_teams, bot_names);
+	}
+
+	// Preset 5: "ZELDA KAKARIKO" (The custom Zelda Kakariko Village map)
+	{
+		u8 weapons[6] = { MPWEAPON_CROSSBOW, MPWEAPON_COMBATKNIFE, MPWEAPON_FALCON2, MPWEAPON_SNIPERRIFLE, MPWEAPON_GRENADE, MPWEAPON_NONE };
+		u8 bot_bodies[MAX_BOTS];
+		u8 bot_heads[MAX_BOTS];
+		u8 bot_teams[MAX_BOTS];
+		const char *bot_names[MAX_BOTS];
+		for (int i = 0; i < MAX_BOTS; i++) {
+			if (i < MAX_BOTS / 2) {
+				bot_bodies[i] = 0x0c; // Elvis (g_MpBodies index 0x0c)
+				bot_heads[i] = 0x04;  // HEAD_ELVIS (g_MpHeads index 0x04)
+				bot_teams[i] = 0;     // Red
+				bot_names[i] = "Elvis";
+			} else {
+				bot_bodies[i] = 0x38; // Maian Soldier (g_MpBodies index 0x38)
+				bot_heads[i] = 0x14;  // HEAD_MAIAN_S (g_MpHeads index 0x14)
+				bot_teams[i] = 1;     // Blue
+				bot_names[i] = "Maian";
+			}
+		}
+		// STAGE_24 (0x24) is Kakariko Village
+		mpsetupInjectPreset(setupfile, "ZELDA KAKARIKO", MPOPTION_TEAMSENABLED, MPSCENARIO_COMBAT, STAGE_24, 60, 100, weapons, bot_bodies, bot_heads, bot_teams, bot_names);
+	}
+
+	// Preset 4: "GEX BUNKER" (Classic GoldenEye Bunker map from GEX Mod)
+	{
+		u8 weapons[6] = { MPWEAPON_FALCON2, MPWEAPON_CMP150, MPWEAPON_SHOTGUN, MPWEAPON_K7AVENGER, MPWEAPON_GRENADE, MPWEAPON_SHIELD };
+		u8 bot_bodies[MAX_BOTS];
+		u8 bot_heads[MAX_BOTS];
+		u8 bot_teams[MAX_BOTS];
+		const char *bot_names[MAX_BOTS];
+		for (int i = 0; i < MAX_BOTS; i++) {
+			if (i < MAX_BOTS / 2) {
+				bot_bodies[i] = 0x00; // Joanna Dark (g_MpBodies index 0x00)
+				bot_heads[i] = 0x00;  // HEAD_DARK_COMBAT (g_MpHeads index 0x00)
+				bot_teams[i] = 0;     // Red
+				bot_names[i] = "Joanna";
+			} else {
+				bot_bodies[i] = 0x16; // Carrington Guard (g_MpBodies index 0x16)
+				bot_heads[i] = 0x00;
+				bot_teams[i] = 1;     // Blue
+				bot_names[i] = "Guard";
+			}
+		}
+		// STAGE_EXTRA11 (0x10) is the Bunker level from GoldenEye X
+		mpsetupInjectPreset(setupfile, "GEX BUNKER", MPOPTION_TEAMSENABLED, MPSCENARIO_COMBAT, STAGE_EXTRA11, 60, 100, weapons, bot_bodies, bot_heads, bot_teams, bot_names);
+	}
+
+	// Preset 3: "GEX FACILITY" (Classic GoldenEye Facility map from GEX Mod)
+	{
+		u8 weapons[6] = { MPWEAPON_FALCON2, MPWEAPON_CMP150, MPWEAPON_SHOTGUN, MPWEAPON_LAPTOPGUN, MPWEAPON_GRENADE, MPWEAPON_SHIELD };
+		u8 bot_bodies[MAX_BOTS];
+		u8 bot_heads[MAX_BOTS];
+		u8 bot_teams[MAX_BOTS];
+		const char *bot_names[MAX_BOTS];
+		for (int i = 0; i < MAX_BOTS; i++) {
+			if (i < MAX_BOTS / 2) {
+				bot_bodies[i] = 0x00; // Joanna Dark (g_MpBodies index 0x00)
+				bot_heads[i] = 0x00;  // HEAD_DARK_COMBAT (g_MpHeads index 0x00)
+				bot_teams[i] = 0;     // Red
+				bot_names[i] = "Joanna";
+			} else {
+				bot_bodies[i] = 0x16; // Carrington Guard (g_MpBodies index 0x16)
+				bot_heads[i] = 0x00;
+				bot_teams[i] = 1;     // Blue
+				bot_names[i] = "Guard";
+			}
+		}
+		// STAGE_EXTRA10 (0x0f) is the Facility level from GoldenEye X
+		mpsetupInjectPreset(setupfile, "GEX FACILITY", MPOPTION_TEAMSENABLED, MPSCENARIO_COMBAT, STAGE_EXTRA10, 60, 100, weapons, bot_bodies, bot_heads, bot_teams, bot_names);
+	}
+
+	// Preset 2: "VILLA DEFENSE" (Carrington Villa Campaign map)
+	{
+		u8 weapons[6] = { MPWEAPON_FALCON2, MPWEAPON_MAGSEC4, MPWEAPON_DY357MAGNUM, MPWEAPON_CYCLONE, MPWEAPON_K7AVENGER, MPWEAPON_SHIELD };
+		u8 bot_bodies[MAX_BOTS];
+		u8 bot_heads[MAX_BOTS];
+		u8 bot_teams[MAX_BOTS];
+		const char *bot_names[MAX_BOTS];
+		for (int i = 0; i < MAX_BOTS; i++) {
+			if (i < MAX_BOTS / 2) {
+				bot_bodies[i] = 0x16; // Carrington Guard (g_MpBodies index 0x16)
+				bot_heads[i] = 0x06;  // HEAD_CARRINGTON (g_MpHeads index 0x06)
+				bot_teams[i] = 0;     // Red
+				bot_names[i] = "Guard";
+			} else {
+				bot_bodies[i] = 0x22; // G5 Swat (g_MpBodies index 0x22)
+				bot_heads[i] = 0;
+				bot_teams[i] = 1;     // Blue
+				bot_names[i] = "G5 Swat";
+			}
+		}
+		// STAGE_VILLA (0x2c) is the actual Carrington Villa Campaign stage
+		mpsetupInjectPreset(setupfile, "VILLA DEFENSE", MPOPTION_TEAMSENABLED, MPSCENARIO_COMBAT, STAGE_VILLA, 60, 100, weapons, bot_bodies, bot_heads, bot_teams, bot_names);
+	}
+
+	// Preset 1: "WAR!" (Skedar Ruins Campaign map with Elvis vs Maian Soldiers)
+	{
+		u8 weapons[6] = { MPWEAPON_PHOENIX, MPWEAPON_CALLISTO, MPWEAPON_REAPER, MPWEAPON_MAULER, MPWEAPON_SLAYER, MPWEAPON_NONE };
+		u8 bot_bodies[MAX_BOTS];
+		u8 bot_heads[MAX_BOTS];
+		u8 bot_teams[MAX_BOTS];
+		const char *bot_names[MAX_BOTS];
+		for (int i = 0; i < MAX_BOTS; i++) {
+			if (i < MAX_BOTS / 2) {
+				bot_bodies[i] = 0x0c; // Elvis (g_MpBodies index 0x0c)
+				bot_heads[i] = 0x04;  // HEAD_ELVIS (g_MpHeads index 0x04)
+				bot_teams[i] = 0;     // Red
+				bot_names[i] = "Elvis";
+			} else {
+				bot_bodies[i] = 0x38; // Maian Soldier (g_MpBodies index 0x38)
+				bot_heads[i] = 0x14;  // HEAD_MAIAN_S (g_MpHeads index 0x14)
+				bot_teams[i] = 1;     // Blue
+				bot_names[i] = "Maian";
+			}
+		}
+		// STAGE_SKEDARRUINS (0x2a) is the actual Campaign Ruins stage
+		mpsetupInjectPreset(setupfile, "WAR!", MPOPTION_TEAMSENABLED, MPSCENARIO_COMBAT, STAGE_SKEDARRUINS, 60, 100, weapons, bot_bodies, bot_heads, bot_teams, bot_names);
+	}
+}
+
 static s32 mpsetupLoadFile(struct mpsetupfile *setupfile, u8 op)
 {
 	FILE *f = mpsetupOpenFile(false, op);
 	if (f == NULL) {
-		return -1;
+		// File does not exist! Let's initialize setupfile to empty so we can inject into it
+		memset(setupfile, 0, sizeof(*setupfile));
+		setupfile->version = MPSETUP_VERSION;
+	} else {
+		mpsetupDeserialize(f, setupfile);
+		fsFileFree(f);
 	}
 
-	mpsetupDeserialize(f, setupfile);
+	if (op == MPSETUP_OP_DEFAULT) {
+		mpsetupInjectCustomPresets(setupfile);
+	}
 
 	if (op == MPSETUP_OP_DEFAULT && setupfile->defaultsetup > 0) {
 		mpsetupLoadSetup(setupfile->defaultsetup - 1);
 	}
-
-	fsFileFree(f);
 
 	return 0;
 }
