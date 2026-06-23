@@ -25,8 +25,8 @@ s32 g_ModelMostModels = 0;
 s32 g_ModelMostAnims = 0;
 
 #define NUMTYPE1() (IS4MB() ? 0 : 35)
-#define NUMTYPE2() (IS4MB() ? 24 : 25)
-#define NUMTYPE3() (IS4MB() ? 0 : 20)
+#define NUMTYPE2() (IS4MB() ? 24 : MODELMGR_NUMTYPE2)
+#define NUMTYPE3() (IS4MB() ? 0 : MODELMGR_NUMTYPE3)
 
 bool modelmgrCanSlotFitRwdata(struct model *modelslot, struct modeldef *modeldef)
 {

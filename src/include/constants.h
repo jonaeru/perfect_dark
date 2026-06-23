@@ -14,7 +14,7 @@
 #define true  1
 
 #define MAX_ARTIFACTS          120
-#define MAX_BOTS               8
+#define MAX_BOTS               24
 #define MAX_CHRSPERSQUADRON    16
 #define MAX_CHRSPERTEAM        32
 #define MAX_CHRWAYPOINTS       6
@@ -23,6 +23,7 @@
 #define MAX_MPPLAYERCONFIGS    (MAX_PLAYERS + 2)
 #define MAX_OBJECTIVES         10
 #define MAX_PLAYERS            4
+#define MAX_SPAWN_POINTS       256
 #define MAX_PROPSPERROOMCHUNK  7
 #define MAX_ROOMPROPLISTCHUNKS 256
 #define MAX_SQUADRONS          16
@@ -4798,7 +4799,7 @@ enum weaponnum {
 
 #define MPSETUP_MAXSETUPS 128
 #define MPSETUP_MAXNAME 17
-#define MPSETUP_BLOCKSIZE 80
+#define MPSETUP_BLOCKSIZE 128
 
 #endif
 

@@ -2257,12 +2257,17 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 			osWritebackDCacheAll();
 			osInvalDCache(alignedcompbuffer, DCACHE_SIZE);
 
-			thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
-			nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;
+			if (g_TexNumToLoad < NUM_TEXTURES) {
+				thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
+				nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;
 
-			if (thisoffset == nextoffset && g_TexNumToLoad < NUM_TEXTURES) {
-				// The texture has no data
-				return;
+				if (thisoffset == nextoffset) {
+					// The texture has no data
+					return;
+				}
+			} else {
+				thisoffset = 0;
+				nextoffset = 0;
 			}
 
 #ifndef PLATFORM_N64
@@ -2272,6 +2277,10 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 			} else
 #endif
 			{
+				if (g_TexNumToLoad >= NUM_TEXTURES) {
+					// Custom texture not found in external files, and cannot load from ROM.
+					return;
+				}
 				// Copy the compressed texture to RAM
 				dmaExec(alignedcompbuffer,
 						(romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8),

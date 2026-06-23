@@ -3483,7 +3483,7 @@ void mpCopySimulant(s32 index)
 
 bool mpHasSimulants(void)
 {
-	if ((g_MpSetup.chrslots & 0xfff0) != 0) {
+	if ((g_MpSetup.chrslots & ~0xf) != 0) {
 		return true;
 	}
 
@@ -4084,7 +4084,7 @@ void mpApplyConfig(struct mpconfigfull *config)
 {
 	s32 i;
 	s32 j;
-	u16 chrslots;
+	u32 chrslots;
 
 	g_MpSetup.scenario = config->config.setup.scenario;
 
@@ -4140,7 +4140,7 @@ void mpApplyConfig(struct mpconfigfull *config)
 void mp0f18dec4(s32 slot)
 {
 	struct mpconfigfull *config;
-	u8 buffer[0x1ca];
+	u8 buffer[sizeof(struct mpconfigfull) + 64] ALIGNED16;
 	s32 confignum = 0;
 	u32 i;
 
@@ -4220,28 +4220,52 @@ void mpsetupfileLoadWad(struct savebuffer *buffer, u8 version)
 
 	g_MpSetup.chrslots &= 0x000f;
 
+	s32 num_file_bots = 24;
+	if (version == 0 || version == 1) {
+		num_file_bots = 8;
+	} else if (version == 2) {
+		num_file_bots = 12;
+	} else {
+		num_file_bots = MAX_BOTS;
+	}
+
+	if (num_file_bots > MAX_BOTS) {
+		num_file_bots = MAX_BOTS;
+	}
+
 	for (i = 0; i < MAX_BOTS; i++) {
 		g_BotConfigsArray[i].base.name[0] = '\0';
-		g_BotConfigsArray[i].type = savebufferReadBits(buffer, 5);
-		g_BotConfigsArray[i].difficulty = savebufferReadBits(buffer, 3);
+		if (i < num_file_bots) {
+			g_BotConfigsArray[i].type = savebufferReadBits(buffer, 5);
+			g_BotConfigsArray[i].difficulty = savebufferReadBits(buffer, 3);
 
-		for (j = 0; j < MAX_PLAYERS; j++) {
-			g_MpSimulantDifficultiesPerNumPlayers[i][j] = g_BotConfigsArray[i].difficulty;
-		}
+			for (j = 0; j < MAX_PLAYERS; j++) {
+				g_MpSimulantDifficultiesPerNumPlayers[i][j] = g_BotConfigsArray[i].difficulty;
+			}
 
-		if (g_BotConfigsArray[i].difficulty != BOTDIFF_DISABLED) {
-			g_MpSetup.chrslots |= 1 << (i + 4);
-		}
+			if (g_BotConfigsArray[i].difficulty != BOTDIFF_DISABLED) {
+				g_MpSetup.chrslots |= 1 << (i + 4);
+			}
 
-		if (version > 1) {
-			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 8);
-			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 8);
+			if (version > 1) {
+				g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 8);
+				g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 8);
+			} else {
+				g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
+				g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+			}
+
+			g_BotConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 		} else {
-			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
-			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+			g_BotConfigsArray[i].type = BOTTYPE_GENERAL;
+			g_BotConfigsArray[i].difficulty = BOTDIFF_DISABLED;
+			for (j = 0; j < MAX_PLAYERS; j++) {
+				g_MpSimulantDifficultiesPerNumPlayers[i][j] = BOTDIFF_DISABLED;
+			}
+			g_BotConfigsArray[i].base.mpheadnum = 0;
+			g_BotConfigsArray[i].base.mpbodynum = 0;
+			g_BotConfigsArray[i].base.team = 0;
 		}
-
-		g_BotConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 	}
 
 	if (version > 0) {
@@ -4284,7 +4308,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 		}
 	}
 
-	savebufferOr(buffer, numsims, 4);
+	savebufferOr(buffer, numsims > 15 ? 15 : numsims, 4);
 	savebufferOr(buffer, g_MpSetup.stagenum, 7);
 	savebufferOr(buffer, g_MpSetup.scenario, 3);
 

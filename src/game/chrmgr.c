@@ -53,7 +53,7 @@ void chrmgrConfigure(s32 numchrs)
 {
 	s32 i;
 
-	g_NumChrSlots = PLAYERCOUNT() + numchrs + 10;
+	g_NumChrSlots = PLAYERCOUNT() + numchrs + MAX_BOTS + 2;
 	g_ChrSlots = mempAlloc(ALIGN16(g_NumChrSlots * sizeof(struct chrdata)), MEMPOOL_STAGE);
 
 	for (i = 0; i < g_NumChrSlots; i++) {

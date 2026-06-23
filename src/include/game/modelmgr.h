@@ -4,6 +4,9 @@
 #include "data.h"
 #include "types.h"
 
+#define MODELMGR_NUMTYPE2 64
+#define MODELMGR_NUMTYPE3 64
+
 bool modelmgrCanSlotFitRwdata(struct model *modelslot, struct modeldef *modeldef);
 void modelmgrPrintCounts(void);
 struct model *modelmgrInstantiateModel(struct modeldef *modeldef, bool arg1);
