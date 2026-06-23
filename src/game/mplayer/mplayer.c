@@ -2448,7 +2448,7 @@ void mpCalculateAwards(void)
 
 					for (j = 0; j < MAX_MPCHRS; j++) {
 #if VERSION >= VERSION_NTSC_1_0
-						if (g_MpSetup.chrslots & (1 << j))
+						if (mpIsChrParticipating(j))
 #endif
 						{
 							struct mpchrconfig *othermpchr = MPCHR(j);
@@ -2477,7 +2477,7 @@ void mpCalculateAwards(void)
 
 					for (j = 0; j < MAX_MPCHRS; j++) {
 #if VERSION >= VERSION_NTSC_1_0
-						if (g_MpSetup.chrslots & (1 << j))
+						if (mpIsChrParticipating(j))
 #endif
 						{
 							struct mpchrconfig *othermpchr = MPCHR(j);
@@ -2664,7 +2664,7 @@ void mpCalculateAwards(void)
 		s32 k;
 
 		for (k = 0; k < MAX_MPCHRS; k++) {
-			if (g_MpSetup.chrslots & (1 << k)) {
+			if (mpIsChrParticipating(k)) {
 				s32 totalkills = 0;
 				struct mpchrconfig *mpchr = MPCHR(k);
 
@@ -2935,7 +2935,7 @@ void mpFindUnusedHeadAndBody(u8 *mpheadnum, u8 *mpbodynum)
 		trympbodynum = rngRandom() % ARRAYCOUNT(g_MpBodies);
 
 		for (i = 0; i < MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				mpchr = MPCHR(i);
 
 				if (mpchr->mpheadnum == trympheadnum) {
@@ -3314,7 +3314,7 @@ struct mpchrconfig *mpGetChrConfigBySlotNum(s32 slot)
 	s32 i;
 
 	for (i = 0; i < MAX_MPCHRS; i++) {
-		if (g_MpSetup.chrslots & (1 << i)) {
+		if (mpIsChrParticipating(i)) {
 			if (count == slot) {
 				result = MPCHR(i);
 				break;
@@ -3335,7 +3335,7 @@ s32 mpGetChrIndexBySlotNum(s32 slot)
 	s32 i;
 
 	for (i = 0; i < MAX_MPCHRS; i++) {
-		if (g_MpSetup.chrslots & (1 << i)) {
+		if (mpIsChrParticipating(i)) {
 			if (count == slot) {
 				result = i;
 				break;
@@ -3355,7 +3355,7 @@ s32 mpGetNumChrs(void)
 	s32 i;
 
 	for (i = 0; i != MAX_MPCHRS; i++) {
-		if (g_MpSetup.chrslots & (1 << i)) {
+		if (mpIsChrParticipating(i)) {
 			count++;
 		}
 	}
@@ -3373,7 +3373,7 @@ u8 mpFindUnusedTeamNum(void)
 		available = true;
 
 		for (i = 0; i < MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				if (mpchr->team == teamnum) {
@@ -3496,7 +3496,7 @@ bool mpHasUnusedBotSlots(void)
 	s32 i;
 
 	for (i = 4; i < MAX_MPCHRS; i++) {
-		if (g_MpSetup.chrslots & (1 << i)) {
+		if (mpIsChrParticipating(i)) {
 			numvacant--;
 		}
 	}
@@ -3513,9 +3513,9 @@ bool mpIsSimSlotEnabled(s32 slot)
 	s32 numfree = MAX_BOTS;
 	s32 i;
 
-	if ((g_MpSetup.chrslots & (1 << (slot + 4))) == 0) {
+	if (!mpIsChrParticipating(slot + MAX_PLAYERS)) {
 		for (i = 0; i < MAX_BOTS; i++) {
-			if (g_MpSetup.chrslots & (1 << (i + 4))) {
+			if (mpIsChrParticipating(i + MAX_PLAYERS)) {
 				numfree--;
 			}
 		}
@@ -3528,6 +3528,18 @@ bool mpIsSimSlotEnabled(s32 slot)
 	}
 
 	return true;
+}
+
+bool mpIsChrParticipating(s32 index)
+{
+	if (index < MAX_PLAYERS) {
+		return (g_MpSetup.chrslots & (1 << index)) != 0;
+	}
+	s32 botnum = index - MAX_PLAYERS;
+	if (botnum < MAX_BOTS) {
+		return g_BotConfigsArray[botnum].difficulty != BOTDIFF_DISABLED;
+	}
+	return false;
 }
 
 s32 mpFindBotProfile(s32 type, s32 difficulty)
@@ -3568,7 +3580,7 @@ void mpGenerateBotNames(void)
 
 	// Count the number of bots using each profile (MeatSim, TurtleSim etc)
 	for (i = 4; i < MAX_MPCHRS; i++) {
-		if (g_MpSetup.chrslots & (1 << i)) {
+		if (mpIsChrParticipating(i)) {
 			profilenum = mpFindBotProfile(g_BotConfigsArray[i - 4].type, g_BotConfigsArray[i - 4].difficulty);
 
 			if (profilenum >= 0 && profilenum < ARRAYCOUNT(g_BotProfiles)) {
@@ -3589,7 +3601,7 @@ void mpGenerateBotNames(void)
 	}
 
 	for (i = 4; i < MAX_MPCHRS; i++) {
-		if (g_MpSetup.chrslots & (1 << i)) {
+		if (mpIsChrParticipating(i)) {
 			profilenum = mpFindBotProfile(g_BotConfigsArray[i - 4].type, g_BotConfigsArray[i - 4].difficulty);
 
 			if (profilenum >= 0 && profilenum < ARRAYCOUNT(g_BotProfiles)) {
@@ -4220,7 +4232,7 @@ void mpsetupfileLoadWad(struct savebuffer *buffer, u8 version)
 
 	g_MpSetup.chrslots &= 0x000f;
 
-	s32 num_file_bots = 24;
+	s32 num_file_bots = MAX_BOTS;
 	if (version == 0 || version == 1) {
 		num_file_bots = 8;
 	} else if (version == 2) {
@@ -4303,7 +4315,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	savebufferWriteString_ext(buffer, g_MpSetup.name, MPSETUP_MAXNAME + 1);
 
 	for (i = 0; i < MAX_BOTS; i++) {
-		if (g_MpSetup.chrslots & (1 << (i + 4))) {
+		if (mpIsChrParticipating(i + MAX_PLAYERS)) {
 			numsims++;
 		}
 	}
@@ -4319,7 +4331,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	for (i = 0; i < MAX_BOTS; i++) {
 		savebufferOr(buffer, g_BotConfigsArray[i].type, 5);
 
-		if (g_MpSetup.chrslots & (1 << (i + 4))) {
+		if (mpIsChrParticipating(i + MAX_PLAYERS)) {
 			savebufferOr(buffer, g_BotConfigsArray[i].difficulty, 3);
 		} else {
 			savebufferOr(buffer, BOTDIFF_DISABLED, 3);
