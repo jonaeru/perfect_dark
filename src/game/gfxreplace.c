@@ -354,3 +354,39 @@ void gfxReplaceGbiCommandsRecursively(struct roomblock *block, s32 type)
 		}
 	}
 }
+
+void gfxMakeRoomWhite(Gfx *startgdl)
+{
+	Gfx *gdl = startgdl;
+
+	while (*(s8 *)gdl != (s8)G_ENDDL) {
+		u8 opcode = (gdl->words.w0 >> 24) & 0xff;
+
+		if (opcode == (u8)G_SETCOMBINE) {
+			*gdl = (Gfx)gsDPSetCombineMode(G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+		}
+		gdl++;
+	}
+}
+
+void gfxMakeRoomWhiteRecursively(struct roomblock *block)
+{
+	while (true) {
+		if (!block) {
+			return;
+		}
+
+		switch (block->type) {
+		case ROOMBLOCKTYPE_LEAF:
+			gfxMakeRoomWhite(block->gdl);
+			block = block->next;
+			break;
+		case ROOMBLOCKTYPE_PARENT:
+			gfxMakeRoomWhiteRecursively(block->child);
+			block = block->next;
+			break;
+		default:
+			return;
+		}
+	}
+}

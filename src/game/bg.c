@@ -3031,7 +3031,10 @@ void bgLoadRoom(s32 roomnum)
 		}
 
 		// Do some find/replaces in the gdls based on environment configuration
-		if (g_FogEnabled) {
+		if (g_Vars.stagenum == STAGE_TEST_UFF) {
+			gfxMakeRoomWhiteRecursively(g_Rooms[roomnum].gfxdata->opablocks);
+			gfxMakeRoomWhiteRecursively(g_Rooms[roomnum].gfxdata->xlublocks);
+		} else if (g_FogEnabled) {
 			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->opablocks, 1);
 			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->xlublocks, 5);
 		} else if (!g_EnvHasTransparency) {
@@ -3310,6 +3313,9 @@ Gfx *bgRenderRoomOpaque(Gfx *gdl, s32 roomnum)
 	gdl = roomApplyMtx(gdl, roomnum);
 
 	gdl = lightsSetForRoom(gdl, roomnum);
+	if (g_Vars.stagenum == STAGE_TEST_UFF) {
+		gDPSetPrimColor(gdl++, 0, 0, 255, 255, 255, 255);
+	}
 	gdl = bgRenderRoomPass(gdl, roomnum, g_Rooms[roomnum].gfxdata->opablocks, true);
 	gdl = lightsSetDefault(gdl);
 
@@ -3340,6 +3346,9 @@ Gfx *bgRenderRoomXlu(Gfx *gdl, s32 roomnum)
 		if (g_Rooms[roomnum].gfxdata);
 
 		gdl = roomApplyMtx(gdl, roomnum);
+		if (g_Vars.stagenum == STAGE_TEST_UFF) {
+			gDPSetPrimColor(gdl++, 0, 0, 255, 255, 255, 255);
+		}
 		gdl = bgRenderRoomPass(gdl, roomnum, g_Rooms[roomnum].gfxdata->xlublocks, true);
 
 		g_Rooms[roomnum].loaded240 = 1;
