@@ -111,7 +111,7 @@ class App():
             # ffffffff ffffffff ffrrrrrr rrrrllll
             flags = self.make_pad_flags(pad)
 
-            word = (flags << 14) | 0x3ff0 | (pad['liftnum'] & 0x0f)
+            word = (flags << 14) | ((pad.get('room', -1) & 0x3ff) << 4) | (pad['liftnum'] & 0x0f)
 
             output += word.to_bytes(4, 'big')
 
