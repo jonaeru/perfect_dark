@@ -259,6 +259,11 @@ struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
 	s32 freeindexsingle = -1;
 	s32 freeindexmulti = -1;
 	bool multibyte = false;
+	static struct jpncharpixels dummy[16] = {0};
+
+	if (g_JpnCacheCacheItems == NULL || g_JpnCharCachePixels == NULL) {
+		return dummy;
+	}
 
 #if VERSION == VERSION_JPN_FINAL
 	static u32 tload = 0;

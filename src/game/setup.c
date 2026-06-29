@@ -2111,7 +2111,7 @@ void setupCreateProps(s32 stagenum)
 						slotnum = (slotnum + 1) % maxsimulants;
 					}
 
-					if ((g_MpSetup.chrslots & (1 << (slotnum + 4)))
+					if (mpIsChrParticipating(slotnum + MAX_PLAYERS)
 							&& mpIsSimSlotEnabled(slotnum)) {
 						botmgrAllocateBot(chrnum, slotnum);
 						chrnum++;

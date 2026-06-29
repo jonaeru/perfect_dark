@@ -3143,7 +3143,7 @@ MenuItemHandlerResult mpAddChangeSimulantMenuHandler(s32 operation, struct menui
 		if (botnum < 0) {
 			botnum = mpGetSlotForNewBot();
 			creating = 1;
-		} else if ((g_MpSetup.chrslots & (1 << (botnum + 4))) == 0) {
+		} else if (!mpIsChrParticipating(botnum + MAX_PLAYERS)) {
 			creating = 1;
 		}
 
@@ -3401,7 +3401,7 @@ MenuItemHandlerResult menuhandlerMpSimulantSlot(s32 operation, struct menuitem *
 	case MENUOP_SET:
 		g_Menus[g_MpPlayerNum].mpsetup.slotindex = item->param;
 
-		if ((g_MpSetup.chrslots & (1 << (item->param + 4))) == 0) {
+		if (!mpIsChrParticipating(item->param + MAX_PLAYERS)) {
 			menuPushDialog(&g_MpAddSimulantMenuDialog);
 		} else if (IS4MB()) {
 			menuPushDialog(&g_MpEditSimulant4MbMenuDialog);
@@ -3427,7 +3427,7 @@ char *mpMenuTextSimulantName(struct menuitem *item)
 {
 	s32 index = item->param;
 
-	if (g_BotConfigsArray[index].base.name[0] == '\0' || (g_MpSetup.chrslots & 1 << (index + 4)) == 0) {
+	if (g_BotConfigsArray[index].base.name[0] == '\0' || !mpIsChrParticipating(index + MAX_PLAYERS)) {
 		return "";
 	}
 
@@ -3439,7 +3439,7 @@ char *func0f17d3dc(struct menuitem *item)
 	s32 index = item->param;
 
 	if (g_BotConfigsArray[index].base.name[0] == '\0'
-			|| ((g_MpSetup.chrslots & 1 << (index + 4)) == 0)) {
+			|| (!mpIsChrParticipating(index + MAX_PLAYERS))) {
 		return "";
 	}
 
@@ -3672,6 +3672,134 @@ struct menuitem g_MpSimulantsMenuItems[] = {
 		7,
 		0,
 		L_MPMENU_092, // "8:"
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		8,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"9:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		9,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"10:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		10,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"11:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		11,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"12:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		12,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"13:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		13,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"14:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		14,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"15:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		15,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"16:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		16,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"17:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		17,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"18:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		18,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"19:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		19,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"20:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		20,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"21:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		21,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"22:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		22,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"23:\n",
+		(uintptr_t)&mpMenuTextSimulantName,
+		menuhandlerMpSimulantSlot,
+	},
+	{
+		MENUITEMTYPE_SELECTABLE,
+		23,
+		MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"24:\n",
 		(uintptr_t)&mpMenuTextSimulantName,
 		menuhandlerMpSimulantSlot,
 	},

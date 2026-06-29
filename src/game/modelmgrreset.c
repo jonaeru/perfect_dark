@@ -5,6 +5,7 @@
 #include "game/cheats.h"
 #include "game/inv.h"
 #include "game/playerreset.h"
+#include "game/modelmgr.h"
 #include "game/chr.h"
 #include "game/body.h"
 #include "game/prop.h"
@@ -25,8 +26,8 @@
 #include "types.h"
 
 #define NUMTYPE1() (IS4MB() ? 0 : 35)
-#define NUMTYPE2() (IS4MB() ? 24 : 25)
-#define NUMTYPE3() (IS4MB() ? 0 : 20)
+#define NUMTYPE2() (IS4MB() ? 24 : MODELMGR_NUMTYPE2)
+#define NUMTYPE3() (IS4MB() ? 0 : MODELMGR_NUMTYPE3)
 #define NUMSPARE() (IS4MB() ? 40 : 60)
 
 void modelmgrReset(void)
@@ -78,8 +79,8 @@ void modelmgrAllocateSlots(s32 numobjs, s32 numchrs)
 	g_ModelNumChrs = numchrs;
 
 	numspare = NUMSPARE();
-	g_MaxModels = numobjs + numspare + numchrs + maxanimatedobjs;
-	g_MaxAnims = numchrs + maxanimatedobjs;
+	g_MaxModels = numobjs + numspare + numchrs + maxanimatedobjs + MAX_MPCHRS;
+	g_MaxAnims = numchrs + maxanimatedobjs + MAX_MPCHRS;
 
 	i = NUMTYPE2();
 	bindingssize = (NUMTYPE1() + i + NUMTYPE3()) * sizeof(struct modelrwdatabinding);
