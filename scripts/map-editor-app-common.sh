@@ -160,9 +160,11 @@ APPLESCRIPT
 # Restore canonical iCloud path when a stale build or symlink dropped the space in "Mobile Documents".
 pd_normalize_repo_root() {
 	local path="$1"
+	local canonical_mobile="/Library/Mobile Documents/"
 	[[ -n "$path" ]] || return 1
 	if [[ "$path" == *"/Library/MobileDocuments/"* ]]; then
-		path="${path//\/Library\/MobileDocuments\//\/Library\/Mobile Documents\/}"
+		# Replacement must live in a variable — literal \/ in the replacement becomes backslash+slash.
+		path="${path//\/Library\/MobileDocuments\//${canonical_mobile}}"
 	fi
 	printf '%s' "$path"
 }

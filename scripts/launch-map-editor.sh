@@ -19,6 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/map-editor-app-common.sh"
 
 REPO_ROOT="${PD_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+REPO_ROOT="$(pd_normalize_repo_root "$REPO_ROOT")"
 VIEWER_DIR="${PD_EDITOR_DIR:-$REPO_ROOT/journal/uff_viewer}"
 SERVE_SCRIPT="$VIEWER_DIR/serve_editor.py"
 STATE_DIR="${PD_EDITOR_STATE_DIR:-$VIEWER_DIR}"
