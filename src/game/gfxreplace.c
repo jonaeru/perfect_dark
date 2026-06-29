@@ -355,21 +355,34 @@ void gfxReplaceGbiCommandsRecursively(struct roomblock *block, s32 type)
 	}
 }
 
-void gfxMakeRoomWhite(Gfx *startgdl)
+void gfxMakeRoomUseShade(Gfx *startgdl)
 {
+	if (!startgdl) {
+		return;
+	}
+
 	Gfx *gdl = startgdl;
 
-	while (*(s8 *)gdl != (s8)G_ENDDL) {
-		u8 opcode = (gdl->words.w0 >> 24) & 0xff;
+	// Bound the walk: a well-formed room gdl always terminates with G_ENDDL.
+	// Guarding against a runaway walk avoids a hard crash if a room's display
+	// list is ever malformed.
+	s32 guard = 0;
+	while (gdl->bytes[GFX_W0_BYTE(0)] != (u8)G_ENDDL) {
+		u8 opcode = gdl->bytes[GFX_W0_BYTE(0)];
+
+		if (++guard > 4096) {
+			break;
+		}
 
 		if (opcode == (u8)G_SETCOMBINE) {
-			*gdl = (Gfx)gsDPSetCombineMode(G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+			gDPSetCombineMode(gdl, G_CC_SHADE, G_CC_SHADE);
 		}
+
 		gdl++;
 	}
 }
 
-void gfxMakeRoomWhiteRecursively(struct roomblock *block)
+void gfxMakeRoomUseShadeRecursively(struct roomblock *block)
 {
 	while (true) {
 		if (!block) {
@@ -378,11 +391,11 @@ void gfxMakeRoomWhiteRecursively(struct roomblock *block)
 
 		switch (block->type) {
 		case ROOMBLOCKTYPE_LEAF:
-			gfxMakeRoomWhite(block->gdl);
+			gfxMakeRoomUseShade(block->gdl);
 			block = block->next;
 			break;
 		case ROOMBLOCKTYPE_PARENT:
-			gfxMakeRoomWhiteRecursively(block->child);
+			gfxMakeRoomUseShadeRecursively(block->child);
 			block = block->next;
 			break;
 		default:
