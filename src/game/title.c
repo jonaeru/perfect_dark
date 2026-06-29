@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
+#include "game/mplayer/mplayer.h"
 #include "game/title.h"
 #include "game/bondgun.h"
 #include "game/modelmgr.h"
@@ -155,6 +156,8 @@ void titleSetLight(Lights1 *light, u8 r, u8 g, u8 b, f32 luminosity, struct coor
 	light->l[0].l.dir[2] = dir->z * 127.0f;
 }
 
+extern s32 sysArgCheck(const char *arg);
+
 void titleInitLegal(void)
 {
 	musicQueueStopAllEvent();
@@ -163,13 +166,50 @@ void titleInitLegal(void)
 	g_TitleButtonPressed = false;
 	g_TitleFastForward = false;
 
-#if VERSION == VERSION_PAL_BETA
-	// Play a sound if player has successfully enabled the crash screen.
-	// This is done in mainInit by holding all four C buttons.
-	if (g_CrashEnabled) {
-		sndStart(var80095200, SFX_8113, 0, -1, -1, -1.0f, -1, -1);
+	if (sysArgCheck("--test-map")) {
+		// FAST BOOT HACK: Boot into MP match instantly with bots and weapons.
+		//
+		// IMPORTANT: only claim the human player slot here (bit 0). The 8 simulant
+		// slots are populated by the quick-team system below (mpStartMatch ->
+		// mpConfigureQuickTeamSimulants), which calls mpGetSlotForNewBot() to find
+		// the first FREE bot slot and mpCreateBotFromProfile() to fill in its
+		// config. If we pre-set the simulant chrslot bits (e.g. 0x0ff0) here, every
+		// bot slot looks "occupied", so mpGetSlotForNewBot() keeps returning the
+		// capped fallback slot (7) and all 8 creations overwrite the same config
+		// while slots 0-6 stay configless -> no bots actually spawn (chr=0).
+		g_MpSetup.chrslots = 0x01; // Player 1 only; simulants added via quick-team
+		g_MpSetup.stagenum = STAGE_TEST_UFF;
+		g_MpSetup.options = 0;
+		g_MpSetup.scenario = 0;
+		
+		if (sysArgCheck("--scenario-0")) g_MpSetup.scenario = 0;
+		if (sysArgCheck("--scenario-1")) g_MpSetup.scenario = 1;
+		if (sysArgCheck("--scenario-2")) g_MpSetup.scenario = 2;
+		if (sysArgCheck("--scenario-3")) g_MpSetup.scenario = 3;
+		if (sysArgCheck("--scenario-4")) g_MpSetup.scenario = 4;
+		if (sysArgCheck("--scenario-5")) g_MpSetup.scenario = 5;
+		
+		// Default weapons
+		g_MpSetup.weapons[0] = MPWEAPON_FALCON2;
+		g_MpSetup.weapons[1] = MPWEAPON_CMP150;
+		g_MpSetup.weapons[2] = MPWEAPON_AR34;
+		g_MpSetup.weapons[3] = MPWEAPON_MAGSEC4;
+		g_MpSetup.weapons[4] = MPWEAPON_NONE;
+		g_MpSetup.weapons[5] = MPWEAPON_SHIELD;
+
+		// Simulants (use quick-team system so bots actually get created)
+		g_Vars.mpquickteam = MPQUICKTEAM_PLAYERSANDSIMS;
+		g_Vars.mpquickteamnumsims = 8;
+		g_Vars.mpsimdifficulty = BOTDIFF_NORMAL;
+
+		setNumPlayers(1);
+		mpStartMatch();
+		mainChangeToStage(STAGE_TEST_UFF);
+		return;
 	}
-#endif
+	
+	g_TitleMode = -1;
+	g_TitleNextMode = -1;
 }
 
 void titleExitLegal(void)
