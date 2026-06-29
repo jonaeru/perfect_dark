@@ -64,6 +64,7 @@ s32 fsPathIsCwdRelative(const char *path)
 const char *fsFullPath(const char *relPath)
 {
 	static char pathBuf[FS_MAXPATH + 1];
+	struct stat st;
 
 	if (relPath[0] == '$') {
 		// expandable placeholder $X; will be replaced with the corresponding path, if any
@@ -94,27 +95,27 @@ const char *fsFullPath(const char *relPath)
 	// path relative to mod or base dir; this will be a read request, so check where the file actually is
 	if (gexModDir[0] && g_ModNum == MOD_GEX) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", gexModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
+		if (stat(pathBuf, &st) == 0) {
 			return pathBuf;
 		}
 	} else if (kakarikoModDir[0] && g_ModNum == MOD_KAKARIKO) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", kakarikoModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
+		if (stat(pathBuf, &st) == 0) {
 			return pathBuf;
 		}
 	} else if (darknoonModDir[0] && g_ModNum == MOD_DARKNOON) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", darknoonModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
+		if (stat(pathBuf, &st) == 0) {
 			return pathBuf;
 		}
 	} else if (goldfinger64ModDir[0] && g_ModNum == MOD_GOLDFINGER_64) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", goldfinger64ModDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
+		if (stat(pathBuf, &st) == 0) {
 			return pathBuf;
 		}
 	} else if (modDir[0]) {
 		snprintf(pathBuf, FS_MAXPATH, "%s/%s", modDir, relPath);
-		if (fsFileSize(pathBuf) >= 0) {
+		if (stat(pathBuf, &st) == 0) {
 			return pathBuf;
 		}
 	}
@@ -369,6 +370,7 @@ s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
 void *fsFileLoad(const char *name, u32 *outSize)
 {
 	const char *fullName = fsFullPath(name);
+	sysLogPrintf(LOG_NOTE, "fsFileLoad: name=%s resolved to=%s", name, fullName);
 
 	FILE *f = fopen(fullName, "rb");
 	if (!f) {
