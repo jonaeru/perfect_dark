@@ -2,20 +2,42 @@
 
 Browser-based 3D editor for Perfect Dark test maps (`journal/uff_viewer/`).
 
-## Quick start (no terminal)
+## Quick start (recommended — Electron app)
 
-1. Build the macOS launcher once (from repo root):
+The **Electron launcher** embeds the editor in a native window. It does not depend on an external browser or the shell-based `.app` launcher.
+
+1. Build once (from repo root):
 
    ```bash
-   ./scripts/build-map-editor-app.sh
+   ./scripts/build-map-editor-electron.sh
    ```
 
-2. **Double-click `Perfect Dark Map Editor.app`**  
-   (in the repo root symlink, or `scripts/release/Perfect Dark Map Editor.app`).
+2. **Double-click `Perfect Dark Map Editor (Electron).app`**  
+   (repo-root symlink, or `scripts/release/Perfect Dark Map Editor (Electron).app`).
 
-   The app starts the local dev server, opens `http://127.0.0.1:8765/`, and shows a notification. **Quit the app from the Dock** (Cmd+Q) to stop the server.
+   The app starts `serve_editor.py`, waits for `/api/health`, and opens the map editor in an embedded window. **Quit from the Dock** (Cmd+Q) to stop the Python server.
 
 3. Set options in the **Map options** strip (top-right): Level, Deploy, Mod, Scenario, build flags. Click **Test / Play** (or press **T**) to build assets and launch `./build/pd.arm64 --test-map`.
+
+### Dev mode (no .app build)
+
+```bash
+cd journal/uff_viewer/electron
+npm install
+PD_REPO_ROOT="/path/to/perfect_dark_jonaeru_aio" npm start
+```
+
+Or: `./scripts/build-map-editor-electron.sh --dev`
+
+## Legacy shell .app (optional)
+
+The older shell launcher opens your default browser via `open http://127.0.0.1:8765/`:
+
+```bash
+./scripts/build-map-editor-app.sh
+```
+
+This can fail on iCloud-evicted repos or when the browser does not come to the foreground. Prefer the Electron app above.
 
 ## UI map
 
@@ -49,12 +71,17 @@ python3 journal/uff_viewer/serve_editor.py
 | `uff_map.html` | Editor UI (Three.js) |
 | `serve_editor.py` | Static server + `POST /api/test-map` |
 | `test_map.py` | Build + deploy + `--play` pipeline |
+| `electron/` | Electron shell (`main.js`, `package.json`) |
 | `gen_uff_viewer.py` | Regenerate HTML from level data |
 | `UI.md` | Information architecture + design principles |
 
-## Notes
+## Troubleshooting
 
+- **Log file:** `~/Library/Logs/PerfectDarkMapEditor.log`
+- **Python:** Requires 3.10+ (`brew install python`). Set `PD_PYTHON` if needed.
+- **Repo path:** Set `PD_REPO_ROOT` if auto-discovery fails (common with iCloud paths containing spaces).
+- **iCloud eviction:** Finder → right-click repo folder → **Download Now**, then relaunch.
 - Player spawns and objectives should sit at floor height (`Y=0` or pad `Y=10`), not high in the air.
 - The editor server only accepts localhost origins.
-- If the app says the server is already running, another session is using port **8765** — the app opens the existing tab instead of starting a duplicate.
+- If port **8765** is busy, the server auto-picks the next free port in **8765–8775**.
 - **Deploy → uff (test-map slot)** unless your level is registered in `stagetable.c`.

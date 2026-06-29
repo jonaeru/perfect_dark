@@ -66,11 +66,14 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from test_map import (  # noqa: E402
+    DEFAULT_LOADOUT,
     TEST_MAP_SLOT,
     _detect_pd_binary,
     build_shell_script,
     play_command,
 )
+
+LOG_FILE = os.path.expanduser("~/Library/Logs/PerfectDarkMapEditor.log")
 
 # Track detached game processes (pid -> popen) for optional /api/status polling.
 _GAME_PROCS: dict[int, subprocess.Popen[Any]] = {}
@@ -103,6 +106,20 @@ def _cors_headers(handler: BaseHTTPRequestHandler) -> None:
         handler.send_header("Vary", "Origin")
 
 
+def _play_params_from_opts(opts: dict[str, Any]) -> dict[str, Any]:
+    """Extract --test-map launch knobs from editor options payload."""
+    loadout = opts.get("loadout")
+    if isinstance(loadout, list):
+        loadout = [int(w) for w in loadout]
+    else:
+        loadout = None
+    return {
+        "num_sims": int(opts.get("numSims", 8)),
+        "sim_difficulty": int(opts.get("simDifficulty", 2)),
+        "loadout": loadout,
+        "mp_options": int(opts.get("mpOptions", 0)),
+    }
+
 def _build_test_map_argv(json_path: str, opts: dict[str, Any], *, play: bool) -> list[str]:
     """Mirror ``buildTestCommandLine`` / ``test_map.py`` flags from editor options."""
     level = str(opts.get("level", "uff")).strip().lower()
@@ -133,6 +150,13 @@ def _build_test_map_argv(json_path: str, opts: dict[str, Any], *, play: bool) ->
         cmd.append("--skip-validate")
     if opts.get("rebuildGame"):
         cmd.append("--rebuild-game")
+    play_params = _play_params_from_opts(opts)
+    cmd.extend(["--num-sims", str(play_params["num_sims"])])
+    cmd.extend(["--sim-difficulty", str(play_params["sim_difficulty"])])
+    if play_params["loadout"]:
+        cmd.extend(["--loadout", ",".join(str(w) for w in play_params["loadout"])])
+    if play_params["mp_options"]:
+        cmd.extend(["--mp-options", str(play_params["mp_options"])])
     if opts.get("backup", True):
         cmd.append("--backup")
     else:
@@ -172,9 +196,35 @@ def _run_test_map(payload: dict[str, Any]) -> dict[str, Any]:
     with open(json_path, "w", encoding="utf-8") as fp:
         json.dump(map_data, fp, indent=2)
 
+    build_argv = _build_test_map_argv(json_path, opts, play=False)
+    build_cmd_str = " ".join(build_argv)
+    full_argv = _build_test_map_argv(json_path, opts, play=want_play)
+    full_cmd_str = " ".join(full_argv)
+
+    # Dry-run: return planned commands without shell artifacts or subprocess work.
+    if opts.get("dryRun"):
+        play_argv = play_command(
+            mod_key=str(opts.get("mod", "mod_allinone")),
+            scenario=int(opts.get("scenario", 0)),
+            pd_binary=pd_binary,
+            use_test_map=use_test_map and want_play,
+            **_play_params_from_opts(opts),
+        )
+        return {
+            "ok": True,
+            "dryRun": True,
+            "command": build_cmd_str,
+            "fullCommand": full_cmd_str,
+            "playCommand": " ".join(play_argv),
+            "options": opts,
+            "pid": None,
+        }
+
     # Build shell script artifact (no-op for API, but keeps .last_test.sh in sync).
     import argparse as _argparse
 
+    play_params = _play_params_from_opts(opts)
+    loadout = play_params["loadout"] if play_params["loadout"] else list(DEFAULT_LOADOUT)
     ns = _argparse.Namespace(
         level=level,
         mod=str(opts.get("mod", "mod_allinone")),
@@ -187,34 +237,18 @@ def _run_test_map(payload: dict[str, Any]) -> dict[str, Any]:
         verbose=False,
         backup=bool(opts.get("backup", True)),
         deploy_as=deploy_as,
+        num_sims=play_params["num_sims"],
+        sim_difficulty=play_params["sim_difficulty"],
+        loadout=loadout,
+        mp_options=play_params["mp_options"],
     )
     sh_path = os.path.join(STATE_DIR, ".last_test.sh")
-    with open(sh_path, "w", encoding="utf-8") as fp:
-        fp.write(build_shell_script(ns, map_data))
-    os.chmod(sh_path, 0o755)
-
-    build_argv = _build_test_map_argv(json_path, opts, play=False)
-    build_cmd_str = " ".join(build_argv)
-    full_argv = _build_test_map_argv(json_path, opts, play=want_play)
-    full_cmd_str = " ".join(full_argv)
-
-    # Dry-run: return planned commands without writing level modules or building.
-    if opts.get("dryRun"):
-        play_argv = play_command(
-            mod_key=str(opts.get("mod", "mod_allinone")),
-            scenario=int(opts.get("scenario", 0)),
-            pd_binary=pd_binary,
-            use_test_map=use_test_map and want_play,
-        )
-        return {
-            "ok": True,
-            "dryRun": True,
-            "command": build_cmd_str,
-            "fullCommand": full_cmd_str,
-            "playCommand": " ".join(play_argv),
-            "options": opts,
-            "pid": None,
-        }
+    try:
+        with open(sh_path, "w", encoding="utf-8") as fp:
+            fp.write(build_shell_script(ns, map_data))
+        os.chmod(sh_path, 0o755)
+    except Exception as exc:
+        _log_traceback(f"build_shell_script failed: {exc}")
 
     if not os.path.isfile(pd_binary) and want_play:
         return {
@@ -266,6 +300,7 @@ def _run_test_map(payload: dict[str, Any]) -> dict[str, Any]:
         scenario=int(opts.get("scenario", 0)),
         pd_binary=pd_binary,
         use_test_map=use_test_map,
+        **_play_params_from_opts(opts),
     )
     result["playCommand"] = " ".join(play_argv)
 
@@ -419,7 +454,13 @@ class EditorHandler(BaseHTTPRequestHandler):
             _json_response(self, 400, {"ok": False, "error": f"invalid_json: {exc}"})
             return
 
-        result = _run_test_map(payload)
+        try:
+            result = _run_test_map(payload)
+        except Exception as exc:
+            _log_traceback(f"POST /api/test-map failed: {exc}")
+            _json_response(self, 500, {"ok": False, "error": str(exc)})
+            return
+
         status = 200 if result.get("ok") else 500
         self.send_response(status)
         _cors_headers(self)
@@ -450,6 +491,25 @@ def _pick_port(host: str, start: int, *, max_tries: int = 20) -> int:
 def _write_port_file(port: int) -> None:
     with open(PORT_FILE, "w", encoding="utf-8") as fp:
         fp.write(str(port))
+
+
+def _log_traceback(message: str) -> None:
+    """Append a traceback to the shared editor log for Electron/shell diagnostics."""
+    import traceback
+    from datetime import datetime
+
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    body = traceback.format_exc()
+    line = f"[{stamp}] [serve_editor] {message}\n{body}"
+    print(line, file=sys.stderr, end="" if line.endswith("\n") else "\n")
+    try:
+        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+        with open(LOG_FILE, "a", encoding="utf-8") as fp:
+            fp.write(line)
+            if not line.endswith("\n"):
+                fp.write("\n")
+    except OSError:
+        pass
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -502,4 +562,10 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except Exception as exc:
+        _log_traceback(f"Fatal error in serve_editor.py: {exc}")
+        raise SystemExit(1) from exc

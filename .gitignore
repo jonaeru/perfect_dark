@@ -26,3 +26,5 @@ tools/mkrom/mkrom
 CppProperties.json
 .idea
 cmake-build-debug
+journal/uff_viewer/electron/node_modules/
+scripts/release/electron-dist/
