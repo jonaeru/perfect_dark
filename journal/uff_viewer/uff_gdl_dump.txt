@@ -1,0 +1,144 @@
+========================================================================
+UFF (Matrix arena) — seg display-list decode
+Source: tools/pdmap/seg.py  (_extract_setup_gdl + _build_gdl, mode=full)
+========================================================================
+
+Box half-extent : 5000.0  (X,Z span [-5000.0, +5000.0])
+Box height      : 3000.0  (Y span [0, 3000.0])
+Total box verts : 24  (6 faces x 4 verts)
+
+------------------------------------------------------------------------
+DISPLAY LIST (in order)
+------------------------------------------------------------------------
+  +0x000  E7000000 00000000  G_RDPPIPESYNC
+  +0x008  BA001402 00100000  G_SETOTHERMODE_H
+  +0x010  B900031D 0C182078  G_SETOTHERMODE_L
+  +0x018  FC26A004 1F1093FF  G_SETCOMBINE
+  +0x020  BA001001 00010000  G_SETOTHERMODE_H
+  +0x028  BB002801 FFFFFFFF  G_TEXTURE
+  +0x030  C0A80002 0000013E  UNKNOWN
+  +0x038  BA001102 00020000  G_SETOTHERMODE_H
+  +0x040  BA000C02 00002000  G_SETOTHERMODE_H
+  +0x048  B6000000 00023000  G_CLEARGEOMETRYMODE
+  +0x050  B7000000 00000205  G_SETGEOMETRYMODE
+  +0x058  0718001C 0D000000  G_COL(vtxcolours)
+            -> vertex colour list, seg-addr 0x0D000000
+  +0x060  04300030 0E000000  G_VTX
+            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000000
+  +0x068  BF000000 00000A14  G_TRI1
+            -> tri verts (0, 1, 2)
+  +0x070  BF000000 0000141E  G_TRI1
+            -> tri verts (0, 2, 3)
+  +0x078  04300030 0E000030  G_VTX
+            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000030
+  +0x080  BF000000 00000A14  G_TRI1
+            -> tri verts (0, 1, 2)
+  +0x088  BF000000 0000141E  G_TRI1
+            -> tri verts (0, 2, 3)
+  +0x090  04300030 0E000060  G_VTX
+            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000060
+  +0x098  BF000000 00000A14  G_TRI1
+            -> tri verts (0, 1, 2)
+  +0x0A0  BF000000 0000141E  G_TRI1
+            -> tri verts (0, 2, 3)
+  +0x0A8  04300030 0E000090  G_VTX
+            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000090
+  +0x0B0  BF000000 00000A14  G_TRI1
+            -> tri verts (0, 1, 2)
+  +0x0B8  BF000000 0000141E  G_TRI1
+            -> tri verts (0, 2, 3)
+  +0x0C0  04300030 0E0000C0  G_VTX
+            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E0000C0
+  +0x0C8  BF000000 00000A14  G_TRI1
+            -> tri verts (0, 1, 2)
+  +0x0D0  BF000000 0000141E  G_TRI1
+            -> tri verts (0, 2, 3)
+  +0x0D8  04300030 0E0000F0  G_VTX
+            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E0000F0
+  +0x0E0  BF000000 00000A14  G_TRI1
+            -> tri verts (0, 1, 2)
+  +0x0E8  BF000000 0000141E  G_TRI1
+            -> tri verts (0, 2, 3)
+  +0x0F0  B8000000 00000000  G_ENDDL
+
+------------------------------------------------------------------------
+G_VTX LOAD SUMMARY  (F3DEX2 count nibble is 4-bit -> max 16/load)
+------------------------------------------------------------------------
+  load #0: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000000
+  load #1: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000030
+  load #2: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000060
+  load #3: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000090
+  load #4: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E0000C0
+  load #5: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E0000F0
+
+  G_VTX loads          : 6
+  verts covered by loads: 24
+  total verts in buffer : 24
+
+  VERDICT: No G_VTX load exceeds 16 vertices; every load is self-
+           contained (one 4-vert load + its 2 triangles per face).
+           The seg geometry as generated does NOT overflow the F3DEX2
+           count nibble, so a single-G_VTX(24) overflow is NOT present
+           in the current generator output. If a phantom surface still
+           appears in-game, the shipped seg may predate this per-face
+           fix (rebuild the seg), or the phantom comes from a stale
+           collision batch elsewhere — see seg.py _build_gdl comment.
+
+------------------------------------------------------------------------
+ORIGIN PROXIMITY (anything with a vertex within 500 units)
+------------------------------------------------------------------------
+  (no box face or collision tile has any vertex near the origin)
+
+------------------------------------------------------------------------
+SHIPPED / BUILT bg_uff.seg VERIFICATION (decoded from disk)
+------------------------------------------------------------------------
+  mods/mod_allinone/files/bgdata/bg_uff.seg
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000000
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000030
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000060
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000090
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000C0
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000F0
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_ENDDL
+    -> G_VTX load sizes=[4, 4, 4, 4, 4, 4] max=4 OVERFLOW(>16)=False
+
+  build/ntsc-final/assets/files/bgdata/bg_uff.seg
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000000
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000030
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000060
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000090
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000C0
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000F0
+    G_TRI1 (0,1,2)
+    G_TRI1 (0,2,3)
+    G_ENDDL
+    -> G_VTX load sizes=[4, 4, 4, 4, 4, 4] max=4 OVERFLOW(>16)=False
+
+  NOTE: If the on-disk seg already uses small per-face loads (<=16),
+        the G_VTX(24) overflow is NOT the cause of any phantom surface
+        observed in a currently-running build -- look elsewhere (stale
+        cached seg in the running process, collision tiles, or a
+        different bg batch).
+
