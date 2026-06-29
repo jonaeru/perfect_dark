@@ -1,0 +1,773 @@
+{
+	"pads": [
+		{
+			"id": "PAD_CSIM_0000",
+			"pos": [
+				-2000.0,
+				10.0,
+				-2000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0001",
+			"pos": [
+				2000.0,
+				10.0,
+				-2000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0002",
+			"pos": [
+				-2000.0,
+				10.0,
+				2000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0003",
+			"pos": [
+				2000.0,
+				10.0,
+				2000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0004",
+			"pos": [
+				0.0,
+				10.0,
+				0.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0005",
+			"pos": [
+				-1500.0,
+				10.0,
+				0.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0006",
+			"pos": [
+				1500.0,
+				10.0,
+				0.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0007",
+			"pos": [
+				-3000.0,
+				10.0,
+				-3000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0008",
+			"pos": [
+				3000.0,
+				10.0,
+				3000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_CSIM_0009",
+			"pos": [
+				0.0,
+				10.0,
+				1500.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		}
+	],
+	"waypoints": [
+		{
+			"id": "WAYPOINT_CSIM_0000",
+			"pad": "PAD_CSIM_0000",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0007",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0001",
+			"pad": "PAD_CSIM_0001",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0002",
+			"pad": "PAD_CSIM_0002",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0003",
+			"pad": "PAD_CSIM_0003",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0004",
+			"pad": "PAD_CSIM_0004",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0005",
+			"pad": "PAD_CSIM_0005",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0006",
+			"pad": "PAD_CSIM_0006",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0007",
+			"pad": "PAD_CSIM_0007",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0008",
+			"pad": "PAD_CSIM_0008",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0009",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		},
+		{
+			"id": "WAYPOINT_CSIM_0009",
+			"pad": "PAD_CSIM_0009",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_CSIM_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_CSIM_0008",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_CSIM_0001"
+		}
+	],
+	"waygroups": [
+		{
+			"id": "WAYGROUP_CSIM_0001",
+			"neighbours": []
+		}
+	],
+	"cover": []
+}
