@@ -132,14 +132,6 @@ def json_to_level_py(data: dict[str, Any]) -> str:
             intro_imports.add("Hill")
     if intro_imports:
         append(f"from tools.pdmap.intro import {', '.join(sorted(intro_imports))}")
-    prop_imports: set[str] = set()
-    if weapon_pads:
-        prop_imports.add("Weapon as WeaponProp")
-    if ammo_pads:
-        # Use AmmoCrate directly when we need per-crate ammotype; add_ammo_row is uniform.
-        pass
-    if prop_imports:
-        append(f"from tools.pdmap.props import {', '.join(sorted(prop_imports))}")
     append("from tools.pdmap import weapons as W")
     append("")
     append("# Arena dimensions — shared by floor tiles and generic box seg (--seg).")
