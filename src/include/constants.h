@@ -1751,6 +1751,8 @@
 #define MENUOP_OPEN                100
 #define MENUOP_CLOSE               101
 #define MENUOP_TICK                102
+#define MENUOP_PREOPEN             103
+
 
 #define MENUPLANE_00 0
 #define MENUPLANE_01 1
