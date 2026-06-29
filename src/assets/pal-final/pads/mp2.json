@@ -1,5 +1,1222 @@
 {
-    "pads": [],
+    "pads": [
+        {
+            "id": "PAD_MP2_0000",
+            "pos": [
+                -4000,
+                10,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0001",
+            "pos": [
+                4000,
+                10,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0002",
+            "pos": [
+                -4000,
+                10,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0003",
+            "pos": [
+                4000,
+                10,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0004",
+            "pos": [
+                -2000,
+                10,
+                -2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0005",
+            "pos": [
+                2000,
+                10,
+                -2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0006",
+            "pos": [
+                -2000,
+                10,
+                2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0007",
+            "pos": [
+                2000,
+                10,
+                2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0008",
+            "pos": [
+                0,
+                10,
+                -3000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0009",
+            "pos": [
+                0,
+                10,
+                3000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_000A",
+            "pos": [
+                -3000,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_000B",
+            "pos": [
+                3000,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_000C",
+            "pos": [
+                -1000,
+                10,
+                -1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_000D",
+            "pos": [
+                1000,
+                10,
+                -1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_000E",
+            "pos": [
+                -1000,
+                10,
+                1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_000F",
+            "pos": [
+                1000,
+                10,
+                1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0010",
+            "pos": [
+                0,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0011",
+            "pos": [
+                0,
+                10,
+                -1500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0012",
+            "pos": [
+                0,
+                10,
+                1500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0013",
+            "pos": [
+                -1500,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0014",
+            "pos": [
+                1500,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0015",
+            "pos": [
+                -3500,
+                10,
+                -3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0016",
+            "pos": [
+                3500,
+                10,
+                -3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0017",
+            "pos": [
+                -3500,
+                10,
+                3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0018",
+            "pos": [
+                3500,
+                10,
+                3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0019",
+            "pos": [
+                -4500,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_001A",
+            "pos": [
+                -4200,
+                10,
+                -4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_001B",
+            "pos": [
+                -4200,
+                10,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_001C",
+            "pos": [
+                4200,
+                10,
+                -4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_001D",
+            "pos": [
+                4200,
+                10,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_001E",
+            "pos": [
+                -4200,
+                10,
+                4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_001F",
+            "pos": [
+                -4200,
+                10,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0020",
+            "pos": [
+                4200,
+                10,
+                4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0021",
+            "pos": [
+                4200,
+                10,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0022",
+            "pos": [
+                0,
+                10,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0023",
+            "pos": [
+                -2500,
+                10,
+                -2500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0024",
+            "pos": [
+                2500,
+                10,
+                -2500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_MP2_0025",
+            "pos": [
+                0,
+                10,
+                -2500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        }
+    ],
     "waypoints": [],
     "waygroups": [],
     "cover": []

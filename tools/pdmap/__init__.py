@@ -99,14 +99,15 @@ def cmd_build(args):
         deploy_all(name)
         print("  Deploy complete")
 
-    errors, warnings = validate_all(name, mapdef)
-    for w in warnings:
-        print(f"  [WARN] {w}")
-    for e in errors:
-        print(f"  [ERROR] {e}")
-    if errors:
-        print(f"Build finished with {len(errors)} validation error(s)", file=sys.stderr)
-        sys.exit(1)
+    if not args.no_validate:
+        errors, warnings = validate_all(name, mapdef)
+        for w in warnings:
+            print(f"  [WARN] {w}")
+        for e in errors:
+            print(f"  [ERROR] {e}")
+        if errors:
+            print(f"Build finished with {len(errors)} validation error(s)", file=sys.stderr)
+            sys.exit(1)
 
     print(f"Build complete for {name}")
 
@@ -256,6 +257,8 @@ def main():
     p_build.add_argument("--deploy", "-d", action="store_true", help="Deploy to mod directories after build")
     p_build.add_argument("--seg", nargs="?", const="", default=None,
                          help="Build seg file (uses level SEG_SCRIPT when flag given without path)")
+    p_build.add_argument("--no-validate", action="store_true",
+                         help="Skip post-build validation (WIP maps)")
     p_build.set_defaults(func=cmd_build)
 
     p_info = sub.add_parser("info", help="Show level statistics")
