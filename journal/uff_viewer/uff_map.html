@@ -65,7 +65,7 @@
     border:1px solid var(--border); border-radius:6px; padding:4px 6px; }
   .field.xyz input { flex:1 1 0; width:0; }
   .field input[type=range] { flex:1 1 auto; }
-  .field .val { flex:0 0 56px; text-align:right; color:#cdd6e6; font-variant-numeric:tabular-nums; }
+  .field .val { flex:0 0 64px; text-align:right; color:#cdd6e6; font-variant-numeric:tabular-nums; }
   /* Properties panel (bottom-right) for the selected pad. */
   #props { right:12px; bottom:12px; width:268px; display:none; max-height:60vh; overflow-y:auto; }
   body.editing #props.shown { display:block; }
@@ -261,10 +261,9 @@ const WEAPON_CATALOG = [
   [0x17, 'Devastator'], [0x18, 'Rocket Launcher'], [0x19, 'Slayer'],
   [0x1b, 'Crossbow'], [0x1c, 'Tranquilizer'],
 ];
-// Ammo type catalog (AMMOTYPE_* from constants.h).
+// Ammo type catalog (AMMOTYPE_* from tools/pdmap/weapons.py / constants.h).
 const AMMO_CATALOG = [
-  [0x01, 'Pistol'], [0x02, 'SMG'], [0x03, 'Crossbow'], [0x04, 'Rifle'],
-  [0x05, 'Shotgun'], [0x07, 'Grenade'], [0x08, 'Rocket'],
+  [0x01, 'Pistol'], [0x03, 'Rifle'], [0x04, 'Shotgun'], [0x05, 'Rocket'],
 ];
 const SCENARIO_CATALOG = [['case', 'Capture the Case'], ['hill', 'King of the Hill']];
 
