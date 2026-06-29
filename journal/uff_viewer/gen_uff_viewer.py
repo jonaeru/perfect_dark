@@ -533,6 +533,13 @@ def build_test_config() -> dict:
             "json": "journal/uff_viewer/.last_test.json",
             "shell": "journal/uff_viewer/.last_test.sh",
         },
+        # pass-6: local dev server for direct launch (serve_editor.py).
+        "devServer": {
+            "port": 8765,
+            "healthPath": "/api/health",
+            "testMapPath": "/api/test-map",
+            "startCommand": "python3 journal/uff_viewer/serve_editor.py",
+        },
     }
 
 
@@ -587,7 +594,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .panel { position:fixed; background:var(--panel); border:1px solid var(--border); border-radius:10px;
     padding:12px 14px; backdrop-filter:blur(6px); box-shadow:0 6px 24px rgba(0,0,0,0.45); }
   #hud { top:12px; left:12px; width:262px; max-height:calc(100vh - 24px); overflow-y:auto; }
-  #panelRight { top:12px; right:12px; width:210px; }
+  /* View/mode panel sits below the always-visible map-options strip. */
+  #panelRight { top:var(--right-stack-top, 186px); right:12px; width:210px; z-index:5; }
   #hud h1 { font-size:14px; margin:0 0 4px; letter-spacing:.2px; }
   #hud .sub { color:var(--muted); margin:0 0 10px; font-size:12px; }
   h2 { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:0 0 6px; }
@@ -632,8 +640,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   #editPanel { top:12px; right:12px; width:248px; max-height:calc(100vh - 24px);
     overflow-y:auto; display:none; }
   body.editing #editPanel { display:block; }
-  /* When editing, slide the view/mode panel to the left of the edit panel so they don't stack. */
-  body.editing #panelRight { right:272px; }
+  /* When editing, slide right-column panels left of the edit panel. */
+  body.editing #panelRight,
+  body.editing #mapOptions { right:272px; }
   #editPanel h1 { font-size:14px; margin:0 0 2px; }
   #editPanel .sub { color:var(--muted); margin:0 0 10px; font-size:12px; }
   /* Tool palette: one button per placeable pad type + a plain select tool. */
@@ -676,12 +685,50 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   #testStatus .warn { color:#ffd166; }
   #testStatus .err { color:#ff5d5d; }
   button.test-primary { background:#1a6638; border-color:#2a8f4e; font-weight:600; }
-  button.test-primary:hover { background:#22884a; border-color:#3cb868; }
+  button.test-primary:hover:not(:disabled) { background:#22884a; border-color:#3cb868; }
+  button.test-primary:disabled { opacity:0.55; cursor:wait; }
+  button.test-export { background:#2a4a6e; border-color:#3a6a9e; font-weight:600; }
+  button.test-export:hover:not(:disabled) { background:#356089; border-color:#4a82b8; }
+  button.test-export:disabled { opacity:0.55; cursor:wait; }
+  .test-export-details { margin-top:6px; font-size:12px; color:var(--muted); }
+  .test-export-details summary { cursor:pointer; color:#cdd6e6; user-select:none; margin-bottom:4px; }
+  .test-export-details[open] summary { margin-bottom:6px; }
+  .test-export-details .export-note { margin:0 0 6px; font-size:11px; }
+  #testServerHint { font-size:11px; color:var(--muted); margin:4px 0 0; line-height:1.35; }
+  #testServerHint .live { color:#57d977; }
+  #testServerHint .off { color:#ffd166; }
   .export-note { font-size:11px; color:var(--muted); margin:4px 0 0; line-height:1.45; }
-  .editbadge { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:5;
+  .editbadge { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:8;
     background:#2c7be5; color:#fff; font-weight:700; letter-spacing:.4px; padding:5px 14px;
     border-radius:20px; box-shadow:0 4px 16px rgba(0,0,0,.4); display:none; }
   body.editing .editbadge { display:block; }
+  /* pass-6: Map options — always-visible top-right strip (no scroll required on 1440×900). */
+  #mapOptions { position:fixed; top:12px; right:12px; width:320px; z-index:7;
+    padding:10px 12px; }
+  #mapOptions h2 { font-size:11px; margin:0 0 6px; letter-spacing:.5px; }
+  #mapOptions .opt-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; }
+  #mapOptions .field { margin:0; }
+  #mapOptions .field label { flex:0 0 52px; font-size:11px; }
+  #mapOptions .field input[type=text],
+  #mapOptions .field select { font-size:12px; padding:3px 5px; }
+  #mapOptions .opt-meta { display:flex; gap:10px; margin:6px 0 4px; font-size:11px;
+    color:var(--muted); font-variant-numeric:tabular-nums; }
+  #mapOptions .opt-meta span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #mapOptions .opt-checks { display:flex; flex-wrap:wrap; gap:4px 10px; margin:4px 0 6px; }
+  #mapOptions .opt-checks label { display:inline-flex; align-items:center; gap:4px;
+    font-size:11px; color:#cdd6e6; cursor:pointer; user-select:none; margin:0; }
+  #mapOptions .opt-checks input { margin:0; }
+  #mapOptions .opt-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0; }
+  #mapOptions .opt-actions button { padding:7px 8px; font-size:12px; }
+  #mapOptions kbd { background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
+    border-radius:5px; padding:0 4px; font-family:ui-monospace,Menlo,monospace; font-size:10px; }
+  #testStatus { font-size:11px; margin:4px 0 0; min-height:16px; line-height:1.35; }
+  /* Collapsed command log + terminal fallback at bottom-right. */
+  #testOutput { position:fixed; right:12px; bottom:12px; width:320px; z-index:6;
+    padding:8px 12px; max-height:40vh; overflow-y:auto; }
+  body.editing #testOutput { right:272px; }
+  #testOutput summary { cursor:pointer; color:#cdd6e6; font-size:12px; user-select:none; }
+  #testOutput .export-note { margin:6px 0; }
 </style>
 </head>
 <body>
@@ -719,6 +766,40 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 </div>
 
 <div class="editbadge">● EDIT MODE</div>
+
+<!-- pass-6: Map options — always visible top-right; works without edit mode or server -->
+<div id="mapOptions" class="panel">
+  <h2>MAP OPTIONS · <kbd>T</kbd> play · <kbd>X</kbd> export</h2>
+  <div class="opt-grid">
+    <div class="field"><label for="testLevelName" title="Python module in src/levels/">Level</label>
+      <input type="text" id="testLevelName" spellcheck="false" placeholder="uff" /></div>
+    <div class="field"><label for="testDeployAs" title="Stage slot for --test-map">Deploy</label>
+      <select id="testDeployAs"></select></div>
+    <div class="field"><label for="testMod" title="Mod directory under mods/">Mod</label>
+      <select id="testMod"></select></div>
+    <div class="field"><label for="testScenario" title="Multiplayer scenario">Scenario</label>
+      <select id="testScenario"></select></div>
+  </div>
+  <div class="opt-meta">
+    <span id="testBoxInfo" title="From box geometry (edit sliders or defaults)">Box —</span>
+    <span id="testSimInfo" title="Bot count vs stock cap">Simulants —</span>
+  </div>
+  <div class="opt-checks">
+    <label title="Build seg display list (--seg)"><input type="checkbox" id="testSegChk" checked /> Seg</label>
+    <label title="Copy assets to mod (--deploy)"><input type="checkbox" id="testDeployChk" checked /> Deploy</label>
+    <label title="cmake --build before play"><input type="checkbox" id="testRebuildChk" /> Rebuild</label>
+    <label title="Launch pd.arm64 --test-map"><input type="checkbox" id="testPlayChk" checked /> Play</label>
+    <label title="Skip pdmap validate"><input type="checkbox" id="testSkipValChk" /> Skip val</label>
+    <label title="Backup existing level .py"><input type="checkbox" id="testBackupChk" checked /> Backup</label>
+    <label title="Proceed when validation warns"><input type="checkbox" id="testWarnOkChk" /> Warn OK</label>
+  </div>
+  <div class="opt-actions btns">
+    <button id="testPlayBtn" class="test-primary" title="Validate, build, deploy, launch">Test / Play</button>
+    <button id="testBuildOnlyBtn" class="test-export" title="Build + deploy, no launch">Export</button>
+  </div>
+  <div id="testServerHint"></div>
+  <div id="testStatus"></div>
+</div>
 
 <!-- pass-2: map-editing panel (visible only in edit mode) -->
 <div id="editPanel" class="panel">
@@ -776,35 +857,25 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <button id="loadLevelBtn" class="wide">Load selected level</button>
   <p class="export-note">Embedded snapshots of repo levels, or <code>?level=csim</code> in the URL. You can also Export JSON above and re-import later.</p>
   <hr/>
-  <h2>Test / Play</h2>
-  <p class="export-note">Validate, export JSON, build via <code>test_map.py</code>, launch <code>--test-map</code>. Save the downloaded script to <code>journal/uff_viewer/.last_test.sh</code> or run the command below.</p>
-  <div class="field"><label>Level module</label><input type="text" id="testLevelName" spellcheck="false" placeholder="uff" /></div>
-  <div class="field"><label>Deploy as</label><select id="testDeployAs"></select></div>
-  <div class="field"><label>Mod target</label><select id="testModSelect"></select></div>
-  <div class="field"><label>Scenario</label><select id="testScenarioSelect"></select></div>
-  <div class="field"><label>Simulants</label><span class="val" id="testSimInfo" style="flex:1;text-align:left;color:var(--muted);font-size:11px"></span></div>
-  <div class="field"><label>Box half</label><span class="val" id="testHalfInfo"></span></div>
-  <div class="field"><label>Box height</label><span class="val" id="testHeightInfo"></span></div>
-  <label class="toggle"><input type="checkbox" id="testSegChk" checked /> Build seg (<code>--seg</code>)</label>
-  <label class="toggle"><input type="checkbox" id="testDeployChk" checked /> Deploy to mod (<code>--deploy</code>)</label>
-  <label class="toggle"><input type="checkbox" id="testSkipValChk" /> Skip pdmap validate (<code>--skip-validate</code>)</label>
-  <label class="toggle"><input type="checkbox" id="testRebuildChk" /> Rebuild game (<code>cmake --build</code>)</label>
-  <label class="toggle"><input type="checkbox" id="testPlayChk" checked /> Launch game (<code>--test-map</code>)</label>
-  <label class="toggle"><input type="checkbox" id="testWarnOkChk" /> Allow warnings (confirm if validation warns)</label>
-  <label class="toggle"><input type="checkbox" id="testBackupChk" checked /> Backup existing level .py</label>
-  <div class="btns" style="margin-top:8px">
-    <button id="testBtn" class="wide test-primary">Test map (export + command)</button>
-    <button id="copyTestCmdBtn">Copy command</button>
-    <button id="downloadTestShBtn">Download .sh</button>
-    <button id="downloadTestJsonBtn">Download JSON</button>
-  </div>
-  <div id="testStatus"></div>
-  <pre id="testCmds"></pre>
-  <hr/>
   <h2>Manual build</h2>
   <pre id="buildCmds"></pre>
-  <p class="export-note"><strong>Tip:</strong> Use <strong>Test / Play</strong> above for a one-shot pipeline. <code>--test-map</code> loads the <code>uff</code> stage slot — set <em>Deploy as → uff (test-map slot)</em> unless your map is registered in <code>stagetable.c</code>.</p>
+  <p class="export-note"><strong>Tip:</strong> Use the <strong>Map options</strong> strip (top-right) for Test / Play and Export. Set <em>Deploy → uff (test-map slot)</em> unless your map is in <code>stagetable.c</code>.</p>
 </div>
+
+<!-- pass-6: Collapsed command log + terminal fallback (bottom-right) -->
+<details id="testOutput" class="panel">
+  <summary>Build log &amp; terminal fallback</summary>
+  <p class="export-note">When the local server is unavailable (<code>file://</code>), save downloads to <code>journal/uff_viewer/</code>.</p>
+  <div class="btns">
+    <button id="testExportJsonBtn" title="Download map JSON">JSON</button>
+    <button id="testExportPyBtn" title="Download src/levels/&lt;name&gt;.py">Python</button>
+    <button id="copyTestCmdBtn" title="Copy terminal build command">Copy cmd</button>
+    <button id="downloadTestShBtn" title="Download .last_test.sh">.sh</button>
+    <button id="testExportBtn" class="wide">Export JSON + .sh</button>
+    <button id="downloadTestJsonBtn">Download JSON</button>
+  </div>
+  <pre id="testCmds"></pre>
+</details>
 
 <!-- pass-2: selected-pad properties (bottom-right, edit mode only) -->
 <div id="props" class="panel">
@@ -814,24 +885,19 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
 <div id="help" class="panel">
   <div id="helpOrbit">
-    <strong>Orbit mode</strong> &nbsp;
-    <kbd>drag</kbd> rotate · <kbd>right-drag</kbd> pan · <kbd>scroll</kbd> zoom ·
-    <kbd>click</kbd> a pad / face for info · <kbd>F</kbd> fly mode
+    <strong>Orbit</strong> · <kbd>drag</kbd> rotate · <kbd>scroll</kbd> zoom · <kbd>F</kbd> fly · <kbd>E</kbd> edit ·
+    <kbd>T</kbd> test/play · <kbd>X</kbd> export
   </div>
   <div id="helpFly" style="display:none">
-    <strong>Fly mode</strong> &nbsp;
-    <kbd>mouse</kbd> look · <kbd>W A S D</kbd> move · <kbd>Space</kbd> up · <kbd>Ctrl</kbd>/<kbd>Q</kbd> down ·
-    <kbd>Shift</kbd> faster · <kbd>Esc</kbd> release · <kbd>F</kbd> exit
-    <div class="hint">Click the scene to capture the mouse.</div>
+    <strong>Fly</strong> · <kbd>WASD</kbd> move · <kbd>mouse</kbd> look · <kbd>Space</kbd> up · <kbd>F</kbd> exit
+    <div class="hint">Click scene to capture mouse.</div>
   </div>
   <div id="helpEdit" style="display:none">
-    <strong>Edit mode</strong> &nbsp;
-    pick a <kbd>tool</kbd> then <kbd>click floor</kbd> to add · <kbd>click</kbd> a pad to select ·
-    <kbd>drag</kbd> a pad to move (snaps to grid when enabled) · <kbd>Del</kbd>/<kbd>Backspace</kbd> delete ·
-    <kbd>drag</kbd> empty space to orbit · <kbd>Ctrl+Z</kbd> undo · <kbd>Ctrl+Y</kbd> redo ·
-    <kbd>Ctrl+S</kbd> save · <kbd>Ctrl+L</kbd> load · <kbd>E</kbd> exit ·
-    <kbd>T</kbd> test / play panel
+    <strong>Edit</strong> · tool + <kbd>click floor</kbd> add · <kbd>drag</kbd> move pad · <kbd>Del</kbd> delete ·
+    <kbd>Ctrl+Z/Y</kbd> undo/redo · <kbd>Ctrl+S/L</kbd> save/load · <kbd>E</kbd> exit
   </div>
+  <div class="hint" style="margin-top:6px"><strong>Map options</strong> (top-right): Level, Deploy, Mod, Scenario, flags, Test/Play.
+    Server: <code>python3 journal/uff_viewer/serve_editor.py</code> or <strong>Perfect Dark Map Editor.app</strong>.</div>
 </div>
 
 <div id="info" class="panel">
@@ -1481,8 +1547,13 @@ addEventListener('keydown', e => {
     if ((e.code === 'Delete' || e.code === 'Backspace') && editing && selectedIndex >= 0) {
       e.preventDefault(); deletePad();
     }
-    if (e.code === 'KeyT' && !e.repeat && editing && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault(); runTestFlow();
+    if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      runTestPlay();
+    }
+    if (e.code === 'KeyX' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      e.preventDefault();
+      runTestBuildOnly();
     }
     // pass-4: global edit shortcuts (undo/redo/save/load).
     if (e.ctrlKey || e.metaKey) {
@@ -1997,6 +2068,15 @@ document.getElementById('downloadBtn').onclick = () => {
 // ===========================================================================
 const LEVEL_CATALOG = DATA.levelCatalog || {};
 const TEST_CONFIG = DATA.testConfig || {};
+const DEV_SERVER = TEST_CONFIG.devServer || {};
+const DEV_SERVER_PORT = DEV_SERVER.port || 8765;
+const DEV_SERVER_BASE = (typeof location !== 'undefined' && location.protocol.startsWith('http'))
+  ? (location.origin)
+  : ('http://127.0.0.1:' + DEV_SERVER_PORT);
+let devServerOnline = false;
+let devServerHealth = null;
+let devServerPollTimer = null;
+let testPlayBusy = false;
 const levelNameInput = document.getElementById('levelName');
 const pyWrap = document.getElementById('pyWrap');
 const pyText = document.getElementById('pyText');
@@ -2154,8 +2234,8 @@ function updateBuildCmds(name) {
 // ===========================================================================
 const testLevelInput = document.getElementById('testLevelName');
 const testDeployAs = document.getElementById('testDeployAs');
-const testModSelect = document.getElementById('testModSelect');
-const testScenarioSelect = document.getElementById('testScenarioSelect');
+const testModSelect = document.getElementById('testMod');
+const testScenarioSelect = document.getElementById('testScenario');
 const testCmdsEl = document.getElementById('testCmds');
 const testStatusEl = document.getElementById('testStatus');
 let lastTestPayload = null;
@@ -2291,11 +2371,149 @@ function setTestStatus(kind, html) {
   testStatusEl.innerHTML = '<span class="' + kind + '">' + html + '</span>';
 }
 
+function updateTestServerHint() {
+  const hint = document.getElementById('testServerHint');
+  const playBtn = document.getElementById('testPlayBtn');
+  const buildBtn = document.getElementById('testBuildOnlyBtn');
+  const startCmd = DEV_SERVER.startCommand || 'python3 journal/uff_viewer/serve_editor.py';
+  const isFileProtocol = typeof location !== 'undefined' && location.protocol === 'file:';
+
+  if (playBtn) {
+    playBtn.disabled = testPlayBusy;
+    playBtn.title = devServerOnline
+      ? 'Validate, build, deploy, and launch ./build/pd.arm64 --test-map'
+      : 'Start local server to play in-game';
+  }
+  if (buildBtn) {
+    buildBtn.disabled = testPlayBusy;
+    buildBtn.title = devServerOnline
+      ? 'Validate, build, and deploy map assets (no --play)'
+      : 'Server offline — downloads JSON + .sh for terminal use';
+  }
+
+  if (!hint) return;
+  if (devServerOnline) {
+    const bin = devServerHealth && devServerHealth.binaryFound;
+    hint.innerHTML = '<span class="live">● Server online</span> at ' + DEV_SERVER_BASE +
+      (bin === false ? ' · <span class="warn">pd binary missing — build game first</span>' : '') +
+      ' · Test / Play launches in-game';
+  } else if (isFileProtocol) {
+    hint.innerHTML = '<span class="off">● Opened via file://</span> — cannot launch the game from the browser. ' +
+      'Double-click <strong>Perfect Dark Map Editor.app</strong> or run <code>' + startCmd +
+      '</code>, then use Test / Play.';
+  } else {
+    hint.innerHTML = '<span class="off">● Server offline</span> — start with <code>' + startCmd +
+      '</code> then open <code>' + DEV_SERVER_BASE + '/</code>';
+  }
+}
+
+async function pollDevServerHealth() {
+  const path = DEV_SERVER.healthPath || '/api/health';
+  try {
+    const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    devServerHealth = await res.json();
+    devServerOnline = !!devServerHealth.ok;
+  } catch (_) {
+    devServerOnline = false;
+    devServerHealth = null;
+  }
+  updateTestServerHint();
+}
+
+function startDevServerPolling() {
+  pollDevServerHealth();
+  if (devServerPollTimer) clearInterval(devServerPollTimer);
+  devServerPollTimer = setInterval(pollDevServerHealth, 5000);
+}
+
+async function runTestPlay() {
+  if (testPlayBusy) return;
+
+  const { errors, warnings } = collectValidationIssues();
+  const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
+  if (errors.length) {
+    setTestStatus('err', errors.join(' · '));
+    alert('Fix validation errors before testing:\n\n' + errors.join('\n'));
+    return;
+  }
+  if (warnings.length && !warnOk) {
+    const proceed = confirm(
+      'Validation warnings:\n\n' + warnings.join('\n') + '\n\nProceed with Test / Play anyway?');
+    if (!proceed) {
+      setTestStatus('warn', 'Test cancelled — fix warnings or enable "Allow warnings"');
+      return;
+    }
+  }
+
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  lastTestPayload = data;
+  lastTestShell = buildTestShellScript(data, opts);
+
+  if (!devServerOnline) {
+    const startCmd = DEV_SERVER.startCommand || 'python3 journal/uff_viewer/serve_editor.py';
+    setTestStatus('warn',
+      'Cannot launch from here — double-click Perfect Dark Map Editor.app or run: ' + startCmd);
+    showToast('Start the editor server to play in-game — use Export below for files');
+    return;
+  }
+
+  if (document.getElementById('testPlayChk')?.checked === false) {
+    setTestStatus('warn', 'Launch disabled — enable "Launch game after build" or use Export below');
+    return;
+  }
+
+  testPlayBusy = true;
+  updateTestServerHint();
+  setTestStatus('', 'Building map and launching game…');
+  showToast('Building + launching…');
+
+  const path = DEV_SERVER.testMapPath || '/api/test-map';
+  opts.play = true;
+  try {
+    const res = await fetch(DEV_SERVER_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ map: data, options: opts }),
+    });
+    const body = await res.json();
+    if (testCmdsEl) {
+      testCmdsEl.textContent =
+        (body.command || '') + '\n\n' +
+        (body.playCommand ? '# play:\n' + body.playCommand + '\n\n' : '') +
+        (body.stdout || '') +
+        (body.stderr ? '\n# stderr:\n' + body.stderr : '');
+    }
+    if (body.ok) {
+      const pidMsg = body.pid ? ' (game pid ' + body.pid + ')' : '';
+      setTestStatus('ok', 'Build OK — game launched' + pidMsg);
+      showToast('Game launched' + pidMsg);
+    } else {
+      const err = body.error || body.stderr || 'Build or launch failed';
+      setTestStatus('err', String(err).slice(0, 500));
+      showToast('Test / Play failed — see status');
+    }
+  } catch (e) {
+    setTestStatus('err', 'Server request failed: ' + e.message);
+    showToast('Could not reach local server');
+  } finally {
+    testPlayBusy = false;
+    updateTestServerHint();
+    updateTestPanel();
+  }
+}
+
 function updateTestPanel() {
-  const halfEl = document.getElementById('testHalfInfo');
-  const heightEl = document.getElementById('testHeightInfo');
-  if (halfEl) halfEl.textContent = '±' + HALF;
-  if (heightEl) heightEl.textContent = '0..' + HEIGHT;
+  const boxEl = document.getElementById('testBoxInfo');
+  if (boxEl) boxEl.textContent = 'Box ±' + HALF + ' × ' + HEIGHT;
+  layoutRightStack();
   try {
     const opts = getTestOptions();
     const data = serializeMap();
@@ -2304,12 +2522,12 @@ function updateTestPanel() {
     lastTestShell = buildTestShellScript(data, opts);
     if (testCmdsEl) {
       testCmdsEl.textContent =
-        '# After Test click: save JSON to journal/uff_viewer/.last_test.json, then run:\n' +
+        '# Test / Play (server): POST ' + (DEV_SERVER.testMapPath || '/api/test-map') + '\n' +
+        '# Terminal fallback:\n' +
         buildTestCommandLine(opts) + '\n\n' +
-        '# Or run the downloaded self-contained script:\n' +
-        'bash journal/uff_viewer/.last_test.sh\n\n' +
         '# Box: half=' + opts.half + ' height=' + opts.height +
-        ' · deploy=' + opts.deployAs + ' · mod=' + opts.mod;
+        ' · deploy=' + opts.deployAs + ' · mod=' + opts.mod +
+        ' · scenario=' + opts.scenario;
     }
     if (opts.play && opts.deployAs !== (TEST_CONFIG.testMapSlot || 'uff')) {
       setTestStatus('warn', 'Deploy as is not "' + (TEST_CONFIG.testMapSlot || 'uff') +
@@ -2317,9 +2535,19 @@ function updateTestPanel() {
     } else {
       setTestStatus('', '');
     }
+    updateTestServerHint();
   } catch (e) {
     if (testCmdsEl) testCmdsEl.textContent = '# ' + e.message;
   }
+}
+
+/** Keep view/mode panel below the map-options strip as status text wraps. */
+function layoutRightStack() {
+  const mo = document.getElementById('mapOptions');
+  if (!mo) return;
+  const gap = 8;
+  const top = Math.ceil(mo.getBoundingClientRect().height + 12 + gap);
+  document.documentElement.style.setProperty('--right-stack-top', top + 'px');
 }
 
 function downloadText(filename, text, mime) {
@@ -2333,7 +2561,105 @@ function downloadText(filename, text, mime) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-function runTestFlow() {
+async function runTestBuildOnly() {
+  if (testPlayBusy) return;
+
+  const { errors, warnings } = collectValidationIssues();
+  const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
+  if (errors.length) {
+    setTestStatus('err', errors.join(' · '));
+    alert('Fix validation errors before exporting:\n\n' + errors.join('\n'));
+    return;
+  }
+  if (warnings.length && !warnOk) {
+    const proceed = confirm(
+      'Validation warnings:\n\n' + warnings.join('\n') + '\n\nProceed with export anyway?');
+    if (!proceed) {
+      setTestStatus('warn', 'Export cancelled — fix warnings or enable "Allow warnings"');
+      return;
+    }
+  }
+
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  lastTestPayload = data;
+  opts.play = false;
+  lastTestShell = buildTestShellScript(data, opts);
+
+  if (!devServerOnline) {
+    runTestExport();
+    return;
+  }
+
+  testPlayBusy = true;
+  updateTestServerHint();
+  setTestStatus('', 'Building map artifacts (no launch)…');
+  showToast('Exporting build…');
+
+  const path = DEV_SERVER.testMapPath || '/api/test-map';
+  try {
+    const res = await fetch(DEV_SERVER_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ map: data, options: opts }),
+    });
+    const body = await res.json();
+    if (testCmdsEl) {
+      testCmdsEl.textContent =
+        (body.command || body.fullCommand || '') + '\n\n' +
+        (body.stdout || '') +
+        (body.stderr ? '\n# stderr:\n' + body.stderr : '');
+    }
+    if (body.ok) {
+      setTestStatus('ok', 'Build OK — artifacts deployed (game not launched)');
+      showToast('Export build complete');
+    } else {
+      const err = body.error || body.stderr || 'Build failed';
+      setTestStatus('err', String(err).slice(0, 500));
+      showToast('Export build failed — see status');
+    }
+  } catch (e) {
+    setTestStatus('err', 'Server request failed: ' + e.message);
+    showToast('Could not reach local server — try terminal fallback');
+  } finally {
+    testPlayBusy = false;
+    updateTestServerHint();
+    updateTestPanel();
+  }
+}
+
+function downloadTestMapJson() {
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  downloadText(opts.level + '.json', JSON.stringify(data, null, 2), 'application/json');
+  showToast('Downloaded ' + opts.level + '.json');
+}
+
+function downloadTestMapPython() {
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  const txt = jsonToLevelPy(data);
+  downloadText(opts.level + '.py', txt, 'text/x-python');
+  showToast('Downloaded ' + opts.level + '.py');
+}
+
+function runTestExport() {
   const { errors, warnings } = collectValidationIssues();
   const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
   if (errors.length) {
@@ -2356,6 +2682,9 @@ function runTestFlow() {
 
   const data = serializeMap();
   data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  opts.play = false;
   lastTestPayload = data;
   lastTestShell = buildTestShellScript(data, opts);
 
@@ -2365,10 +2694,9 @@ function runTestFlow() {
 
   const msg = warnings.length
     ? 'Exported with ' + warnings.length + ' warning(s). Save files to journal/uff_viewer/ and run the command.'
-    : 'Exported .last_test.json + .last_test.sh — save to journal/uff_viewer/ and run the command below.';
+    : 'Exported .last_test.json + .last_test.sh — save to journal/uff_viewer/ and run in terminal.';
   setTestStatus('ok', msg);
-  showToast('Test export ready — run command in terminal');
-  exportJSON();
+  showToast('Export ready — run command in terminal');
 }
 
 function populateLevelSelect() {
@@ -2438,9 +2766,13 @@ if (testLevelInput) {
  document.getElementById('testSkipValChk'), document.getElementById('testRebuildChk'),
  document.getElementById('testPlayChk'), document.getElementById('testBackupChk'),
  document.getElementById('testWarnOkChk')].forEach(el => {
-  if (el) el.addEventListener('change', updateTestPanel);
+  if (el) el.addEventListener('change', () => { updateTestPanel(); updateTestServerHint(); });
 });
-document.getElementById('testBtn')?.addEventListener('click', runTestFlow);
+document.getElementById('testPlayBtn')?.addEventListener('click', runTestPlay);
+document.getElementById('testBuildOnlyBtn')?.addEventListener('click', runTestBuildOnly);
+document.getElementById('testExportBtn')?.addEventListener('click', runTestExport);
+document.getElementById('testExportJsonBtn')?.addEventListener('click', downloadTestMapJson);
+document.getElementById('testExportPyBtn')?.addEventListener('click', downloadTestMapPython);
 document.getElementById('copyTestCmdBtn')?.addEventListener('click', () => {
   try {
     const cmd = buildTestCommandLine(getTestOptions());
@@ -2468,6 +2800,9 @@ document.getElementById('downloadTestJsonBtn')?.addEventListener('click', () => 
 halfRange.addEventListener('input', () => updateTestPanel());
 heightRange.addEventListener('input', () => updateTestPanel());
 updateTestPanel();
+startDevServerPolling();
+layoutRightStack();
+window.addEventListener('resize', layoutRightStack);
 
 // pass-4: session controls (undo/redo, LocalStorage, clear).
 document.getElementById('undoBtn').onclick = undo;
@@ -2493,7 +2828,8 @@ window.__editor = {
   setEditing, addPad, selectPad, deletePad, exportJSON, loadMap, serializeMap, mapState, setTool,
   exportPython, jsonToLevelPy, loadFromCatalog,
   undo, redo, pushHistory, saveToLocalStorage, loadFromLocalStorage, clearMap,
-  collectValidationIssues, getTestOptions, buildTestCommandLine, runTestFlow, updateTestPanel,
+  collectValidationIssues, getTestOptions, buildTestCommandLine, runTestPlay, runTestBuildOnly, runTestExport, updateTestPanel,
+  pollDevServerHealth, devServerOnline,
 };
 
 updateValidation();  // initial pass once everything is defined

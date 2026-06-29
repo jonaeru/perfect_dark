@@ -39,7 +39,11 @@ def cmd_build(args):
     # --seg is present whenever args.seg is not None (it defaults to None and is
     # set to "" by a bare flag or to a path when one is given). A level may also
     # opt into seg generation via SEG_SCRIPT without the flag (e.g. uff).
-    want_seg = args.seg is not None or bool(seg_script)
+    # Levels with BOX_HALF/BOX_HEIGHT always rebuild the procedural box seg so
+    # `pdmap build uff --deploy` cannot redeploy a stale G_VTX(24) seg from
+    # BUILD_DIR (phantom collision wall regression).
+    has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
+    want_seg = args.seg is not None or bool(seg_script) or has_box_dims
     if want_seg:
         try:
             if seg_script:

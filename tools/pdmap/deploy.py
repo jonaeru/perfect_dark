@@ -4,6 +4,19 @@ import subprocess
 import sys
 
 from .core import BUILD_DIR, MOD_DIRS, ROOT, SETUP_DIR
+from .seg import validate_seg_g_vtx
+
+
+def _validate_seg_before_deploy(seg_path: str) -> None:
+    """Reject stale/corrupt segs that would reintroduce phantom collision walls."""
+    with open(seg_path, "rb") as seg_fp:
+        errors = validate_seg_g_vtx(seg_fp.read())
+    if errors:
+        raise ValueError(
+            f"Refusing to deploy corrupt seg {seg_path}:\n  "
+            + "\n  ".join(errors)
+            + "\n  Rebuild with: python3 tools/pdmap.py build <name> --seg --deploy"
+        )
 
 
 def deploy(name: str, mod_dirs: list[str] | None = None):
@@ -23,6 +36,8 @@ def deploy(name: str, mod_dirs: list[str] | None = None):
             src = os.path.join(BUILD_DIR, asset)
             dst = os.path.join(mod_dir, asset)
             if os.path.exists(src):
+                if asset.endswith(".seg"):
+                    _validate_seg_before_deploy(src)
                 shutil.copy2(src, dst)
                 print(f"  Deployed {asset} -> {dst}")
             else:

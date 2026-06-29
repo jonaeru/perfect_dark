@@ -3,6 +3,7 @@ import json
 from typing import Optional
 
 from .core import MapDef, load_level_module, ROOT, ROMID, BUILD_DIR
+from .seg import validate_seg_g_vtx
 from .intro import Spawn, Case, CaseRespawn, Hill
 
 
@@ -108,6 +109,10 @@ def validate_all(name: str, mapdef: Optional[MapDef] = None) -> tuple[list[str],
     seg_path = os.path.join(BUILD_DIR, f"bg_{name}.seg")
     if not os.path.exists(seg_path):
         warnings.append(f"Seg not built at {seg_path} — run build with --seg if needed")
+    else:
+        with open(seg_path, "rb") as seg_fp:
+            for msg in validate_seg_g_vtx(seg_fp.read()):
+                errors.append(f"Seg G_VTX: {msg}")
 
     setup_path = os.path.join(ROOT, "build", ROMID, f"Ump_setup{name}Z")
     if not os.path.exists(setup_path):

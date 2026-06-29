@@ -831,6 +831,34 @@ the origin when no spawn location can be chosen.
 **Fix:** Provide several `Spawn(pad=...)` intro commands at distinct pads that sit
 above the floor and inside the room bbox (same requirements as player spawns).
 
+### 11.11 Phantom wall follows camera (collidable, takes bullet holes)
+
+**Symptoms:** An invisible or partially visible surface blocks first-person view,
+follows the camera, partially clears when looking up/down, takes bullet holes,
+and may appear even during the intro orbit camera. Collidable geometry near the
+origin, not a real wall face.
+
+**Cause:** F3DEX2 packs the `G_VTX` vertex count in a **4-bit nibble** (max 16
+verts per load). A single `G_VTX(24)` for the six-face box wraps the nibble to 8
+(`(24-1)&0xF + 1`). The PC renderer derives its count from the byte length and
+still draws all faces, but `bgPopulateVtxBatchType` / `bgTestHitInVtxBatch` in
+`src/game/bg.c` read the nibble and only load eight vertices into the batch
+buffer, then walk all twelve triangles — wall faces index past the loaded eight
+into stale memory → phantom collision near the origin.
+
+**Fix:** `tools/pdmap/seg.py` emits **one `G_VTX(4)` per face** (six loads for the
+full box). Regenerate and redeploy:
+
+```bash
+python3 tools/pdmap.py build uff --deploy    # auto-rebuilds box seg (BOX_HALF set)
+python3 journal/uff_viewer/gen_uff_viewer.py # writes uff_gdl_dump.txt evidence
+```
+
+**Do not** deploy a stale `build/.../bg_uff.seg` after editing pads/tiles only.
+`pdmap validate uff` and deploy now reject any seg whose G_VTX load exceeds 16
+verts or whose nibble disagrees with the byte length. Unchecking **Seg** in the
+uff editor Export panel skips regeneration — leave **Seg** checked for box arenas.
+
 ---
 
 ## 12. Full recipe — new arena from scratch in 6 steps

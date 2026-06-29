@@ -99,6 +99,60 @@ def _g_vtx_cmd(nverts, v0, addr):
     return _gfx((0x04 << 24) | (p << 16) | (12 * nverts), addr)
 
 
+# F3DEX2 packs the vertex count in a 4-bit nibble (max 16/load). Loads above 16
+# wrap the nibble; bgPopulateVtxBatchType reads the nibble while the renderer
+# uses the byte length — phantom collision triangles near the origin result.
+MAX_G_VTX_LOAD = 16
+
+
+def validate_gdl_g_vtx(gdl: bytes) -> list[str]:
+    """Return human-readable errors for invalid G_VTX loads in a display list."""
+    errors: list[str] = []
+    load_index = 0
+    for off in range(0, len(gdl), 8):
+        if off + 8 > len(gdl):
+            break
+        w0, _w1 = struct.unpack(">II", gdl[off:off + 8])
+        op = (w0 >> 24) & 0xFF
+        if op == 0xB8:
+            break
+        if op != 0x04:
+            continue
+        numbytes = w0 & 0xFFFF
+        nverts_from_bytes = numbytes // 12
+        p = (w0 >> 16) & 0xFF
+        nverts_nibble = ((p >> 4) & 0xF) + 1
+        load_index += 1
+        if nverts_from_bytes > MAX_G_VTX_LOAD:
+            errors.append(
+                f"G_VTX load #{load_index} requests {nverts_from_bytes} verts "
+                f"(max {MAX_G_VTX_LOAD} per F3DEX2 nibble) — phantom collision "
+                f"near origin/camera"
+            )
+        elif nverts_nibble != nverts_from_bytes:
+            errors.append(
+                f"G_VTX load #{load_index}: byte length implies "
+                f"{nverts_from_bytes} verts but nibble says {nverts_nibble} "
+                f"(bgPopulateVtxBatchType under-loads; phantom collision)"
+            )
+    return errors
+
+
+def validate_seg_g_vtx(seg_data: bytes) -> list[str]:
+    """Decode a bg *.seg room GDL and validate every G_VTX load."""
+    try:
+        prim_size, sec1_cmp, prim_cmp = struct.unpack(">III", seg_data[0:12])
+        room_blob = seg_data[12 + prim_cmp:12 + sec1_cmp]
+        room = unzip1172(room_blob)
+        gdl_ptr = struct.unpack(">I", room[32:36])[0]
+        gdl_start = gdl_ptr - (SEG_BASE + prim_size)
+        if gdl_start < 0 or gdl_start >= len(room):
+            return [f"invalid GDL offset {gdl_start} in room block"]
+        return validate_gdl_g_vtx(room[gdl_start:])
+    except Exception as exc:
+        return [f"seg G_VTX validation failed: {exc!r}"]
+
+
 def _g_tri1_cmd(i, j, k):
     w1 = ((i * 10) << 16) | ((j * 10) << 8) | (k * 10)
     return _gfx(0xBF000000, w1)
@@ -348,10 +402,18 @@ def build_box_seg(*, half=5000, height=3000, face_colours=None, template_seg=Non
 
     rest = _patch_section3_gfxdatalen(rest, len(new_room))
 
-    return (struct.pack(">III", PRIMARY_SIZE,
-                        len(primary_blob) + len(new_room_blob),
-                        len(primary_blob))
-            + primary_blob + new_room_blob + rest)
+    result = (struct.pack(">III", PRIMARY_SIZE,
+                          len(primary_blob) + len(new_room_blob),
+                          len(primary_blob))
+              + primary_blob + new_room_blob + rest)
+
+    g_vtx_errors = validate_seg_g_vtx(result)
+    if g_vtx_errors:
+        raise ValueError(
+            "Refusing to emit box seg with invalid G_VTX loads:\n  "
+            + "\n  ".join(g_vtx_errors)
+        )
+    return result
 
 
 def write_box_seg(out_path, *, half=5000, height=3000, face_colours=None,
