@@ -725,13 +725,13 @@ u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype)
 {
 #ifdef PLATFORM_64BIT
 	switch (loadtype) {
-	case LOADTYPE_BG:	   return (u32)(size * 1.1f);
-	case LOADTYPE_TILES: return (u32)(size * 1.1f);
-	case LOADTYPE_LANG:  return (u32)(size * 1.3f);
-	case LOADTYPE_SETUP: return (u32)(size * 1.5f);
-	case LOADTYPE_PADS:  return (u32)(size * 1.7f);
-	case LOADTYPE_MODEL: return (u32)(size * 1.7f);
-	case LOADTYPE_GUN: return (u32)(size * 1.7f);
+	case LOADTYPE_BG:    return (u32)(size * 1.5f) + 16384;
+	case LOADTYPE_TILES: return (u32)(size * 1.5f) + 16384;
+	case LOADTYPE_LANG:  return (u32)(size * 1.5f) + 16384;
+	case LOADTYPE_SETUP: return (u32)(size * 30.0f) + 16384;
+	case LOADTYPE_PADS:  return (u32)(size * 30.0f) + 16384;
+	case LOADTYPE_MODEL: return (u32)(size * 30.0f) + 16384;
+	case LOADTYPE_GUN:   return (u32)(size * 30.0f) + 16384;
 	default:
 		sysLogPrintf(LOG_WARNING, "romdataFileGetEstimatedSize: wrong loadtype %d", loadtype);
 	}
