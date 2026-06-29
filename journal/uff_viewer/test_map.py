@@ -24,7 +24,8 @@ import sys
 from typing import Any
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))
+_env_root = os.environ.get("PD_REPO_ROOT", "").strip()
+ROOT = os.path.abspath(_env_root) if _env_root else os.path.dirname(os.path.dirname(HERE))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 if HERE not in sys.path:
@@ -122,8 +123,12 @@ def build_level(
     mod = load_level_module(name)
     mapdef = mod.build()
     seg_script = _resolve_seg_script(mod, name)
+    # Box-arena levels must always regenerate seg before deploy; skipping seg
+    # and copying BUILD_DIR redeployed the pre-fix G_VTX(24) blob (phantom wall).
+    has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
+    want_seg = seg or seg_script or has_box_dims
 
-    if seg or seg_script:
+    if want_seg:
         if seg_script:
             if verbose:
                 print(f"  Building seg via {seg_script}")
@@ -134,6 +139,11 @@ def build_level(
             if verbose:
                 print(f"  Building generic box seg (half={half:.0f} height={height:.0f})")
             build_box_seg_asset(name, half=half, height=height, mod_dirs=mod_dirs)
+    elif deploy and verbose:
+        print(
+            "  WARNING: seg build skipped; deploy will copy existing BUILD_DIR seg "
+            "(must pass G_VTX validation)"
+        )
 
     pads_json_path = write_pads_json(mapdef)
     if verbose:
