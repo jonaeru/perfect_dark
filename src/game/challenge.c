@@ -224,7 +224,7 @@ void challengeDetermineUnlockedFeatures(void)
 	// If the ability to have 8 simulants hasn't been unlocked, limit them to 4
 	if (!challengeIsFeatureUnlocked(MPFEATURE_8BOTS)) {
 		for (k = 4; k < MAX_BOTS; k++) {
-			if (g_MpSetup.chrslots & (1 << (MAX_PLAYERS + k))) {
+			if (mpIsChrParticipating(MAX_PLAYERS + k)) {
 				mpRemoveSimulant(k);
 			}
 		}
@@ -257,7 +257,9 @@ void challengePerformSanityChecks(void)
 			g_BotConfigsArray[i].difficulty = g_MpSimulantDifficultiesPerNumPlayers[i][numplayers - 1];
 
 			if (g_BotConfigsArray[i].difficulty != BOTDIFF_DISABLED) {
-				g_MpSetup.chrslots |= 1 << (i + MAX_PLAYERS);
+				if (i + MAX_PLAYERS < 32) {
+					g_MpSetup.chrslots |= 1 << (i + MAX_PLAYERS);
+				}
 			}
 		}
 

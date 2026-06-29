@@ -197,6 +197,7 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_EXTRA25,         0, L_MPMENU_336 }, // Paradox
 	{ STAGE_EXTRA26,         0, L_MPMENU_337 }, // War Colors
 	{ STAGE_TEST_LAM,        0, L_MPMENU_338 }, // Grand Library
+	{ STAGE_TEST_UFF,        0, 0x7FFF       }, // Custom Box Level
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -209,8 +210,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (71 Stage + 4 Random)
-	return 75;
+#else
+	return ARRAYCOUNT(g_MpArenas);
 #endif
 }
 
@@ -223,7 +224,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 71; i++) {
+	for (i = 0; i < 72; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -235,7 +236,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 71; i++) {
+	for (i = 0; i < 72; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -348,7 +349,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 55, L_MPMENU_326  }, // "Bonus"
-		{ 71, L_MPMENU_118  }, // "Random"
+		{ 71, 0x7FFE        }, // "Custom Maps"
+		{ 72, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -405,7 +407,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #ifdef PLATFORM_N64
 		data->list.value = 3;
 #else // All Solos in Multi Mod
-		data->list.value = 7;
+		data->list.value = 8;
 #endif
 
 #ifdef PLATFORM_N64 // All Solos in Multi Mod
@@ -3447,10 +3449,83 @@ char *func0f17d3dc(struct menuitem *item)
 	return g_StringPointer;
 }
 
+struct menuitem g_MpSimulantsMenuItems[MAX_BOTS + 6];
+
 MenuDialogHandlerResult menudialogMpSimulants(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
-	if (operation == MENUOP_OPEN) {
+	static char labels[MAX_BOTS][8];
+
+	if (operation == MENUOP_PREOPEN) {
 		g_Menus[g_MpPlayerNum].mpsetup.slotcount = 0;
+
+		s32 idx = 0;
+		s32 i;
+
+		// 1. "Add Simulant..."
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_LOCKABLEMINOR;
+		g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_084;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = menuhandlerMpAddSimulant;
+		idx++;
+
+		// 2. Separator
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SEPARATOR;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = 0;
+		g_MpSimulantsMenuItems[idx].param2 = 0;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = NULL;
+		idx++;
+
+		// 3. Simulants
+		for (i = 0; i < MAX_BOTS; i++) {
+			g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+			g_MpSimulantsMenuItems[idx].param = i;
+			g_MpSimulantsMenuItems[idx].param3 = (uintptr_t)&mpMenuTextSimulantName;
+			g_MpSimulantsMenuItems[idx].handler = menuhandlerMpSimulantSlot;
+
+			if (i < 8) {
+				g_MpSimulantsMenuItems[idx].flags = 0;
+				g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_085 + i;
+			} else {
+				g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_LITERAL_TEXT;
+				sprintf(labels[i], "%d:\n", i + 1);
+				g_MpSimulantsMenuItems[idx].param2 = (uintptr_t)labels[i];
+			}
+			idx++;
+		}
+
+		// 4. Separator
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SEPARATOR;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = 0;
+		g_MpSimulantsMenuItems[idx].param2 = 0;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = NULL;
+		idx++;
+
+		// 5. "Clear All"
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_LOCKABLEMINOR;
+		g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_093;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = menuhandlerMpClearAllSimulants;
+		idx++;
+
+		// 6. "Back"
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_SELECTABLE_CLOSESDIALOG;
+		g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_094;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = NULL;
+		idx++;
+
+		// 7. End
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_END;
 	}
 
 	return false;
@@ -3594,241 +3669,6 @@ struct menudialogdef g_MpEditSimulantMenuDialog = {
 	NULL,
 };
 
-struct menuitem g_MpSimulantsMenuItems[] = {
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR,
-		L_MPMENU_084, // "Add Simulant..."
-		0,
-		menuhandlerMpAddSimulant,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		0,
-		L_MPMENU_085, // "1:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		1,
-		0,
-		L_MPMENU_086, // "2:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		2,
-		0,
-		L_MPMENU_087, // "3:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		3,
-		0,
-		L_MPMENU_088, // "4:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		4,
-		0,
-		L_MPMENU_089, // "5:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		5,
-		0,
-		L_MPMENU_090, // "6:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		6,
-		0,
-		L_MPMENU_091, // "7:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		7,
-		0,
-		L_MPMENU_092, // "8:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		8,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"9:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		9,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"10:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		10,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"11:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		11,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"12:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		12,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"13:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		13,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"14:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		14,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"15:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		15,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"16:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		16,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"17:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		17,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"18:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		18,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"19:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		19,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"20:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		20,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"21:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		21,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"22:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		22,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"23:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		23,
-		MENUITEMFLAG_LITERAL_TEXT,
-		(uintptr_t)"24:\n",
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR,
-		L_MPMENU_093, // "Clear All"
-		0,
-		menuhandlerMpClearAllSimulants,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
-		L_MPMENU_094, // "Back"
-		0,
-		NULL,
-	},
-	{ MENUITEMTYPE_END },
-};
 
 struct menudialogdef g_MpSimulantsMenuDialog = {
 	MENUDIALOGTYPE_DEFAULT,
@@ -3939,7 +3779,7 @@ MenuItemHandlerResult menuhandlerMpMaximumTeams(s32 operation, struct menuitem *
 		u8 team = 0;
 
 		for (i = 0; i != MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				mpchr->team = team++;
@@ -3962,7 +3802,7 @@ MenuItemHandlerResult menuhandlerMpHumansVsSimulants(s32 operation, struct menui
 		s32 i;
 
 		for (i = 0; i != MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				mpchr->team = i < 4 ? 0 : 1;
@@ -3984,7 +3824,7 @@ MenuItemHandlerResult menuhandlerMpHumanSimulantPairs(s32 operation, struct menu
 		s32 simindex = 0;
 
 		for (i = 0; i != MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				if (i < 4) {

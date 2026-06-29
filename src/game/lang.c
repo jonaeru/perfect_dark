@@ -456,6 +456,10 @@ void langClearBank(s32 bank)
  */
 char *langGet(s32 textid)
 {
+#ifndef PLATFORM_N64
+	if (textid == 0x7FFF) return "Matrix Test Room";
+	if (textid == 0x7FFE) return "Custom Maps";
+#endif
 	s32 bankindex = textid >> 9;
 	s32 textindex = textid & 0x1ff;
 	uintptr_t *bank = (uintptr_t*)g_LangBanks[bankindex];
