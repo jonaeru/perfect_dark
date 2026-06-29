@@ -30,8 +30,17 @@
   button { font:inherit; color:#e6e6e6; background:#1b2330; border:1px solid var(--border);
     border-radius:7px; padding:6px 8px; cursor:pointer; transition:background .12s, border-color .12s; }
   button:hover { background:#243049; border-color:#3a465c; }
+  button:disabled { opacity:0.45; cursor:not-allowed; background:#141820; }
   button.wide { grid-column:1 / -1; }
   button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  #toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:20;
+    background:rgba(16,20,28,0.92); border:1px solid var(--border); border-radius:8px;
+    padding:8px 16px; font-size:12px; color:#cdd6e6; pointer-events:none; opacity:0;
+    transition:opacity .25s; }
+  #toast.show { opacity:1; }
+  .drag-hint { position:fixed; pointer-events:none; z-index:4; color:#8a93a6; font-size:11px;
+    background:rgba(16,20,28,0.85); padding:3px 8px; border-radius:6px; display:none;
+    border:1px solid var(--border); }
   #help { left:12px; bottom:12px; max-width:420px; font-size:12px; color:#c7cedb; }
   #help kbd { background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
     border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#e6e6e6; }
@@ -84,6 +93,15 @@
     color:#cdd6e6; background:#0c0f16; border:1px solid var(--border); border-radius:7px; padding:6px; }
   #buildCmds { margin:0; padding:8px; background:#0c0f16; border:1px solid var(--border); border-radius:7px;
     font:11px/1.5 ui-monospace,Menlo,monospace; color:#cdd6e6; white-space:pre-wrap; word-break:break-all; }
+  #testCmds { margin:0; padding:8px; background:#0c0f16; border:1px solid var(--border); border-radius:7px;
+    font:11px/1.5 ui-monospace,Menlo,monospace; color:#cdd6e6; white-space:pre-wrap; word-break:break-all;
+    max-height:220px; overflow-y:auto; }
+  #testStatus { font-size:12px; margin:6px 0 0; min-height:18px; }
+  #testStatus .ok { color:#57d977; }
+  #testStatus .warn { color:#ffd166; }
+  #testStatus .err { color:#ff5d5d; }
+  button.test-primary { background:#1a6638; border-color:#2a8f4e; font-weight:600; }
+  button.test-primary:hover { background:#22884a; border-color:#3cb868; }
   .export-note { font-size:11px; color:var(--muted); margin:4px 0 0; line-height:1.45; }
   .editbadge { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:5;
     background:#2c7be5; color:#fff; font-weight:700; letter-spacing:.4px; padding:5px 14px;
@@ -143,7 +161,19 @@
   <h2>Validation</h2>
   <div id="validate"></div>
   <hr/>
-  <h2>Map I/O</h2>
+  <h2>Session &amp; undo</h2>
+  <div class="btns">
+    <button id="undoBtn" title="Undo last edit">Undo</button>
+    <button id="redoBtn" title="Redo undone edit">Redo</button>
+  </div>
+  <div class="btns">
+    <button id="saveLocalBtn" title="Save to browser LocalStorage">Save local</button>
+    <button id="loadLocalBtn" title="Load from browser LocalStorage">Load local</button>
+    <button id="clearMapBtn" class="wide">Clear map</button>
+  </div>
+  <p class="export-note">Storage key: <code id="storageKey"></code> (named by map name)</p>
+  <hr/>
+  <h2>Export &amp; import</h2>
   <div class="btns">
     <button id="exportBtn">Export JSON</button>
     <button id="importBtn">Import JSON</button>
@@ -171,9 +201,34 @@
   <button id="loadLevelBtn" class="wide">Load selected level</button>
   <p class="export-note">Embedded snapshots of repo levels, or <code>?level=csim</code> in the URL. You can also Export JSON above and re-import later.</p>
   <hr/>
-  <h2>Build commands</h2>
+  <h2>Test / Play</h2>
+  <p class="export-note">Validate, export JSON, build via <code>test_map.py</code>, launch <code>--test-map</code>. Save the downloaded script to <code>journal/uff_viewer/.last_test.sh</code> or run the command below.</p>
+  <div class="field"><label>Level module</label><input type="text" id="testLevelName" spellcheck="false" placeholder="uff" /></div>
+  <div class="field"><label>Deploy as</label><select id="testDeployAs"></select></div>
+  <div class="field"><label>Mod target</label><select id="testModSelect"></select></div>
+  <div class="field"><label>Scenario</label><select id="testScenarioSelect"></select></div>
+  <div class="field"><label>Simulants</label><span class="val" id="testSimInfo" style="flex:1;text-align:left;color:var(--muted);font-size:11px"></span></div>
+  <div class="field"><label>Box half</label><span class="val" id="testHalfInfo"></span></div>
+  <div class="field"><label>Box height</label><span class="val" id="testHeightInfo"></span></div>
+  <label class="toggle"><input type="checkbox" id="testSegChk" checked /> Build seg (<code>--seg</code>)</label>
+  <label class="toggle"><input type="checkbox" id="testDeployChk" checked /> Deploy to mod (<code>--deploy</code>)</label>
+  <label class="toggle"><input type="checkbox" id="testSkipValChk" /> Skip pdmap validate (<code>--skip-validate</code>)</label>
+  <label class="toggle"><input type="checkbox" id="testRebuildChk" /> Rebuild game (<code>cmake --build</code>)</label>
+  <label class="toggle"><input type="checkbox" id="testPlayChk" checked /> Launch game (<code>--test-map</code>)</label>
+  <label class="toggle"><input type="checkbox" id="testWarnOkChk" /> Allow warnings (confirm if validation warns)</label>
+  <label class="toggle"><input type="checkbox" id="testBackupChk" checked /> Backup existing level .py</label>
+  <div class="btns" style="margin-top:8px">
+    <button id="testBtn" class="wide test-primary">Test map (export + command)</button>
+    <button id="copyTestCmdBtn">Copy command</button>
+    <button id="downloadTestShBtn">Download .sh</button>
+    <button id="downloadTestJsonBtn">Download JSON</button>
+  </div>
+  <div id="testStatus"></div>
+  <pre id="testCmds"></pre>
+  <hr/>
+  <h2>Manual build</h2>
   <pre id="buildCmds"></pre>
-  <p class="export-note"><strong>Note:</strong> <code>--test-map</code> still hardcodes the <code>uff</code> stage in C unless you wire your stage into <code>title.c</code> / stagetable. Use <code>pdmap build &lt;name&gt; --deploy --seg</code> to compile assets regardless.</p>
+  <p class="export-note"><strong>Tip:</strong> Use <strong>Test / Play</strong> above for a one-shot pipeline. <code>--test-map</code> loads the <code>uff</code> stage slot — set <em>Deploy as → uff (test-map slot)</em> unless your map is registered in <code>stagetable.c</code>.</p>
 </div>
 
 <!-- pass-2: selected-pad properties (bottom-right, edit mode only) -->
@@ -197,7 +252,10 @@
   <div id="helpEdit" style="display:none">
     <strong>Edit mode</strong> &nbsp;
     pick a <kbd>tool</kbd> then <kbd>click floor</kbd> to add · <kbd>click</kbd> a pad to select ·
-    <kbd>drag</kbd> a pad to move · <kbd>Del</kbd>/<kbd>Backspace</kbd> delete · <kbd>drag</kbd> empty space to orbit · <kbd>E</kbd> exit
+    <kbd>drag</kbd> a pad to move (snaps to grid when enabled) · <kbd>Del</kbd>/<kbd>Backspace</kbd> delete ·
+    <kbd>drag</kbd> empty space to orbit · <kbd>Ctrl+Z</kbd> undo · <kbd>Ctrl+Y</kbd> redo ·
+    <kbd>Ctrl+S</kbd> save · <kbd>Ctrl+L</kbd> load · <kbd>E</kbd> exit ·
+    <kbd>T</kbd> test / play panel
   </div>
 </div>
 
@@ -205,6 +263,9 @@
   <span class="close" id="infoClose">✕</span>
   <div id="infoBody"></div>
 </div>
+
+<div id="toast"></div>
+<div id="dragHint" class="drag-hint"></div>
 
 <script type="importmap">
 { "imports": {
@@ -217,7 +278,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-const DATA = {"name": "uff", "half": 5000.0, "height": 3000.0, "faces": [{"index": 0, "name": "F0 floor (Y=0)", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 0, 5000], [-5000, 0, 5000]], "rgba": 1078001663, "hex": "#4040FF"}, {"index": 1, "name": "F1 ceiling (Y=H)", "verts": [[-5000, 3000, -5000], [5000, 3000, -5000], [5000, 3000, 5000], [-5000, 3000, 5000]], "rgba": 1090470143, "hex": "#40FF40"}, {"index": 2, "name": "F2 wall -Z", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 3000, -5000], [-5000, 3000, -5000]], "rgba": 4282401023, "hex": "#FF4040"}, {"index": 3, "name": "F3 wall +X", "verts": [[5000, 0, -5000], [5000, 0, 5000], [5000, 3000, 5000], [5000, 3000, -5000]], "rgba": 4282449919, "hex": "#FF40FF"}, {"index": 4, "name": "F4 wall +Z", "verts": [[5000, 0, 5000], [-5000, 0, 5000], [-5000, 3000, 5000], [5000, 3000, 5000]], "rgba": 4294918399, "hex": "#FFFF40"}, {"index": 5, "name": "F5 wall -X", "verts": [[-5000, 0, 5000], [-5000, 0, -5000], [-5000, 3000, -5000], [-5000, 3000, 5000]], "rgba": 1090519039, "hex": "#40FFFF"}], "tiles": [{"room": "ROOM_UFF_0001", "verts": [[-5000, 0, -5000], [-5000, 0, 5000], [5000, 0, 5000], [5000, 0, -5000]], "floortype": "default", "floorcolour": 4095}], "pads": [{"index": 0, "pos": [-4000, 10.0, -4000], "room": 1, "kind": "spawn"}, {"index": 1, "pos": [4000, 10.0, -4000], "room": 1, "kind": "spawn"}, {"index": 2, "pos": [-4000, 10.0, 4000], "room": 1, "kind": "spawn"}, {"index": 3, "pos": [4000, 10.0, 4000], "room": 1, "kind": "spawn"}, {"index": 4, "pos": [-2000, 10.0, -2000], "room": 1, "kind": "spawn"}, {"index": 5, "pos": [2000, 10.0, -2000], "room": 1, "kind": "spawn"}, {"index": 6, "pos": [-2000, 10.0, 2000], "room": 1, "kind": "spawn"}, {"index": 7, "pos": [2000, 10.0, 2000], "room": 1, "kind": "spawn"}, {"index": 8, "pos": [0, 10.0, -3000], "room": 1, "kind": "spawn"}, {"index": 9, "pos": [0, 10.0, 3000], "room": 1, "kind": "spawn"}, {"index": 10, "pos": [-3000, 10.0, 0], "room": 1, "kind": "spawn"}, {"index": 11, "pos": [3000, 10.0, 0], "room": 1, "kind": "spawn"}, {"index": 12, "pos": [-1000, 10.0, -1000], "room": 1, "kind": "spawn"}, {"index": 13, "pos": [1000, 10.0, -1000], "room": 1, "kind": "spawn"}, {"index": 14, "pos": [-1000, 10.0, 1000], "room": 1, "kind": "spawn"}, {"index": 15, "pos": [1000, 10.0, 1000], "room": 1, "kind": "spawn"}, {"index": 16, "pos": [0, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 17, "pos": [0, 10.0, -1500], "room": 1, "kind": "weapon"}, {"index": 18, "pos": [0, 10.0, 1500], "room": 1, "kind": "weapon"}, {"index": 19, "pos": [-1500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 20, "pos": [1500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 21, "pos": [-3500, 10.0, -3500], "room": 1, "kind": "weapon"}, {"index": 22, "pos": [3500, 10.0, -3500], "room": 1, "kind": "weapon"}, {"index": 23, "pos": [-3500, 10.0, 3500], "room": 1, "kind": "weapon"}, {"index": 24, "pos": [3500, 10.0, 3500], "room": 1, "kind": "weapon"}, {"index": 25, "pos": [-4500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 26, "pos": [-4200, 10.0, -4200], "room": 1, "kind": "scenario"}, {"index": 27, "pos": [-4200, 10.0, -4000], "room": 1, "kind": "scenario"}, {"index": 28, "pos": [4200, 10.0, -4200], "room": 1, "kind": "scenario"}, {"index": 29, "pos": [4200, 10.0, -4000], "room": 1, "kind": "scenario"}, {"index": 30, "pos": [-4200, 10.0, 4200], "room": 1, "kind": "scenario"}, {"index": 31, "pos": [-4200, 10.0, 4000], "room": 1, "kind": "scenario"}, {"index": 32, "pos": [4200, 10.0, 4200], "room": 1, "kind": "scenario"}, {"index": 33, "pos": [4200, 10.0, 4000], "room": 1, "kind": "scenario"}, {"index": 34, "pos": [0, 10.0, 500], "room": 1, "kind": "scenario"}, {"index": 35, "pos": [0, 10.0, -500], "room": 1, "kind": "scenario"}, {"index": 36, "pos": [-500, 10.0, 0], "room": 1, "kind": "scenario"}, {"index": 37, "pos": [500, 10.0, 0], "room": 1, "kind": "scenario"}, {"index": 38, "pos": [-3000, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 39, "pos": [-1500, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 40, "pos": [0, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 41, "pos": [1500, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 42, "pos": [3000, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 43, "pos": [-3000, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 44, "pos": [-1500, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 45, "pos": [0, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 46, "pos": [1500, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 47, "pos": [3000, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 48, "pos": [-3000, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 49, "pos": [-1500, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 50, "pos": [0, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 51, "pos": [1500, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 52, "pos": [3000, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 53, "pos": [-3000, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 54, "pos": [-1500, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 55, "pos": [0, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 56, "pos": [1500, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 57, "pos": [3000, 10.0, 1500], "room": 1, "kind": "ammo"}], "originRadius": 500.0, "nearFaces": [], "nearTiles": [], "gdl": {"loads": 6, "maxLoad": 4, "anyOverflow": false, "totalVerts": 24}, "levelCatalog": {"csim": {"name": "csim", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 4, "type": "ammo", "x": 0.0, "y": 10.0, "z": 0.0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 5, "type": "weapon", "x": -1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 10}, {"index": 6, "type": "weapon", "x": 1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 5}, {"index": 7, "type": "scenario", "x": -3000.0, "y": 10.0, "z": -3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 8, "type": "scenario", "x": 3000.0, "y": 10.0, "z": 3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 9, "type": "scenario", "x": 0.0, "y": 10.0, "z": 1500.0, "room": 1, "scenario": "hill", "team": 0}]}, "uff": {"name": "uff", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 1, "type": "spawn", "x": 4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 2, "type": "spawn", "x": -4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 3, "type": "spawn", "x": 4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 4, "type": "spawn", "x": -2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 5, "type": "spawn", "x": 2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 6, "type": "spawn", "x": -2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 7, "type": "spawn", "x": 2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 8, "type": "spawn", "x": 0, "y": 10.0, "z": -3000, "room": 1}, {"index": 9, "type": "spawn", "x": 0, "y": 10.0, "z": 3000, "room": 1}, {"index": 10, "type": "spawn", "x": -3000, "y": 10.0, "z": 0, "room": 1}, {"index": 11, "type": "spawn", "x": 3000, "y": 10.0, "z": 0, "room": 1}, {"index": 12, "type": "spawn", "x": -1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 13, "type": "spawn", "x": 1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 14, "type": "spawn", "x": -1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 15, "type": "spawn", "x": 1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 16, "type": "weapon", "x": 0, "y": 10.0, "z": 0, "room": 1, "weapon": 2}, {"index": 17, "type": "weapon", "x": 0, "y": 10.0, "z": -1500, "room": 1, "weapon": 5}, {"index": 18, "type": "weapon", "x": 0, "y": 10.0, "z": 1500, "room": 1, "weapon": 6}, {"index": 19, "type": "weapon", "x": -1500, "y": 10.0, "z": 0, "room": 1, "weapon": 10}, {"index": 20, "type": "weapon", "x": 1500, "y": 10.0, "z": 0, "room": 1, "weapon": 18}, {"index": 21, "type": "weapon", "x": -3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 14}, {"index": 22, "type": "weapon", "x": 3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 24}, {"index": 23, "type": "weapon", "x": -3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 21}, {"index": 24, "type": "weapon", "x": 3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 27}, {"index": 25, "type": "weapon", "x": -4500, "y": 10.0, "z": 0, "room": 1, "weapon": 28}, {"index": 26, "type": "scenario", "x": -4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 0}, {"index": 27, "type": "scenario", "x": -4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case", "team": 0}, {"index": 28, "type": "scenario", "x": 4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 1}, {"index": 29, "type": "scenario", "x": 4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case", "team": 1}, {"index": 30, "type": "scenario", "x": -4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 2}, {"index": 31, "type": "scenario", "x": -4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case", "team": 2}, {"index": 32, "type": "scenario", "x": 4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 3}, {"index": 33, "type": "scenario", "x": 4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case", "team": 3}, {"index": 34, "type": "scenario", "x": 0, "y": 10.0, "z": 500, "room": 1, "scenario": "hill", "team": 0}, {"index": 35, "type": "scenario", "x": 0, "y": 10.0, "z": -500, "room": 1, "scenario": "hill", "team": 0}, {"index": 36, "type": "scenario", "x": -500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 37, "type": "scenario", "x": 500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 38, "type": "ammo", "x": -3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 39, "type": "ammo", "x": -1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 40, "type": "ammo", "x": 0, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 41, "type": "ammo", "x": 1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 42, "type": "ammo", "x": 3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 43, "type": "ammo", "x": -3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 44, "type": "ammo", "x": -1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 45, "type": "ammo", "x": 0, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 46, "type": "ammo", "x": 1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 47, "type": "ammo", "x": 3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 48, "type": "ammo", "x": -3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 49, "type": "ammo", "x": -1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 50, "type": "ammo", "x": 0, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 51, "type": "ammo", "x": 1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 52, "type": "ammo", "x": 3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 53, "type": "ammo", "x": -3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 54, "type": "ammo", "x": -1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 55, "type": "ammo", "x": 0, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 56, "type": "ammo", "x": 1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 57, "type": "ammo", "x": 3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}]}}};
+const DATA = {"name": "uff", "half": 5000.0, "height": 3000.0, "faces": [{"index": 0, "name": "F0 floor (Y=0)", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 0, 5000], [-5000, 0, 5000]], "rgba": 1078001663, "hex": "#4040FF"}, {"index": 1, "name": "F1 ceiling (Y=H)", "verts": [[-5000, 3000, -5000], [5000, 3000, -5000], [5000, 3000, 5000], [-5000, 3000, 5000]], "rgba": 1090470143, "hex": "#40FF40"}, {"index": 2, "name": "F2 wall -Z", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 3000, -5000], [-5000, 3000, -5000]], "rgba": 4282401023, "hex": "#FF4040"}, {"index": 3, "name": "F3 wall +X", "verts": [[5000, 0, -5000], [5000, 0, 5000], [5000, 3000, 5000], [5000, 3000, -5000]], "rgba": 4282449919, "hex": "#FF40FF"}, {"index": 4, "name": "F4 wall +Z", "verts": [[5000, 0, 5000], [-5000, 0, 5000], [-5000, 3000, 5000], [5000, 3000, 5000]], "rgba": 4294918399, "hex": "#FFFF40"}, {"index": 5, "name": "F5 wall -X", "verts": [[-5000, 0, 5000], [-5000, 0, -5000], [-5000, 3000, -5000], [-5000, 3000, 5000]], "rgba": 1090519039, "hex": "#40FFFF"}], "tiles": [{"room": "ROOM_UFF_0001", "verts": [[-5000, 0, -5000], [-5000, 0, 5000], [5000, 0, 5000], [5000, 0, -5000]], "floortype": "default", "floorcolour": 4095}], "pads": [{"index": 0, "pos": [-4000, 10.0, -4000], "room": 1, "kind": "spawn"}, {"index": 1, "pos": [4000, 10.0, -4000], "room": 1, "kind": "spawn"}, {"index": 2, "pos": [-4000, 10.0, 4000], "room": 1, "kind": "spawn"}, {"index": 3, "pos": [4000, 10.0, 4000], "room": 1, "kind": "spawn"}, {"index": 4, "pos": [-2000, 10.0, -2000], "room": 1, "kind": "spawn"}, {"index": 5, "pos": [2000, 10.0, -2000], "room": 1, "kind": "spawn"}, {"index": 6, "pos": [-2000, 10.0, 2000], "room": 1, "kind": "spawn"}, {"index": 7, "pos": [2000, 10.0, 2000], "room": 1, "kind": "spawn"}, {"index": 8, "pos": [0, 10.0, -3000], "room": 1, "kind": "spawn"}, {"index": 9, "pos": [0, 10.0, 3000], "room": 1, "kind": "spawn"}, {"index": 10, "pos": [-3000, 10.0, 0], "room": 1, "kind": "spawn"}, {"index": 11, "pos": [3000, 10.0, 0], "room": 1, "kind": "spawn"}, {"index": 12, "pos": [-1000, 10.0, -1000], "room": 1, "kind": "spawn"}, {"index": 13, "pos": [1000, 10.0, -1000], "room": 1, "kind": "spawn"}, {"index": 14, "pos": [-1000, 10.0, 1000], "room": 1, "kind": "spawn"}, {"index": 15, "pos": [1000, 10.0, 1000], "room": 1, "kind": "spawn"}, {"index": 16, "pos": [0, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 17, "pos": [0, 10.0, -1500], "room": 1, "kind": "weapon"}, {"index": 18, "pos": [0, 10.0, 1500], "room": 1, "kind": "weapon"}, {"index": 19, "pos": [-1500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 20, "pos": [1500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 21, "pos": [-3500, 10.0, -3500], "room": 1, "kind": "weapon"}, {"index": 22, "pos": [3500, 10.0, -3500], "room": 1, "kind": "weapon"}, {"index": 23, "pos": [-3500, 10.0, 3500], "room": 1, "kind": "weapon"}, {"index": 24, "pos": [3500, 10.0, 3500], "room": 1, "kind": "weapon"}, {"index": 25, "pos": [-4500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 26, "pos": [-4200, 10.0, -4200], "room": 1, "kind": "scenario"}, {"index": 27, "pos": [-4200, 10.0, -4000], "room": 1, "kind": "scenario"}, {"index": 28, "pos": [4200, 10.0, -4200], "room": 1, "kind": "scenario"}, {"index": 29, "pos": [4200, 10.0, -4000], "room": 1, "kind": "scenario"}, {"index": 30, "pos": [-4200, 10.0, 4200], "room": 1, "kind": "scenario"}, {"index": 31, "pos": [-4200, 10.0, 4000], "room": 1, "kind": "scenario"}, {"index": 32, "pos": [4200, 10.0, 4200], "room": 1, "kind": "scenario"}, {"index": 33, "pos": [4200, 10.0, 4000], "room": 1, "kind": "scenario"}, {"index": 34, "pos": [0, 10.0, 500], "room": 1, "kind": "scenario"}, {"index": 35, "pos": [0, 10.0, -500], "room": 1, "kind": "scenario"}, {"index": 36, "pos": [-500, 10.0, 0], "room": 1, "kind": "scenario"}, {"index": 37, "pos": [500, 10.0, 0], "room": 1, "kind": "scenario"}, {"index": 38, "pos": [-3000, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 39, "pos": [-1500, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 40, "pos": [0, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 41, "pos": [1500, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 42, "pos": [3000, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 43, "pos": [-3000, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 44, "pos": [-1500, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 45, "pos": [0, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 46, "pos": [1500, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 47, "pos": [3000, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 48, "pos": [-3000, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 49, "pos": [-1500, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 50, "pos": [0, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 51, "pos": [1500, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 52, "pos": [3000, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 53, "pos": [-3000, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 54, "pos": [-1500, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 55, "pos": [0, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 56, "pos": [1500, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 57, "pos": [3000, 10.0, 1500], "room": 1, "kind": "ammo"}], "originRadius": 500.0, "nearFaces": [], "nearTiles": [], "gdl": {"loads": 6, "maxLoad": 4, "anyOverflow": false, "totalVerts": 24}, "levelCatalog": {"csim": {"name": "csim", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 4, "type": "ammo", "x": 0.0, "y": 10.0, "z": 0.0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 5, "type": "weapon", "x": -1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 10}, {"index": 6, "type": "weapon", "x": 1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 5}, {"index": 7, "type": "scenario", "x": -3000.0, "y": 10.0, "z": -3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 8, "type": "scenario", "x": 3000.0, "y": 10.0, "z": 3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 9, "type": "scenario", "x": 0.0, "y": 10.0, "z": 1500.0, "room": 1, "scenario": "hill", "team": 0}]}, "uff": {"name": "uff", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 1, "type": "spawn", "x": 4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 2, "type": "spawn", "x": -4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 3, "type": "spawn", "x": 4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 4, "type": "spawn", "x": -2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 5, "type": "spawn", "x": 2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 6, "type": "spawn", "x": -2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 7, "type": "spawn", "x": 2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 8, "type": "spawn", "x": 0, "y": 10.0, "z": -3000, "room": 1}, {"index": 9, "type": "spawn", "x": 0, "y": 10.0, "z": 3000, "room": 1}, {"index": 10, "type": "spawn", "x": -3000, "y": 10.0, "z": 0, "room": 1}, {"index": 11, "type": "spawn", "x": 3000, "y": 10.0, "z": 0, "room": 1}, {"index": 12, "type": "spawn", "x": -1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 13, "type": "spawn", "x": 1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 14, "type": "spawn", "x": -1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 15, "type": "spawn", "x": 1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 16, "type": "weapon", "x": 0, "y": 10.0, "z": 0, "room": 1, "weapon": 2}, {"index": 17, "type": "weapon", "x": 0, "y": 10.0, "z": -1500, "room": 1, "weapon": 5}, {"index": 18, "type": "weapon", "x": 0, "y": 10.0, "z": 1500, "room": 1, "weapon": 6}, {"index": 19, "type": "weapon", "x": -1500, "y": 10.0, "z": 0, "room": 1, "weapon": 10}, {"index": 20, "type": "weapon", "x": 1500, "y": 10.0, "z": 0, "room": 1, "weapon": 18}, {"index": 21, "type": "weapon", "x": -3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 14}, {"index": 22, "type": "weapon", "x": 3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 24}, {"index": 23, "type": "weapon", "x": -3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 21}, {"index": 24, "type": "weapon", "x": 3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 27}, {"index": 25, "type": "weapon", "x": -4500, "y": 10.0, "z": 0, "room": 1, "weapon": 28}, {"index": 26, "type": "scenario", "x": -4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 0}, {"index": 27, "type": "scenario", "x": -4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case", "team": 0}, {"index": 28, "type": "scenario", "x": 4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 1}, {"index": 29, "type": "scenario", "x": 4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case", "team": 1}, {"index": 30, "type": "scenario", "x": -4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 2}, {"index": 31, "type": "scenario", "x": -4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case", "team": 2}, {"index": 32, "type": "scenario", "x": 4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 3}, {"index": 33, "type": "scenario", "x": 4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case", "team": 3}, {"index": 34, "type": "scenario", "x": 0, "y": 10.0, "z": 500, "room": 1, "scenario": "hill", "team": 0}, {"index": 35, "type": "scenario", "x": 0, "y": 10.0, "z": -500, "room": 1, "scenario": "hill", "team": 0}, {"index": 36, "type": "scenario", "x": -500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 37, "type": "scenario", "x": 500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 38, "type": "ammo", "x": -3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 39, "type": "ammo", "x": -1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 40, "type": "ammo", "x": 0, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 41, "type": "ammo", "x": 1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 42, "type": "ammo", "x": 3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 43, "type": "ammo", "x": -3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 44, "type": "ammo", "x": -1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 45, "type": "ammo", "x": 0, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 46, "type": "ammo", "x": 1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 47, "type": "ammo", "x": 3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 48, "type": "ammo", "x": -3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 49, "type": "ammo", "x": -1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 50, "type": "ammo", "x": 0, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 51, "type": "ammo", "x": 1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 52, "type": "ammo", "x": 3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 53, "type": "ammo", "x": -3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 54, "type": "ammo", "x": -1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 55, "type": "ammo", "x": 0, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 56, "type": "ammo", "x": 1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 57, "type": "ammo", "x": 3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}]}}, "testConfig": {"testMapSlot": "uff", "stageTestUff": 77, "mods": [{"id": "mod_allinone", "path": "mods/mod_allinone"}, {"id": "mod_dark_noon", "path": "mods/mod_dark_noon"}, {"id": "mod_gex", "path": "mods/mod_gex"}, {"id": "mod_goldfinger_64", "path": "mods/mod_goldfinger_64"}, {"id": "mod_kakariko", "path": "mods/mod_kakariko"}], "scenarios": [{"id": 0, "label": "Combat", "flag": "--scenario-0"}, {"id": 1, "label": "Hold the Briefcase", "flag": "--scenario-1"}, {"id": 2, "label": "Hacker Central", "flag": "--scenario-2"}, {"id": 3, "label": "Pop a Cap", "flag": "--scenario-3"}, {"id": 4, "label": "King of the Hill", "flag": "--scenario-4"}, {"id": 5, "label": "Capture the Case", "flag": "--scenario-5"}], "simulants": {"requested": 8, "stockCap": 4, "note": "title.c --test-map requests 8 bots; stock profile caps at 4 unless MPFEATURE_8BOTS is unlocked."}, "helperScript": "journal/uff_viewer/test_map.py", "artifacts": {"json": "journal/uff_viewer/.last_test.json", "shell": "journal/uff_viewer/.last_test.sh"}}};
 
 const KIND_COLORS = {
   spawn:    0x57d977,  // green
@@ -249,6 +310,7 @@ const EYE_H = 170;  // approx in-game player eye height (world units)
 // calls rebuildPads() which re-derives indices + 3D meshes from this array.
 // ===========================================================================
 const KIND_ORDER = ['spawn', 'weapon', 'ammo', 'scenario', 'other'];
+const rnd = v => Math.round(v);
 
 // Curated weapon catalog (weaponnum enum from src/include/constants.h, the same
 // IDs tools/pdmap/weapons.py uses for WeaponProp). Values are the integer IDs.
@@ -288,6 +350,141 @@ const mapState = {
     }, defaultsForType(t));
   }),
 };
+
+// ===========================================================================
+// pass-4: undo/redo history + browser LocalStorage persistence
+// ---------------------------------------------------------------------------
+// Snapshots capture the full editable state (pads, box size, selection). Every
+// user-facing mutation pushes the *pre-change* snapshot so undo restores it.
+// ===========================================================================
+const MAX_HISTORY = 80;
+const historyStack = [];
+const redoStack = [];
+let suppressHistory = false;   // true while undo/redo/restore is in flight
+let boxSliderPushed = false;   // one history entry per box-slider drag session
+
+function captureSnapshot() {
+  return {
+    name: mapState.name,
+    half: HALF,
+    height: HEIGHT,
+    pads: mapState.pads.map(p => JSON.parse(JSON.stringify(p))),
+    selectedIndex: selectedIndex,
+  };
+}
+
+function restoreSnapshot(snap) {
+  suppressHistory = true;
+  mapState.name = snap.name;
+  mapState.pads = snap.pads.map(p => JSON.parse(JSON.stringify(p)));
+  halfRange.value = snap.half;
+  heightRange.value = snap.height;
+  applyBoxSize(snap.half, snap.height);
+  selectedIndex = (snap.selectedIndex >= 0 && snap.selectedIndex < mapState.pads.length)
+    ? snap.selectedIndex : -1;
+  rebuildPads();
+  renderProps();
+  updateStorageKeyDisplay();
+  suppressHistory = false;
+}
+
+function pushHistory() {
+  if (suppressHistory) return;
+  historyStack.push(captureSnapshot());
+  if (historyStack.length > MAX_HISTORY) historyStack.shift();
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+}
+
+function undo() {
+  if (!historyStack.length) return;
+  suppressHistory = true;
+  redoStack.push(captureSnapshot());
+  const snap = historyStack.pop();
+  restoreSnapshot(snap);
+  updateUndoRedoButtons();
+  showToast('Undo');
+}
+
+function redo() {
+  if (!redoStack.length) return;
+  suppressHistory = true;
+  historyStack.push(captureSnapshot());
+  const snap = redoStack.pop();
+  restoreSnapshot(snap);
+  updateUndoRedoButtons();
+  showToast('Redo');
+}
+
+function updateUndoRedoButtons() {
+  const u = document.getElementById('undoBtn');
+  const r = document.getElementById('redoBtn');
+  if (u) u.disabled = historyStack.length === 0;
+  if (r) r.disabled = redoStack.length === 0;
+}
+
+function localStorageKey() {
+  const nameEl = document.getElementById('levelName');
+  const raw = (nameEl && nameEl.value) ? nameEl.value : mapState.name;
+  const name = (raw || 'map').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_') || 'map';
+  return 'pdmap_editor_' + name;
+}
+
+function updateStorageKeyDisplay() {
+  const el = document.getElementById('storageKey');
+  if (el) el.textContent = localStorageKey();
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function saveToLocalStorage() {
+  try {
+    const data = serializeMap();
+    localStorage.setItem(localStorageKey(), JSON.stringify(data));
+    showToast('Saved to ' + localStorageKey());
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+  }
+}
+
+function loadFromLocalStorage() {
+  const key = localStorageKey();
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    alert('No saved map in LocalStorage for key "' + key + '". Save first or change the map name.');
+    return false;
+  }
+  try {
+    pushHistory();
+    const obj = JSON.parse(raw);
+    loadMap(obj, { skipHistory: true });
+    showToast('Loaded from ' + key);
+    return true;
+  } catch (e) {
+    alert('Load failed: ' + e.message);
+    return false;
+  }
+}
+
+const BLANK_MAP_DEFAULTS = { box_half: 2500, box_height: 2000, pads: [] };
+
+function clearMap() {
+  if (!confirm('Clear all pads and reset box to minimal defaults (±2500, height 2000)?')) return;
+  pushHistory();
+  const blank = Object.assign({ name: mapState.name || 'map' }, BLANK_MAP_DEFAULTS);
+  loadMap(blank, { skipHistory: true });
+  levelNameInput.value = mapState.name;
+  updateBuildCmds(mapState.name);
+  showToast('Map cleared');
+}
 
 // ---------- renderer / scene / camera ----------
 const canvas = document.getElementById('c');
@@ -509,7 +706,15 @@ const selectionMarker = new THREE.Mesh(
 selectionMarker.visible = false;
 scene.add(selectionMarker);
 
-// Regenerate every pad mesh + label from mapState.pads. This is the ONE place
+// pass-4: visual line from dragged pad to floor snap point.
+const dragLine = new THREE.Line(
+  new THREE.BufferGeometry(),
+  new THREE.LineBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.45 })
+);
+dragLine.visible = false;
+scene.add(dragLine);
+
+// Regenerate every pad mesh + label from mapState.pads.
 // indices are assigned (index = array position) so they are always contiguous.
 function rebuildPads() {
   for (const k of KIND_ORDER) {
@@ -701,6 +906,17 @@ addEventListener('keydown', e => {
     if ((e.code === 'Delete' || e.code === 'Backspace') && editing && selectedIndex >= 0) {
       e.preventDefault(); deletePad();
     }
+    if (e.code === 'KeyT' && !e.repeat && editing && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault(); runTestFlow();
+    }
+    // pass-4: global edit shortcuts (undo/redo/save/load).
+    if (e.ctrlKey || e.metaKey) {
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+      else if (k === 's') { e.preventDefault(); saveToLocalStorage(); }
+      else if (k === 'l') { e.preventDefault(); loadFromLocalStorage(); }
+    }
   }
   if (mode === 'fly' && (e.code === 'Space' || e.code.startsWith('Control'))) e.preventDefault();
   keys[e.code] = true;
@@ -774,7 +990,27 @@ const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);  // Y=0 floo
 const editBtn = document.getElementById('editBtn');
 const snapChk = document.getElementById('snapChk');
 
-const rnd = v => Math.round(v);
+function updateDragVisual(px, py, pz, sx, sz, clientX, clientY) {
+  dragLine.geometry.setFromPoints([
+    new THREE.Vector3(px, py, pz),
+    new THREE.Vector3(sx, 0, sz),
+    new THREE.Vector3(sx, py, sz),
+  ]);
+  dragLine.visible = padRoot.visible;
+  const hint = document.getElementById('dragHint');
+  if (hint) {
+    hint.style.display = 'block';
+    hint.style.left = (clientX + 14) + 'px';
+    hint.style.top = (clientY + 14) + 'px';
+    hint.textContent = 'X ' + rnd(sx) + '  Z ' + rnd(sz) + (snapChk.checked ? ' (snapped)' : '');
+  }
+}
+
+function hideDragVisual() {
+  dragLine.visible = false;
+  const hint = document.getElementById('dragHint');
+  if (hint) hint.style.display = 'none';
+}
 
 // ---- mode toggle ----------------------------------------------------------
 function setEditing(on) {
@@ -848,6 +1084,7 @@ function defaultRoom() {
   return 1;
 }
 function addPad(type, pt) {
+  pushHistory();
   const s = snapClamp(pt);
   const pad = Object.assign({ type, x: rnd(s.x), y: 0, z: rnd(s.z), room: defaultRoom() }, defaultsForType(type));
   mapState.pads.push(pad);
@@ -856,6 +1093,7 @@ function addPad(type, pt) {
 }
 function deletePad() {
   if (selectedIndex < 0) return;
+  pushHistory();
   mapState.pads.splice(selectedIndex, 1);  // splice keeps the array dense → indices stay 0..N-1
   selectedIndex = -1;
   rebuildPads();
@@ -888,6 +1126,7 @@ canvas.addEventListener('pointerdown', e => {
   editDownXY = { x: e.clientX, y: e.clientY };
   const hit = padMeshAt(e);
   if (hit) {
+    pushHistory();  // one undo step for the whole drag gesture
     selectPad(hit.userData.index);
     dragging = true;
     controls.enabled = false;  // OrbitControls.onPointerDown bails when disabled
@@ -901,13 +1140,20 @@ canvas.addEventListener('pointermove', e => {
   const p = mapState.pads[selectedIndex];
   p.x = rnd(s.x); p.z = rnd(s.z);  // keep Y (floor height) while dragging on the plane
   syncSelectedMesh();
+  updateDragVisual(p.x, p.y, p.z, s.x, s.z, e.clientX, e.clientY);
   refreshPropsLive();
   updateValidation();
 }, true);
 
 canvas.addEventListener('pointerup', e => {
   if (!editing || mode !== 'orbit') return;
-  if (dragging) { dragging = false; controls.enabled = true; renderProps(); return; }
+  if (dragging) {
+    dragging = false;
+    controls.enabled = true;
+    hideDragVisual();
+    renderProps();
+    return;
+  }
   if (!editDownXY) return;
   const moved = Math.hypot(e.clientX - editDownXY.x, e.clientY - editDownXY.y);
   editDownXY = null;
@@ -960,8 +1206,11 @@ function renderProps() {
   propsPanel.classList.add('shown');
 
   document.getElementById('propsClose2').onclick = () => selectPad(-1);
-  // live-binding helpers
+  // One history entry per properties-panel edit session (not per keystroke).
+  let propsPushed = false;
+  const maybePushProps = () => { if (!propsPushed) { pushHistory(); propsPushed = true; } };
   const onPos = () => {
+    maybePushProps();
     p.x = parseFloat(document.getElementById('pX').value) || 0;
     p.y = parseFloat(document.getElementById('pY').value) || 0;
     p.z = parseFloat(document.getElementById('pZ').value) || 0;
@@ -971,9 +1220,11 @@ function renderProps() {
   document.getElementById('pY').addEventListener('input', onPos);
   document.getElementById('pZ').addEventListener('input', onPos);
   document.getElementById('pRoom').addEventListener('input', () => {
+    maybePushProps();
     p.room = parseInt(document.getElementById('pRoom').value, 10) || 0; updateValidation();
   });
   document.getElementById('pType').addEventListener('change', () => {
+    pushHistory();
     p.type = document.getElementById('pType').value;
     // merge in any missing type-specific defaults without clobbering shared fields
     const d = defaultsForType(p.type);
@@ -981,15 +1232,15 @@ function renderProps() {
     rebuildPads(); renderProps();
   });
   const wpn = document.getElementById('pWeapon');
-  if (wpn) wpn.addEventListener('change', () => { p.weapon = parseInt(wpn.value, 10); });
+  if (wpn) wpn.addEventListener('change', () => { pushHistory(); p.weapon = parseInt(wpn.value, 10); });
   const amm = document.getElementById('pAmmo');
-  if (amm) amm.addEventListener('change', () => { p.ammoType = parseInt(amm.value, 10); });
+  if (amm) amm.addEventListener('change', () => { pushHistory(); p.ammoType = parseInt(amm.value, 10); });
   const qty = document.getElementById('pQty');
-  if (qty) qty.addEventListener('input', () => { p.quantity = parseInt(qty.value, 10) || 0; });
+  if (qty) qty.addEventListener('input', () => { maybePushProps(); p.quantity = parseInt(qty.value, 10) || 0; });
   const scn = document.getElementById('pScenario');
-  if (scn) scn.addEventListener('change', () => { p.scenario = scn.value; });
+  if (scn) scn.addEventListener('change', () => { pushHistory(); p.scenario = scn.value; });
   const team = document.getElementById('pTeam');
-  if (team) team.addEventListener('input', () => { p.team = parseInt(team.value, 10) || 0; });
+  if (team) team.addEventListener('input', () => { maybePushProps(); p.team = parseInt(team.value, 10) || 0; });
   document.getElementById('delPadBtn').onclick = () => deletePad();
 }
 // During a drag, just push the new X/Z into the (already open) position inputs.
@@ -1024,6 +1275,14 @@ function applyBoxSize(half, height) {
   halfVal.textContent = HALF; heightVal.textContent = HEIGHT;
   updateCounts(); updateValidation();
 }
+halfRange.addEventListener('pointerdown', () => {
+  if (!boxSliderPushed) { pushHistory(); boxSliderPushed = true; }
+});
+halfRange.addEventListener('pointerup', () => { boxSliderPushed = false; });
+heightRange.addEventListener('pointerdown', () => {
+  if (!boxSliderPushed) { pushHistory(); boxSliderPushed = true; }
+});
+heightRange.addEventListener('pointerup', () => { boxSliderPushed = false; });
 halfRange.addEventListener('input', () => applyBoxSize(parseFloat(halfRange.value), HEIGHT));
 heightRange.addEventListener('input', () => applyBoxSize(HALF, parseFloat(heightRange.value)));
 document.getElementById('reframeBtn').onclick = () => presetView('iso');
@@ -1034,14 +1293,27 @@ function updateValidation() {
   if (!el) return;
   const pads = mapState.pads;
   const c = { spawn: 0, weapon: 0, ammo: 0, scenario: 0, other: 0 };
-  let belowFloor = 0, outside = 0, badWeapon = 0, onFloor = 0;
-  for (const p of pads) {
-    c[KIND_ORDER.includes(p.type) ? p.type : 'other']++;
+  let belowFloor = 0, outside = 0, onFloor = 0;
+  const weaponMissing = [], ammoMissing = [], scenarioMissing = [], nearOriginPads = [];
+  const posBuckets = new Map();
+
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    c[kind]++;
     if (p.y < 0) belowFloor++;
-    else if (p.y === 0 && (p.type === 'spawn' || p.type === 'weapon' || p.type === 'ammo')) onFloor++;
+    else if (p.y === 0 && (kind === 'spawn' || kind === 'weapon' || kind === 'ammo')) onFloor++;
     if (Math.abs(p.x) > HALF || Math.abs(p.z) > HALF) outside++;
-    if (p.type === 'weapon' && p.weapon == null) badWeapon++;
+    if (kind === 'weapon' && p.weapon == null) weaponMissing.push(i);
+    if (kind === 'ammo' && p.ammoType == null) ammoMissing.push(i);
+    if (kind === 'scenario' && !p.scenario) scenarioMissing.push(i);
+    if (Math.hypot(p.x, p.y, p.z) <= DATA.originRadius) nearOriginPads.push(i);
+    const posKey = rnd(p.x) + ',' + rnd(p.y) + ',' + rnd(p.z);
+    const bucket = posBuckets.get(posKey) || [];
+    bucket.push(i);
+    posBuckets.set(posKey, bucket);
   }
+
   const chips = [
     `<span class="chip">${pads.length} pads</span>`,
     `<span class="chip">${c.spawn} spawn</span>`,
@@ -1051,12 +1323,21 @@ function updateValidation() {
     `<span class="chip" style="color:#57d977">idx 0..${Math.max(0, pads.length - 1)} contiguous</span>`,
   ];
   const warns = [];
-  if (c.spawn === 0) warns.push(`<span class="chip err">⚠ 0 spawns — players cannot spawn</span>`);
-  else if (c.spawn < 4) warns.push(`<span class="chip warn">only ${c.spawn} spawn(s); want ≥ player count</span>`);
+  if (pads.length === 0) warns.push(`<span class="chip warn">Empty map — add spawn pads before export</span>`);
+  if (c.spawn === 0 && pads.length > 0) warns.push(`<span class="chip err">0 spawn pads — players cannot spawn</span>`);
+  else if (c.spawn > 0 && c.spawn < 4) warns.push(`<span class="chip warn">Only ${c.spawn} spawn pad(s) — recommend ≥4 for MP</span>`);
+  if (c.weapon === 0 && pads.length > 0) warns.push(`<span class="chip warn">0 weapon pads — no floor weapon pickups</span>`);
+  weaponMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: weapon type not assigned</span>`));
+  ammoMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: ammo type not assigned</span>`));
+  scenarioMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: scenario mode not set</span>`));
   if (belowFloor) warns.push(`<span class="chip err">${belowFloor} pad(s) below floor (Y&lt;0)</span>`);
   if (onFloor) warns.push(`<span class="chip warn">${onFloor} pad(s) at Y=0 — use Y≥10 (SPAWN_Y) or players fall through</span>`);
-  if (outside) warns.push(`<span class="chip warn">${outside} pad(s) outside box XZ</span>`);
-  if (badWeapon) warns.push(`<span class="chip err">${badWeapon} weapon pad(s) missing weapon id</span>`);
+  if (outside) warns.push(`<span class="chip warn">${outside} pad(s) outside box XZ footprint</span>`);
+  if (nearOriginPads.length) warns.push(`<span class="chip warn">Pad(s) ${nearOriginPads.join(', ')} within ${DATA.originRadius} of origin</span>`);
+  for (const [, indices] of posBuckets) {
+    if (indices.length > 1) warns.push(`<span class="chip warn">Pads ${indices.join(', ')} share the same position</span>`);
+  }
+  if (!warns.length && pads.length > 0) warns.push(`<span class="chip ok">No issues detected</span>`);
   el.innerHTML = chips.join('') + (warns.length ? '<div style="margin-top:4px">' + warns.join(' ') + '</div>' : '');
 }
 
@@ -1091,9 +1372,11 @@ function exportJSON() {
   ioWrap.classList.add('shown');
   return txt;
 }
-function loadMap(obj) {
+function loadMap(obj, opts = {}) {
   if (!obj || !Array.isArray(obj.pads)) { alert('Map JSON must have a pads[] array.'); return false; }
+  if (!opts.skipHistory && !suppressHistory) pushHistory();
   mapState.name = obj.name || mapState.name;
+  updateStorageKeyDisplay();
   if (Number.isFinite(+obj.box_half) && Number.isFinite(+obj.box_height)) {
     halfRange.value = +obj.box_half; heightRange.value = +obj.box_height;
     applyBoxSize(+obj.box_half, +obj.box_height);
@@ -1115,7 +1398,8 @@ document.getElementById('exportBtn').onclick = exportJSON;
 document.getElementById('importBtn').onclick = () => {
   if (!ioWrap.classList.contains('shown')) { ioWrap.classList.add('shown'); ioText.focus(); return; }
   let obj; try { obj = JSON.parse(ioText.value); } catch (err) { alert('Invalid JSON: ' + err.message); return; }
-  loadMap(obj);
+  pushHistory();
+  loadMap(obj, { skipHistory: true });
 };
 document.getElementById('copyBtn').onclick = () => {
   const txt = exportJSON();
@@ -1137,6 +1421,7 @@ document.getElementById('downloadBtn').onclick = () => {
 // build-command panel.
 // ===========================================================================
 const LEVEL_CATALOG = DATA.levelCatalog || {};
+const TEST_CONFIG = DATA.testConfig || {};
 const levelNameInput = document.getElementById('levelName');
 const pyWrap = document.getElementById('pyWrap');
 const pyText = document.getElementById('pyText');
@@ -1282,11 +1567,233 @@ function updateBuildCmds(name) {
   let lvl;
   try { lvl = sanitizeLevelName(name); } catch (e) { lvl = 'myarena'; }
   buildCmdsEl.textContent =
-    '# 1. Save exported Python to src/levels/' + lvl + '.py\n' +
-    '# 2. Build pads, tiles, setup, and box seg:\n' +
+    '# Manual pdmap path (Test / Play panel automates this):\n' +
+    'python3 journal/uff_viewer/json_to_level.py map.json -o src/levels/' + lvl + '.py\n' +
     'python3 tools/pdmap.py build ' + lvl + ' --deploy --seg\n\n' +
-    '# 3. Run the game (still loads uff unless title.c is wired for ' + lvl + '):\n' +
     './build/pd.arm64 --test-map --scenario-0 --moddir mods/mod_allinone';
+  if (typeof updateTestPanel === 'function') updateTestPanel();
+}
+
+// ===========================================================================
+// pass-5: Test / Play — validate, export JSON, emit test_map.py command/script
+// ===========================================================================
+const testLevelInput = document.getElementById('testLevelName');
+const testDeployAs = document.getElementById('testDeployAs');
+const testModSelect = document.getElementById('testModSelect');
+const testScenarioSelect = document.getElementById('testScenarioSelect');
+const testCmdsEl = document.getElementById('testCmds');
+const testStatusEl = document.getElementById('testStatus');
+let lastTestPayload = null;
+let lastTestShell = '';
+
+function collectValidationIssues() {
+  const pads = mapState.pads;
+  const errors = [];
+  const warnings = [];
+  const c = { spawn: 0, weapon: 0, ammo: 0, scenario: 0 };
+  const posBuckets = new Map();
+
+  if (pads.length === 0) errors.push('Empty map — add pads before testing');
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    if (kind in c) c[kind]++;
+    if (p.y < 0) errors.push('Pad ' + i + ' below floor (Y<0)');
+    if (kind === 'weapon' && p.weapon == null) errors.push('Pad ' + i + ': weapon not assigned');
+    if (kind === 'ammo' && p.ammoType == null) errors.push('Pad ' + i + ': ammo type not assigned');
+    if (kind === 'scenario' && !p.scenario) errors.push('Pad ' + i + ': scenario mode not set');
+    if (Math.abs(p.x) > HALF || Math.abs(p.z) > HALF) warnings.push('Pad ' + i + ' outside box XZ footprint');
+    if (p.y === 0 && (kind === 'spawn' || kind === 'weapon' || kind === 'ammo'))
+      warnings.push('Pad ' + i + ' at Y=0 — use Y≥10 (SPAWN_Y)');
+    if (Math.hypot(p.x, p.y, p.z) <= DATA.originRadius) warnings.push('Pad ' + i + ' near origin');
+    const posKey = rnd(p.x) + ',' + rnd(p.y) + ',' + rnd(p.z);
+    const bucket = posBuckets.get(posKey) || [];
+    bucket.push(i);
+    posBuckets.set(posKey, bucket);
+  }
+  if (pads.length > 0 && c.spawn === 0) errors.push('0 spawn pads — players cannot spawn');
+  else if (c.spawn > 0 && c.spawn < 4) warnings.push('Only ' + c.spawn + ' spawn pad(s) — recommend ≥4 for MP');
+  if (pads.length > 0 && c.weapon === 0) warnings.push('0 weapon pads — no floor weapon pickups');
+  for (const [, indices] of posBuckets) {
+    if (indices.length > 1) warnings.push('Pads ' + indices.join(', ') + ' share the same position');
+  }
+  return { errors, warnings };
+}
+
+function populateTestSelects() {
+  const slot = TEST_CONFIG.testMapSlot || 'uff';
+  if (testDeployAs) {
+    testDeployAs.innerHTML =
+      '<option value="__same__">Same as level module</option>' +
+      '<option value="' + slot + '">' + slot + ' (test-map slot)</option>';
+  }
+  if (testModSelect && Array.isArray(TEST_CONFIG.mods)) {
+    testModSelect.innerHTML = TEST_CONFIG.mods.map(m =>
+      '<option value="' + m.id + '">' + m.id + ' (' + m.path + ')</option>').join('');
+  }
+  if (testScenarioSelect && Array.isArray(TEST_CONFIG.scenarios)) {
+    testScenarioSelect.innerHTML = TEST_CONFIG.scenarios.map(s =>
+      '<option value="' + s.id + '">' + s.id + ' — ' + s.label + '</option>').join('');
+  }
+  const simEl = document.getElementById('testSimInfo');
+  if (simEl && TEST_CONFIG.simulants) {
+    const s = TEST_CONFIG.simulants;
+    simEl.textContent = (s.requested || 8) + ' requested · ' + (s.stockCap || 4) + ' stock cap';
+    simEl.title = s.note || '';
+  }
+}
+
+function getTestOptions() {
+  let level;
+  try { level = sanitizeLevelName(testLevelInput.value || levelNameInput.value || mapState.name); }
+  catch (e) { throw new Error(e.message); }
+  const deployChoice = testDeployAs ? testDeployAs.value : '__same__';
+  const deployAs = (deployChoice === '__same__') ? level : deployChoice;
+  return {
+    level,
+    deployAs,
+    mod: testModSelect ? testModSelect.value : 'mod_allinone',
+    scenario: testScenarioSelect ? parseInt(testScenarioSelect.value, 10) : 0,
+    seg: document.getElementById('testSegChk')?.checked !== false,
+    deploy: document.getElementById('testDeployChk')?.checked !== false,
+    skipValidate: document.getElementById('testSkipValChk')?.checked === true,
+    rebuildGame: document.getElementById('testRebuildChk')?.checked === true,
+    play: document.getElementById('testPlayChk')?.checked !== false,
+    backup: document.getElementById('testBackupChk')?.checked !== false,
+    warnOk: document.getElementById('testWarnOkChk')?.checked === true,
+    half: HALF,
+    height: HEIGHT,
+  };
+}
+
+function buildTestShellScript(data, opts) {
+  const jsonBlob = JSON.stringify(data, null, 2);
+  const flags = [
+    '--level ' + opts.level,
+    '--mod ' + opts.mod,
+    '--scenario ' + opts.scenario,
+  ];
+  if (opts.deployAs !== opts.level) flags.push('--deploy-as ' + opts.deployAs);
+  if (opts.seg) flags.push('--seg');
+  if (opts.deploy) flags.push('--deploy');
+  if (opts.skipValidate) flags.push('--skip-validate');
+  if (opts.rebuildGame) flags.push('--rebuild-game');
+  if (opts.play) flags.push('--play');
+  if (opts.backup) flags.push('--backup');
+  flags.push('--write-artifacts');
+  const flagBlock = flags.map(f => '  ' + f).join(' \\\n');
+  return (
+    '#!/bin/bash\n' +
+    '# Generated by uff viewer — save as journal/uff_viewer/.last_test.sh and run from repo root.\n' +
+    'set -euo pipefail\n' +
+    'ROOT="$(cd "$(dirname "$0")/../.." && pwd)"\n' +
+    'cd "$ROOT"\n' +
+    'python3 journal/uff_viewer/test_map.py - \\\n' +
+    flagBlock + ' <<\'__PDMAP_EDITOR_JSON__\'\n' +
+    jsonBlob + '\n' +
+    '__PDMAP_EDITOR_JSON__\n'
+  );
+}
+
+function buildTestCommandLine(opts) {
+  const parts = ['python3 journal/uff_viewer/test_map.py journal/uff_viewer/.last_test.json'];
+  parts.push('--level', opts.level);
+  parts.push('--mod', opts.mod);
+  parts.push('--scenario', String(opts.scenario));
+  if (opts.deployAs !== opts.level) parts.push('--deploy-as', opts.deployAs);
+  if (opts.seg) parts.push('--seg');
+  if (opts.deploy) parts.push('--deploy');
+  if (opts.skipValidate) parts.push('--skip-validate');
+  if (opts.rebuildGame) parts.push('--rebuild-game');
+  if (opts.play) parts.push('--play');
+  if (opts.backup) parts.push('--backup');
+  parts.push('--write-artifacts');
+  return parts.join(' ');
+}
+
+function setTestStatus(kind, html) {
+  if (!testStatusEl) return;
+  testStatusEl.innerHTML = '<span class="' + kind + '">' + html + '</span>';
+}
+
+function updateTestPanel() {
+  const halfEl = document.getElementById('testHalfInfo');
+  const heightEl = document.getElementById('testHeightInfo');
+  if (halfEl) halfEl.textContent = '±' + HALF;
+  if (heightEl) heightEl.textContent = '0..' + HEIGHT;
+  try {
+    const opts = getTestOptions();
+    const data = serializeMap();
+    data.name = opts.level;
+    lastTestPayload = data;
+    lastTestShell = buildTestShellScript(data, opts);
+    if (testCmdsEl) {
+      testCmdsEl.textContent =
+        '# After Test click: save JSON to journal/uff_viewer/.last_test.json, then run:\n' +
+        buildTestCommandLine(opts) + '\n\n' +
+        '# Or run the downloaded self-contained script:\n' +
+        'bash journal/uff_viewer/.last_test.sh\n\n' +
+        '# Box: half=' + opts.half + ' height=' + opts.height +
+        ' · deploy=' + opts.deployAs + ' · mod=' + opts.mod;
+    }
+    if (opts.play && opts.deployAs !== (TEST_CONFIG.testMapSlot || 'uff')) {
+      setTestStatus('warn', 'Deploy as is not "' + (TEST_CONFIG.testMapSlot || 'uff') +
+        '" — --test-map may not load these assets unless the stage is registered.');
+    } else {
+      setTestStatus('', '');
+    }
+  } catch (e) {
+    if (testCmdsEl) testCmdsEl.textContent = '# ' + e.message;
+  }
+}
+
+function downloadText(filename, text, mime) {
+  const blob = new Blob([text], { type: mime || 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function runTestFlow() {
+  const { errors, warnings } = collectValidationIssues();
+  const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
+  if (errors.length) {
+    setTestStatus('err', errors.join(' · '));
+    alert('Fix validation errors before testing:\n\n' + errors.join('\n'));
+    return;
+  }
+  if (warnings.length && !warnOk) {
+    const proceed = confirm(
+      'Validation warnings:\n\n' + warnings.join('\n') + '\n\nProceed with test export anyway?');
+    if (!proceed) {
+      setTestStatus('warn', 'Test cancelled — fix warnings or enable "Allow warnings"');
+      return;
+    }
+  }
+
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+
+  const data = serializeMap();
+  data.name = opts.level;
+  lastTestPayload = data;
+  lastTestShell = buildTestShellScript(data, opts);
+
+  downloadText('.last_test.json', JSON.stringify(data, null, 2), 'application/json');
+  downloadText('.last_test.sh', lastTestShell, 'application/x-sh');
+  if (testCmdsEl) testCmdsEl.textContent = buildTestCommandLine(opts) + '\n\n' + lastTestShell;
+
+  const msg = warnings.length
+    ? 'Exported with ' + warnings.length + ' warning(s). Save files to journal/uff_viewer/ and run the command.'
+    : 'Exported .last_test.json + .last_test.sh — save to journal/uff_viewer/ and run the command below.';
+  setTestStatus('ok', msg);
+  showToast('Test export ready — run command in terminal');
+  exportJSON();
 }
 
 function populateLevelSelect() {
@@ -1306,10 +1813,10 @@ function populateLevelSelect() {
   });
 }
 
-function loadFromCatalog(name) {
+function loadFromCatalog(name, opts = {}) {
   const snap = LEVEL_CATALOG[name];
   if (!snap) { alert('Level "' + name + '" not in embedded catalog.'); return false; }
-  if (!loadMap(snap)) return false;
+  if (!loadMap(snap, opts)) return false;
   levelNameInput.value = name;
   updateBuildCmds(name);
   return true;
@@ -1337,9 +1844,64 @@ document.getElementById('downloadPyBtn').onclick = () => {
 };
 document.getElementById('loadLevelBtn').onclick = () => {
   const n = levelSelect.value;
-  if (n) loadFromCatalog(n);
+  if (n) { pushHistory(); loadFromCatalog(n, { skipHistory: true }); }
 };
-levelNameInput.addEventListener('input', () => updateBuildCmds(levelNameInput.value || mapState.name));
+levelNameInput.addEventListener('input', () => {
+  updateBuildCmds(levelNameInput.value || mapState.name);
+  updateStorageKeyDisplay();
+  if (testLevelInput && !testLevelInput.dataset.userEdited) testLevelInput.value = levelNameInput.value;
+});
+
+// pass-5: Test / Play panel wiring
+populateTestSelects();
+if (testLevelInput) {
+  testLevelInput.value = mapState.name || 'uff';
+  testLevelInput.addEventListener('input', () => { testLevelInput.dataset.userEdited = '1'; updateTestPanel(); });
+}
+[testDeployAs, testModSelect, testScenarioSelect,
+ document.getElementById('testSegChk'), document.getElementById('testDeployChk'),
+ document.getElementById('testSkipValChk'), document.getElementById('testRebuildChk'),
+ document.getElementById('testPlayChk'), document.getElementById('testBackupChk'),
+ document.getElementById('testWarnOkChk')].forEach(el => {
+  if (el) el.addEventListener('change', updateTestPanel);
+});
+document.getElementById('testBtn')?.addEventListener('click', runTestFlow);
+document.getElementById('copyTestCmdBtn')?.addEventListener('click', () => {
+  try {
+    const cmd = buildTestCommandLine(getTestOptions());
+    if (navigator.clipboard) navigator.clipboard.writeText(cmd).catch(() => {});
+    else { if (testCmdsEl) { testCmdsEl.textContent = cmd; testCmdsEl.focus(); } }
+    showToast('Copied test command');
+  } catch (e) { alert(e.message); }
+});
+document.getElementById('downloadTestShBtn')?.addEventListener('click', () => {
+  try {
+    const opts = getTestOptions();
+    const data = serializeMap(); data.name = opts.level;
+    downloadText('.last_test.sh', buildTestShellScript(data, opts), 'application/x-sh');
+    showToast('Downloaded .last_test.sh');
+  } catch (e) { alert(e.message); }
+});
+document.getElementById('downloadTestJsonBtn')?.addEventListener('click', () => {
+  try {
+    const opts = getTestOptions();
+    const data = serializeMap(); data.name = opts.level;
+    downloadText('.last_test.json', JSON.stringify(data, null, 2), 'application/json');
+    showToast('Downloaded .last_test.json');
+  } catch (e) { alert(e.message); }
+});
+halfRange.addEventListener('input', () => updateTestPanel());
+heightRange.addEventListener('input', () => updateTestPanel());
+updateTestPanel();
+
+// pass-4: session controls (undo/redo, LocalStorage, clear).
+document.getElementById('undoBtn').onclick = undo;
+document.getElementById('redoBtn').onclick = redo;
+document.getElementById('saveLocalBtn').onclick = saveToLocalStorage;
+document.getElementById('loadLocalBtn').onclick = loadFromLocalStorage;
+document.getElementById('clearMapBtn').onclick = clearMap;
+updateUndoRedoButtons();
+updateStorageKeyDisplay();
 
 populateLevelSelect();
 levelNameInput.value = mapState.name || 'uff';
@@ -1352,7 +1914,12 @@ updateBuildCmds(mapState.name);
 })();
 
 // expose hooks for headless scripted sanity checks (pass-2/3 VERIFY)
-window.__editor = { setEditing, addPad, selectPad, deletePad, exportJSON, loadMap, serializeMap, mapState, setTool, exportPython, jsonToLevelPy, loadFromCatalog };
+window.__editor = {
+  setEditing, addPad, selectPad, deletePad, exportJSON, loadMap, serializeMap, mapState, setTool,
+  exportPython, jsonToLevelPy, loadFromCatalog,
+  undo, redo, pushHistory, saveToLocalStorage, loadFromLocalStorage, clearMap,
+  collectValidationIssues, getTestOptions, buildTestCommandLine, runTestFlow, updateTestPanel,
+};
 
 updateValidation();  // initial pass once everything is defined
 
