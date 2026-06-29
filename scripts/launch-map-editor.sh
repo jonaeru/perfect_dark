@@ -75,12 +75,21 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-wait_for_server_on() {
-	local port="$1"
+# Wait until the child server responds on /api/health (port file optional).
+wait_for_server_ready() {
 	local attempt
-	for attempt in $(seq 1 50); do
-		if server_healthy_on "$port"; then
+	local port_from_file=""
+	for attempt in $(seq 1 60); do
+		port_from_file="$(read_port_file || true)"
+		if [[ -n "$port_from_file" ]] && server_healthy_on "$port_from_file"; then
+			ACTIVE_PORT="$port_from_file"
 			return 0
+		fi
+		if ACTIVE_PORT="$(pd_find_healthy_editor_port "$DEFAULT_HOST" "$PORT_MIN" "$PORT_MAX")"; then
+			if [[ -n "$SERVER_PID" ]] && pid_alive "$SERVER_PID"; then
+				log "Server healthy on port ${ACTIVE_PORT} (port file: ${PORT_FILE})"
+				return 0
+			fi
 		fi
 		if [[ -n "$SERVER_PID" ]] && ! pid_alive "$SERVER_PID"; then
 			return 1
@@ -167,32 +176,19 @@ main() {
 	cd "$REPO_ROOT"
 	mkdir -p "$STATE_DIR"
 	rm -f "$PORT_FILE"
-	log "Starting serve_editor.py on ${DEFAULT_HOST}:${DEFAULT_PORT} (--auto-port) from ${SERVE_SCRIPT}"
-	PD_REPO_ROOT="$REPO_ROOT" "$python_bin" "$SERVE_SCRIPT" --host "$DEFAULT_HOST" --port "$DEFAULT_PORT" --auto-port >>"$LOG_FILE" 2>&1 &
+	log "Starting serve_editor.py on ${DEFAULT_HOST}:${DEFAULT_PORT} (--auto-port) from ${SERVE_SCRIPT} (state=${STATE_DIR})"
+	PD_REPO_ROOT="$REPO_ROOT" PD_EDITOR_STATE_DIR="$STATE_DIR" \
+		"$python_bin" "$SERVE_SCRIPT" --host "$DEFAULT_HOST" --port "$DEFAULT_PORT" --auto-port >>"$LOG_FILE" 2>&1 &
 	SERVER_PID=$!
 	echo "$SERVER_PID" >"$PID_FILE"
 	log "Server PID ${SERVER_PID}"
 
-	local attempt
-	for attempt in $(seq 1 50); do
-		ACTIVE_PORT="$(read_port_file || true)"
-		[[ -n "$ACTIVE_PORT" ]] && break
-		if ! pid_alive "$SERVER_PID"; then
-			log "ERROR: server process ${SERVER_PID} exited before writing port file"
-			show_start_failure
-			exit 1
+	if ! wait_for_server_ready; then
+		if [[ -n "$SERVER_PID" ]] && ! pid_alive "$SERVER_PID"; then
+			log "ERROR: server process ${SERVER_PID} exited before becoming healthy"
+		else
+			log "ERROR: server failed health check (PID ${SERVER_PID}, port file ${PORT_FILE})"
 		fi
-		sleep 0.1
-	done
-
-	if [[ -z "$ACTIVE_PORT" ]]; then
-		log "ERROR: port file never appeared at ${PORT_FILE}"
-		show_start_failure
-		exit 1
-	fi
-
-	if ! wait_for_server_on "$ACTIVE_PORT"; then
-		log "ERROR: server failed health check on port ${ACTIVE_PORT} (PID ${SERVER_PID})"
 		show_start_failure
 		exit 1
 	fi

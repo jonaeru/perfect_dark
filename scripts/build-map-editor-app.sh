@@ -245,6 +245,8 @@ Log: ${LOG_FILE}"
 fi
 
 log "REPO_ROOT=${REPO_ROOT}"
+REPO_ROOT="$(pd_normalize_repo_root "$REPO_ROOT")"
+log "REPO_ROOT (normalized)=${REPO_ROOT}"
 pd_hydrate_repo_root "$REPO_ROOT" || true
 
 EDITOR_DIR="$(pd_resolve_editor_dir "$REPO_ROOT" "$APP_BUNDLE" 2>/dev/null || true)"

@@ -157,7 +157,18 @@ APPLESCRIPT
 	return 1
 }
 
+# Restore canonical iCloud path when a stale build or symlink dropped the space in "Mobile Documents".
+pd_normalize_repo_root() {
+	local path="$1"
+	[[ -n "$path" ]] || return 1
+	if [[ "$path" == *"/Library/MobileDocuments/"* ]]; then
+		path="${path//\/Library\/MobileDocuments\//\/Library\/Mobile Documents\/}"
+	fi
+	printf '%s' "$path"
+}
+
 # Read repo path baked into the .app at build time (Contents/Resources/repo_root.txt).
+# Trim leading/trailing whitespace only — never strip spaces inside the path.
 pd_read_baked_repo_root() {
 	local app_bundle="$1"
 	local repo_file="${app_bundle}/Contents/Resources/repo_root.txt"
@@ -167,6 +178,7 @@ pd_read_baked_repo_root() {
 	IFS= read -r baked <"$repo_file" || return 1
 	baked="${baked#"${baked%%[![:space:]]*}"}"
 	baked="${baked%"${baked##*[![:space:]]}"}"
+	baked="$(pd_normalize_repo_root "$baked")"
 	[[ -n "$baked" ]] || return 1
 	printf '%s' "$baked"
 }

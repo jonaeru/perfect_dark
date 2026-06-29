@@ -33,7 +33,12 @@ DEFAULT_PORT = 8765
 
 
 def _writable_state_dir() -> str:
-    """Persist port/pid/last-test artifacts in repo when possible, else Application Support."""
+    """Persist port/pid/last-test artifacts; honor PD_EDITOR_STATE_DIR when set."""
+    env_state = os.environ.get("PD_EDITOR_STATE_DIR", "").strip()
+    if env_state:
+        os.makedirs(env_state, exist_ok=True)
+        return env_state
+
     repo_viewer = os.path.join(ROOT, "journal", "uff_viewer")
     if os.path.isdir(repo_viewer):
         try:
