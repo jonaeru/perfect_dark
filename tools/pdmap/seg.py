@@ -158,16 +158,28 @@ def _build_gdl(setup_gdl):
     # walls.
     face_list = [0, 1, 2, 3, 4, 5] if mode == "full" else [0, 1, 2, 3]
 
-    # Single G_VTX load of all 24 verts, then two single-winding triangles per
-    # face. A single load (one vtx batch) avoids the engine's per-batch
-    # vtx-walk over-reading with multiple loads; near-plane clipping in fast3d
-    # keeps behind-eye wall vertices from crashing the GL driver.
+    # Per-face vertex loads (one G_VTX of 4 verts per face, then its 2
+    # single-winding triangles). This is REQUIRED for correctness, not just an
+    # optimisation:
+    #
+    #   The F3DEX2 G_VTX count lives in a 4-bit nibble (max 16 verts/load). A
+    #   single G_VTX(24) wraps that field to (24-1)&0xF + 1 == 8. The fast3d
+    #   renderer derives the count from the byte length (12*24) so it still
+    #   draws all 24 verts correctly, but the engine's collision/hit code
+    #   (bgPopulateVtxBatchType / bgTestHitInVtxBatch in src/game/bg.c) reads
+    #   the nibble and only loads 8 vertices into its local batch buffer. It
+    #   then walks ALL the triangles, so the four wall faces (verts 8..23)
+    #   index past the loaded 8 into stale buffer memory -> PHANTOM collision
+    #   triangles near the origin that take bullet holes and block movement.
+    #
+    #   Loading 4 verts per face keeps every batch's count valid (==4) and
+    #   self-contained: each face's two triangles index 0..3 relative to that
+    #   load's base, so both the renderer and the collision walk read exactly
+    #   the verts they reference. Near-plane clipping in fast3d still keeps
+    #   behind-eye wall vertices from crashing the GL driver.
     gdl = setup_gdl
-    gdl += _g_vtx_cmd(24, 0, 0x0E000000)
     for fi in face_list:
-        base = fi * 4
-        gdl += _g_tri1_cmd(base, base + 1, base + 2)
-        gdl += _g_tri1_cmd(base, base + 2, base + 3)
+        gdl += _face_gdl(fi)
     return gdl + _enddl()
 
 
