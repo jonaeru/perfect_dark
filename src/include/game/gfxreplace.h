@@ -6,6 +6,6 @@
 
 void gfxReplaceGbiCommands(Gfx *gdl, Gfx *endgdl, s32 type);
 void gfxReplaceGbiCommandsRecursively(struct roomblock *arg0, s32 type);
-void gfxMakeRoomWhiteRecursively(struct roomblock *block);
+void gfxMakeRoomUseShadeRecursively(struct roomblock *block);
 
 #endif

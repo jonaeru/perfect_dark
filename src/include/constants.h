@@ -45,7 +45,11 @@
 #define S32_MAX  2147483647
 #define U32_MAX  4294967295
 #define MINFLOAT ((float)-3.40282346638528860e+38)
+// Some host <math.h> headers already define MAXFLOAT; guard to avoid a
+// -Wmacro-redefined warning emitted by every translation unit.
+#ifndef MAXFLOAT
 #define MAXFLOAT ((float)3.40282346638528860e+38)
+#endif
 
 #define ABS(val)            ((val) > 0 ? (val) : -(val))
 #define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
