@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
+#include <system.h>
 #include "../lib/naudio/n_sndp.h"
 #include "game/camdraw.h"
 #include "game/game_006900.h"
@@ -1486,6 +1487,10 @@ void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *dialog, 
 		break;
 	}
 
+	if (dialogdef->handler) {
+		dialogdef->handler(MENUOP_PREOPEN, dialogdef, &data3);
+	}
+
 	func0f0f1d6c(dialogdef, dialog, menu);
 	dialogInitItems(dialog);
 
@@ -1506,6 +1511,9 @@ void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *dialog, 
 	// Check if any items should be focused automatically
 	item = dialog->definition->items;
 
+	// Defensive bound: a malformed dialog without a MENUITEMTYPE_END terminator must
+	// not loop into garbage memory.
+	int item_count = 0;
 	while (item->type != MENUITEMTYPE_END) {
 		if (item->handler
 				&& (item->flags & MENUITEMFLAG_SELECTABLE_OPENSDIALOG) == 0
@@ -1514,6 +1522,11 @@ void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *dialog, 
 		}
 
 		item++;
+		item_count++;
+		if (item_count > 100) {
+			sysLogPrintf(LOG_ERROR, "menuOpenDialog: Infinite loop detected! Force exiting loop.");
+			break;
+		}
 	}
 
 	// Run focus handler
