@@ -491,7 +491,9 @@ static void mpsetupInjectPreset(struct mpsetupfile *setupfile, const char *name,
 
 	// Configure simulants
 	for (int i = 0; i < MAX_BOTS; i++) {
-		g_MpSetup.chrslots |= (1 << (i + 4));
+		if (i + 4 < 32) {
+			g_MpSetup.chrslots |= (1 << (i + 4));
+		}
 		
 		g_BotConfigsArray[i].type = BOTTYPE_GENERAL;
 		g_BotConfigsArray[i].difficulty = BOTDIFF_NORMAL;
