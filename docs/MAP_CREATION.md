@@ -870,6 +870,7 @@ only one leaves the symptom:
 | **Engine collision** | `bgGVtxLoadCount()` uses DMA byte length (`w0&0xffff`/12), capped at 16; triangle indices bounds-checked in `bgTestHitInVtxBatch` |
 | **Generator** | Per-face `G_VTX(4)` when walls are requested (`full`/`box` modes) |
 | **Validation** | `validate_seg_g_vtx` + `validate_seg_phantom_viewport` fail `pdmap build` / deploy for play-mode segs with face loads |
+| **LLM Play guard** | `scripts/ensure-llm-map-assets.py` — runs before every LLM Play session and in `verify-llm-play.sh`; redeploys empty seg and syncs `scripts/bg_uff.seg` |
 
 ```bash
 python3 tools/pdmap.py build uff --deploy    # box levels default to empty seg
