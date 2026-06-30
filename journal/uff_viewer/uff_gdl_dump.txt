@@ -23,56 +23,14 @@ DISPLAY LIST (in order)
   +0x050  B7000000 00000205  G_SETGEOMETRYMODE
   +0x058  0718001C 0D000000  G_COL(vtxcolours)
             -> vertex colour list, seg-addr 0x0D000000
-  +0x060  04300030 0E000000  G_VTX
-            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000000
-  +0x068  BF000000 00000A14  G_TRI1
-            -> tri verts (0, 1, 2)
-  +0x070  BF000000 0000141E  G_TRI1
-            -> tri verts (0, 2, 3)
-  +0x078  04300030 0E000030  G_VTX
-            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000030
-  +0x080  BF000000 00000A14  G_TRI1
-            -> tri verts (0, 1, 2)
-  +0x088  BF000000 0000141E  G_TRI1
-            -> tri verts (0, 2, 3)
-  +0x090  04300030 0E000060  G_VTX
-            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000060
-  +0x098  BF000000 00000A14  G_TRI1
-            -> tri verts (0, 1, 2)
-  +0x0A0  BF000000 0000141E  G_TRI1
-            -> tri verts (0, 2, 3)
-  +0x0A8  04300030 0E000090  G_VTX
-            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E000090
-  +0x0B0  BF000000 00000A14  G_TRI1
-            -> tri verts (0, 1, 2)
-  +0x0B8  BF000000 0000141E  G_TRI1
-            -> tri verts (0, 2, 3)
-  +0x0C0  04300030 0E0000C0  G_VTX
-            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E0000C0
-  +0x0C8  BF000000 00000A14  G_TRI1
-            -> tri verts (0, 1, 2)
-  +0x0D0  BF000000 0000141E  G_TRI1
-            -> tri verts (0, 2, 3)
-  +0x0D8  04300030 0E0000F0  G_VTX
-            -> loads 4 verts (nibble says 4), v0=0, 48 bytes, seg-addr 0x0E0000F0
-  +0x0E0  BF000000 00000A14  G_TRI1
-            -> tri verts (0, 1, 2)
-  +0x0E8  BF000000 0000141E  G_TRI1
-            -> tri verts (0, 2, 3)
-  +0x0F0  B8000000 00000000  G_ENDDL
+  +0x060  B8000000 00000000  G_ENDDL
 
 ------------------------------------------------------------------------
 G_VTX LOAD SUMMARY  (F3DEX2 count nibble is 4-bit -> max 16/load)
 ------------------------------------------------------------------------
-  load #0: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000000
-  load #1: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000030
-  load #2: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000060
-  load #3: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E000090
-  load #4: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E0000C0
-  load #5: bytes=  48  verts= 4  nibble= 4  v0=0  addr=0x0E0000F0
 
-  G_VTX loads          : 6
-  verts covered by loads: 24
+  G_VTX loads          : 0
+  verts covered by loads: 0
   total verts in buffer : 24
 
   VERDICT: No G_VTX load exceeds 16 vertices; every load is self-
@@ -93,48 +51,12 @@ ORIGIN PROXIMITY (anything with a vertex within 500 units)
 SHIPPED / BUILT bg_uff.seg VERIFICATION (decoded from disk)
 ------------------------------------------------------------------------
   mods/mod_allinone/files/bgdata/bg_uff.seg
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000000
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000030
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000060
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000090
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000C0
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000F0
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
     G_ENDDL
-    -> G_VTX load sizes=[4, 4, 4, 4, 4, 4] max=4 OVERFLOW(>16)=False
+    -> G_VTX load sizes=[] max=0 OVERFLOW(>16)=False
 
   build/ntsc-final/assets/files/bgdata/bg_uff.seg
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000000
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000030
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000060
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E000090
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000C0
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
-    G_VTX bytes=48 verts=4 nibble=4 addr=0x0E0000F0
-    G_TRI1 (0,1,2)
-    G_TRI1 (0,2,3)
     G_ENDDL
-    -> G_VTX load sizes=[4, 4, 4, 4, 4, 4] max=4 OVERFLOW(>16)=False
+    -> G_VTX load sizes=[] max=0 OVERFLOW(>16)=False
 
   NOTE: If the on-disk seg already uses small per-face loads (<=16),
         the G_VTX(24) overflow is NOT the cause of any phantom surface

@@ -138,6 +138,45 @@ def validate_gdl_g_vtx(gdl: bytes) -> list[str]:
     return errors
 
 
+def validate_seg_phantom_viewport(seg_data: bytes) -> list[str]:
+    """Fail builds whose room GDL still draws in-box wall faces (viewport phantom).
+
+    With the camera inside the box arena, huge wall quads that extend behind the
+    eye used to be partially near-plane clipped into screen-filling junk. Play
+    and Test/Play should ship ``PDMAP_SEG_MODE=empty`` (tiles-only collision).
+    """
+    errors: list[str] = []
+    try:
+        prim_size, sec1_cmp, prim_cmp = struct.unpack(">III", seg_data[0:12])
+        room_blob = seg_data[12 + prim_cmp:12 + sec1_cmp]
+        room = unzip1172(room_blob)
+        gdl_ptr = struct.unpack(">I", room[32:36])[0]
+        gdl_start = gdl_ptr - (SEG_BASE + prim_size)
+        if gdl_start < 0 or gdl_start >= len(room):
+            return errors
+        gdl = room[gdl_start:]
+        g_vtx_after_setup = 0
+        for off in range(0, len(gdl), 8):
+            if off + 8 > len(gdl):
+                break
+            w0, _w1 = struct.unpack(">II", gdl[off:off + 8])
+            op = (w0 >> 24) & 0xFF
+            if op == 0xB8:
+                break
+            if op == 0x04:
+                g_vtx_after_setup += 1
+        if g_vtx_after_setup > 0:
+            errors.append(
+                f"seg room GDL has {g_vtx_after_setup} G_VTX face load(s) — "
+                f"PDMAP_SEG_MODE=empty is required for in-box FPS (wall quads "
+                f"behind the camera become a viewport-attached phantom sheet; "
+                f"floor collision comes from tiles)"
+            )
+    except Exception as exc:
+        errors.append(f"seg viewport validation failed: {exc!r}")
+    return errors
+
+
 def validate_seg_g_vtx(seg_data: bytes) -> list[str]:
     """Decode a bg *.seg room GDL and validate every G_VTX load."""
     try:
@@ -191,16 +230,18 @@ def _build_gdl(setup_gdl):
         GL heap.
 
     Modes (PDMAP_SEG_MODE):
-      full   (default) all six faces of the box — visible and stable
-      box    floor + ceiling + two walls
-      floor  floor quad only
-      empty  no geometry (collision-only)
+      full   (default) ceiling + four walls (no floor face — avoids near-plane clip)
+      box    ceiling + two walls (no floor)
+      floor  floor quad only (debug; clips viewport when camera inside box)
+      empty  no geometry (collision-only; recommended for Test/Play in-box FPS)
 
     All modes are playable; floor/wall collision comes from the tiles file,
     not the seg geometry.
     """
     import os as _os
-    mode = _os.environ.get("PDMAP_SEG_MODE", "full")
+    # empty = collision-only (tiles floor); recommended for in-box FPS Test/Play.
+    # full = coloured walls for editor preview; safe only with near-plane cull fix.
+    mode = _os.environ.get("PDMAP_SEG_MODE", "empty")
 
     if mode == "empty":
         return setup_gdl + _enddl()
@@ -208,9 +249,19 @@ def _build_gdl(setup_gdl):
     if mode == "floor":
         return setup_gdl + _face_gdl(0) + _enddl()
 
-    # Face set to draw. "full" = all six faces; "box" = floor + ceiling + two
-    # walls.
-    face_list = [0, 1, 2, 3, 4, 5] if mode == "full" else [0, 1, 2, 3]
+    # Face sets for in-box cameras (Y=SPAWN_Y). Face 0 (floor at Y=0) is
+    # deliberately omitted from playable modes: the huge floor quad sits behind
+    # the near plane when the player stands inside the box, and fast3d clips it
+    # into a dark/blurred sheet glued to the viewport. Floor collision still
+    # comes from bg_*_tilesZ — the seg floor is visual-only.
+    #   full = ceiling + four walls (Matrix room colours)
+    #   box  = ceiling + two walls (minimal shell)
+    if mode == "full":
+        face_list = [1, 2, 3, 4, 5]
+    elif mode == "box":
+        face_list = [1, 2, 3]
+    else:
+        face_list = [1, 2, 3, 4, 5]
 
     # Per-face vertex loads (one G_VTX of 4 verts per face, then its 2
     # single-winding triangles). This is REQUIRED for correctness, not just an
@@ -413,6 +464,17 @@ def build_box_seg(*, half=5000, height=3000, face_colours=None, template_seg=Non
             "Refusing to emit box seg with invalid G_VTX loads:\n  "
             + "\n  ".join(g_vtx_errors)
         )
+
+    import os as _os
+    mode = _os.environ.get("PDMAP_SEG_MODE", "empty")
+    if mode in ("empty",):
+        viewport_errors = validate_seg_phantom_viewport(result)
+        if viewport_errors:
+            raise ValueError(
+                "Refusing to emit box seg that would cause viewport phantom:\n  "
+                + "\n  ".join(viewport_errors)
+            )
+
     return result
 
 

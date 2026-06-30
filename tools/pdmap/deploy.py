@@ -4,13 +4,16 @@ import subprocess
 import sys
 
 from .core import BUILD_DIR, MOD_DIRS, ROOT, SETUP_DIR
-from .seg import validate_seg_g_vtx
+from .seg import validate_seg_g_vtx, validate_seg_phantom_viewport
 
 
 def _validate_seg_before_deploy(seg_path: str) -> None:
     """Reject stale/corrupt segs that would reintroduce phantom collision walls."""
     with open(seg_path, "rb") as seg_fp:
-        errors = validate_seg_g_vtx(seg_fp.read())
+        data = seg_fp.read()
+    errors = validate_seg_g_vtx(data)
+    if os.environ.get("PDMAP_SEG_MODE", "empty") in ("empty",):
+        errors.extend(validate_seg_phantom_viewport(data))
     if errors:
         raise ValueError(
             f"Refusing to deploy corrupt seg {seg_path}:\n  "

@@ -43,6 +43,8 @@ def cmd_build(args):
     # `pdmap build uff --deploy` cannot redeploy a stale G_VTX(24) seg from
     # BUILD_DIR (phantom collision wall regression).
     has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
+    if has_box_dims:
+        os.environ.setdefault("PDMAP_SEG_MODE", "empty")
     want_seg = args.seg is not None or bool(seg_script) or has_box_dims
     if want_seg:
         try:

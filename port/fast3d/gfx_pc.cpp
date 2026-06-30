@@ -1495,14 +1495,21 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
 
     struct GfxClipParameters clip_parameters = gfx_rapi->get_clip_parameters();
 
-    // Near-plane clip this triangle into 0-2 triangles whose vertices are all
-    // in front of the eye, then emit each. Without this, behind-eye vertices
-    // reach the GL driver and corrupt its heap (crash during buffer swap).
-    struct LoadedVertex gfx_clip_storage[2];
+    // Cull (do not clip) triangles with any vertex behind the near plane
+    // (clip-space z + w < 0). Partial near-plane clips on huge in-box wall
+    // quads project to screen-filling junk that moves with the camera and looks
+    // like a phantom surface glued to the viewport. Submitting behind-eye verts
+    // without handling them corrupts the GL heap, so drop the whole triangle.
     struct LoadedVertex* gfx_clip_tris[2][3];
     int gfx_num_clip_tris;
     if (!is_rect && (rsp.extra_geometry_mode & G_NO_CLIPPING_EXT) == 0) {
-        gfx_num_clip_tris = gfx_clip_triangle_near(v1, v2, v3, gfx_clip_tris, gfx_clip_storage);
+        if (v1->z + v1->w < 0.0f || v2->z + v2->w < 0.0f || v3->z + v3->w < 0.0f) {
+            return;
+        }
+        gfx_clip_tris[0][0] = v1;
+        gfx_clip_tris[0][1] = v2;
+        gfx_clip_tris[0][2] = v3;
+        gfx_num_clip_tris = 1;
     } else {
         gfx_clip_tris[0][0] = v1;
         gfx_clip_tris[0][1] = v2;

@@ -842,34 +842,50 @@ follows the camera, partially clears when looking up/down, takes bullet holes,
 and may appear even during the intro orbit camera. Collidable geometry near the
 origin, not a real wall face.
 
-**Cause:** F3DEX2 packs the `G_VTX` vertex count in a **4-bit nibble** (max 16
-verts per load). A single `G_VTX(24)` for the six-face box wraps the nibble to 8
-(`(24-1)&0xF + 1`). The PC renderer derives its count from the byte length and
-still draws all faces, but `bgPopulateVtxBatchType` / `bgTestHitInVtxBatch` in
-`src/game/bg.c` read the nibble and only load eight vertices into the batch
-buffer, then walk all twelve triangles — wall faces index past the loaded eight
-into stale memory → phantom collision near the origin.
+**Root cause (verified 2026-06-30):** Two independent bugs stacked together; fixing
+only one leaves the symptom:
 
-**Fix:** `tools/pdmap/seg.py` emits **one `G_VTX(4)` per face** (six loads for the
-full box). Regenerate and redeploy:
+1. **Viewport phantom (visual, camera-attached sheet).** Default box builds shipped
+   `PDMAP_SEG_MODE=full` (five huge wall/ceiling quads). With the spawn camera
+   *inside* the box, wall faces extend **behind** the eye. The PC fast3d path
+   (`gfx_sp_tri1` in `port/fast3d/gfx_pc.cpp`) partially near-plane clipped those
+   tris into screen-filling junk glued to the viewport — it moves with orbit/look
+   and looks like geometry on the player. This is **not** tile collision and **not**
+   a bad pad; redeploying a correct per-face G_VTX seg **without** changing mode
+   still drew the walls and still produced the sheet.
+
+2. **Origin phantom (collidable, bullet holes).** F3DEX2 packs `G_VTX` count in a
+   **4-bit nibble** (max 16/load). A single `G_VTX(24)` wraps the nibble to 8 while
+   the renderer loads 24 verts from the byte length. `bgPopulateVtxBatchType` /
+   `bgTestHitInVtxBatch` in `src/game/bg.c` used only the nibble into
+   `var800a6470[16×3]` then walked all triangles → stale verts near `(0,0,0)` →
+   phantom collision and bullet holes at the crosshair.
+
+**Fix (all required):**
+
+| Layer | Change |
+|---|---|
+| **Play/Test default** | `PDMAP_SEG_MODE=empty` — setup GDL only, **zero** face `G_VTX`; floor collision from `bg_*_tilesZ` |
+| **Engine render** | Cull (do not clip) any triangle with a vertex behind the near plane (`z+w<0`) in `gfx_sp_tri1` — eliminates viewport sheet when previewing walls |
+| **Engine collision** | `bgGVtxLoadCount()` uses DMA byte length (`w0&0xffff`/12), capped at 16; triangle indices bounds-checked in `bgTestHitInVtxBatch` |
+| **Generator** | Per-face `G_VTX(4)` when walls are requested (`full`/`box` modes) |
+| **Validation** | `validate_seg_g_vtx` + `validate_seg_phantom_viewport` fail `pdmap build` / deploy for play-mode segs with face loads |
 
 ```bash
-python3 tools/pdmap.py build uff --deploy    # auto-rebuilds box seg (BOX_HALF set)
-python3 journal/uff_viewer/gen_uff_viewer.py # writes uff_gdl_dump.txt evidence
+python3 tools/pdmap.py build uff --deploy    # box levels default to empty seg
+python3 journal/uff_viewer/gen_uff_viewer.py # evidence → uff_gdl_dump.txt
 ```
 
-**Do not** deploy a stale `build/.../bg_uff.seg` after editing pads/tiles only.
-`pdmap validate uff` and deploy now reject any seg whose G_VTX load exceeds 16
-verts or whose nibble disagrees with the byte length. Box arenas (`BOX_HALF` /
-`BOX_HEIGHT`) **always** regenerate seg in `pdmap build` and `test_map.py`
-(`--no-seg` is ignored); the editor server forces the same. Test/Play writes the
-box seg to **every** mod `bgdata/` folder so switching `--moddir` cannot leave a
-stale pre-fix seg behind.
+Preview coloured walls intentionally:
 
-**Pitfall:** `pdmap build uff --deploy` without the auto-rebuild path (pre-2026-06)
-copied whatever sat in `build/.../bg_uff.seg` — often a single `G_VTX(24)` blob.
-Likewise, older Test/Play only refreshed seg in the **selected** mod, so other mod
-folders could still serve the bad seg.
+```bash
+PDMAP_SEG_MODE=full python3 tools/pdmap.py build uff --seg --deploy
+# deploy allows wall seg only when PDMAP_SEG_MODE=full; engine cull prevents sheet
+```
+
+**Evidence after fix:** `journal/uff_evidence/phantom_wall_fix.png`, `journal/uff_viewer/uff_gdl_dump.txt` (`G_VTX loads=0` for play deploy).
+
+**Do not** redeploy only pads/tiles while leaving a stale `full` seg in `mods/*/bgdata/` — `pdmap deploy` now rejects face-loaded segs unless `PDMAP_SEG_MODE=full`.
 
 ### 11.12 Viewport-blocking sheet (near-plane clip, not G_VTX)
 
@@ -879,24 +895,16 @@ when the floor face at `Y=0` is included). **Not** collidable like §11.11; pad
 validation warnings are unrelated. Game log may still show
 `bg_uff.seg loaded externally` — mod loading is working.
 
-**Cause:** The camera stands **inside** the box arena at `Y=SPAWN_Y` (typically 10).
-Huge seg quads (floor at `Y=0`, walls) sit behind the near clip plane. The PC
-fast3d path (`gfx_clip_triangle_near` in `port/fast3d/gfx_pc.cpp`) clips them into
-screen-space junk that looks like a sheet stuck to the viewport.
+**Cause:** Same as §11.11 item 1 — partial near-plane clip of in-box wall quads
+whose vertices straddle the eye plane. Previously documented separately because
+bullet-hole reports came from §11.11 item 2; the visual sheet alone does not
+register `bgTestHitInRoom` hits.
 
-**Fix (Test/Play default):** Use collision-only visible geometry:
+**Fix:** Same as §11.11 — `PDMAP_SEG_MODE=empty` for play, plus engine cull in
+`gfx_sp_tri1` when using `full` preview.
 
-```bash
-PDMAP_SEG_MODE=empty python3 tools/pdmap.py build uff --seg --deploy
-```
-
-`journal/uff_viewer/test_map.py` sets `PDMAP_SEG_MODE=empty` automatically for
-box arenas. Floor **collision** still comes from `bg_*_tilesZ`; the seg floor is
-visual-only. For coloured walls without the floor artifact, `full` mode omits
-face 0 (see `tools/pdmap/seg.py`).
-
-**Do not confuse with §11.11:** phantom walls block movement and take bullet
-holes; near-plane sheets are a rendering artifact only.
+**Do not confuse with §11.11:** collidable phantom at the crosshair = G_VTX nibble
+overflow or stale batch indices; camera-attached dark sheet = wall seg + near plane.
 
 Full decision tree: [`MAP_MAKING_WIKI.md` §6](MAP_MAKING_WIKI.md#6-visual-and-collision-artifacts-read-this).
 
