@@ -3,6 +3,10 @@
 Codebase-accurate guide to creating custom multiplayer maps in this fork. Every
 claim is grounded in the actual source and build pipeline.
 
+**Workflow, checklists, and troubleshooting:** see **[`MAP_MAKING_WIKI.md`](MAP_MAKING_WIKI.md)**
+(the living master guide). This file is the deep technical reference (binary
+layouts, intro opcodes, registration steps).
+
 ---
 
 ## 1. Architecture — what a map actually is
@@ -13,11 +17,11 @@ A playable arena is **five asset files** plus **four wiring points** in the sour
 
 | File (deployed path) | What it is | Build source |
 |---|---|---|
-| `bgdata/bg_<name>.seg` | Room geometry (F3DEX2 display lists) + room bboxes | `scripts/build_custom_seg.py` or copy from another stage |
-| `bgdata/bg_<name>_tiles` | Collision floor tiles (per room) | `tools/assetmgr/mktiles/mktiles.py` compiles from JSON |
-| `bgdata/bg_<name>_pads` | Pad locations (spawn/weapon/obj anchors) | `tools/assetmgr/mkpads/mkpads.py` compiles from JSON |
-| `bgdata/Usetup<name>` | Solo mode setup (props/paths/AI) | C source → compiled |
-| `bgdata/Ump_setup<name>` | MP setup — intro cmds (spawns/weapons) | `tools/pdmap` generates setup binary directly |
+| `bgdata/bg_<name>.seg` | Room geometry (F3DEX2 display lists) + room bboxes | `scripts/build_custom_seg.py` or `tools/pdmap/seg.py` |
+| `bgdata/bg_<name>_tilesZ` | Collision floor tiles (per room, RareZip) | `tools/assetmgr/mktiles/mktiles.py` compiles from JSON |
+| `bgdata/bg_<name>_padsZ` | Pad locations (spawn/weapon/obj anchors, RareZip) | `tools/assetmgr/mkpads/mkpads.py` compiles from JSON |
+| `bgdata/Usetup<name>Z` | Solo mode setup (props/paths/AI) | C source → compiled |
+| `bgdata/Ump_setup<name>Z` | MP setup — intro cmds (spawns/weapons) | `tools/pdmap` generates setup binary directly |
 
 The game loads these at stage init via `stagetable.c` (see §3).
 
@@ -655,10 +659,10 @@ Add paths at the matching indices (the array is indexed by FILE_* value):
 
 ```c
 /*0x00dd*/ "bgdata/bg_mymap.seg",
-/*0x00de*/ "bgdata/bg_mymap_tiles",
-/*0x00df*/ "bgdata/bg_mymap_pads",
-/*0x00e0*/ "bgdata/Usetupmymap",
-/*0x00e1*/ "bgdata/Ump_setupmymap",
+/*0x00de*/ "bgdata/bg_mymap_tilesZ",
+/*0x00df*/ "bgdata/bg_mymap_padsZ",
+/*0x00e0*/ "bgdata/UsetupmymapZ",
+/*0x00e1*/ "bgdata/Ump_setupmymapZ",
 ```
 
 ### Step 3: `src/game/stagetable.c`
@@ -856,8 +860,45 @@ python3 journal/uff_viewer/gen_uff_viewer.py # writes uff_gdl_dump.txt evidence
 
 **Do not** deploy a stale `build/.../bg_uff.seg` after editing pads/tiles only.
 `pdmap validate uff` and deploy now reject any seg whose G_VTX load exceeds 16
-verts or whose nibble disagrees with the byte length. Unchecking **Seg** in the
-uff editor Export panel skips regeneration — leave **Seg** checked for box arenas.
+verts or whose nibble disagrees with the byte length. Box arenas (`BOX_HALF` /
+`BOX_HEIGHT`) **always** regenerate seg in `pdmap build` and `test_map.py`
+(`--no-seg` is ignored); the editor server forces the same. Test/Play writes the
+box seg to **every** mod `bgdata/` folder so switching `--moddir` cannot leave a
+stale pre-fix seg behind.
+
+**Pitfall:** `pdmap build uff --deploy` without the auto-rebuild path (pre-2026-06)
+copied whatever sat in `build/.../bg_uff.seg` — often a single `G_VTX(24)` blob.
+Likewise, older Test/Play only refreshed seg in the **selected** mod, so other mod
+folders could still serve the bad seg.
+
+### 11.12 Viewport-blocking sheet (near-plane clip, not G_VTX)
+
+**Symptoms:** A large **dark grey or blurred rectangle** glued to the side or
+center of the first-person view. Worse with full six-face box segs (especially
+when the floor face at `Y=0` is included). **Not** collidable like §11.11; pad
+validation warnings are unrelated. Game log may still show
+`bg_uff.seg loaded externally` — mod loading is working.
+
+**Cause:** The camera stands **inside** the box arena at `Y=SPAWN_Y` (typically 10).
+Huge seg quads (floor at `Y=0`, walls) sit behind the near clip plane. The PC
+fast3d path (`gfx_clip_triangle_near` in `port/fast3d/gfx_pc.cpp`) clips them into
+screen-space junk that looks like a sheet stuck to the viewport.
+
+**Fix (Test/Play default):** Use collision-only visible geometry:
+
+```bash
+PDMAP_SEG_MODE=empty python3 tools/pdmap.py build uff --seg --deploy
+```
+
+`journal/uff_viewer/test_map.py` sets `PDMAP_SEG_MODE=empty` automatically for
+box arenas. Floor **collision** still comes from `bg_*_tilesZ`; the seg floor is
+visual-only. For coloured walls without the floor artifact, `full` mode omits
+face 0 (see `tools/pdmap/seg.py`).
+
+**Do not confuse with §11.11:** phantom walls block movement and take bullet
+holes; near-plane sheets are a rendering artifact only.
+
+Full decision tree: [`MAP_MAKING_WIKI.md` §6](MAP_MAKING_WIKI.md#6-visual-and-collision-artifacts-read-this).
 
 ---
 
@@ -925,7 +966,9 @@ python3 tools/pdmap.py info mymap
 
 Launch the game with:
 ```bash
-cd build && ./pd.arm64 --test-map mymap --moddir mods/mod_allinone
+./build/pd.arm64 --test-map --moddir mods/mod_allinone
+# --test-map always loads STAGE_TEST_UFF / bg_uff.* — deploy as uff or register stage (§10).
+# For a registered stage: --boot-stage <STAGE_ID> --skip-intro --moddir mods/mod_allinone
 ```
 
 ---

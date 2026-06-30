@@ -69,11 +69,33 @@ SCENARIO_CHOICES = {
     5: "Capture the Case",
 }
 
+# MPWEAPON_* ids passed to title.c --test-map (see src/include/constants.h).
+DEFAULT_LOADOUT = [0x01, 0x09, 0x10, 0x04, 0x00, 0x25]  # Falcon2, CMP150, AR34, MagSec4, None, Shield
+
+
+def parse_loadout(raw: str | None) -> list[int]:
+    """Parse six comma-separated MPWEAPON ids for --loadout."""
+    if not raw:
+        return list(DEFAULT_LOADOUT)
+    parts = [p.strip() for p in raw.split(",") if p.strip()]
+    if len(parts) != 6:
+        raise ValueError(f"--loadout needs exactly 6 weapon ids, got {len(parts)}: {raw!r}")
+    return [int(p, 0) for p in parts]
+
 
 def _mod_bgdata(mod_key: str) -> str:
     if mod_key not in MOD_CHOICES:
         raise ValueError(f"Unknown mod {mod_key!r}; choose from {', '.join(MOD_CHOICES)}")
     return os.path.join(ROOT, MOD_CHOICES[mod_key], "files", "bgdata")
+
+
+def _all_mod_bgdata_dirs() -> list[str]:
+    """Every mod bgdata folder — box segs must stay in sync across mods."""
+    return [
+        os.path.join(ROOT, MOD_CHOICES[k], "files", "bgdata")
+        for k in MOD_CHOICES
+        if os.path.isdir(os.path.join(ROOT, MOD_CHOICES[k], "files", "bgdata"))
+    ]
 
 
 def _detect_pd_binary() -> str:
@@ -108,6 +130,12 @@ def _resolve_seg_script(mod, name: str) -> str | None:
     return None
 
 
+def level_is_box_arena(name: str) -> bool:
+    """True when the level module declares BOX_HALF/BOX_HEIGHT (procedural box seg)."""
+    mod = load_level_module(name)
+    return hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
+
+
 def build_level(
     name: str,
     *,
@@ -119,6 +147,7 @@ def build_level(
 ) -> tuple[list[str], list[str]]:
     """Build pads/tiles/setup/(seg) for ``name``; return (errors, warnings)."""
     mod_dirs = [_mod_bgdata(mod_key)]
+    seg_mod_dirs = _all_mod_bgdata_dirs()
 
     mod = load_level_module(name)
     mapdef = mod.build()
@@ -127,18 +156,28 @@ def build_level(
     # and copying BUILD_DIR redeployed the pre-fix G_VTX(24) blob (phantom wall).
     has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
     want_seg = seg or seg_script or has_box_dims
+    if has_box_dims and not seg and verbose:
+        print(
+            "  NOTE: box arena — seg rebuild forced (ignoring --no-seg; stale G_VTX "
+            "seg causes phantom collision wall)"
+        )
 
     if want_seg:
         if seg_script:
             if verbose:
                 print(f"  Building seg via {seg_script}")
-            build_seg(name, seg_script, mod_dirs)
+            build_seg(name, seg_script, seg_mod_dirs)
         else:
             half = float(getattr(mod, "BOX_HALF", 5000.0))
             height = float(getattr(mod, "BOX_HEIGHT", 3000.0))
             if verbose:
                 print(f"  Building generic box seg (half={half:.0f} height={height:.0f})")
-            build_box_seg_asset(name, half=half, height=height, mod_dirs=mod_dirs)
+            # Inside-box test-map cameras clip visible seg faces through the near
+            # plane (dark sheet glued to the viewport). Tiles carry collision; an
+            # empty seg keeps play clean. Override with PDMAP_SEG_MODE=full for
+            # coloured wall previews from the shell when needed.
+            os.environ.setdefault("PDMAP_SEG_MODE", "empty")
+            build_box_seg_asset(name, half=half, height=height, mod_dirs=seg_mod_dirs)
     elif deploy and verbose:
         print(
             "  WARNING: seg build skipped; deploy will copy existing BUILD_DIR seg "
@@ -215,12 +254,22 @@ def play_command(
     scenario: int,
     pd_binary: str,
     use_test_map: bool,
+    num_sims: int = 8,
+    sim_difficulty: int = 2,
+    loadout: list[int] | None = None,
+    mp_options: int = 0,
 ) -> list[str]:
     mod_path = os.path.join(ROOT, MOD_CHOICES[mod_key])
     cmd = [pd_binary]
     if use_test_map:
         cmd.append("--test-map")
         cmd.append(f"--scenario-{scenario}")
+        cmd.extend(["--num-sims", str(num_sims)])
+        cmd.extend(["--sim-difficulty", str(sim_difficulty)])
+        weapons = loadout if loadout is not None else DEFAULT_LOADOUT
+        cmd.extend(["--loadout", ",".join(str(w) for w in weapons)])
+        if mp_options:
+            cmd.extend(["--mp-options", str(mp_options)])
     else:
         cmd.extend(["--boot-stage", str(STAGE_TEST_UFF)])
         cmd.append("--skip-intro")
@@ -254,7 +303,12 @@ def build_shell_script(args: argparse.Namespace, data: dict[str, Any]) -> str:
         f"--level {args.level}",
         f"--mod {args.mod}",
         f"--scenario {args.scenario}",
+        f"--num-sims {args.num_sims}",
+        f"--sim-difficulty {args.sim_difficulty}",
+        f"--loadout {','.join(str(w) for w in args.loadout)}",
     ]
+    if args.mp_options:
+        flags.append(f"--mp-options {args.mp_options}")
     if args.seg:
         flags.append("--seg")
     if args.deploy:
@@ -308,6 +362,31 @@ def main(argv: list[str] | None = None) -> int:
         default=0,
         help="MP scenario for --test-map (default: 0 Combat)",
     )
+    parser.add_argument(
+        "--num-sims",
+        type=int,
+        default=8,
+        help="Simulant count for --test-map quick-team (default: 8, stock cap 4)",
+    )
+    parser.add_argument(
+        "--sim-difficulty",
+        type=int,
+        default=2,
+        choices=range(0, 6),
+        help="Bot difficulty 0=Meat … 5=Dark (default: 2 Normal)",
+    )
+    parser.add_argument(
+        "--loadout",
+        type=parse_loadout,
+        default=parse_loadout(None),
+        help="Six MPWEAPON ids comma-separated for match loadout",
+    )
+    parser.add_argument(
+        "--mp-options",
+        type=lambda x: int(x, 0),
+        default=0,
+        help="MP options bitmask for --test-map (decimal or 0x hex)",
+    )
     parser.add_argument("--seg", action="store_true", default=True, help="Build box seg (default: on)")
     parser.add_argument("--no-seg", dest="seg", action="store_false", help="Skip seg build")
     parser.add_argument("--deploy", action="store_true", default=True, help="Deploy to mod (default: on)")
@@ -344,6 +423,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Deploy/build : {deploy_name}")
     print(f"Mod target   : {args.mod} ({MOD_CHOICES[args.mod]})")
     print(f"Scenario     : {args.scenario} ({SCENARIO_CHOICES[args.scenario]})")
+    print(f"Simulants    : {args.num_sims} · difficulty {args.sim_difficulty}")
+    print(f"Loadout      : {','.join(str(w) for w in args.loadout)}")
+    if args.mp_options:
+        print(f"MP options   : {args.mp_options} (0x{args.mp_options:x})")
     if args.play and not use_test_map:
         print(
             f"WARNING: --test-map loads the '{TEST_MAP_SLOT}' asset slot (STAGE_TEST_UFF). "
@@ -364,6 +447,10 @@ def main(argv: list[str] | None = None) -> int:
             scenario=args.scenario,
             pd_binary=pd_binary,
             use_test_map=use_test_map and args.play,
+            num_sims=args.num_sims,
+            sim_difficulty=args.sim_difficulty,
+            loadout=args.loadout,
+            mp_options=args.mp_options,
         )
         print("\n# play command:")
         print(" ".join(play))
@@ -414,6 +501,10 @@ def main(argv: list[str] | None = None) -> int:
             scenario=args.scenario,
             pd_binary=pd_binary,
             use_test_map=use_test_map,
+            num_sims=args.num_sims,
+            sim_difficulty=args.sim_difficulty,
+            loadout=args.loadout,
+            mp_options=args.mp_options,
         )
         print("\nLaunching:", " ".join(cmd))
         subprocess.run(cmd, cwd=ROOT, check=False)

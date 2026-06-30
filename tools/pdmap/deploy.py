@@ -88,12 +88,14 @@ def build_box_seg_asset(name: str, *, half: float = 5000.0, height: float = 3000
     os.makedirs(BUILD_DIR, exist_ok=True)
     build_dst = os.path.join(BUILD_DIR, f"bg_{name}.seg")
     write_box_seg(build_dst, half=half, height=height)
+    _validate_seg_before_deploy(build_dst)
     print(f"  Built box seg -> {build_dst} (half={half:.0f} height={height:.0f})")
 
     for mod_dir in mod_dirs:
         os.makedirs(mod_dir, exist_ok=True)
         mod_dst = os.path.join(mod_dir, f"bg_{name}.seg")
         shutil.copy2(build_dst, mod_dst)
+        _validate_seg_before_deploy(mod_dst)
         print(f"  Deployed seg -> {mod_dst}")
 
     return build_dst
@@ -118,15 +120,19 @@ def build_seg(name: str, script_path: str, mod_dirs: list[str] | None = None) ->
             f"Ensure the script writes bg_{name}.seg next to itself."
         )
 
+    _validate_seg_before_deploy(generated)
+
     os.makedirs(BUILD_DIR, exist_ok=True)
     build_dst = os.path.join(BUILD_DIR, f"bg_{name}.seg")
     shutil.copy2(generated, build_dst)
+    _validate_seg_before_deploy(build_dst)
     print(f"  Installed seg -> {build_dst}")
 
     for mod_dir in mod_dirs:
         os.makedirs(mod_dir, exist_ok=True)
         mod_dst = os.path.join(mod_dir, f"bg_{name}.seg")
         shutil.copy2(generated, mod_dst)
+        _validate_seg_before_deploy(mod_dst)
         print(f"  Deployed seg -> {mod_dst}")
 
     return build_dst
