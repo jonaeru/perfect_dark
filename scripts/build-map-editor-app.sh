@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# Build double-clickable macOS .app bundles for the uff map editor workflow.
+# Build the Play Last Test Map companion .app (replay last --test-map launch).
+#
+# The map editor itself is built with ./scripts/build-map-editor-electron.sh
+# (outputs scripts/release/Perfect Dark Map Editor.app).
 #
 # Outputs:
-#   scripts/release/Perfect Dark Map Editor.app
 #   scripts/release/Play Last Test Map.app
-#   (optional symlink) ./Perfect Dark Map Editor.app
 #
 # Usage:
 #   ./scripts/build-map-editor-app.sh
-#   ./scripts/build-map-editor-app.sh --no-symlink
+#   ./scripts/build-map-editor-app.sh --symlink-at-root   # optional root symlink for Play app
 
 set -euo pipefail
 
@@ -18,16 +19,23 @@ RELEASE_DIR="$SCRIPT_DIR/release"
 BUILD_DIR="$REPO_ROOT/.tmp-map-editor-app-build"
 ICONSET_DIR="$BUILD_DIR/AppIcon.iconset"
 SOURCE_PNG="$BUILD_DIR/map-editor-1024.png"
-SYMLINK_AT_ROOT=1
+SYMLINK_AT_ROOT=0
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
+	--symlink-at-root)
+		SYMLINK_AT_ROOT=1
+		shift
+		;;
 	--no-symlink)
 		SYMLINK_AT_ROOT=0
 		shift
 		;;
 	-h | --help)
-		echo "Usage: $0 [--no-symlink]"
+		echo "Usage: $0 [--symlink-at-root]"
+		echo ""
+		echo "Builds Play Last Test Map.app only. For the editor, run:"
+		echo "  ./scripts/build-map-editor-electron.sh"
 		exit 0
 		;;
 	*)
@@ -37,12 +45,11 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-APP_EDITOR_NAME="Perfect Dark Map Editor"
 APP_PLAY_NAME="Play Last Test Map"
-APP_EDITOR_BUNDLE="$RELEASE_DIR/${APP_EDITOR_NAME}.app"
 APP_PLAY_BUNDLE="$RELEASE_DIR/${APP_PLAY_NAME}.app"
 EDITOR_ICON="$BUILD_DIR/EditorAppIcon.icns"
 PLAY_ICON="$BUILD_DIR/PlayAppIcon.icns"
+LEGACY_SHELL_EDITOR="$RELEASE_DIR/Perfect Dark Map Editor.app"
 
 write_info_plist() {
 	local plist_path="$1"
@@ -105,9 +112,7 @@ tint_icon_png() {
 	local output_png="$2"
 	local hue_shift="${3:-0.35}"
 
-	# Duplicate base icon and shift hue for the play shortcut app.
 	sips -s format png "$input_png" --out "$output_png" >/dev/null
-	# sips has no hue rotate; use a simple overlay via Python if available.
 	if command -v python3 >/dev/null 2>&1; then
 		python3 - "$input_png" "$output_png" "$hue_shift" <<'PY'
 import sys
@@ -122,7 +127,6 @@ except ImportError:
 src, dst, shift = sys.argv[1], sys.argv[2], float(sys.argv[3])
 img = Image.open(src).convert("RGBA")
 r, g, b, a = img.split()
-# Warm tint for play app
 merged = Image.merge("RGBA", (
     r.point(lambda p: min(255, int(p * (1.0 + shift * 0.15)))),
     g.point(lambda p: min(255, int(p * (1.0 + shift * 0.05)))),
@@ -134,7 +138,6 @@ PY
 	fi
 }
 
-# Drop shebang / duplicate set -euo / SCRIPT_DIR source lines when inlining a launcher script.
 strip_launcher_for_embed() {
 	local script_path="$1"
 	awk '
@@ -147,7 +150,6 @@ strip_launcher_for_embed() {
 	' "$script_path"
 }
 
-# Copy editor server + static UI into the .app so Finder launch survives iCloud eviction.
 bundle_editor_into_app() {
 	local app_bundle="$1"
 	local editor_dir="$app_bundle/Contents/Resources/editor"
@@ -177,16 +179,11 @@ install_launcher_app() {
 	mkdir -p "$app_bundle/Contents/MacOS" "$app_bundle/Contents/Resources"
 
 	local macos_exe="$app_bundle/Contents/MacOS/$executable_name"
-	local log_name="PerfectDarkMapEditor.log"
-	if [[ "$launcher_script" == "play-last-test-map.sh" ]]; then
-		log_name="PerfectDarkPlayLastTest.log"
-	fi
+	local log_name="PerfectDarkPlayLastTest.log"
 
-	# Self-contained MacOS executable: repo discovery + embedded launcher (no external sh exec).
 	{
 		cat <<WRAPPER
 #!/bin/bash
-# Finder-launched .app entry point — launcher logic is embedded at build time.
 set -uo pipefail
 
 LOG_FILE="\${HOME}/Library/Logs/${log_name}"
@@ -212,7 +209,6 @@ APPLESCRIPT
 log "=== ${executable_name} start (PATH=\${PATH:-<empty>}) ==="
 
 APP_MACOS="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-# Resolve symlinks so repo discovery works when the .app is a symlink at repo root.
 APP_BUNDLE="\$(cd "\${APP_MACOS}/../.." && pwd -P)"
 REPO_ROOT="\${PD_REPO_ROOT:-}"
 SERVE_MARKER="journal/uff_viewer/serve_editor.py"
@@ -220,14 +216,12 @@ BUNDLED_EDITOR="\${APP_BUNDLE}/Contents/Resources/editor"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-# --- embedded map-editor-app-common.sh (pd_ensure_local_file, pd_read_baked_repo_root, …) ---
 WRAPPER
 		tail -n +2 "$SCRIPT_DIR/map-editor-app-common.sh"
 		cat <<'WRAPPER_MID'
 
 set -euo pipefail
 
-# Resolve repository root: env → baked path → walk-up from .app.
 if [[ -z "$REPO_ROOT" ]]; then
   REPO_ROOT="$(pd_read_baked_repo_root "$APP_BUNDLE" 2>/dev/null || true)"
 fi
@@ -237,41 +231,35 @@ fi
 if [[ -z "$REPO_ROOT" ]]; then
   fail_dialog "Could not locate the Perfect Dark repository.
 
-Rebuild from the repo: ./scripts/build-map-editor-app.sh
+Rebuild Play app: ./scripts/build-map-editor-app.sh
+Editor app: ./scripts/build-map-editor-electron.sh
 
-Or set PD_REPO_ROOT to the repo path.
+Or set PD_REPO_ROOT.
 
 Log: ${LOG_FILE}"
 fi
 
 log "REPO_ROOT=${REPO_ROOT}"
 REPO_ROOT="$(pd_normalize_repo_root "$REPO_ROOT")"
-log "REPO_ROOT (normalized)=${REPO_ROOT}"
 pd_hydrate_repo_root "$REPO_ROOT" || true
 
 EDITOR_DIR="$(pd_resolve_editor_dir "$REPO_ROOT" "$APP_BUNDLE" 2>/dev/null || true)"
 if [[ -z "$EDITOR_DIR" ]]; then
-  fail_dialog "Could not locate the map editor server (repo or bundled copy).
+  fail_dialog "Could not locate editor files.
 
 REPO_ROOT: ${REPO_ROOT}
-
-Rebuild: ./scripts/build-map-editor-app.sh
 
 Log: ${LOG_FILE}"
 fi
 
 if [[ "$EDITOR_DIR" == "$BUNDLED_EDITOR" ]]; then
-  log "Using bundled editor at ${EDITOR_DIR} (repo copy unavailable or evicted)"
   export PD_EDITOR_STATE_DIR="${HOME}/Library/Application Support/PerfectDarkMapEditor"
-else
-  log "Using repo editor at ${EDITOR_DIR}"
 fi
 
 export PD_REPO_ROOT="$REPO_ROOT"
 export PD_EDITOR_DIR="$EDITOR_DIR"
 export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
 
-# --- embedded launcher body ---
 WRAPPER_MID
 		strip_launcher_for_embed "$SCRIPT_DIR/$launcher_script"
 	} >"$macos_exe"
@@ -279,14 +267,9 @@ WRAPPER_MID
 
 	bundle_editor_into_app "$app_bundle"
 
-	# Ad-hoc sign so Gatekeeper allows double-click (strip iCloud/quarantine xattrs first).
 	if command -v codesign >/dev/null 2>&1; then
 		xattr -cr "$app_bundle" 2>/dev/null || true
-		if ! codesign --force --deep --sign - "$app_bundle" 2>&1; then
-			# iCloud extended attributes can make the bundle look invalid until cleared again.
-			xattr -cr "$app_bundle" 2>/dev/null || true
-			codesign --force --deep --sign - "$app_bundle" 2>&1 || printf 'Warning: codesign failed for %s (try: xattr -cr "%s" && codesign --force --deep --sign - "%s")\n' "$app_bundle" "$app_bundle" "$app_bundle" >&2
-		fi
+		codesign --force --deep --sign - "$app_bundle" 2>&1 || true
 	fi
 
 	cp "$icon_icns" "$app_bundle/Contents/Resources/${icon_base}.icns"
@@ -297,24 +280,23 @@ main() {
 	mkdir -p "$RELEASE_DIR" "$BUILD_DIR"
 
 	chmod +x \
-		"$SCRIPT_DIR/launch-map-editor.sh" \
 		"$SCRIPT_DIR/play-last-test-map.sh" \
 		"$SCRIPT_DIR/map-editor-app-common.sh"
 
-	swift "$SCRIPT_DIR/generate-map-editor-icon.swift" "$SOURCE_PNG"
-	build_icns "$SOURCE_PNG" "$EDITOR_ICON"
+	if [[ ! -f "$SOURCE_PNG" ]]; then
+		swift "$SCRIPT_DIR/generate-map-editor-icon.swift" "$SOURCE_PNG"
+	fi
+	if [[ ! -f "$EDITOR_ICON" ]]; then
+		build_icns "$SOURCE_PNG" "$EDITOR_ICON"
+	fi
 
 	tint_icon_png "$SOURCE_PNG" "$BUILD_DIR/play-icon-1024.png" "0.4"
 	build_icns "$BUILD_DIR/play-icon-1024.png" "$PLAY_ICON"
 
-	install_launcher_app \
-		"$APP_EDITOR_BUNDLE" \
-		"launch-map-editor.sh" \
-		"map-editor-launcher" \
-		"com.perfectdark.jonaeru.map-editor" \
-		"$APP_EDITOR_NAME" \
-		"$EDITOR_ICON" \
-		"EditorAppIcon"
+	# Drop legacy shell-based editor .app if present (Electron is canonical).
+	if [[ -d "$LEGACY_SHELL_EDITOR" ]] && [[ ! -f "$LEGACY_SHELL_EDITOR/Contents/Resources/app.asar" ]]; then
+		rm -rf "$LEGACY_SHELL_EDITOR"
+	fi
 
 	install_launcher_app \
 		"$APP_PLAY_BUNDLE" \
@@ -326,16 +308,16 @@ main() {
 		"PlayAppIcon"
 
 	if [[ "$SYMLINK_AT_ROOT" -eq 1 ]]; then
-		ln -sfn "$APP_EDITOR_BUNDLE" "$REPO_ROOT/${APP_EDITOR_NAME}.app"
+		ln -sfn "$APP_PLAY_BUNDLE" "$REPO_ROOT/${APP_PLAY_NAME}.app"
 	fi
 
-	printf '\nBuilt map editor apps:\n'
-	printf '  %s\n' "$APP_EDITOR_BUNDLE"
+	printf '\nBuilt companion app:\n'
 	printf '  %s\n' "$APP_PLAY_BUNDLE"
 	if [[ "$SYMLINK_AT_ROOT" -eq 1 ]]; then
-		printf '  %s -> %s\n' "$REPO_ROOT/${APP_EDITOR_NAME}.app" "$APP_EDITOR_BUNDLE"
+		printf '  %s -> %s\n' "$REPO_ROOT/${APP_PLAY_NAME}.app" "$APP_PLAY_BUNDLE"
 	fi
-	printf '\nDouble-click "%s" to start the editor server and open your browser.\n' "$APP_EDITOR_NAME"
+	printf '\nMap editor: ./scripts/build-map-editor-electron.sh\n'
+	printf '  -> scripts/release/Perfect Dark Map Editor.app\n'
 }
 
 main "$@"

@@ -141,7 +141,7 @@ main() {
 
 	if ! pd_ensure_local_file "$SERVE_SCRIPT" 12; then
 		log "ERROR: serve_editor.py not found or not downloaded at ${SERVE_SCRIPT}"
-		show_dialog "Map editor server script not found or still downloading from iCloud.\n\nExpected:\n${SERVE_SCRIPT}\n\nREPO_ROOT: ${REPO_ROOT}\n\nIf using iCloud Drive: Finder → right-click repo folder → Download Now.\n\nOr move the .app inside this repository or rebuild with ./scripts/build-map-editor-app.sh"
+		show_dialog "Map editor server script not found or still downloading from iCloud.\n\nExpected:\n${SERVE_SCRIPT}\n\nREPO_ROOT: ${REPO_ROOT}\n\nIf using iCloud Drive: Finder → right-click repo folder → Download Now.\n\nOr rebuild the editor: ./scripts/build-map-editor-electron.sh"
 		exit 1
 	fi
 

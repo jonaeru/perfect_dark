@@ -1,6 +1,6 @@
 {
   "name": "perfect-dark-map-editor",
-  "productName": "Perfect Dark Map Editor (Electron)",
+  "productName": "Perfect Dark Map Editor",
   "version": "1.0.0",
   "description": "Electron shell for the Perfect Dark uff map editor",
   "main": "main.js",
@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.perfectdark.jonaeru.map-editor.electron",
-    "productName": "Perfect Dark Map Editor (Electron)",
+    "productName": "Perfect Dark Map Editor",
     "directories": {
       "output": "../../../scripts/release/electron-dist",
       "buildResources": "build"
@@ -25,6 +25,13 @@
       "main.js",
       "preload.js",
       "repo-config.json"
+    ],
+    "extraResources": [
+      {
+        "from": "editor-bundle",
+        "to": "editor",
+        "filter": ["**/*"]
+      }
     ],
     "mac": {
       "category": "public.app-category.developer-tools",

@@ -2,28 +2,45 @@
 # Build the Electron-based Perfect Dark Map Editor macOS .app bundle.
 #
 # Outputs:
-#   scripts/release/Perfect Dark Map Editor (Electron).app
-#   (optional symlink) ./Perfect Dark Map Editor (Electron).app
+#   scripts/release/Perfect Dark Map Editor.app
 #
 # Usage:
-#   ./scripts/build-map-editor-electron.sh
-#   ./scripts/build-map-editor-electron.sh --no-symlink
-#   ./scripts/build-map-editor-electron.sh --dev   # npm start only (no .app)
+#   ./scripts/build-map-editor-electron.sh              # builds + repo-root symlink
+#   ./scripts/build-map-editor-electron.sh --no-symlink # build only (no root symlink)
+#   ./scripts/build-map-editor-electron.sh --dev        # npm start only (no .app)
+#
+# After changing editor HTML/Python, rebuild the .app — no manual server restart needed.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ELECTRON_DIR="$REPO_ROOT/journal/uff_viewer/electron"
+VIEWER_DIR="$REPO_ROOT/journal/uff_viewer"
+EDITOR_BUNDLE_STAGING="$ELECTRON_DIR/editor-bundle"
 RELEASE_DIR="$SCRIPT_DIR/release"
-APP_NAME="Perfect Dark Map Editor (Electron)"
+APP_NAME="Perfect Dark Map Editor"
 APP_BUNDLE="$RELEASE_DIR/${APP_NAME}.app"
+LEGACY_ELECTRON_BUNDLE="$RELEASE_DIR/Perfect Dark Map Editor (Electron).app"
 BUILD_DIR="$REPO_ROOT/.tmp-map-editor-app-build"
 SYMLINK_AT_ROOT=1
 DEV_ONLY=0
 
+# Editor assets copied into Contents/Resources/editor/ at build time.
+EDITOR_BUNDLE_FILES=(
+	serve_editor.py
+	test_map.py
+	json_to_level.py
+	uff_map.html
+)
+
 while [[ $# -gt 0 ]]; do
 	case "$1" in
+	--symlink-at-root)
+		# Default; kept for explicit scripts/CI.
+		SYMLINK_AT_ROOT=1
+		shift
+		;;
 	--no-symlink)
 		SYMLINK_AT_ROOT=0
 		shift
@@ -46,6 +63,32 @@ done
 # Bake repo root for packaged .app (handles iCloud path with spaces).
 write_repo_config() {
 	printf '{"repoRoot": "%s"}\n' "$REPO_ROOT" >"$ELECTRON_DIR/repo-config.json"
+}
+
+regenerate_editor_html() {
+	echo "Regenerating uff_map.html from level data ..."
+	python3 "$VIEWER_DIR/gen_uff_viewer.py"
+}
+
+prepare_editor_bundle() {
+	echo "Staging editor bundle for Contents/Resources/editor/ ..."
+	rm -rf "$EDITOR_BUNDLE_STAGING"
+	mkdir -p "$EDITOR_BUNDLE_STAGING"
+	local f
+	for f in "${EDITOR_BUNDLE_FILES[@]}"; do
+		if [[ ! -f "$VIEWER_DIR/$f" ]]; then
+			echo "Missing editor asset: $VIEWER_DIR/$f" >&2
+			exit 1
+		fi
+		cp "$VIEWER_DIR/$f" "$EDITOR_BUNDLE_STAGING/$f"
+	done
+	# Build stamp for diagnostics (Electron also cache-busts on first load).
+	printf '{"builtAt":"%s","repoRoot":"%s","files":%s}\n' \
+		"$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+		"$REPO_ROOT" \
+		"$(printf '%s\n' "${EDITOR_BUNDLE_FILES[@]}" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')" \
+		>"$EDITOR_BUNDLE_STAGING/manifest.json"
+	echo "  staged ${#EDITOR_BUNDLE_FILES[@]} files -> $EDITOR_BUNDLE_STAGING"
 }
 
 prepare_icon() {
@@ -104,6 +147,14 @@ install_built_app() {
 	printf '%s\n' "$REPO_ROOT" >"$APP_BUNDLE/Contents/Resources/repo_root.txt"
 	cp "$ELECTRON_DIR/repo-config.json" "$APP_BUNDLE/Contents/Resources/repo-config.json" 2>/dev/null || true
 
+	# Ensure bundled editor assets are present (extraResources + post-copy safety net).
+	local bundled_editor="$APP_BUNDLE/Contents/Resources/editor"
+	if [[ ! -f "$bundled_editor/serve_editor.py" ]]; then
+		echo "Copying editor bundle into .app Resources/editor/ ..."
+		mkdir -p "$bundled_editor"
+		cp -R "$EDITOR_BUNDLE_STAGING/." "$bundled_editor/"
+	fi
+
 	if command -v codesign >/dev/null 2>&1; then
 		xattr -cr "$APP_BUNDLE" 2>/dev/null || true
 		codesign --force --deep --sign - "$APP_BUNDLE" 2>&1 || true
@@ -123,6 +174,11 @@ main() {
 	write_repo_config
 	prepare_icon
 
+	if [[ "$DEV_ONLY" -eq 0 ]]; then
+		regenerate_editor_html
+		prepare_editor_bundle
+	fi
+
 	cd "$ELECTRON_DIR"
 	echo "Installing npm dependencies in $ELECTRON_DIR ..."
 	npm install
@@ -137,18 +193,32 @@ main() {
 	echo "Building macOS .app with electron-builder ..."
 	npm run build
 
+	# Replace legacy shell launcher at the canonical path (no app.asar).
+	if [[ -d "$APP_BUNDLE" ]] && [[ ! -f "$APP_BUNDLE/Contents/Resources/app.asar" ]]; then
+		rm -rf "$APP_BUNDLE"
+	fi
+
 	install_built_app
+
+	# Remove old Electron-named bundle and repo-root duplicates.
+	rm -rf "$LEGACY_ELECTRON_BUNDLE" "$REPO_ROOT/Perfect Dark Map Editor (Electron).app"
+	rm -f "$REPO_ROOT/Perfect Dark Map Editor.app"
 
 	if [[ "$SYMLINK_AT_ROOT" -eq 1 ]]; then
 		ln -sfn "$APP_BUNDLE" "$REPO_ROOT/${APP_NAME}.app"
 	fi
 
-	printf '\nBuilt Electron map editor app:\n'
+	printf '\nBuilt map editor app:\n'
 	printf '  %s\n' "$APP_BUNDLE"
 	if [[ "$SYMLINK_AT_ROOT" -eq 1 ]]; then
 		printf '  %s -> %s\n' "$REPO_ROOT/${APP_NAME}.app" "$APP_BUNDLE"
 	fi
-	printf '\nDouble-click "%s" — editor opens in an embedded window (no external browser).\n' "$APP_NAME"
+	if [[ "$SYMLINK_AT_ROOT" -eq 1 ]]; then
+		printf '\nDouble-click %s.app at the repo root (or scripts/release/) — editor opens with bundled UI; no manual server.\n' "$APP_NAME"
+	else
+		printf '\nDouble-click scripts/release/%s.app — editor opens with bundled UI; no manual server.\n' "$APP_NAME"
+	fi
+	printf 'After editor code changes, rebuild: ./scripts/build-map-editor-electron.sh\n'
 	printf 'Dev fallback: cd journal/uff_viewer/electron && PD_REPO_ROOT="%s" npm start\n' "$REPO_ROOT"
 }
 

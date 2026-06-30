@@ -526,7 +526,51 @@ def build_test_config() -> dict:
         "simulants": {
             "requested": 8,
             "stockCap": 4,
-            "note": "title.c --test-map requests 8 bots; stock profile caps at 4 unless MPFEATURE_8BOTS is unlocked.",
+            "note": "title.c --test-map requests N bots; stock profile caps at 4 unless MPFEATURE_8BOTS is unlocked.",
+        },
+        # MPWEAPON_* loadout slots (match menu weapons, not floor pickup weaponnum).
+        "loadoutWeapons": [
+            {"id": 0x00, "label": "None"},
+            {"id": 0x01, "label": "Falcon 2"},
+            {"id": 0x04, "label": "MagSec 4"},
+            {"id": 0x05, "label": "Mauler"},
+            {"id": 0x06, "label": "Phoenix"},
+            {"id": 0x09, "label": "CMP150"},
+            {"id": 0x0A, "label": "Cyclone"},
+            {"id": 0x0D, "label": "Laptop Gun"},
+            {"id": 0x0E, "label": "Dragon"},
+            {"id": 0x10, "label": "AR34"},
+            {"id": 0x11, "label": "SuperDragon"},
+            {"id": 0x12, "label": "Shotgun"},
+            {"id": 0x14, "label": "Sniper Rifle"},
+            {"id": 0x17, "label": "Rocket Launcher"},
+            {"id": 0x1A, "label": "Crossbow"},
+            {"id": 0x1B, "label": "Tranquilizer"},
+            {"id": 0x25, "label": "Shield"},
+        ],
+        "simDifficulties": [
+            {"id": 0, "label": "Meat"},
+            {"id": 1, "label": "Easy"},
+            {"id": 2, "label": "Normal"},
+            {"id": 3, "label": "Hard"},
+            {"id": 4, "label": "Perfect"},
+            {"id": 5, "label": "Dark"},
+        ],
+        "gameOptions": [
+            {"id": 0x00000001, "label": "One hit kills"},
+            {"id": 0x00000002, "label": "Teams"},
+            {"id": 0x00000004, "label": "No radar"},
+            {"id": 0x00000008, "label": "No auto-aim"},
+            {"id": 0x00000100, "label": "Fast movement"},
+            {"id": 0x00200000, "label": "Spawn with weapon"},
+            {"id": 0x02000000, "label": "Friendly fire"},
+            {"id": 0x08000000, "label": "No doors"},
+        ],
+        "defaults": {
+            "numSims": 8,
+            "simDifficulty": 2,
+            "loadout": [0x01, 0x09, 0x10, 0x04, 0x00, 0x25],
+            "mpOptions": 0,
         },
         "helperScript": "journal/uff_viewer/test_map.py",
         "artifacts": {
@@ -538,6 +582,7 @@ def build_test_config() -> dict:
             "port": 8765,
             "healthPath": "/api/health",
             "testMapPath": "/api/test-map",
+            "mapsPath": "/api/maps",
             "startCommand": "python3 journal/uff_viewer/serve_editor.py",
         },
     }
@@ -585,17 +630,28 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>uff (Matrix arena) — 3D inspector</title>
+<title>Perfect Dark Map Editor</title>
 <style>
-  :root { --panel: rgba(16,20,28,0.88); --border:#2a3242; --muted:#8a93a6; --accent:#2c7be5; }
+  :root {
+    --panel: rgba(16,20,28,0.88); --border:#2a3242; --muted:#8a93a6; --accent:#2c7be5;
+    --space-xs:4px; --space-sm:6px; --space-md:10px; --space-lg:14px;
+    --label-size:11px; --control-size:12px; --toolbar-size:10px;
+    --menu-h: 0px;
+    --chrome-top: 12px;
+    --runbar-h: 52px;
+    --edit-col-w: 276px;
+    --right-gap: 12px;
+    --bottom-bar-h: 92px;
+  }
+  body.browser-mode { --menu-h: 28px; --chrome-top: 36px; }
   html, body { margin:0; height:100%; overflow:hidden; background:#0b0e14; color:#e6e6e6;
     font:13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif; }
   #c { position:fixed; inset:0; display:block; width:100vw; height:100vh; }
   .panel { position:fixed; background:var(--panel); border:1px solid var(--border); border-radius:10px;
     padding:12px 14px; backdrop-filter:blur(6px); box-shadow:0 6px 24px rgba(0,0,0,0.45); }
-  #hud { top:12px; left:12px; width:262px; max-height:calc(100vh - 24px); overflow-y:auto; }
-  /* View/mode panel sits below the always-visible map-options strip. */
-  #panelRight { top:var(--right-stack-top, 186px); right:12px; width:210px; z-index:5; }
+  #hud { top:var(--chrome-top); left:12px; width:262px; max-height:calc(100vh - var(--chrome-top) - var(--bottom-bar-h) - 16px); overflow-y:auto; z-index:4; }
+  /* View/mode panel — fixed under slim run bar (pass-10 native Mac IA). */
+  #panelRight { top:calc(var(--chrome-top) + var(--runbar-h) + 8px); right:var(--right-gap); width:210px; z-index:5; }
   #hud h1 { font-size:14px; margin:0 0 4px; letter-spacing:.2px; }
   #hud .sub { color:var(--muted); margin:0 0 10px; font-size:12px; }
   h2 { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:0 0 6px; }
@@ -621,10 +677,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     padding:8px 16px; font-size:12px; color:#cdd6e6; pointer-events:none; opacity:0;
     transition:opacity .25s; }
   #toast.show { opacity:1; }
+  body.editing #toast { bottom:calc(var(--bottom-bar-h) + 52px); }
   .drag-hint { position:fixed; pointer-events:none; z-index:4; color:#8a93a6; font-size:11px;
     background:rgba(16,20,28,0.85); padding:3px 8px; border-radius:6px; display:none;
     border:1px solid var(--border); }
-  #help { left:12px; bottom:12px; max-width:420px; font-size:12px; color:#c7cedb; }
+  #help { left:12px; bottom:12px; max-width:420px; font-size:12px; color:#c7cedb; z-index:4; }
   #help kbd { background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
     border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#e6e6e6; }
   #help .hint { color:var(--muted); margin-top:4px; }
@@ -636,20 +693,58 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   code { color:#cdd6e6; }
 
   /* ---------- pass-2: edit-mode UI ---------- */
-  /* Edit panel sits under the view/mode panel on the right; hidden until edit mode. */
-  #editPanel { top:12px; right:12px; width:248px; max-height:calc(100vh - 24px);
-    overflow-y:auto; display:none; }
+  /* Edit inspector stacks under run bar in one right column; view presets hide while editing. */
+  #editPanel {
+    top:calc(var(--chrome-top) + var(--runbar-h) + 8px);
+    right:var(--right-gap);
+    width:var(--edit-col-w);
+    max-height:calc(100vh - var(--chrome-top) - var(--runbar-h) - var(--bottom-bar-h) - 24px);
+    overflow-y:auto; display:none; z-index:5;
+  }
   body.editing #editPanel { display:block; }
-  /* When editing, slide right-column panels left of the edit panel. */
-  body.editing #panelRight,
-  body.editing #mapOptions { right:272px; }
-  #editPanel h1 { font-size:14px; margin:0 0 2px; }
-  #editPanel .sub { color:var(--muted); margin:0 0 10px; font-size:12px; }
-  /* Tool palette: one button per placeable pad type + a plain select tool. */
-  .tools { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
-  .tools button { display:flex; align-items:center; gap:7px; justify-content:flex-start; }
-  .tools .dot { width:11px; height:11px; border-radius:50%; flex:0 0 auto;
-    border:1px solid rgba(255,255,255,.3); }
+  body.editing #panelRight { display:none !important; }
+  body.editing #help { display:none !important; }
+  body.editing .editbadge { display:none !important; }
+  #editPanel h1 { font-size:13px; margin:0 0 1px; }
+  #editPanel .sub { color:var(--muted); margin:0 0 var(--space-sm); font-size:11px; line-height:1.35; }
+  #editPanel hr { margin:var(--space-sm) 0; }
+  #editPanel h2 { margin:0 0 var(--space-xs); font-size:10px; }
+  #editPanel .field { margin:3px 0; }
+  #editPanel .btns { gap:var(--space-xs); margin-bottom:var(--space-sm); }
+  #editPanel .export-note { margin:var(--space-xs) 0 0; font-size:10px; line-height:1.4; }
+  #editPanel details.edit-advanced { margin-top:6px; border:1px solid var(--border); border-radius:6px; padding:6px 8px; }
+  #editPanel details.edit-advanced > summary { cursor:pointer; font-size:11px; color:var(--muted); user-select:none; }
+  #editPanel details.edit-advanced[open] > summary { margin-bottom:6px; color:#cdd6e6; }
+  /* Side-panel tool grid removed — floating #placeToolbar is the primary placement UX. */
+  .tools { display:none; }
+  /* Floating canvas toolbar — big visual component buttons for click-to-place. */
+  #placeToolbar {
+    position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:8;
+    display:none; align-items:center; gap:8px; padding:8px 12px; border-radius:12px;
+    background:rgba(12,16,24,0.94); border:1px solid var(--border);
+    box-shadow:0 8px 32px rgba(0,0,0,0.45); backdrop-filter:blur(12px);
+    max-width:calc(100vw - var(--edit-col-w) - var(--right-gap) - 48px);
+  }
+  body.editing #placeToolbar { display:flex; }
+  #placeToolBtns { display:flex; align-items:center; gap:6px; }
+  #placeToolbar button {
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    min-width:68px; min-height:58px; padding:6px 8px; font-size:11px;
+  }
+  #placeToolbar .pt-dot { width:14px; height:14px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.35); }
+  #placeToolbar button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  #placeToolbar .pt-hint { font-size:10px; color:var(--muted); max-width:180px; line-height:1.35; }
+  #placeVariants {
+    position:fixed; bottom:calc(var(--bottom-bar-h) - 4px); left:50%; transform:translateX(-50%); z-index:8;
+    display:none; flex-wrap:wrap; gap:5px; justify-content:center;
+    max-width:calc(100vw - var(--edit-col-w) - var(--right-gap) - 48px); padding:8px 10px; border-radius:10px;
+    background:rgba(12,16,24,0.92); border:1px solid var(--border);
+    box-shadow:0 4px 20px rgba(0,0,0,0.35);
+  }
+  #placeVariants.open { display:flex; }
+  #placeVariants button { font-size:10px; padding:4px 8px; min-height:28px; }
+  #placeVariants button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
   /* Numeric field rows in the properties / geometry panels. */
   .field { display:flex; align-items:center; gap:8px; margin:5px 0; }
   .field label { flex:0 0 64px; color:var(--muted); }
@@ -660,8 +755,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .field input[type=range] { flex:1 1 auto; }
   .field .val { flex:0 0 64px; text-align:right; color:#cdd6e6; font-variant-numeric:tabular-nums; }
   /* Properties panel (bottom-right) for the selected pad. */
-  #props { right:12px; bottom:12px; width:268px; display:none; max-height:60vh; overflow-y:auto; }
-  body.editing #props.shown { display:block; }
+  /* Properties panel — floats left of edit column while editing. */
+  #props { right:12px; bottom:12px; width:268px; display:none; max-height:60vh; overflow-y:auto; z-index:6; }
+  body.editing #props.shown {
+    display:block;
+    right:calc(var(--edit-col-w) + var(--right-gap) + 12px);
+    bottom:calc(var(--bottom-bar-h) + 8px);
+    max-height:min(46vh, 380px);
+  }
   #props h2 { color:#e6e6e6; text-transform:none; font-size:13px; letter-spacing:0; margin:0 0 6px; }
   #props .close { float:right; cursor:pointer; color:var(--muted); }
   /* Validation status line: green ok / yellow warn / red error chips. */
@@ -698,41 +799,195 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   #testServerHint .live { color:#57d977; }
   #testServerHint .off { color:#ffd166; }
   .export-note { font-size:11px; color:var(--muted); margin:4px 0 0; line-height:1.45; }
-  .editbadge { position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:8;
+  .editbadge { position:fixed; top:calc(var(--chrome-top) + 4px); left:50%; transform:translateX(-50%); z-index:8;
     background:#2c7be5; color:#fff; font-weight:700; letter-spacing:.4px; padding:5px 14px;
-    border-radius:20px; box-shadow:0 4px 16px rgba(0,0,0,.4); display:none; }
-  body.editing .editbadge { display:block; }
-  /* pass-6: Map options — always-visible top-right strip (no scroll required on 1440×900). */
-  #mapOptions { position:fixed; top:12px; right:12px; width:320px; z-index:7;
-    padding:10px 12px; }
-  #mapOptions h2 { font-size:11px; margin:0 0 6px; letter-spacing:.5px; }
-  #mapOptions .opt-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 8px; }
-  #mapOptions .field { margin:0; }
-  #mapOptions .field label { flex:0 0 52px; font-size:11px; }
-  #mapOptions .field input[type=text],
-  #mapOptions .field select { font-size:12px; padding:3px 5px; }
-  #mapOptions .opt-meta { display:flex; gap:10px; margin:6px 0 4px; font-size:11px;
-    color:var(--muted); font-variant-numeric:tabular-nums; }
-  #mapOptions .opt-meta span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  #mapOptions .opt-checks { display:flex; flex-wrap:wrap; gap:4px 10px; margin:4px 0 6px; }
-  #mapOptions .opt-checks label { display:inline-flex; align-items:center; gap:4px;
-    font-size:11px; color:#cdd6e6; cursor:pointer; user-select:none; margin:0; }
-  #mapOptions .opt-checks input { margin:0; }
-  #mapOptions .opt-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:0; }
-  #mapOptions .opt-actions button { padding:7px 8px; font-size:12px; }
-  #mapOptions kbd { background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
-    border-radius:5px; padding:0 4px; font-family:ui-monospace,Menlo,monospace; font-size:10px; }
-  #testStatus { font-size:11px; margin:4px 0 0; min-height:16px; line-height:1.35; }
-  /* Collapsed command log + terminal fallback at bottom-right. */
-  #testOutput { position:fixed; right:12px; bottom:12px; width:320px; z-index:6;
+    border-radius:20px; box-shadow:0 4px 16px rgba(0,0,0,.4); display:none; pointer-events:none; }
+  body.editing:not(.browser-mode) .editbadge { display:block; }
+  /* pass-10: Run bar — Mod + Scenario + Play only; file ops live in menu bar. */
+  #runBar { position:fixed; top:var(--chrome-top); right:var(--right-gap); z-index:7; display:flex; align-items:center;
+    gap:var(--space-sm); padding:6px 10px; border-radius:10px; max-height:44px;
+    background:var(--panel); border:1px solid var(--border); backdrop-filter:blur(6px);
+    box-shadow:0 6px 24px rgba(0,0,0,0.45); }
+  #runBar .run-field { display:flex; align-items:center; gap:var(--space-xs); margin:0; }
+  #runBar .run-field label { flex:0 0 auto; font-size:var(--label-size); color:var(--muted);
+    text-transform:uppercase; letter-spacing:.4px; }
+  #runBar .run-field select { font-size:var(--control-size); padding:6px 8px; min-height:32px;
+    min-width:88px; border-radius:7px; border:1px solid var(--border); background:#10141c; color:#e6e6e6; }
+  #runBar #testPlayBtn { min-height:44px; min-width:88px; padding:8px 14px; font-size:13px;
+    font-weight:600; border-radius:8px; }
+  #runBar #editModeBtn { min-height:44px; min-width:56px; padding:8px 12px; font-size:13px; font-weight:600; border-radius:8px; }
+  #runBar #editModeBtn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  #runBar #buildSettingsBtn { min-width:44px; min-height:44px; padding:0; font-size:16px;
+    line-height:1; border-radius:8px; background:#1b2330; }
+  #runBar #buildSettingsBtn:focus-visible, #runBar select:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  body.drag-over-canvas { outline:3px dashed var(--accent); outline-offset:-3px; }
+  /* Document status pill — map name + dirty (replaces in-panel file chrome). */
+  #statusPill { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:9;
+    display:flex; align-items:center; gap:8px; padding:8px 16px; min-height:36px;
+    border-radius:20px; background:rgba(16,20,28,0.9); border:1px solid var(--border);
+    backdrop-filter:blur(8px); box-shadow:0 4px 20px rgba(0,0,0,.4); pointer-events:none;
+    font-size:13px; font-weight:500; color:#f0f3fa; max-width:min(420px, calc(100vw - 48px)); }
+  body.editing #statusPill {
+    bottom:calc(var(--bottom-bar-h) + 6px);
+    max-width:min(420px, calc(100vw - var(--edit-col-w) - var(--right-gap) - 48px));
+  }
+  #statusPill .doc-dirty { color:#ffb020; font-size:11px; font-weight:700; flex:0 0 auto; }
+  #statusPill .doc-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  #statusPill .doc-server { font-size:10px; color:var(--muted); font-weight:400; flex:0 0 auto; }
+  /* Browser-only menu strip when Electron app menu is unavailable. */
+  #browserMenuBar { position:fixed; top:0; left:0; right:0; z-index:12; height:28px;
+    display:none; align-items:center; gap:2px; padding:0 8px;
+    background:rgba(22,26,34,0.96); border-bottom:1px solid var(--border);
+    font-size:12px; -webkit-app-region:no-drag; }
+  body.browser-mode #browserMenuBar { display:flex; }
+  body.browser-mode #hud { top:var(--chrome-top); }
+  .browser-menu { position:relative; }
+  .browser-menu summary { list-style:none; cursor:pointer; padding:4px 10px; border-radius:4px;
+    color:#cdd6e6; user-select:none; }
+  .browser-menu summary::-webkit-details-marker { display:none; }
+  .browser-menu summary:hover, .browser-menu[open] summary { background:rgba(255,255,255,.08); }
+  .browser-menu-panel { position:absolute; left:0; top:100%; min-width:180px; padding:4px;
+    background:#141c2a; border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.45); z-index:20; }
+  .browser-menu-panel button { display:block; width:100%; text-align:left; padding:6px 10px;
+    font-size:12px; border:none; background:transparent; color:#e6e6e6; border-radius:4px; cursor:pointer; }
+  .browser-menu-panel button:hover { background:rgba(255,255,255,.08); }
+  /* Build Settings sheet — advanced test/build flags off the canvas. */
+  #buildSettingsModal { position:fixed; inset:0; z-index:30; display:none; align-items:center;
+    justify-content:center; background:rgba(0,0,0,.55); backdrop-filter:blur(2px); }
+  #buildSettingsModal.open { display:flex; }
+  #buildSettingsSheet { width:min(420px, calc(100vw - 32px)); max-height:min(80vh, 720px);
+    overflow-y:auto; padding:var(--space-lg); border-radius:12px; background:#121820;
+    border:1px solid var(--border); box-shadow:0 12px 40px rgba(0,0,0,.55); }
+  #buildSettingsSheet h2 { margin:0 0 var(--space-md); font-size:15px; color:#f0f3fa;
+    text-transform:none; letter-spacing:0; }
+  #buildSettingsSheet .sheet-section { margin:var(--space-md) 0; }
+  #buildSettingsSheet .sheet-section h3 { margin:0 0 var(--space-xs); font-size:var(--label-size);
+    text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+  #buildSettingsSheet .opt-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-xs) var(--space-sm); }
+  #buildSettingsSheet .field { margin:0; gap:var(--space-xs); }
+  #buildSettingsSheet .field label { flex:0 0 52px; font-size:var(--label-size); }
+  #buildSettingsSheet .loadout-grid { display:grid; grid-template-columns:26px 1fr; gap:2px var(--space-sm); }
+  #buildSettingsSheet .loadout-grid label { font-size:10px; color:var(--muted); align-self:center; }
+  #buildSettingsSheet .loadout-grid select { font-size:var(--label-size); padding:4px 6px; width:100%; }
+  #buildSettingsSheet .opt-checks { display:flex; flex-wrap:wrap; gap:var(--space-xs) var(--space-sm); }
+  #buildSettingsSheet .opt-checks label { display:inline-flex; align-items:center; gap:4px;
+    font-size:var(--label-size); color:#cdd6e6; cursor:pointer; min-height:28px; }
+  #buildSettingsSheet .opt-meta { display:flex; gap:var(--space-sm); font-size:var(--label-size);
+    color:var(--muted); margin-bottom:var(--space-xs); }
+  #buildSettingsSheet .sheet-actions { display:flex; justify-content:flex-end; gap:var(--space-sm);
+    margin-top:var(--space-lg); padding-top:var(--space-md); border-top:1px solid var(--border); }
+  #buildSettingsSheet .sheet-actions button { min-height:44px; padding:8px 16px; }
+  /* Map name prompt — Electron does not support window.prompt(); use in-app modal. */
+  #mapNameModal { position:fixed; inset:0; z-index:31; display:none; align-items:center;
+    justify-content:center; background:rgba(0,0,0,.55); backdrop-filter:blur(2px); }
+  #mapNameModal.open { display:flex; }
+  #mapNameSheet { width:min(380px, calc(100vw - 32px)); padding:var(--space-lg); border-radius:12px;
+    background:#121820; border:1px solid var(--border); box-shadow:0 12px 40px rgba(0,0,0,.55); }
+  #mapNameSheet h2 { margin:0 0 var(--space-xs); font-size:15px; color:#f0f3fa;
+    text-transform:none; letter-spacing:0; }
+  #mapNameSheet .map-name-hint { margin:0 0 var(--space-md); font-size:var(--label-size); color:var(--muted); }
+  #mapNameSheet input { width:100%; box-sizing:border-box; font:inherit; color:#e6e6e6;
+    background:#1b2330; border:1px solid var(--border); border-radius:7px; padding:8px 10px; }
+  #mapNameSheet input:focus { outline:none; border-color:var(--accent); }
+  #mapNameError { min-height:16px; margin:var(--space-xs) 0 0; font-size:var(--label-size); color:#ff5d5d; }
+  #mapNameSheet .sheet-actions { display:flex; justify-content:flex-end; gap:var(--space-sm);
+    margin-top:var(--space-md); }
+  #mapNameSheet .sheet-actions button { min-height:36px; padding:6px 14px; }
+  #testStatus { font-size:var(--label-size); margin:var(--space-xs) 0 0; min-height:14px; line-height:1.35; }
+  #runTestStatus { position:fixed; right:var(--right-gap); top:calc(var(--chrome-top) + var(--runbar-h) + 4px); z-index:6; max-width:280px; font-size:11px;
+    color:var(--muted); pointer-events:none; line-height:1.35; text-align:right; }
+  body.editing #runTestStatus { display:none; }
+  /* Collapsed command log — hidden in edit mode unless explicitly opened. */
+  #testOutput { position:fixed; right:var(--right-gap); bottom:12px; width:320px; z-index:6;
     padding:8px 12px; max-height:40vh; overflow-y:auto; }
-  body.editing #testOutput { right:272px; }
+  body.editing #testOutput:not([open]) { display:none; }
+  body.editing #testOutput[open] {
+    left:auto;
+    right:calc(var(--edit-col-w) + var(--right-gap) + 12px);
+    bottom:calc(var(--bottom-bar-h) + 8px);
+    width:min(300px, calc(100vw - var(--edit-col-w) - 48px));
+  }
   #testOutput summary { cursor:pointer; color:#cdd6e6; font-size:12px; user-select:none; }
   #testOutput .export-note { margin:6px 0; }
+  /* pass-8: saved maps + minimap + pad visual polish */
+  #mapsStatus { min-height:0; margin:2px 0 0; font-size:10px; line-height:1.25;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #mapsStatus .live { color:#57d977; }
+  #mapsStatus .off { color:#ffd166; }
+  #mapsStatus .err { color:#ff5d5d; }
+  /* Compact square minimap — floats in the canvas margin above the edit column. */
+  #minimapWrap {
+    position:fixed;
+    display:none;
+    right:calc(var(--edit-col-w) + var(--right-gap) + 10px);
+    top:calc(var(--chrome-top) + var(--runbar-h) + 10px);
+    width:96px;
+    height:96px;
+    z-index:6;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:rgba(12,16,24,0.88);
+    box-shadow:0 4px 18px rgba(0,0,0,0.35);
+    overflow:hidden;
+    backdrop-filter:blur(6px);
+    pointer-events:auto;
+  }
+  #minimapWrap.visible { display:block; }
+  #minimapWrap canvas { display:block; width:96px; height:96px; }
+  #minimapClose {
+    position:absolute; top:3px; right:3px; width:18px; height:18px; padding:0;
+    font-size:10px; line-height:1; border-radius:4px; min-height:0; z-index:1;
+    background:rgba(16,20,28,0.9); border:1px solid var(--border); color:var(--muted);
+  }
+  #minimapClose:hover { color:#e6e6e6; background:rgba(36,48,73,0.95); }
+  .pad-hover-ring { pointer-events:none; }
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
+
+<!-- Browser fallback: mimics macOS menu when Electron app menu is absent -->
+<nav id="browserMenuBar" aria-label="Application menu">
+  <details class="browser-menu" id="browserFileMenu">
+    <summary>File</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="new">New Map</button>
+      <button type="button" data-menu="open">Open…</button>
+      <button type="button" data-menu="save">Save</button>
+      <button type="button" data-menu="save-as">Save As…</button>
+      <button type="button" data-menu="export">Export JSON</button>
+      <button type="button" data-menu="revert-cached">Revert to Cached</button>
+      <button type="button" data-menu="delete">Delete Map…</button>
+    </div>
+  </details>
+  <details class="browser-menu">
+    <summary>Edit</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="undo">Undo</button>
+      <button type="button" data-menu="redo">Redo</button>
+    </div>
+  </details>
+  <details class="browser-menu">
+    <summary>View</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="toggle-fly">Toggle Fly Mode</button>
+      <button type="button" data-menu="toggle-edit">Toggle Edit Mode</button>
+      <button type="button" data-menu="toggle-minimap">Toggle Minimap</button>
+      <button type="button" data-menu="view-iso">Isometric</button>
+      <button type="button" data-menu="view-top">Top</button>
+      <button type="button" data-menu="toggle-help">Toggle Help</button>
+    </div>
+  </details>
+  <details class="browser-menu">
+    <summary>Play</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="test-map">Test Map</button>
+      <button type="button" data-menu="export-assets">Export Assets</button>
+      <button type="button" data-menu="build-settings">Build Settings…</button>
+    </div>
+  </details>
+</nav>
 
 <div id="hud" class="panel">
   <h1>uff — Matrix combat-sim arena</h1>
@@ -767,47 +1022,104 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
 <div class="editbadge">● EDIT MODE</div>
 
-<!-- pass-6: Map options — always visible top-right; works without edit mode or server -->
-<div id="mapOptions" class="panel">
-  <h2>MAP OPTIONS · <kbd>T</kbd> play · <kbd>X</kbd> export</h2>
-  <div class="opt-grid">
-    <div class="field"><label for="testLevelName" title="Python module in src/levels/">Level</label>
-      <input type="text" id="testLevelName" spellcheck="false" placeholder="uff" /></div>
-    <div class="field"><label for="testDeployAs" title="Stage slot for --test-map">Deploy</label>
-      <select id="testDeployAs"></select></div>
-    <div class="field"><label for="testMod" title="Mod directory under mods/">Mod</label>
-      <select id="testMod"></select></div>
-    <div class="field"><label for="testScenario" title="Multiplayer scenario">Scenario</label>
-      <select id="testScenario"></select></div>
+<!-- pass-10: slim Run bar — play workflow only; documents use menu bar -->
+<div id="runBar" class="panel" role="toolbar" aria-label="Play test map">
+  <div class="run-field">
+    <label for="testMod">Mod</label>
+    <select id="testMod" title="Mod directory under mods/"></select>
   </div>
-  <div class="opt-meta">
-    <span id="testBoxInfo" title="From box geometry (edit sliders or defaults)">Box —</span>
-    <span id="testSimInfo" title="Bot count vs stock cap">Simulants —</span>
+  <div class="run-field">
+    <label for="testScenario">Scenario</label>
+    <select id="testScenario" title="Multiplayer scenario"></select>
   </div>
-  <div class="opt-checks">
-    <label title="Build seg display list (--seg)"><input type="checkbox" id="testSegChk" checked /> Seg</label>
-    <label title="Copy assets to mod (--deploy)"><input type="checkbox" id="testDeployChk" checked /> Deploy</label>
-    <label title="cmake --build before play"><input type="checkbox" id="testRebuildChk" /> Rebuild</label>
-    <label title="Launch pd.arm64 --test-map"><input type="checkbox" id="testPlayChk" checked /> Play</label>
-    <label title="Skip pdmap validate"><input type="checkbox" id="testSkipValChk" /> Skip val</label>
-    <label title="Backup existing level .py"><input type="checkbox" id="testBackupChk" checked /> Backup</label>
-    <label title="Proceed when validation warns"><input type="checkbox" id="testWarnOkChk" /> Warn OK</label>
-  </div>
-  <div class="opt-actions btns">
-    <button id="testPlayBtn" class="test-primary" title="Validate, build, deploy, launch">Test / Play</button>
-    <button id="testBuildOnlyBtn" class="test-export" title="Build + deploy, no launch">Export</button>
-  </div>
-  <div id="testServerHint"></div>
-  <div id="testStatus"></div>
+  <button id="editModeBtn" type="button" title="Toggle edit mode (E)" aria-pressed="false">Edit</button>
+  <button id="testPlayBtn" class="test-primary" type="button" title="Validate, build, deploy, launch (T)" aria-label="Play test map">▶ Play</button>
+  <button id="buildSettingsBtn" type="button" title="Build Settings…" aria-label="Build settings">⚙</button>
 </div>
+<div id="runTestStatus" aria-live="polite"></div>
+
+<!-- Floating document status — name, dirty, server hint -->
+<div id="statusPill" aria-label="Document status">
+  <span id="docDirtyBadge" class="doc-dirty" hidden title="Unsaved changes" aria-label="Unsaved">●</span>
+  <span id="currentMapTitle" class="doc-title" title="Current map">uff</span>
+  <span id="mapsStatus" class="doc-server" role="status" aria-live="polite"></span>
+</div>
+
+<!-- Advanced build / test options — opened from Play menu or gear -->
+<div id="buildSettingsModal" role="dialog" aria-modal="true" aria-labelledby="buildSettingsTitle" hidden>
+  <div id="buildSettingsSheet" class="panel">
+    <h2 id="buildSettingsTitle">Build Settings</h2>
+    <div class="sheet-section">
+      <h3>Level &amp; deploy</h3>
+      <div class="opt-grid">
+        <div class="field"><label for="testLevelName">Level</label>
+          <input type="text" id="testLevelName" spellcheck="false" placeholder="uff" /></div>
+        <div class="field"><label for="testDeployAs">Deploy</label>
+          <select id="testDeployAs"></select></div>
+        <div class="field"><label for="testNumSims">Sims</label>
+          <select id="testNumSims"></select></div>
+        <div class="field"><label for="testSimDiff">Diff</label>
+          <select id="testSimDiff"></select></div>
+      </div>
+    </div>
+    <div class="sheet-section">
+      <h3>Loadout</h3>
+      <div class="loadout-grid" id="testLoadoutGrid"></div>
+    </div>
+    <div class="sheet-section">
+      <h3>Game options</h3>
+      <div class="opt-checks" id="testGameOptions"></div>
+    </div>
+    <div class="sheet-section">
+      <h3>Build flags</h3>
+      <div class="opt-meta">
+        <span id="testBoxInfo" title="From box geometry">Box —</span>
+        <span id="testSimInfo" title="Bot count vs stock cap">Simulants —</span>
+      </div>
+      <div class="opt-checks">
+        <label title="Build seg display list (--seg)"><input type="checkbox" id="testSegChk" checked /> Seg</label>
+        <label title="Copy assets to mod (--deploy)"><input type="checkbox" id="testDeployChk" checked /> Deploy</label>
+        <label title="cmake --build before play"><input type="checkbox" id="testRebuildChk" /> Rebuild</label>
+        <label title="Launch pd.arm64 --test-map"><input type="checkbox" id="testPlayChk" checked /> Play</label>
+        <label title="Skip pdmap validate"><input type="checkbox" id="testSkipValChk" /> Skip val</label>
+        <label title="Backup existing level .py"><input type="checkbox" id="testBackupChk" checked /> Backup</label>
+        <label title="Proceed when validation warns"><input type="checkbox" id="testWarnOkChk" /> Warn OK</label>
+      </div>
+      <div id="testServerHint"></div>
+      <div id="testStatus"></div>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" id="buildSettingsClose">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Map name entry — replaces window.prompt (unsupported in Electron). -->
+<div id="mapNameModal" role="dialog" aria-modal="true" aria-labelledby="mapNameModalTitle" hidden>
+  <div id="mapNameSheet" class="panel">
+    <h2 id="mapNameModalTitle">Map name</h2>
+    <p id="mapNameModalHint" class="map-name-hint">Lowercase letters, digits, and underscore only.</p>
+    <input type="text" id="mapNameInput" spellcheck="false" autocomplete="off"
+      aria-describedby="mapNameModalHint mapNameError" />
+    <div id="mapNameError" role="alert" aria-live="polite"></div>
+    <div class="sheet-actions">
+      <button type="button" id="mapNameCancel">Cancel</button>
+      <button type="button" id="mapNameOk" class="active">Create</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="openFileInput" accept=".json,application/json" hidden aria-hidden="true" tabindex="-1" />
+<input type="text" id="newMapName" spellcheck="false" placeholder="my_arena" hidden aria-hidden="true" tabindex="-1" />
+<div id="openMapList" hidden aria-hidden="true"></div>
 
 <!-- pass-2: map-editing panel (visible only in edit mode) -->
 <div id="editPanel" class="panel">
   <h1>Map editor</h1>
-  <p class="sub">Click the floor to place · click a pad to select · drag to move</p>
-  <h2>Place tool</h2>
-  <div class="tools" id="tools"></div>
-  <label class="toggle"><input type="checkbox" id="snapChk" /> Snap to 250-unit grid</label>
+  <p class="sub">Use the bottom toolbar to pick a component, then click the floor. Click a pad to select · drag to move.</p>
+  <label class="toggle"><input type="checkbox" id="snapChk" checked /> Snap to 250-unit grid</label>
+  <label class="toggle"><input type="checkbox" id="minimapChk" /> Minimap overlay (M)</label>
+  <div id="tools" hidden aria-hidden="true"></div>
   <hr/>
   <h2>Box geometry</h2>
   <div class="field"><label>Half (XZ)</label><input type="range" id="halfRange" min="500" max="12000" step="100"><span class="val" id="halfVal"></span></div>
@@ -822,13 +1134,20 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <button id="undoBtn" title="Undo last edit">Undo</button>
     <button id="redoBtn" title="Redo undone edit">Redo</button>
   </div>
+  <p class="export-note">Use <strong>File → Save</strong> for server maps. Session backup below is browser-only.</p>
+  <details class="opt-section" style="margin-top:6px;border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+    <summary style="cursor:pointer;font-size:11px;color:var(--muted);">Session backup (browser)</summary>
+    <div class="btns" style="margin-top:6px;">
+      <button id="saveLocalBtn" title="Save to browser LocalStorage">Cache locally</button>
+      <button id="loadLocalBtn" title="Load from browser LocalStorage">Load cache</button>
+    </div>
+  </details>
   <div class="btns">
-    <button id="saveLocalBtn" title="Save to browser LocalStorage">Save local</button>
-    <button id="loadLocalBtn" title="Load from browser LocalStorage">Load local</button>
     <button id="clearMapBtn" class="wide">Clear map</button>
   </div>
-  <p class="export-note">Storage key: <code id="storageKey"></code> (named by map name)</p>
-  <hr/>
+  <p class="export-note"><code id="storageKey"></code></p>
+  <details class="edit-advanced">
+    <summary>Export, import &amp; build</summary>
   <h2>Export &amp; import</h2>
   <div class="btns">
     <button id="exportBtn">Export JSON</button>
@@ -859,7 +1178,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <hr/>
   <h2>Manual build</h2>
   <pre id="buildCmds"></pre>
-  <p class="export-note"><strong>Tip:</strong> Use the <strong>Map options</strong> strip (top-right) for Test / Play and Export. Set <em>Deploy → uff (test-map slot)</em> unless your map is in <code>stagetable.c</code>.</p>
+  <p class="export-note"><strong>Tip:</strong> Use <strong>Play → Test Map</strong> or the ▶ Play run bar. Set <em>Deploy → uff (test-map slot)</em> in Build Settings unless your map is in <code>stagetable.c</code>.</p>
+  </details>
 </div>
 
 <!-- pass-6: Collapsed command log + terminal fallback (bottom-right) -->
@@ -893,16 +1213,29 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <div class="hint">Click scene to capture mouse.</div>
   </div>
   <div id="helpEdit" style="display:none">
-    <strong>Edit</strong> · tool + <kbd>click floor</kbd> add · <kbd>drag</kbd> move pad · <kbd>Del</kbd> delete ·
-    <kbd>Ctrl+Z/Y</kbd> undo/redo · <kbd>Ctrl+S/L</kbd> save/load · <kbd>E</kbd> exit
+    <strong>Edit</strong> · tool + <kbd>click floor</kbd> add · ghost preview · <kbd>drag</kbd> move pad ·
+    <kbd>Del</kbd> delete · <kbd>G</kbd> snap grid · <kbd>M</kbd> minimap ·
+    <kbd>Ctrl+Z/Y</kbd> undo/redo · <kbd>Ctrl+N</kbd> new · <kbd>Ctrl+S</kbd> save · <kbd>Ctrl+O</kbd> open · <kbd>E</kbd> exit
   </div>
-  <div class="hint" style="margin-top:6px"><strong>Map options</strong> (top-right): Level, Deploy, Mod, Scenario, flags, Test/Play.
+  <div class="hint" style="margin-top:6px"><strong>Run bar</strong> (top-right): Mod, Scenario, ▶ Play. Advanced options in <strong>Play → Build Settings…</strong>.
     Server: <code>python3 journal/uff_viewer/serve_editor.py</code> or <strong>Perfect Dark Map Editor.app</strong>.</div>
 </div>
 
 <div id="info" class="panel">
   <span class="close" id="infoClose">✕</span>
   <div id="infoBody"></div>
+</div>
+
+<!-- Floating click-to-place toolbar (edit mode) — primary placement UX -->
+<div id="placeToolbar" role="toolbar" aria-label="Place map components">
+  <div id="placeToolBtns"></div>
+  <span class="pt-hint" id="placeHint">Click the floor to place</span>
+</div>
+<div id="placeVariants" role="toolbar" aria-label="Component variant"></div>
+
+<div id="minimapWrap" aria-hidden="true" title="Top-down pad preview">
+  <button type="button" id="minimapClose" title="Hide minimap (M)" aria-label="Hide minimap">✕</button>
+  <canvas id="minimap" width="128" height="128"></canvas>
 </div>
 
 <div id="toast"></div>
@@ -928,6 +1261,54 @@ const KIND_COLORS = {
   scenario: 0xc77dff,  // purple
   other:    0x999999,
 };
+// pass-8: pad sphere radius + selection ring scale vary by type for clearer read.
+const PAD_RADIUS = { spawn: 110, weapon: 95, ammo: 80, scenario: 100, other: 85 };
+const PAD_RING_SCALE = { spawn: 1.48, weapon: 1.40, ammo: 1.34, scenario: 1.44, other: 1.36 };
+const padGeomCache = {};
+function padGeometryFor(kind) {
+  const k = KIND_ORDER.includes(kind) ? kind : 'other';
+  if (!padGeomCache[k]) padGeomCache[k] = new THREE.SphereGeometry(PAD_RADIUS[k], 18, 14);
+  return padGeomCache[k];
+}
+let hoverIndex = -1;
+let animTime = 0;
+let showMinimap = false;
+let editing = false;  // must be declared before drawMinimap / first rebuildPads()
+// pass-8: minimap ctx must exist before the first rebuildPads() — drawMinimap() is hoisted.
+const minimapCanvas = document.getElementById('minimap');
+let minimapCtx = minimapCanvas ? minimapCanvas.getContext('2d') : null;
+function drawMinimap() {
+  if (!minimapCtx || !showMinimap || !editing) return;
+  const w = minimapCanvas.width;
+  const h = minimapCanvas.height;
+  const pad = 8;
+  const span = HALF * 2 || 1;
+  const inner = Math.min(w, h) - pad * 2;
+  const scale = inner / span;
+  const sx = scale;
+  const sz = scale;
+  const toX = x => pad + (x + HALF) * sx;
+  const toY = z => pad + (z + HALF) * sz;
+
+  minimapCtx.clearRect(0, 0, w, h);
+  minimapCtx.fillStyle = '#0c1018';
+  minimapCtx.fillRect(0, 0, w, h);
+  minimapCtx.strokeStyle = '#3a465c';
+  minimapCtx.strokeRect(pad, pad, span * sx, span * sz);
+
+  mapState.pads.forEach((p, i) => {
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    minimapCtx.beginPath();
+    minimapCtx.fillStyle = '#' + (KIND_COLORS[kind] || 0xffffff).toString(16).padStart(6, '0');
+    minimapCtx.arc(toX(p.x), toY(p.z), i === selectedIndex ? 5 : 3.5, 0, Math.PI * 2);
+    minimapCtx.fill();
+    if (i === selectedIndex) {
+      minimapCtx.strokeStyle = '#ffffff';
+      minimapCtx.lineWidth = 1.5;
+      minimapCtx.stroke();
+    }
+  });
+}
 const KIND_LABEL = {
   spawn: 'Spawn', weapon: 'Weapon', ammo: 'Ammo',
   scenario: 'Scenario (case/hill)', other: 'Other',
@@ -951,7 +1332,22 @@ const EYE_H = 170;  // approx in-game player eye height (world units)
 // calls rebuildPads() which re-derives indices + 3D meshes from this array.
 // ===========================================================================
 const KIND_ORDER = ['spawn', 'weapon', 'ammo', 'scenario', 'other'];
+const PAD_FLOOR_Y = 10;  // pads must sit above floor (Y=0) or spawns fall through in-game
 const rnd = v => Math.round(v);
+
+// Validation: weapon/ammo may share a spawn XZ in stock maps; only duplicate spawns
+// (or two weapons / two ammo crates at the same spot) should block Test / Play.
+function padPositionsConflict(indices, pads) {
+  if (indices.length <= 1) return false;
+  for (const kind of ['spawn', 'weapon', 'ammo']) {
+    if (indices.filter(i => pads[i].type === kind).length > 1) return true;
+  }
+  return false;
+}
+// Near-origin gate for Test / Play: spawn pads hugging world origin (phantom-floor class).
+function padNearOriginForTest(p) {
+  return p.type === 'spawn' && Math.hypot(p.x, p.z) <= 80 && p.y <= 20;
+}
 
 // Curated weapon catalog (weaponnum enum from src/include/constants.h, the same
 // IDs tools/pdmap/weapons.py uses for WeaponProp). Values are the integer IDs.
@@ -1035,6 +1431,7 @@ function pushHistory() {
   if (historyStack.length > MAX_HISTORY) historyStack.shift();
   redoStack.length = 0;
   updateUndoRedoButtons();
+  markDirty();
 }
 
 function undo() {
@@ -1117,6 +1514,28 @@ function loadFromLocalStorage() {
 
 const BLANK_MAP_DEFAULTS = { box_half: 2500, box_height: 2000, pads: [] };
 
+/** Starter template: box + four corner spawns + weapons/ammo/scenario. */
+function starterMapTemplate(name) {
+  const half = 2500;
+  const y = 10;
+  const d = 2000;
+  return {
+    name: name || 'map',
+    box_half: half,
+    box_height: 2000,
+    pads: [
+      { type: 'spawn', x: -d, y, z: -d, room: 1 },
+      { type: 'spawn', x: d, y, z: -d, room: 1 },
+      { type: 'spawn', x: -d, y, z: d, room: 1 },
+      { type: 'spawn', x: d, y, z: d, room: 1 },
+      { type: 'weapon', x: 0, y, z: -1500, room: 1, weapon: 0x11 },
+      { type: 'weapon', x: 0, y, z: 1500, room: 1, weapon: 0x13 },
+      { type: 'ammo', x: 0, y, z: 0, room: 1, ammoType: 0x04, quantity: 200 },
+      { type: 'scenario', x: 0, y, z: -500, room: 1, scenario: 'case', team: 0 },
+    ],
+  };
+}
+
 function clearMap() {
   if (!confirm('Clear all pads and reset box to minimal defaults (±2500, height 2000)?')) return;
   pushHistory();
@@ -1124,7 +1543,8 @@ function clearMap() {
   loadMap(blank, { skipHistory: true });
   levelNameInput.value = mapState.name;
   updateBuildCmds(mapState.name);
-  showToast('Map cleared');
+  showToast('Map cleared — click the floor to place components');
+  beginPlacementMode('spawn');
 }
 
 // ---------- renderer / scene / camera ----------
@@ -1335,17 +1755,77 @@ scene.add(padRoot);
 const padGroups = {};
 for (const k of KIND_ORDER) { padGroups[k] = new THREE.Group(); padRoot.add(padGroups[k]); }
 const padKindVisible = {}; for (const k of KIND_ORDER) padKindVisible[k] = true;
-const padGeom = new THREE.SphereGeometry(90, 16, 12);
 let pickPads = [];            // pad meshes for raycasting (rebuilt each time)
 let selectedIndex = -1;       // index into mapState.pads, or -1 = none
 
-// Selection marker: a bright wireframe sphere that follows the selected pad.
-const selectionMarker = new THREE.Mesh(
-  new THREE.SphereGeometry(150, 18, 12),
-  new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.85, depthTest: false })
+// pass-8: selection gizmo — outer type-colored ring + inner pulse + floor crosshair.
+const selectionGroup = new THREE.Group();
+selectionGroup.visible = false;
+scene.add(selectionGroup);
+const selectionRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.92, 1.0, 32),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthTest: false })
 );
-selectionMarker.visible = false;
-scene.add(selectionMarker);
+selectionRing.rotation.x = -Math.PI / 2;
+selectionGroup.add(selectionRing);
+const selectionPulse = new THREE.Mesh(
+  new THREE.RingGeometry(0.78, 0.86, 32),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthTest: false })
+);
+selectionPulse.rotation.x = -Math.PI / 2;
+selectionGroup.add(selectionPulse);
+const gizmoCross = new THREE.Group();
+const gizmoMat = new THREE.LineBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.65, depthTest: false });
+const gizmoLineA = new THREE.Line(new THREE.BufferGeometry(), gizmoMat);
+const gizmoLineB = new THREE.Line(new THREE.BufferGeometry(), gizmoMat);
+const gizmoPillar = new THREE.Line(new THREE.BufferGeometry(), gizmoMat.clone());
+gizmoCross.add(gizmoLineA, gizmoLineB, gizmoPillar);
+selectionGroup.add(gizmoCross);
+
+// Hover highlight ring (follows hovered pad).
+const hoverRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.88, 1.0, 28),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthTest: false })
+);
+hoverRing.rotation.x = -Math.PI / 2;
+hoverRing.visible = false;
+scene.add(hoverRing);
+
+// Ghost preview while a place tool is active.
+const ghostPad = new THREE.Mesh(
+  new THREE.SphereGeometry(90, 16, 12),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, depthWrite: false })
+);
+ghostPad.visible = false;
+scene.add(ghostPad);
+const ghostRing = new THREE.Mesh(
+  new THREE.RingGeometry(120, 140, 32),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthTest: false })
+);
+ghostRing.rotation.x = -Math.PI / 2;
+ghostRing.visible = false;
+scene.add(ghostRing);
+
+// Snap grid dots (optional, when snap enabled in edit mode).
+const snapGridGroup = new THREE.Group();
+snapGridGroup.visible = false;
+scene.add(snapGridGroup);
+function rebuildSnapGrid() {
+  for (const c of snapGridGroup.children) { c.geometry?.dispose?.(); c.material?.dispose?.(); }
+  snapGridGroup.clear();
+  const step = 250;
+  const dotGeom = new THREE.RingGeometry(18, 28, 12);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0x4a5870, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthTest: false });
+  for (let x = -HALF; x <= HALF; x += step) {
+    for (let z = -HALF; z <= HALF; z += step) {
+      const d = new THREE.Mesh(dotGeom, dotMat);
+      d.rotation.x = -Math.PI / 2;
+      d.position.set(x, 0.5, z);
+      snapGridGroup.add(d);
+    }
+  }
+}
+rebuildSnapGrid();
 
 // pass-4: visual line from dragged pad to floor snap point.
 const dragLine = new THREE.Line(
@@ -1371,30 +1851,90 @@ function rebuildPads() {
     const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
     const suspect = Math.hypot(p.x, p.y, p.z) <= DATA.originRadius;
     const col = suspect ? SUSPECT_COLOR : (KIND_COLORS[kind] || 0xffffff);
-    const m = new THREE.Mesh(padGeom, new THREE.MeshBasicMaterial({ color: col }));
+    const m = new THREE.Mesh(padGeometryFor(kind), new THREE.MeshBasicMaterial({ color: col }));
     m.position.set(p.x, p.y, p.z);
-    m.userData = { type: 'pad', index: i, kind, ref: p, suspect };
+    m.userData = { type: 'pad', index: i, kind, ref: p, suspect, baseScale: 1 };
+    if (i === selectedIndex) m.scale.setScalar(1.12);
+    else if (i === hoverIndex) m.scale.setScalar(1.08);
     padGroups[kind].add(m);
     pickPads.push(m);
 
     const lab = makeLabel('p' + i, '#cdd6e6');
-    lab.position.set(p.x, p.y + 110, p.z);
+    lab.position.set(p.x, p.y + PAD_RADIUS[kind] + 20, p.z);
     padLabelGroup.add(lab);
   });
 
   for (const k of KIND_ORDER) padGroups[k].visible = padKindVisible[k];
   // keep selection valid + marker positioned
   if (selectedIndex >= mapState.pads.length) selectedIndex = -1;
+  if (hoverIndex >= mapState.pads.length) hoverIndex = -1;
   updateSelectionMarker();
+  updateHoverRing();
   if (typeof updateValidation === 'function') updateValidation();
   if (typeof updateCounts === 'function') updateCounts();
+  if (typeof drawMinimap === 'function') drawMinimap();
 }
 
 function updateSelectionMarker() {
-  if (selectedIndex < 0 || selectedIndex >= mapState.pads.length) { selectionMarker.visible = false; return; }
+  if (selectedIndex < 0 || selectedIndex >= mapState.pads.length) {
+    selectionGroup.visible = false;
+    return;
+  }
   const p = mapState.pads[selectedIndex];
-  selectionMarker.position.set(p.x, p.y, p.z);
-  selectionMarker.visible = padRoot.visible;
+  const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+  const r = PAD_RADIUS[kind] * (PAD_RING_SCALE[kind] || 1.4);
+  selectionGroup.position.set(p.x, p.y, p.z);
+  selectionGroup.visible = padRoot.visible;
+  selectionRing.scale.set(r, r, 1);
+  selectionPulse.scale.set(r * 0.92, r * 0.92, 1);
+  const col = KIND_COLORS[kind] || 0xffffff;
+  selectionRing.material.color.set(col);
+  selectionPulse.material.color.set(col);
+  const span = Math.max(160, r * 0.85);
+  gizmoLineA.geometry.setFromPoints([new THREE.Vector3(-span, 0, 0), new THREE.Vector3(span, 0, 0)]);
+  gizmoLineB.geometry.setFromPoints([new THREE.Vector3(0, 0, -span), new THREE.Vector3(0, 0, span)]);
+  gizmoPillar.geometry.setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, p.y, 0)]);
+  gizmoLineA.position.y = 0.5 - p.y;
+  gizmoLineB.position.y = 0.5 - p.y;
+}
+
+function updateHoverRing() {
+  if (hoverIndex < 0 || hoverIndex >= mapState.pads.length || hoverIndex === selectedIndex) {
+    hoverRing.visible = false;
+    return;
+  }
+  const p = mapState.pads[hoverIndex];
+  const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+  const r = PAD_RADIUS[kind] * 1.22;
+  hoverRing.position.set(p.x, p.y + 2, p.z);
+  hoverRing.scale.set(r, r, 1);
+  hoverRing.material.color.set(KIND_COLORS[kind] || 0xffffff);
+  hoverRing.visible = padRoot.visible && editing;
+}
+
+function updateGhostPreview(pt, kind) {
+  if (!editing || !activeTool || !pt) {
+    ghostPad.visible = false;
+    ghostRing.visible = false;
+    return;
+  }
+  const k = activeTool || kind || 'spawn';
+  const s = snapClamp(pt);
+  const col = KIND_COLORS[k] || 0xffffff;
+  ghostPad.geometry = padGeometryFor(k);
+  ghostPad.material.color.set(col);
+  ghostPad.position.set(rnd(s.x), PAD_FLOOR_Y, rnd(s.z));
+  ghostPad.visible = padRoot.visible;
+  ghostRing.position.set(rnd(s.x), PAD_FLOOR_Y + 0.5, rnd(s.z));
+  ghostRing.material.color.set(col);
+  ghostRing.visible = padRoot.visible && snapChk.checked;
+}
+
+function animatePadVisuals(dt) {
+  animTime += dt;
+  const pulse = 0.45 + 0.25 * Math.sin(animTime * 4.5);
+  if (selectionPulse.visible) selectionPulse.material.opacity = pulse;
+  if (ghostPad.visible) ghostPad.material.opacity = 0.28 + 0.12 * Math.sin(animTime * 5);
 }
 rebuildPads();
 
@@ -1434,7 +1974,7 @@ function addToggle(parent, label, checked, onChange) {
 }
 addToggle(togglesEl, 'Box faces', true, v => { faceGroup.visible = v; });
 addToggle(togglesEl, 'Collision tiles', true, v => { tileGroup.visible = v; });
-addToggle(togglesEl, 'Pads', true, v => { padRoot.visible = v; updateSelectionMarker(); });
+addToggle(togglesEl, 'Pads', true, v => { padRoot.visible = v; updateSelectionMarker(); updateHoverRing(); });
 const subWrap = document.createElement('div'); subWrap.className = 'sub-toggles'; togglesEl.appendChild(subWrap);
 // Sub-toggles for every pad kind (not just present ones) so visibility persists
 // across edits that add/remove a kind.
@@ -1537,13 +2077,19 @@ function updateFly(dt) {
   if (keys['ControlLeft'] || keys['ControlRight'] || keys['KeyQ']) camera.position.y -= step;
 }
 
+function isTypingInForm(el) {
+  const node = el || document.activeElement;
+  if (!node) return false;
+  const tag = node.tagName || '';
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || node.isContentEditable;
+}
+
 addEventListener('keydown', e => {
   // Ignore shortcuts while typing in an editor input/textarea/select.
-  const tag = (e.target && e.target.tagName) || '';
-  const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+  const typing = isTypingInForm(e.target);
   if (!typing) {
-    if (e.code === 'KeyF' && !e.repeat) { setMode(mode === 'fly' ? 'orbit' : 'fly'); }
-    if (e.code === 'KeyE' && !e.repeat) { setEditing(!editing); }
+    if (e.code === 'KeyF' && !e.repeat) { e.preventDefault(); setMode(mode === 'fly' ? 'orbit' : 'fly'); }
+    if (e.code === 'KeyE' && !e.repeat) { e.preventDefault(); setEditing(!editing); }
     if ((e.code === 'Delete' || e.code === 'Backspace') && editing && selectedIndex >= 0) {
       e.preventDefault(); deletePad();
     }
@@ -1555,19 +2101,29 @@ addEventListener('keydown', e => {
       e.preventDefault();
       runTestBuildOnly();
     }
-    // pass-4: global edit shortcuts (undo/redo/save/load).
+    if (e.code === 'KeyG' && !e.repeat) {
+      e.preventDefault();
+      toggleSnapGrid();
+    }
+    if (e.code === 'KeyM' && !e.repeat) {
+      e.preventDefault();
+      toggleMinimap();
+    }
+    // pass-4/8: global edit shortcuts (undo/redo/save/load maps).
     if (e.ctrlKey || e.metaKey) {
       const k = e.key.toLowerCase();
       if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
       else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
-      else if (k === 's') { e.preventDefault(); saveToLocalStorage(); }
+      else if (k === 's') { e.preventDefault(); saveCurrentMap(); }
+      else if (k === 'o') { e.preventDefault(); triggerOpenFilePicker(); }
+      else if (k === 'n') { e.preventDefault(); createNewMap(); }
       else if (k === 'l') { e.preventDefault(); loadFromLocalStorage(); }
     }
   }
   if (mode === 'fly' && (e.code === 'Space' || e.code.startsWith('Control'))) e.preventDefault();
   keys[e.code] = true;
-});
-addEventListener('keyup', e => { keys[e.code] = false; });
+}, true);
+addEventListener('keyup', e => { keys[e.code] = false; }, true);
 
 // re-lock the pointer if the user pressed Esc but is still in fly mode
 canvas.addEventListener('click', () => { if (mode === 'fly' && !fly.isLocked) { try { fly.lock(); } catch (e) {} } });
@@ -1628,13 +2184,43 @@ helpBtn.onclick = () => {
 // pass-2 EDITOR: edit mode, place/select/drag/delete, properties, geometry,
 // validation, JSON import/export.
 // ===========================================================================
-let editing = false;
 let activeTool = null;        // null = select/move; else 'spawn'|'weapon'|'ammo'|'scenario'
 let dragging = false;         // currently dragging the selected pad on the floor
 let editDownXY = null;        // pointer-down screen pos (to distinguish click vs orbit-drag)
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);  // Y=0 floor
 const editBtn = document.getElementById('editBtn');
+const editModeBtn = document.getElementById('editModeBtn');
 const snapChk = document.getElementById('snapChk');
+const minimapChk = document.getElementById('minimapChk');
+const minimapWrap = document.getElementById('minimapWrap');
+
+function syncMinimapDisplay() {
+  if (minimapChk) minimapChk.checked = showMinimap;
+  if (minimapWrap) {
+    minimapWrap.classList.toggle('visible', editing && showMinimap);
+    minimapWrap.setAttribute('aria-hidden', (editing && showMinimap) ? 'false' : 'true');
+  }
+  if (editing && showMinimap) drawMinimap();
+}
+function setMinimapVisible(on, opts = {}) {
+  showMinimap = !!on;
+  syncMinimapDisplay();
+  if (!opts.silent) showToast(showMinimap ? 'Minimap on' : 'Minimap off');
+}
+function toggleMinimap() {
+  if (!editing) setEditing(true);
+  setMinimapVisible(!showMinimap);
+}
+function toggleSnapGrid() {
+  if (!editing) setEditing(true);
+  if (!snapChk) return;
+  snapChk.checked = !snapChk.checked;
+  snapGridGroup.visible = editing && snapChk.checked;
+  rebuildSnapGrid();
+  showToast(snapChk.checked ? 'Snap grid on' : 'Snap grid off');
+}
+minimapChk?.addEventListener('change', () => setMinimapVisible(minimapChk.checked));
+document.getElementById('minimapClose')?.addEventListener('click', () => setMinimapVisible(false));
 
 function updateDragVisual(px, py, pz, sx, sz, clientX, clientY) {
   dragLine.geometry.setFromPoints([
@@ -1663,42 +2249,157 @@ function setEditing(on) {
   if (on === editing) return;
   editing = on;
   document.body.classList.toggle('editing', on);
-  editBtn.textContent = on ? 'Exit edit mode (E)' : 'Enter edit mode (E)';
-  editBtn.classList.toggle('active', on);
+  if (editBtn) {
+    editBtn.textContent = on ? 'Exit edit mode (E)' : 'Enter edit mode (E)';
+    editBtn.classList.toggle('active', on);
+  }
+  if (editModeBtn) {
+    editModeBtn.textContent = on ? 'Done' : 'Edit';
+    editModeBtn.classList.toggle('active', on);
+    editModeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    editModeBtn.title = on ? 'Exit edit mode (E)' : 'Enter edit mode (E)';
+  }
   if (on && mode === 'fly') setMode('orbit');
   document.getElementById('helpEdit').style.display = on ? '' : 'none';
   document.getElementById('helpOrbit').style.display = (!on && mode === 'orbit') ? '' : 'none';
   if (on) document.getElementById('info').style.display = 'none';  // hide inspect popup
-  else { selectPad(-1); canvas.style.cursor = 'default'; }
+  else { selectPad(-1); canvas.style.cursor = 'default'; hideGhostPreview(); }
+  snapGridGroup.visible = on && snapChk.checked;
+  syncMinimapDisplay();
+  if (on) closeMapMenus();
+  updatePlaceVariants();
+  layoutChrome();
 }
-editBtn.onclick = () => setEditing(!editing);
+function hideGhostPreview() {
+  ghostPad.visible = false;
+  ghostRing.visible = false;
+}
+/** Enter edit mode with an optional placement tool pre-selected (spawn by default). */
+function beginPlacementMode(tool) {
+  if (!editing) setEditing(true);
+  setTool(tool != null ? tool : 'spawn');
+}
+editBtn?.addEventListener('click', () => setEditing(!editing));
+editModeBtn?.addEventListener('click', () => setEditing(!editing));
 
-// ---- tool palette ---------------------------------------------------------
+// ---- tool palette (side panel + floating canvas toolbar) ------------------
 const toolsEl = document.getElementById('tools');
 const toolBtns = {};
+const placeToolBtnsEl = document.getElementById('placeToolBtns');
+const placeVariantsEl = document.getElementById('placeVariants');
+const placeHintEl = document.getElementById('placeHint');
+const placeToolBtns = {};
 const TOOL_DEFS = [['spawn', 'Spawn'], ['weapon', 'Weapon'], ['ammo', 'Ammo'], ['scenario', 'Scenario']];
-(function buildTools() {
-  const selBtn = document.createElement('button');
-  selBtn.textContent = 'Select / Move'; selBtn.style.gridColumn = '1 / -1';
-  selBtn.onclick = () => setTool(null);
-  toolsEl.appendChild(selBtn);
-  toolBtns['_select'] = selBtn;
-  for (const [t, label] of TOOL_DEFS) {
-    const b = document.createElement('button');
-    const dot = document.createElement('span'); dot.className = 'dot';
-    dot.style.background = '#' + (KIND_COLORS[t] || 0xffffff).toString(16).padStart(6, '0');
-    b.appendChild(dot); b.appendChild(document.createTextNode(label));
-    b.onclick = () => setTool(t);
-    toolBtns[t] = b; toolsEl.appendChild(b);
+// Quick-pick variants shown above the floating toolbar when placing weapons/ammo/scenario.
+const QUICK_WEAPONS = [0x11, 0x13, 0x15, 0x18, 0x0e, 0x02];
+const QUICK_AMMO = [0x03, 0x04, 0x01, 0x05];
+let placeWeapon = 0x11;
+let placeAmmo = 0x04;
+let placeScenario = 'case';
+
+function syncToolButtonStates() {
+  for (const k of Object.keys(toolBtns)) toolBtns[k].classList.toggle('active', (activeTool || '_select') === k);
+  for (const k of Object.keys(placeToolBtns)) placeToolBtns[k].classList.toggle('active', (activeTool || '_select') === k);
+  canvas.style.cursor = (editing && activeTool) ? 'crosshair' : 'default';
+}
+
+function updatePlaceHint() {
+  if (!placeHintEl) return;
+  if (!editing) { placeHintEl.textContent = ''; return; }
+  if (!activeTool) placeHintEl.textContent = 'Select — click a pad · drag to move';
+  else if (activeTool === 'spawn') placeHintEl.textContent = 'Spawn — click the floor';
+  else if (activeTool === 'weapon') placeHintEl.textContent = weaponName(placeWeapon) + ' — click floor';
+  else if (activeTool === 'ammo') placeHintEl.textContent = ammoName(placeAmmo) + ' ×200 — click floor';
+  else if (activeTool === 'scenario') {
+    const sc = SCENARIO_CATALOG.find(([id]) => id === placeScenario);
+    placeHintEl.textContent = (sc ? sc[1] : placeScenario) + ' — click floor';
+  } else placeHintEl.textContent = 'Click the floor to place';
+}
+
+function updatePlaceVariants() {
+  if (!placeVariantsEl) return;
+  placeVariantsEl.innerHTML = '';
+  if (!editing || !activeTool || activeTool === 'spawn') {
+    placeVariantsEl.classList.remove('open');
+    updatePlaceHint();
+    return;
   }
+  placeVariantsEl.classList.add('open');
+  if (activeTool === 'weapon') {
+    for (const id of QUICK_WEAPONS) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = weaponName(id);
+      b.classList.toggle('active', placeWeapon === id);
+      b.onclick = () => { placeWeapon = id; updatePlaceVariants(); };
+      placeVariantsEl.appendChild(b);
+    }
+  } else if (activeTool === 'ammo') {
+    for (const id of QUICK_AMMO) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = ammoName(id);
+      b.classList.toggle('active', placeAmmo === id);
+      b.onclick = () => { placeAmmo = id; updatePlaceVariants(); };
+      placeVariantsEl.appendChild(b);
+    }
+  } else if (activeTool === 'scenario') {
+    for (const [id, label] of SCENARIO_CATALOG) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.classList.toggle('active', placeScenario === id);
+      b.onclick = () => { placeScenario = id; updatePlaceVariants(); };
+      placeVariantsEl.appendChild(b);
+    }
+  }
+  updatePlaceHint();
+}
+
+(function buildTools() {
+  // Legacy hidden container keeps toolBtns map alive for syncToolButtonStates().
+  if (toolsEl) {
+    const selBtn = document.createElement('button');
+    selBtn.textContent = 'Select / Move';
+    selBtn.onclick = () => setTool(null);
+    toolBtns['_select'] = selBtn;
+    for (const [t, label] of TOOL_DEFS) {
+      const b = document.createElement('button');
+      b.onclick = () => setTool(t);
+      toolBtns[t] = b;
+    }
+  }
+  // Floating canvas toolbar — primary placement UX.
+  const mkPlaceBtn = (key, label, col) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.title = label;
+    if (col != null) {
+      const dot = document.createElement('span');
+      dot.className = 'pt-dot';
+      dot.style.background = '#' + col.toString(16).padStart(6, '0');
+      b.appendChild(dot);
+    }
+    b.appendChild(document.createTextNode(label));
+    b.onclick = () => setTool(key === '_select' ? null : key);
+    placeToolBtnsEl.appendChild(b);
+    placeToolBtns[key] = b;
+  };
+  mkPlaceBtn('_select', 'Select', null);
+  for (const [t, label] of TOOL_DEFS) mkPlaceBtn(t, label, KIND_COLORS[t] || 0xffffff);
   setTool(null);
 })();
 function setTool(t) {
   activeTool = (t === activeTool) ? null : t;  // clicking the active tool returns to select
-  for (const k of Object.keys(toolBtns)) toolBtns[k].classList.remove('active');
-  toolBtns[activeTool || '_select'].classList.add('active');
-  canvas.style.cursor = (editing && activeTool) ? 'crosshair' : 'default';
+  syncToolButtonStates();
+  if (!activeTool) hideGhostPreview();
+  updatePlaceVariants();
+  layoutChrome();
 }
+snapChk.addEventListener('change', () => {
+  snapGridGroup.visible = editing && snapChk.checked;
+  rebuildSnapGrid();
+});
 
 // ---- raycast helpers ------------------------------------------------------
 function setNdc(e) {
@@ -1732,10 +2433,16 @@ function defaultRoom() {
 function addPad(type, pt) {
   pushHistory();
   const s = snapClamp(pt);
-  const pad = Object.assign({ type, x: rnd(s.x), y: 0, z: rnd(s.z), room: defaultRoom() }, defaultsForType(type));
+  const pad = Object.assign({
+    type, x: rnd(s.x), y: PAD_FLOOR_Y, z: rnd(s.z), room: defaultRoom(),
+  }, defaultsForType(type));
+  if (type === 'weapon') pad.weapon = placeWeapon;
+  if (type === 'ammo') { pad.ammoType = placeAmmo; pad.quantity = 200; }
+  if (type === 'scenario') pad.scenario = placeScenario;
   mapState.pads.push(pad);
   rebuildPads();               // reassigns contiguous indices + meshes
   selectPad(mapState.pads.length - 1);
+  updateValidation();
 }
 function deletePad() {
   if (selectedIndex < 0) return;
@@ -1749,6 +2456,8 @@ function selectPad(i) {
   selectedIndex = (i >= 0 && i < mapState.pads.length) ? i : -1;
   updateSelectionMarker();
   renderProps();
+  updateHoverRing();
+  if (typeof drawMinimap === 'function') drawMinimap();
 }
 
 // Live-sync only the selected pad's mesh/label/marker during a drag (cheap).
@@ -1762,8 +2471,12 @@ function syncSelectedMesh() {
     const suspect = Math.hypot(p.x, p.y, p.z) <= DATA.originRadius;
     mesh.material.color.set(suspect ? SUSPECT_COLOR : (KIND_COLORS[kind] || 0xffffff));
   }
-  const lab = padLabelGroup.children[i]; if (lab) lab.position.set(p.x, p.y + 110, p.z);
-  selectionMarker.position.set(p.x, p.y, p.z);
+  const lab = padLabelGroup.children[i];
+  if (lab) {
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    lab.position.set(p.x, p.y + PAD_RADIUS[kind] + 20, p.z);
+  }
+  updateSelectionMarker();
 }
 
 // ---- pointer interactions (capture phase so we win over OrbitControls) -----
@@ -1780,15 +2493,35 @@ canvas.addEventListener('pointerdown', e => {
 }, true);
 
 canvas.addEventListener('pointermove', e => {
-  if (!editing || !dragging) return;
-  const pt = floorPointAt(e); if (!pt) return;
-  const s = snapClamp(pt);
-  const p = mapState.pads[selectedIndex];
-  p.x = rnd(s.x); p.z = rnd(s.z);  // keep Y (floor height) while dragging on the plane
-  syncSelectedMesh();
-  updateDragVisual(p.x, p.y, p.z, s.x, s.z, e.clientX, e.clientY);
-  refreshPropsLive();
-  updateValidation();
+  if (!editing || mode !== 'orbit') return;
+  if (dragging) {
+    const pt = floorPointAt(e); if (!pt) return;
+    const s = snapClamp(pt);
+    const p = mapState.pads[selectedIndex];
+    p.x = rnd(s.x); p.z = rnd(s.z);
+    syncSelectedMesh();
+    updateDragVisual(p.x, p.y, p.z, s.x, s.z, e.clientX, e.clientY);
+    refreshPropsLive();
+    updateValidation();
+    return;
+  }
+  // Hover highlight + placement ghost when not dragging.
+  const hit = padMeshAt(e);
+  const nextHover = hit ? hit.userData.index : -1;
+  if (nextHover !== hoverIndex) {
+    hoverIndex = nextHover;
+    pickPads.forEach((m, idx) => {
+      const base = (idx === selectedIndex) ? 1.12 : (idx === hoverIndex) ? 1.08 : 1;
+      m.scale.setScalar(base);
+    });
+    updateHoverRing();
+  }
+  if (activeTool) {
+    const pt = floorPointAt(e);
+    updateGhostPreview(pt, activeTool);
+  } else {
+    hideGhostPreview();
+  }
 }, true);
 
 canvas.addEventListener('pointerup', e => {
@@ -1800,6 +2533,7 @@ canvas.addEventListener('pointerup', e => {
     renderProps();
     return;
   }
+  hideGhostPreview();
   if (!editDownXY) return;
   const moved = Math.hypot(e.clientX - editDownXY.x, e.clientY - editDownXY.y);
   editDownXY = null;
@@ -1919,7 +2653,9 @@ function applyBoxSize(half, height) {
   box3.getBoundingSphere(bsphere);
   controls.maxDistance = HALF * 8;
   halfVal.textContent = HALF; heightVal.textContent = HEIGHT;
+  rebuildSnapGrid();
   updateCounts(); updateValidation();
+  if (typeof drawMinimap === 'function') drawMinimap();
 }
 halfRange.addEventListener('pointerdown', () => {
   if (!boxSliderPushed) { pushHistory(); boxSliderPushed = true; }
@@ -1981,7 +2717,9 @@ function updateValidation() {
   if (outside) warns.push(`<span class="chip warn">${outside} pad(s) outside box XZ footprint</span>`);
   if (nearOriginPads.length) warns.push(`<span class="chip warn">Pad(s) ${nearOriginPads.join(', ')} within ${DATA.originRadius} of origin</span>`);
   for (const [, indices] of posBuckets) {
-    if (indices.length > 1) warns.push(`<span class="chip warn">Pads ${indices.join(', ')} share the same position</span>`);
+    if (padPositionsConflict(indices, pads)) {
+      warns.push(`<span class="chip warn">Pads ${indices.join(', ')} share the same position</span>`);
+    }
   }
   if (!warns.length && pads.length > 0) warns.push(`<span class="chip ok">No issues detected</span>`);
   el.innerHTML = chips.join('') + (warns.length ? '<div style="margin-top:4px">' + warns.join(' ') + '</div>' : '');
@@ -2022,6 +2760,7 @@ function loadMap(obj, opts = {}) {
   if (!obj || !Array.isArray(obj.pads)) { alert('Map JSON must have a pads[] array.'); return false; }
   if (!opts.skipHistory && !suppressHistory) pushHistory();
   mapState.name = obj.name || mapState.name;
+  syncMapNameFields(mapState.name);
   updateStorageKeyDisplay();
   if (Number.isFinite(+obj.box_half) && Number.isFinite(+obj.box_height)) {
     halfRange.value = +obj.box_half; heightRange.value = +obj.box_height;
@@ -2038,6 +2777,7 @@ function loadMap(obj, opts = {}) {
   selectedIndex = -1;
   rebuildPads();
   renderProps();
+  updateValidation();
   return true;
 }
 document.getElementById('exportBtn').onclick = exportJSON;
@@ -2070,13 +2810,588 @@ const LEVEL_CATALOG = DATA.levelCatalog || {};
 const TEST_CONFIG = DATA.testConfig || {};
 const DEV_SERVER = TEST_CONFIG.devServer || {};
 const DEV_SERVER_PORT = DEV_SERVER.port || 8765;
-const DEV_SERVER_BASE = (typeof location !== 'undefined' && location.protocol.startsWith('http'))
-  ? (location.origin)
+let DEV_SERVER_BASE = (typeof location !== 'undefined' && location.protocol.startsWith('http'))
+  ? location.origin
   : ('http://127.0.0.1:' + DEV_SERVER_PORT);
 let devServerOnline = false;
 let devServerHealth = null;
 let devServerPollTimer = null;
 let testPlayBusy = false;
+let mapsCatalog = [];
+let currentMapId = null;
+let docDirty = false;
+
+const openMapListEl = document.getElementById('openMapList');
+const openFileInput = document.getElementById('openFileInput');
+const newMapNameInput = document.getElementById('newMapName');
+const mapsStatusEl = document.getElementById('mapsStatus');
+const currentMapTitleEl = document.getElementById('currentMapTitle');
+const docDirtyBadgeEl = document.getElementById('docDirtyBadge');
+const buildSettingsModal = document.getElementById('buildSettingsModal');
+const runTestStatusEl = document.getElementById('runTestStatus');
+
+async function resolveDevServerBase() {
+  if (typeof location !== 'undefined' && location.protocol.startsWith('http')) {
+    return location.origin;
+  }
+  for (let port = DEV_SERVER_PORT; port <= DEV_SERVER_PORT + 10; port++) {
+    try {
+      const res = await fetch('http://127.0.0.1:' + port + (DEV_SERVER.healthPath || '/api/health'),
+        { method: 'GET', cache: 'no-store' });
+      if (res.ok) return 'http://127.0.0.1:' + port;
+    } catch (_) { /* try next port */ }
+  }
+  return 'http://127.0.0.1:' + DEV_SERVER_PORT;
+}
+
+function updateDocTitle() {
+  const name = currentMapId || mapState.name || 'untitled';
+  if (currentMapTitleEl) {
+    currentMapTitleEl.textContent = name;
+    currentMapTitleEl.title = docDirty ? name + ' — unsaved changes' : 'Current map: ' + name;
+  }
+  if (docDirtyBadgeEl) docDirtyBadgeEl.hidden = !docDirty;
+  if (typeof document !== 'undefined') {
+    document.title = name + ' — Perfect Dark Map Editor';
+  }
+}
+
+function markDirty() {
+  if (!docDirty) { docDirty = true; updateDocTitle(); }
+}
+
+function markClean() {
+  docDirty = false;
+  updateDocTitle();
+}
+
+let mapNamePromptResolve = null;
+const mapNameModal = document.getElementById('mapNameModal');
+const mapNameInput = document.getElementById('mapNameInput');
+const mapNameErrorEl = document.getElementById('mapNameError');
+
+function closeMapNameModal(result) {
+  if (mapNameModal) {
+    mapNameModal.classList.remove('open');
+    mapNameModal.hidden = true;
+  }
+  if (mapNamePromptResolve) {
+    mapNamePromptResolve(result);
+    mapNamePromptResolve = null;
+  }
+}
+
+/** In-app name dialog — window.prompt() is unsupported in Electron (returns null silently). */
+function openMapNameDialog(opts = {}) {
+  const {
+    defaultValue = 'my_arena',
+    title = 'Map name',
+    hint = 'Lowercase letters, digits, and underscore only.',
+    confirmLabel = 'OK',
+  } = opts;
+  if (!mapNameModal || !mapNameInput) {
+    // Last-resort browser fallback (plain http:// dev, not Electron).
+    const raw = window.prompt(hint, defaultValue);
+    return Promise.resolve(raw == null ? null : raw.trim());
+  }
+  return new Promise((resolve) => {
+    mapNamePromptResolve = resolve;
+    if (mapNameErrorEl) mapNameErrorEl.textContent = '';
+    const titleEl = document.getElementById('mapNameModalTitle');
+    const hintEl = document.getElementById('mapNameModalHint');
+    const okBtn = document.getElementById('mapNameOk');
+    if (titleEl) titleEl.textContent = title;
+    if (hintEl) hintEl.textContent = hint;
+    if (okBtn) okBtn.textContent = confirmLabel;
+    mapNameInput.value = defaultValue || 'my_arena';
+    mapNameModal.hidden = false;
+    mapNameModal.classList.add('open');
+    mapNameInput.focus();
+    mapNameInput.select();
+  });
+}
+
+async function promptMapName(defaultName, dialogOpts = {}) {
+  const raw = await openMapNameDialog(Object.assign({
+    defaultValue: defaultName || 'my_arena',
+    title: 'Map name',
+    hint: 'Lowercase letters, digits, and underscore only.',
+    confirmLabel: 'OK',
+  }, dialogOpts));
+  if (raw == null || !String(raw).trim()) return null;
+  try { return sanitizeLevelName(raw); }
+  catch (e) {
+    alert(e.message);
+    return null;
+  }
+}
+
+function submitMapNameModal() {
+  if (!mapNameInput) { closeMapNameModal(null); return; }
+  try {
+    const name = sanitizeLevelName(mapNameInput.value);
+    if (mapNameErrorEl) mapNameErrorEl.textContent = '';
+    closeMapNameModal(name);
+  } catch (e) {
+    if (mapNameErrorEl) mapNameErrorEl.textContent = e.message;
+    mapNameInput.focus();
+  }
+}
+
+async function resolveDocumentName({ saveAs = false } = {}) {
+  if (saveAs) {
+    const typed = newMapNameInput?.value.trim();
+    if (typed) return sanitizeLevelName(typed);
+    const prompted = await promptMapName((currentMapId || mapState.name || 'my_arena') + '_copy', {
+      title: 'Save as',
+      confirmLabel: 'Save',
+    });
+    if (!prompted) throw new Error('Save cancelled.');
+    return prompted;
+  }
+  if (currentMapId) return sanitizeLevelName(currentMapId);
+  const typed = newMapNameInput?.value.trim();
+  if (typed) return sanitizeLevelName(typed);
+  const prompted = await promptMapName(mapState.name && mapState.name !== 'uff' ? mapState.name : 'my_arena', {
+    title: 'Save map',
+    confirmLabel: 'Save',
+  });
+  if (!prompted) throw new Error('Save cancelled.');
+  return prompted;
+}
+
+function syncMapNameFields(name) {
+  const n = name || mapState.name || 'map';
+  mapState.name = n;
+  if (levelNameInput) levelNameInput.value = n;
+  if (testLevelInput && !testLevelInput.dataset.userEdited) testLevelInput.value = n;
+  if (newMapNameInput && !newMapNameInput.value.trim()) newMapNameInput.placeholder = n + '_copy';
+  updateBuildCmds(n);
+  updateStorageKeyDisplay();
+  updateDocTitle();
+}
+
+function setMapsStatus(kind, msg) {
+  if (!mapsStatusEl) return;
+  const cls = kind === 'ok' ? 'live' : (kind === 'warn' ? 'off' : (kind === 'err' ? 'err' : ''));
+  const short = (msg || '').length > 28 ? String(msg).slice(0, 26) + '…' : (msg || '');
+  mapsStatusEl.innerHTML = short ? (cls ? `<span class="${cls}">${short}</span>` : short) : '';
+  mapsStatusEl.title = msg || '';
+}
+
+function listLocalStorageMaps() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith('pdmap_editor_')) continue;
+    const name = key.slice('pdmap_editor_'.length);
+    let padCount = 0;
+    try {
+      const obj = JSON.parse(localStorage.getItem(key) || '{}');
+      padCount = Array.isArray(obj.pads) ? obj.pads.length : 0;
+    } catch (_) { /* ignore corrupt entries */ }
+    out.push({ name, padCount, source: 'local', updatedAt: 0 });
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function mergeMapsCatalog(serverMaps, localMaps) {
+  const byName = new Map();
+  localMaps.forEach(m => byName.set(m.name, m));
+  serverMaps.forEach(m => byName.set(m.name, m));  // server wins on name clash
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function closeMapMenus() {
+  document.querySelectorAll('.browser-menu[open]').forEach(el => el.removeAttribute('open'));
+}
+
+function openBuildSettings() {
+  if (!buildSettingsModal) return;
+  buildSettingsModal.hidden = false;
+  buildSettingsModal.classList.add('open');
+  document.getElementById('buildSettingsClose')?.focus();
+}
+
+function closeBuildSettings() {
+  if (!buildSettingsModal) return;
+  buildSettingsModal.classList.remove('open');
+  buildSettingsModal.hidden = true;
+}
+
+function exportDocumentJson() {
+  const data = serializeMap();
+  try { data.name = sanitizeLevelName(data.name || mapState.name || 'map'); }
+  catch (e) { alert(e.message); return; }
+  downloadText(data.name + '.json', JSON.stringify(data, null, 2), 'application/json');
+  showToast('Exported ' + data.name + '.json');
+}
+
+async function openSavedMapDialog() {
+  await refreshMapsList();
+  if (!mapsCatalog.length) {
+    alert('No saved maps on server or in browser cache.');
+    return;
+  }
+  const names = mapsCatalog.map(m => m.name);
+  const hint = 'Saved maps: ' + names.join(', ');
+  const pick = await promptMapName(currentMapId || names[0] || '', {
+    title: 'Open saved map',
+    hint,
+    confirmLabel: 'Open',
+  });
+  if (!pick) return;
+  try { await loadSelectedMap(pick); }
+  catch (e) { alert(e.message); }
+}
+
+function handleMenuAction(action) {
+  closeMapMenus();
+  const modeKeys = new Set(['toggle-edit', 'toggle-fly', 'toggle-minimap', 'toggle-snap-grid', 'test-map', 'export-assets']);
+  if (modeKeys.has(action) && isTypingInForm()) return;
+  switch (action) {
+    case 'new': createNewMap(); break;
+    case 'open': triggerOpenFilePicker(); break;
+    case 'open-saved': openSavedMapDialog(); break;
+    case 'save': saveCurrentMap(); break;
+    case 'save-as': saveCurrentMap({ saveAs: true }); break;
+    case 'export': exportDocumentJson(); break;
+    case 'revert-cached': loadFromLocalStorage(); break;
+    case 'delete': deleteSelectedMap(); break;
+    case 'undo': undo(); break;
+    case 'redo': redo(); break;
+    case 'toggle-fly': setMode(mode === 'fly' ? 'orbit' : 'fly'); break;
+    case 'toggle-edit': setEditing(!editing); break;
+    case 'toggle-minimap': toggleMinimap(); break;
+    case 'toggle-snap-grid': toggleSnapGrid(); break;
+    case 'view-iso': presetView('iso'); break;
+    case 'view-top': presetView('top'); break;
+    case 'view-front': presetView('front'); break;
+    case 'view-side': presetView('side'); break;
+    case 'toggle-help': helpBtn?.click(); break;
+    case 'test-map': runTestPlay(); break;
+    case 'export-assets': runTestBuildOnly(); break;
+    case 'build-settings': openBuildSettings(); break;
+    default: break;
+  }
+}
+
+function populateOpenMapList() {
+  if (!openMapListEl) return;
+  if (!mapsCatalog.length) {
+    openMapListEl.innerHTML = '<div class="maps-open-empty">No saved maps</div>';
+    return;
+  }
+  openMapListEl.innerHTML = mapsCatalog.map(m => {
+    const src = m.source === 'file' ? 'disk' : 'browser';
+    const meta = m.padCount != null ? ` · ${m.padCount}p` : '';
+    const active = (currentMapId === m.name || (!currentMapId && mapState.name === m.name)) ? ' aria-current="true"' : '';
+    return `<button type="button" role="menuitem" data-map-name="${m.name}" title="${m.name} (${src})"${active}>${m.name}${meta}</button>`;
+  }).join('');
+}
+
+async function refreshMapsList() {
+  let serverMaps = [];
+  if (devServerOnline) {
+    try {
+      const path = DEV_SERVER.mapsPath || '/api/maps';
+      const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        serverMaps = Array.isArray(data.maps) ? data.maps : [];
+      }
+    } catch (_) { /* fall back to local only */ }
+  }
+  mapsCatalog = mergeMapsCatalog(serverMaps, listLocalStorageMaps());
+  populateOpenMapList();
+  setMapsStatus(devServerOnline ? 'ok' : 'warn', devServerOnline ? 'Server online' : 'Offline');
+}
+
+async function loadSelectedMap(nameOverride) {
+  const name = nameOverride || '';
+  if (!name) { alert('Choose a saved map via File → Open Saved…'); return false; }
+  closeMapMenus();
+  if (docDirty && !confirm('Discard unsaved changes and open "' + name + '"?')) return false;
+
+  if (devServerOnline) {
+    try {
+      const path = (DEV_SERVER.mapsPath || '/api/maps') + '/' + encodeURIComponent(name);
+      const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        suppressHistory = true;
+        loadMap(data.map, { skipHistory: true });
+        suppressHistory = false;
+        historyStack.length = 0;
+        redoStack.length = 0;
+        updateUndoRedoButtons();
+        currentMapId = name;
+        syncMapNameFields(name);
+        markClean();
+        showToast('Opened ' + name);
+        setMapsStatus('ok', 'Opened from server');
+        return true;
+      }
+      if (res.status === 404) {
+        /* fall through to LocalStorage */
+      } else {
+        alert('Could not load "' + name + '" from server (HTTP ' + res.status + ').');
+        return false;
+      }
+    } catch (e) {
+      alert('Could not reach editor server: ' + e.message);
+      return false;
+    }
+  }
+  const key = 'pdmap_editor_' + name;
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    alert('Map "' + name + '" not found on server or in LocalStorage.');
+    return false;
+  }
+  try {
+    suppressHistory = true;
+    loadMap(JSON.parse(raw), { skipHistory: true });
+    suppressHistory = false;
+    historyStack.length = 0;
+    redoStack.length = 0;
+    updateUndoRedoButtons();
+    currentMapId = name;
+    syncMapNameFields(name);
+    markClean();
+    showToast('Opened ' + name + ' from browser');
+    setMapsStatus('warn', 'Opened from cache');
+    return true;
+  } catch (e) {
+    alert('Load failed: ' + e.message);
+    return false;
+  }
+}
+
+function loadMapFromJsonText(text, label) {
+  let obj;
+  try { obj = JSON.parse(text); }
+  catch (e) { alert('Invalid JSON: ' + e.message); return false; }
+  if (docDirty && !confirm('Discard unsaved changes and open "' + (label || 'file') + '"?')) return false;
+  suppressHistory = true;
+  const ok = loadMap(obj, { skipHistory: true });
+  suppressHistory = false;
+  if (!ok) return false;
+  historyStack.length = 0;
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+  currentMapId = null;
+  const baseName = (label || '').replace(/\.json$/i, '') || obj.name || 'imported';
+  syncMapNameFields(obj.name || baseName);
+  markDirty();
+  showToast('Opened ' + (label || baseName));
+  setMapsStatus('ok', 'Unsaved file');
+  return true;
+}
+
+async function openMapFromFile(file) {
+  if (!file) return false;
+  closeMapMenus();
+  try {
+    const text = await file.text();
+    return loadMapFromJsonText(text, file.name);
+  } catch (e) {
+    alert('Could not read file: ' + e.message);
+    return false;
+  }
+}
+
+async function triggerOpenFilePicker() {
+  closeMapMenus();
+  if (window.electronAPI?.openJsonFile) {
+    try {
+      const result = await window.electronAPI.openJsonFile();
+      if (!result) return false;
+      return loadMapFromJsonText(result.content, result.name || result.path || 'file');
+    } catch (e) {
+      alert('Open file failed: ' + e.message);
+      return false;
+    }
+  }
+  openFileInput?.click();
+  return false;
+}
+
+function handleJsonFileDrop(fileList) {
+  const file = fileList && fileList[0];
+  if (!file) return;
+  const name = (file.name || '').toLowerCase();
+  if (!name.endsWith('.json') && file.type && file.type !== 'application/json') {
+    showToast('Drop a .json map file');
+    return;
+  }
+  openMapFromFile(file);
+}
+
+async function saveCurrentMap(opts = {}) {
+  const saveAs = opts.saveAs === true;
+  let name;
+  try { name = await resolveDocumentName({ saveAs }); }
+  catch (e) {
+    if (e.message !== 'Save cancelled.') alert(e.message);
+    return false;
+  }
+
+  const data = serializeMap();
+  data.name = name;
+  mapState.name = name;
+  syncMapNameFields(name);
+
+  if (devServerOnline) {
+    try {
+      const path = (DEV_SERVER.mapsPath || '/api/maps') + '/' + encodeURIComponent(name);
+      const res = await fetch(DEV_SERVER_BASE + path, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ map: data }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (res.ok && payload.ok !== false) {
+        currentMapId = name;
+        if (newMapNameInput) newMapNameInput.value = '';
+        markClean();
+        await refreshMapsList();
+        showToast('Saved ' + name);
+        setMapsStatus('ok', 'Saved to journal/uff_viewer/maps/' + name + '.json');
+        return true;
+      }
+      const err = payload.error || ('HTTP ' + res.status);
+      alert('Save failed: ' + err);
+      setMapsStatus('err', 'Save failed: ' + err);
+      return false;
+    } catch (e) {
+      alert('Could not reach editor server: ' + e.message);
+      setMapsStatus('err', 'Server unreachable');
+      return false;
+    }
+  }
+
+  try {
+    localStorage.setItem('pdmap_editor_' + name, JSON.stringify(data));
+    currentMapId = name;
+    if (newMapNameInput) newMapNameInput.value = '';
+    markClean();
+    await refreshMapsList();
+    showToast('Saved ' + name + ' locally');
+    setMapsStatus('warn', 'Offline — saved to LocalStorage (pdmap_editor_' + name + ')');
+    return true;
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+    return false;
+  }
+}
+
+async function createNewMap() {
+  if (docDirty && !confirm('Discard unsaved changes and create a new map?')) return;
+
+  let name = null;
+  const typed = newMapNameInput?.value.trim();
+  if (typed) {
+    try { name = sanitizeLevelName(typed); }
+    catch (e) { alert(e.message); return; }
+  } else {
+    name = await promptMapName('my_arena', { title: 'New map', confirmLabel: 'Create' });
+    if (!name) return;
+  }
+
+  if (devServerOnline) {
+    try {
+      const path = DEV_SERVER.mapsPath || '/api/maps';
+      const res = await fetch(DEV_SERVER_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        alert('Map "' + name + '" already exists. Open it or pick another name.');
+        return;
+      }
+      if (res.ok && payload.map) {
+        suppressHistory = true;
+        loadMap(payload.map, { skipHistory: true });
+        suppressHistory = false;
+        historyStack.length = 0;
+        redoStack.length = 0;
+        updateUndoRedoButtons();
+        currentMapId = name;
+        syncMapNameFields(name);
+        if (newMapNameInput) newMapNameInput.value = '';
+        markClean();
+        await refreshMapsList();
+        showToast('Created ' + name + ' — click the floor to place components');
+        setMapsStatus('ok', 'Created "' + name + '" with starter pads');
+        beginPlacementMode('spawn');
+        return;
+      }
+      alert('Create failed: ' + (payload.error || ('HTTP ' + res.status)));
+      return;
+    } catch (e) {
+      alert('Could not reach editor server: ' + e.message);
+      return;
+    }
+  }
+
+  const template = starterMapTemplate(name);
+  suppressHistory = true;
+  loadMap(template, { skipHistory: true });
+  suppressHistory = false;
+  historyStack.length = 0;
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+  currentMapId = name;
+  syncMapNameFields(name);
+  if (newMapNameInput) newMapNameInput.value = '';
+  localStorage.setItem('pdmap_editor_' + name, JSON.stringify(template));
+  markClean();
+  await refreshMapsList();
+  showToast('Created ' + name + ' — click the floor to place components');
+  setMapsStatus('warn', 'Offline — created in LocalStorage');
+  beginPlacementMode('spawn');
+}
+
+async function deleteSelectedMap() {
+  let name = currentMapId || mapState.name || '';
+  if (!name || name === 'uff') {
+    const picked = await promptMapName(currentMapId || '', {
+      title: 'Delete map',
+      hint: 'Enter the map name to delete permanently.',
+      confirmLabel: 'Continue',
+    });
+    if (!picked) return;
+    name = picked;
+  }
+  if (!confirm('Delete saved map "' + name + '"? This cannot be undone.')) return;
+  closeMapMenus();
+
+  let deleted = false;
+  if (devServerOnline) {
+    try {
+      const path = (DEV_SERVER.mapsPath || '/api/maps') + '/' + encodeURIComponent(name);
+      const res = await fetch(DEV_SERVER_BASE + path, { method: 'DELETE' });
+      if (res.ok) deleted = true;
+    } catch (_) { /* try local */ }
+  }
+  const key = 'pdmap_editor_' + name;
+  if (localStorage.getItem(key)) {
+    localStorage.removeItem(key);
+    deleted = true;
+  }
+  if (!deleted) {
+    alert('Could not delete "' + name + '".');
+    return;
+  }
+  if (currentMapId === name) currentMapId = null;
+  await refreshMapsList();
+  showToast('Deleted ' + name);
+  setMapsStatus('ok', 'Deleted "' + name + '"');
+}
+
 const levelNameInput = document.getElementById('levelName');
 const pyWrap = document.getElementById('pyWrap');
 const pyText = document.getElementById('pyText');
@@ -2209,6 +3524,10 @@ function jsonToLevelPy(obj) {
 }
 
 function exportPython() {
+  if (mapState.pads.length === 0) {
+    alert('Cannot export an empty map — add spawn/weapon pads first.');
+    return '';
+  }
   const obj = serializeMap();
   obj.name = sanitizeLevelName(levelNameInput.value || mapState.name);
   const txt = jsonToLevelPy(obj);
@@ -2260,7 +3579,7 @@ function collectValidationIssues() {
     if (Math.abs(p.x) > HALF || Math.abs(p.z) > HALF) warnings.push('Pad ' + i + ' outside box XZ footprint');
     if (p.y === 0 && (kind === 'spawn' || kind === 'weapon' || kind === 'ammo'))
       warnings.push('Pad ' + i + ' at Y=0 — use Y≥10 (SPAWN_Y)');
-    if (Math.hypot(p.x, p.y, p.z) <= DATA.originRadius) warnings.push('Pad ' + i + ' near origin');
+    if (padNearOriginForTest(p)) warnings.push('Pad ' + i + ' near origin');
     const posKey = rnd(p.x) + ',' + rnd(p.y) + ',' + rnd(p.z);
     const bucket = posBuckets.get(posKey) || [];
     bucket.push(i);
@@ -2270,13 +3589,16 @@ function collectValidationIssues() {
   else if (c.spawn > 0 && c.spawn < 4) warnings.push('Only ' + c.spawn + ' spawn pad(s) — recommend ≥4 for MP');
   if (pads.length > 0 && c.weapon === 0) warnings.push('0 weapon pads — no floor weapon pickups');
   for (const [, indices] of posBuckets) {
-    if (indices.length > 1) warnings.push('Pads ' + indices.join(', ') + ' share the same position');
+    if (padPositionsConflict(indices, pads)) {
+      warnings.push('Pads ' + indices.join(', ') + ' share the same position');
+    }
   }
   return { errors, warnings };
 }
 
 function populateTestSelects() {
   const slot = TEST_CONFIG.testMapSlot || 'uff';
+  const defs = TEST_CONFIG.defaults || {};
   if (testDeployAs) {
     testDeployAs.innerHTML =
       '<option value="__same__">Same as level module</option>' +
@@ -2290,12 +3612,90 @@ function populateTestSelects() {
     testScenarioSelect.innerHTML = TEST_CONFIG.scenarios.map(s =>
       '<option value="' + s.id + '">' + s.id + ' — ' + s.label + '</option>').join('');
   }
-  const simEl = document.getElementById('testSimInfo');
-  if (simEl && TEST_CONFIG.simulants) {
-    const s = TEST_CONFIG.simulants;
-    simEl.textContent = (s.requested || 8) + ' requested · ' + (s.stockCap || 4) + ' stock cap';
-    simEl.title = s.note || '';
+  const numSimsEl = document.getElementById('testNumSims');
+  if (numSimsEl) {
+    let opts = '';
+    for (let n = 0; n <= 8; n++) opts += '<option value="' + n + '">' + n + '</option>';
+    numSimsEl.innerHTML = opts;
+    numSimsEl.value = String(defs.numSims != null ? defs.numSims : 8);
   }
+  const simDiffEl = document.getElementById('testSimDiff');
+  if (simDiffEl && Array.isArray(TEST_CONFIG.simDifficulties)) {
+    simDiffEl.innerHTML = TEST_CONFIG.simDifficulties.map(d =>
+      '<option value="' + d.id + '">' + d.label + '</option>').join('');
+    simDiffEl.value = String(defs.simDifficulty != null ? defs.simDifficulty : 2);
+  }
+  populateLoadoutSelects();
+  populateGameOptions();
+  updateSimInfoReadout();
+}
+
+function populateLoadoutSelects() {
+  const grid = document.getElementById('testLoadoutGrid');
+  const weapons = TEST_CONFIG.loadoutWeapons || [];
+  const defaults = (TEST_CONFIG.defaults && TEST_CONFIG.defaults.loadout) || [0x01, 0x09, 0x10, 0x04, 0x00, 0x25];
+  if (!grid) return;
+  grid.innerHTML = '';
+  const optsHtml = weapons.map(w =>
+    '<option value="' + w.id + '">' + w.label + '</option>').join('');
+  for (let i = 0; i < 6; i++) {
+    const lbl = document.createElement('label');
+    lbl.textContent = String(i + 1);
+    lbl.setAttribute('for', 'testLoadout' + i);
+    const sel = document.createElement('select');
+    sel.id = 'testLoadout' + i;
+    sel.innerHTML = optsHtml;
+    sel.value = String(defaults[i] != null ? defaults[i] : 0);
+    sel.addEventListener('change', () => { updateTestPanel(); });
+    grid.appendChild(lbl);
+    grid.appendChild(sel);
+  }
+}
+
+function populateGameOptions() {
+  const container = document.getElementById('testGameOptions');
+  const options = TEST_CONFIG.gameOptions || [];
+  const defaultMask = (TEST_CONFIG.defaults && TEST_CONFIG.defaults.mpOptions) || 0;
+  if (!container) return;
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const label = document.createElement('label');
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.dataset.mpOpt = String(opt.id);
+    chk.checked = (defaultMask & opt.id) !== 0;
+    chk.addEventListener('change', () => { updateTestPanel(); });
+    label.appendChild(chk);
+    label.appendChild(document.createTextNode(' ' + opt.label));
+    container.appendChild(label);
+  });
+}
+
+function getLoadoutFromUI() {
+  const out = [];
+  for (let i = 0; i < 6; i++) {
+    const el = document.getElementById('testLoadout' + i);
+    out.push(el ? parseInt(el.value, 10) : 0);
+  }
+  return out;
+}
+
+function getMpOptionsFromUI() {
+  let mask = 0;
+  document.querySelectorAll('#testGameOptions input[data-mp-opt]').forEach(chk => {
+    if (chk.checked) mask |= parseInt(chk.dataset.mpOpt, 10);
+  });
+  return mask;
+}
+
+function updateSimInfoReadout() {
+  const simEl = document.getElementById('testSimInfo');
+  if (!simEl) return;
+  const numEl = document.getElementById('testNumSims');
+  const requested = numEl ? parseInt(numEl.value, 10) : ((TEST_CONFIG.defaults && TEST_CONFIG.defaults.numSims) || 8);
+  const cap = (TEST_CONFIG.simulants && TEST_CONFIG.simulants.stockCap) || 4;
+  simEl.textContent = requested + ' sims · cap ' + cap;
+  simEl.title = (TEST_CONFIG.simulants && TEST_CONFIG.simulants.note) || '';
 }
 
 function getTestOptions() {
@@ -2309,6 +3709,10 @@ function getTestOptions() {
     deployAs,
     mod: testModSelect ? testModSelect.value : 'mod_allinone',
     scenario: testScenarioSelect ? parseInt(testScenarioSelect.value, 10) : 0,
+    numSims: parseInt(document.getElementById('testNumSims')?.value || '8', 10),
+    simDifficulty: parseInt(document.getElementById('testSimDiff')?.value || '2', 10),
+    loadout: getLoadoutFromUI(),
+    mpOptions: getMpOptionsFromUI(),
     seg: document.getElementById('testSegChk')?.checked !== false,
     deploy: document.getElementById('testDeployChk')?.checked !== false,
     skipValidate: document.getElementById('testSkipValChk')?.checked === true,
@@ -2327,7 +3731,11 @@ function buildTestShellScript(data, opts) {
     '--level ' + opts.level,
     '--mod ' + opts.mod,
     '--scenario ' + opts.scenario,
+    '--num-sims ' + opts.numSims,
+    '--sim-difficulty ' + opts.simDifficulty,
+    '--loadout ' + opts.loadout.join(','),
   ];
+  if (opts.mpOptions) flags.push('--mp-options ' + opts.mpOptions);
   if (opts.deployAs !== opts.level) flags.push('--deploy-as ' + opts.deployAs);
   if (opts.seg) flags.push('--seg');
   if (opts.deploy) flags.push('--deploy');
@@ -2355,6 +3763,10 @@ function buildTestCommandLine(opts) {
   parts.push('--level', opts.level);
   parts.push('--mod', opts.mod);
   parts.push('--scenario', String(opts.scenario));
+  parts.push('--num-sims', String(opts.numSims));
+  parts.push('--sim-difficulty', String(opts.simDifficulty));
+  parts.push('--loadout', opts.loadout.join(','));
+  if (opts.mpOptions) parts.push('--mp-options', String(opts.mpOptions));
   if (opts.deployAs !== opts.level) parts.push('--deploy-as', opts.deployAs);
   if (opts.seg) parts.push('--seg');
   if (opts.deploy) parts.push('--deploy');
@@ -2367,14 +3779,15 @@ function buildTestCommandLine(opts) {
 }
 
 function setTestStatus(kind, html) {
-  if (!testStatusEl) return;
-  testStatusEl.innerHTML = '<span class="' + kind + '">' + html + '</span>';
+  const span = '<span class="' + kind + '">' + html + '</span>';
+  if (testStatusEl) testStatusEl.innerHTML = span;
+  if (runTestStatusEl && html) runTestStatusEl.innerHTML = span;
+  else if (runTestStatusEl) runTestStatusEl.innerHTML = '';
 }
 
 function updateTestServerHint() {
   const hint = document.getElementById('testServerHint');
   const playBtn = document.getElementById('testPlayBtn');
-  const buildBtn = document.getElementById('testBuildOnlyBtn');
   const startCmd = DEV_SERVER.startCommand || 'python3 journal/uff_viewer/serve_editor.py';
   const isFileProtocol = typeof location !== 'undefined' && location.protocol === 'file:';
 
@@ -2383,12 +3796,6 @@ function updateTestServerHint() {
     playBtn.title = devServerOnline
       ? 'Validate, build, deploy, and launch ./build/pd.arm64 --test-map'
       : 'Start local server to play in-game';
-  }
-  if (buildBtn) {
-    buildBtn.disabled = testPlayBusy;
-    buildBtn.title = devServerOnline
-      ? 'Validate, build, and deploy map assets (no --play)'
-      : 'Server offline — downloads JSON + .sh for terminal use';
   }
 
   if (!hint) return;
@@ -2399,7 +3806,7 @@ function updateTestServerHint() {
       ' · Test / Play launches in-game';
   } else if (isFileProtocol) {
     hint.innerHTML = '<span class="off">● Opened via file://</span> — cannot launch the game from the browser. ' +
-      'Double-click <strong>Perfect Dark Map Editor.app</strong> or run <code>' + startCmd +
+      'Double-click <strong>scripts/release/Perfect Dark Map Editor.app</strong> or run <code>' + startCmd +
       '</code>, then use Test / Play.';
   } else {
     hint.innerHTML = '<span class="off">● Server offline</span> — start with <code>' + startCmd +
@@ -2408,6 +3815,7 @@ function updateTestServerHint() {
 }
 
 async function pollDevServerHealth() {
+  DEV_SERVER_BASE = await resolveDevServerBase();
   const path = DEV_SERVER.healthPath || '/api/health';
   try {
     const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
@@ -2419,6 +3827,7 @@ async function pollDevServerHealth() {
     devServerHealth = null;
   }
   updateTestServerHint();
+  refreshMapsList();
 }
 
 function startDevServerPolling() {
@@ -2460,7 +3869,7 @@ async function runTestPlay() {
   if (!devServerOnline) {
     const startCmd = DEV_SERVER.startCommand || 'python3 journal/uff_viewer/serve_editor.py';
     setTestStatus('warn',
-      'Cannot launch from here — double-click Perfect Dark Map Editor.app or run: ' + startCmd);
+      'Cannot launch from here — open scripts/release/Perfect Dark Map Editor.app or run: ' + startCmd);
     showToast('Start the editor server to play in-game — use Export below for files');
     return;
   }
@@ -2513,7 +3922,7 @@ async function runTestPlay() {
 function updateTestPanel() {
   const boxEl = document.getElementById('testBoxInfo');
   if (boxEl) boxEl.textContent = 'Box ±' + HALF + ' × ' + HEIGHT;
-  layoutRightStack();
+  updateSimInfoReadout();
   try {
     const opts = getTestOptions();
     const data = serializeMap();
@@ -2527,7 +3936,10 @@ function updateTestPanel() {
         buildTestCommandLine(opts) + '\n\n' +
         '# Box: half=' + opts.half + ' height=' + opts.height +
         ' · deploy=' + opts.deployAs + ' · mod=' + opts.mod +
-        ' · scenario=' + opts.scenario;
+        ' · scenario=' + opts.scenario +
+        ' · sims=' + opts.numSims + ' diff=' + opts.simDifficulty +
+        ' · loadout=' + opts.loadout.join(',') +
+        (opts.mpOptions ? ' · mpOptions=0x' + opts.mpOptions.toString(16) : '');
     }
     if (opts.play && opts.deployAs !== (TEST_CONFIG.testMapSlot || 'uff')) {
       setTestStatus('warn', 'Deploy as is not "' + (TEST_CONFIG.testMapSlot || 'uff') +
@@ -2541,14 +3953,30 @@ function updateTestPanel() {
   }
 }
 
-/** Keep view/mode panel below the map-options strip as status text wraps. */
+/** Legacy hook — run bar is fixed height; panelRight uses static top offset. */
 function layoutRightStack() {
-  const mo = document.getElementById('mapOptions');
-  if (!mo) return;
-  const gap = 8;
-  const top = Math.ceil(mo.getBoundingClientRect().height + 12 + gap);
-  document.documentElement.style.setProperty('--right-stack-top', top + 'px');
+  layoutChrome();
 }
+function layoutChrome() {
+  const root = document.documentElement;
+  const runBar = document.getElementById('runBar');
+  const placeBar = document.getElementById('placeToolbar');
+  const variants = document.getElementById('placeVariants');
+  if (runBar) {
+    const h = Math.ceil(runBar.getBoundingClientRect().height);
+    if (h > 0) root.style.setProperty('--runbar-h', h + 'px');
+  }
+  if (editing && placeBar) {
+    let bottomH = Math.ceil(placeBar.getBoundingClientRect().height) + 28;
+    if (variants && variants.classList.contains('open')) {
+      bottomH += Math.ceil(variants.getBoundingClientRect().height) + 8;
+    }
+    root.style.setProperty('--bottom-bar-h', Math.max(92, bottomH) + 'px');
+  } else {
+    root.style.setProperty('--bottom-bar-h', '24px');
+  }
+}
+window.addEventListener('resize', layoutChrome);
 
 function downloadText(filename, text, mime) {
   const blob = new Blob([text], { type: mime || 'text/plain' });
@@ -2762,6 +4190,7 @@ if (testLevelInput) {
   testLevelInput.addEventListener('input', () => { testLevelInput.dataset.userEdited = '1'; updateTestPanel(); });
 }
 [testDeployAs, testModSelect, testScenarioSelect,
+ document.getElementById('testNumSims'), document.getElementById('testSimDiff'),
  document.getElementById('testSegChk'), document.getElementById('testDeployChk'),
  document.getElementById('testSkipValChk'), document.getElementById('testRebuildChk'),
  document.getElementById('testPlayChk'), document.getElementById('testBackupChk'),
@@ -2769,7 +4198,20 @@ if (testLevelInput) {
   if (el) el.addEventListener('change', () => { updateTestPanel(); updateTestServerHint(); });
 });
 document.getElementById('testPlayBtn')?.addEventListener('click', runTestPlay);
-document.getElementById('testBuildOnlyBtn')?.addEventListener('click', runTestBuildOnly);
+document.getElementById('buildSettingsBtn')?.addEventListener('click', openBuildSettings);
+document.getElementById('buildSettingsClose')?.addEventListener('click', closeBuildSettings);
+buildSettingsModal?.addEventListener('click', e => {
+  if (e.target === buildSettingsModal) closeBuildSettings();
+});
+document.getElementById('mapNameOk')?.addEventListener('click', submitMapNameModal);
+document.getElementById('mapNameCancel')?.addEventListener('click', () => closeMapNameModal(null));
+mapNameModal?.addEventListener('click', e => {
+  if (e.target === mapNameModal) closeMapNameModal(null);
+});
+mapNameInput?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); submitMapNameModal(); }
+  if (e.key === 'Escape') { e.preventDefault(); closeMapNameModal(null); }
+});
 document.getElementById('testExportBtn')?.addEventListener('click', runTestExport);
 document.getElementById('testExportJsonBtn')?.addEventListener('click', downloadTestMapJson);
 document.getElementById('testExportPyBtn')?.addEventListener('click', downloadTestMapPython);
@@ -2801,8 +4243,6 @@ halfRange.addEventListener('input', () => updateTestPanel());
 heightRange.addEventListener('input', () => updateTestPanel());
 updateTestPanel();
 startDevServerPolling();
-layoutRightStack();
-window.addEventListener('resize', layoutRightStack);
 
 // pass-4: session controls (undo/redo, LocalStorage, clear).
 document.getElementById('undoBtn').onclick = undo;
@@ -2810,8 +4250,59 @@ document.getElementById('redoBtn').onclick = redo;
 document.getElementById('saveLocalBtn').onclick = saveToLocalStorage;
 document.getElementById('loadLocalBtn').onclick = loadFromLocalStorage;
 document.getElementById('clearMapBtn').onclick = clearMap;
+
+// pass-10: menu bar bridge (Electron) + browser fallback strip.
+if (!window.electronAPI) document.body.classList.add('browser-mode');
+window.electronAPI?.onMenuAction?.(handleMenuAction);
+document.querySelectorAll('#browserMenuBar [data-menu]').forEach(btn => {
+  btn.addEventListener('click', () => handleMenuAction(btn.getAttribute('data-menu')));
+});
+document.getElementById('browserFileMenu')?.querySelector('[data-menu="open-saved"]')?.remove();
+// Inject Open Saved into browser File menu after Open…
+(function addOpenSavedBrowserItem() {
+  const filePanel = document.querySelector('#browserFileMenu .browser-menu-panel');
+  const openBtn = filePanel?.querySelector('[data-menu="open"]');
+  if (!filePanel || !openBtn) return;
+  const savedBtn = document.createElement('button');
+  savedBtn.type = 'button';
+  savedBtn.dataset.menu = 'open-saved';
+  savedBtn.textContent = 'Open Saved…';
+  openBtn.insertAdjacentElement('afterend', savedBtn);
+  savedBtn.addEventListener('click', () => handleMenuAction('open-saved'));
+})();
+
+openFileInput?.addEventListener('change', () => {
+  const f = openFileInput.files && openFileInput.files[0];
+  if (f) openMapFromFile(f);
+  openFileInput.value = '';
+});
+['dragenter', 'dragover'].forEach(ev => {
+  const handler = e => {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    document.body.classList.add('drag-over-canvas');
+  };
+  document.body.addEventListener(ev, handler);
+  canvas.addEventListener(ev, handler);
+});
+['dragleave', 'drop'].forEach(ev => {
+  const handler = e => {
+    if (ev === 'dragleave' && e.target !== document.body && e.target !== canvas) return;
+    document.body.classList.remove('drag-over-canvas');
+    if (ev === 'drop') {
+      e.preventDefault();
+      handleJsonFileDrop(e.dataTransfer?.files);
+    }
+  };
+  document.body.addEventListener(ev, handler);
+  canvas.addEventListener(ev, handler);
+});
 updateUndoRedoButtons();
 updateStorageKeyDisplay();
+refreshMapsList();
+currentMapId = null;
+markClean();
+updateDocTitle();
 
 populateLevelSelect();
 levelNameInput.value = mapState.name || 'uff';
@@ -2825,14 +4316,23 @@ updateBuildCmds(mapState.name);
 
 // expose hooks for headless scripted sanity checks (pass-2/3 VERIFY)
 window.__editor = {
-  setEditing, addPad, selectPad, deletePad, exportJSON, loadMap, serializeMap, mapState, setTool,
+  setEditing, beginPlacementMode, toggleMinimap, toggleSnapGrid, setMinimapVisible, addPad, selectPad, deletePad, exportJSON, loadMap, serializeMap, mapState, setTool,
   exportPython, jsonToLevelPy, loadFromCatalog,
   undo, redo, pushHistory, saveToLocalStorage, loadFromLocalStorage, clearMap,
+  saveCurrentMap, loadSelectedMap, createNewMap, deleteSelectedMap, refreshMapsList,
+  openMapFromFile, triggerOpenFilePicker, loadMapFromJsonText, closeMapMenus,
+  handleMenuAction, openBuildSettings, closeBuildSettings, exportDocumentJson, openSavedMapDialog,
+  markDirty, markClean, updateDocTitle, resolveDocumentName,
   collectValidationIssues, getTestOptions, buildTestCommandLine, runTestPlay, runTestBuildOnly, runTestExport, updateTestPanel,
-  pollDevServerHealth, devServerOnline,
+  setMinimapVisible, drawMinimap,
+  get currentMapId() { return currentMapId; },
+  set currentMapId(v) { currentMapId = v; },
+  get devServerOnline() { return devServerOnline; },
+  promptMapName, openMapNameDialog,
 };
 
 updateValidation();  // initial pass once everything is defined
+layoutChrome();
 
 // ---------- corner orientation gizmo (mini axis indicator) ----------
 const gizmoScene = new THREE.Scene();
@@ -2921,6 +4421,8 @@ function renderGizmo() {
     updateFly(dt);
   }
   updateLabels();
+  animatePadVisuals(dt);
+  if (editing && showMinimap) drawMinimap();
   renderer.clear();
   renderer.render(scene, camera);
   renderGizmo();

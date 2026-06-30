@@ -6,7 +6,7 @@
  * (no external browser dependency).
  */
 
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require('electron');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
@@ -21,6 +21,7 @@ const DEFAULT_HOST = '127.0.0.1';
 const PORT_MIN = 8765;
 const PORT_MAX = 8775;
 const SERVE_MARKER = path.join('journal', 'uff_viewer', 'serve_editor.py');
+const BUNDLED_EDITOR_SUBDIR = 'editor';
 
 /** @type {import('child_process').ChildProcess | null} */
 let serverProcess = null;
@@ -32,7 +33,7 @@ let activePort = '';
 let quitting = false;
 /** @type {number} */
 let restartAttempts = 0;
-/** @type {{ pythonBin: string, serveScript: string, repoRoot: string, stateDir: string } | null} */
+/** @type {{ pythonBin: string, serveScript: string, repoRoot: string, stateDir: string, bundleDir: string } | null} */
 let serverContext = null;
 
 const MAX_RESTART_ATTEMPTS = 3;
@@ -81,6 +82,31 @@ async function ensureLocalFile(filePath, maxAttempts = 12) {
   return false;
 }
 
+function resolveBundledEditorDir() {
+  const resourceDir = process.resourcesPath || __dirname;
+  const candidates = [
+    path.join(resourceDir, BUNDLED_EDITOR_SUBDIR),
+    path.join(__dirname, BUNDLED_EDITOR_SUBDIR),
+  ];
+  for (const bundleDir of candidates) {
+    const serveScript = path.join(bundleDir, 'serve_editor.py');
+    const html = path.join(bundleDir, 'uff_map.html');
+    if (fileReadable(serveScript) && fileReadable(html)) {
+      return bundleDir;
+    }
+  }
+  return '';
+}
+
+function repoRootLooksValid(root) {
+  if (!root) return false;
+  // Bundled editor does not need journal/uff_viewer on disk (iCloud-safe).
+  if (resolveBundledEditorDir()) {
+    return fs.existsSync(root);
+  }
+  return fileReadable(path.join(root, SERVE_MARKER));
+}
+
 function readBakedRepoRoot() {
   const resourceDir = process.resourcesPath || __dirname;
   const candidates = [
@@ -98,7 +124,7 @@ function readBakedRepoRoot() {
       } else {
         root = normalizeRepoRoot(fs.readFileSync(cfgPath, 'utf8'));
       }
-      if (root && fileReadable(path.join(root, SERVE_MARKER))) {
+      if (repoRootLooksValid(root)) {
         return root;
       }
     } catch {
@@ -124,7 +150,7 @@ function discoverRepoRoot(startDir) {
 
 function resolveRepoRoot() {
   const fromEnv = normalizeRepoRoot(process.env.PD_REPO_ROOT || '');
-  if (fromEnv && fileReadable(path.join(fromEnv, SERVE_MARKER))) {
+  if (fromEnv && repoRootLooksValid(fromEnv)) {
     log(`REPO_ROOT from PD_REPO_ROOT=${fromEnv}`);
     return fromEnv;
   }
@@ -151,23 +177,35 @@ function resolveRepoRoot() {
   return '';
 }
 
-function resolveEditorDir(repoRoot) {
+function resolveEditorPaths(repoRoot) {
+  const bundleDir = resolveBundledEditorDir();
+  if (bundleDir) {
+    return {
+      bundleDir,
+      serveScript: path.join(bundleDir, 'serve_editor.py'),
+      source: 'bundle',
+    };
+  }
   const repoViewer = path.join(repoRoot, 'journal', 'uff_viewer');
   const repoServe = path.join(repoViewer, 'serve_editor.py');
   if (fileReadable(repoServe)) {
-    return repoViewer;
+    return {
+      bundleDir: '',
+      serveScript: repoServe,
+      source: 'repo',
+    };
   }
-  return '';
+  return null;
 }
 
-function resolveStateDir(repoRoot, editorDir) {
+function resolveStateDir(repoRoot, editorSource) {
   const envState = (process.env.PD_EDITOR_STATE_DIR || '').trim();
   if (envState) {
     fs.mkdirSync(envState, { recursive: true });
     return envState;
   }
   const repoViewer = path.join(repoRoot, 'journal', 'uff_viewer');
-  if (editorDir === repoViewer) {
+  if (editorSource === 'repo') {
     try {
       const probe = path.join(repoViewer, '.pd_editor_write_probe');
       fs.writeFileSync(probe, 'ok', 'utf8');
@@ -222,6 +260,37 @@ function resolvePython() {
   return '';
 }
 
+function fetchHealth(port) {
+  return new Promise((resolve) => {
+    const req = http.get(
+      {
+        hostname: DEFAULT_HOST,
+        port,
+        path: '/api/health',
+        timeout: 2000,
+      },
+      (res) => {
+        let body = '';
+        res.on('data', (chunk) => {
+          body += chunk;
+        });
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(body));
+          } catch {
+            resolve(null);
+          }
+        });
+      }
+    );
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => {
+      req.destroy();
+      resolve(null);
+    });
+  });
+}
+
 function healthOk(port) {
   return new Promise((resolve) => {
     const req = http.get(
@@ -244,10 +313,15 @@ function healthOk(port) {
   });
 }
 
-async function findHealthyPort(minPort, maxPort) {
+async function findHealthyPort(minPort, maxPort, expectedBundleDir = '') {
   for (let port = minPort; port <= maxPort; port += 1) {
     // eslint-disable-next-line no-await-in-loop
-    if (await healthOk(port)) return String(port);
+    const health = await fetchHealth(port);
+    if (!health || health.ok !== true) continue;
+    if (expectedBundleDir && health.bundleDir !== expectedBundleDir) {
+      continue;
+    }
+    return String(port);
   }
   return '';
 }
@@ -268,7 +342,7 @@ async function waitForServerReady(expectedPid, stateDir) {
       return portFromFile;
     }
 
-    const scanned = await findHealthyPort(PORT_MIN, PORT_MAX);
+    const scanned = await findHealthyPort(PORT_MIN, PORT_MAX, serverContext?.bundleDir || '');
     if (scanned && serverProcess && !serverProcess.killed) {
       return scanned;
     }
@@ -282,21 +356,26 @@ async function waitForServerReady(expectedPid, stateDir) {
   throw new Error('Timed out waiting for /api/health on ports 8765–8775');
 }
 
-function buildSpawnEnv(repoRoot, stateDir) {
+function buildSpawnEnv(repoRoot, stateDir, bundleDir) {
   const pythonPath = [
     repoRoot,
+    bundleDir,
     path.join(repoRoot, 'journal', 'uff_viewer'),
     process.env.PYTHONPATH || '',
   ]
     .filter(Boolean)
     .join(':');
-  return {
+  const env = {
     ...process.env,
     PD_REPO_ROOT: repoRoot,
     PD_EDITOR_STATE_DIR: stateDir,
     PYTHONPATH: pythonPath,
     PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH || ''}`,
   };
+  if (bundleDir) {
+    env.PD_EDITOR_BUNDLE_DIR = bundleDir;
+  }
+  return env;
 }
 
 function formatSpawnCommand(pythonBin, args, env) {
@@ -304,7 +383,7 @@ function formatSpawnCommand(pythonBin, args, env) {
   return `${JSON.stringify(pythonBin)} ${argStr} (PD_REPO_ROOT=${env.PD_REPO_ROOT}, PD_EDITOR_STATE_DIR=${env.PD_EDITOR_STATE_DIR}, PYTHONPATH=${env.PYTHONPATH})`;
 }
 
-function spawnServer(pythonBin, serveScript, repoRoot, stateDir) {
+function spawnServer(pythonBin, serveScript, repoRoot, stateDir, bundleDir) {
   const spawnArgs = [
     serveScript,
     '--host',
@@ -313,10 +392,10 @@ function spawnServer(pythonBin, serveScript, repoRoot, stateDir) {
     String(PORT_MIN),
     '--auto-port',
   ];
-  const spawnEnv = buildSpawnEnv(repoRoot, stateDir);
+  const spawnEnv = buildSpawnEnv(repoRoot, stateDir, bundleDir);
   log(`Spawn command: ${formatSpawnCommand(pythonBin, spawnArgs, spawnEnv)}`);
   log(
-    `Starting serve_editor.py from ${serveScript} (state=${stateDir})`
+    `Starting serve_editor.py from ${serveScript} (bundle=${bundleDir || 'repo'}, state=${stateDir})`
   );
   const child = spawn(pythonBin, spawnArgs, {
     cwd: repoRoot,
@@ -350,7 +429,7 @@ async function handleServerExit(code, signal) {
     return;
   }
 
-  const stillHealthy = await findHealthyPort(PORT_MIN, PORT_MAX);
+  const stillHealthy = await findHealthyPort(PORT_MIN, PORT_MAX, serverContext?.bundleDir || '');
   if (stillHealthy) {
     log(
       `Editor still healthy on port ${stillHealthy} after child exit; adopting existing server`
@@ -358,7 +437,7 @@ async function handleServerExit(code, signal) {
     activePort = stillHealthy;
     restartAttempts = 0;
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.loadURL(`http://${DEFAULT_HOST}:${stillHealthy}/`);
+      mainWindow.loadURL(editorUrl(stillHealthy));
     }
     return;
   }
@@ -378,14 +457,15 @@ async function handleServerExit(code, signal) {
         serverContext.pythonBin,
         serverContext.serveScript,
         serverContext.repoRoot,
-        serverContext.stateDir
+        serverContext.stateDir,
+        serverContext.bundleDir
       );
       log(`Restarted server PID ${serverProcess.pid}`);
       activePort = await waitForServerReady(serverProcess.pid, serverContext.stateDir);
       restartAttempts = 0;
       log(`Restart healthy on port ${activePort}`);
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.loadURL(`http://${DEFAULT_HOST}:${activePort}/`);
+        mainWindow.loadURL(editorUrl(activePort));
       }
     } catch (err) {
       log(`Restart failed: ${err.message}`);
@@ -420,6 +500,110 @@ function showStartupError(message) {
   );
 }
 
+function editorUrl(port) {
+  // One-shot cache bust on load; server sends no-store for HTML anyway.
+  return `http://${DEFAULT_HOST}:${port}/?v=${Date.now()}`;
+}
+
+function sendMenuAction(win, action) {
+  const w = win || mainWindow;
+  if (w && !w.isDestroyed()) {
+    w.webContents.send('editor:menu-action', action);
+  }
+}
+
+/** Forward single-key shortcuts to the renderer (menu accelerators miss keyDown in focused webviews on macOS). */
+function bindEditorShortcuts(contents) {
+  const KEY_ACTIONS = {
+    KeyE: 'toggle-edit',
+    KeyF: 'toggle-fly',
+    KeyG: 'toggle-snap-grid',
+    KeyM: 'toggle-minimap',
+    KeyT: 'test-map',
+    KeyX: 'export-assets',
+  };
+  contents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown' || input.isAutoRepeat) return;
+    if (input.control || input.meta || input.alt || input.shift) return;
+    const action = KEY_ACTIONS[input.code];
+    if (!action) return;
+    event.preventDefault();
+    sendMenuAction(mainWindow, action);
+  });
+}
+
+/** Native macOS application menu — document, edit, view, play surfaces. */
+function buildApplicationMenu(win) {
+  const isMac = process.platform === 'darwin';
+  const template = [
+    ...(isMac
+      ? [{
+          label: app.name,
+          submenu: [
+            { role: 'about' },
+            { type: 'separator' },
+            { role: 'services' },
+            { type: 'separator' },
+            { role: 'hide' },
+            { role: 'hideOthers' },
+            { role: 'unhide' },
+            { type: 'separator' },
+            { role: 'quit' },
+          ],
+        }]
+      : []),
+    {
+      label: 'File',
+      submenu: [
+        { label: 'New Map', accelerator: 'CmdOrCtrl+N', click: () => sendMenuAction(win, 'new') },
+        { label: 'Open…', accelerator: 'CmdOrCtrl+O', click: () => sendMenuAction(win, 'open') },
+        { label: 'Open Saved…', click: () => sendMenuAction(win, 'open-saved') },
+        { type: 'separator' },
+        { label: 'Save', accelerator: 'CmdOrCtrl+S', click: () => sendMenuAction(win, 'save') },
+        { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: () => sendMenuAction(win, 'save-as') },
+        { type: 'separator' },
+        { label: 'Export JSON…', click: () => sendMenuAction(win, 'export') },
+        { label: 'Revert to Cached', click: () => sendMenuAction(win, 'revert-cached') },
+        { type: 'separator' },
+        { label: 'Delete Map…', click: () => sendMenuAction(win, 'delete') },
+        ...(!isMac ? [{ type: 'separator' }, { role: 'quit' }] : []),
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => sendMenuAction(win, 'undo') },
+        { label: 'Redo', accelerator: 'CmdOrCtrl+Shift+Z', click: () => sendMenuAction(win, 'redo') },
+      ],
+    },
+    {
+      label: 'View',
+      submenu: [
+        { label: 'Toggle Fly Mode', click: () => sendMenuAction(win, 'toggle-fly') },
+        { label: 'Toggle Edit Mode', click: () => sendMenuAction(win, 'toggle-edit') },
+        { label: 'Toggle Minimap', click: () => sendMenuAction(win, 'toggle-minimap') },
+        { type: 'separator' },
+        { label: 'Isometric', click: () => sendMenuAction(win, 'view-iso') },
+        { label: 'Top', click: () => sendMenuAction(win, 'view-top') },
+        { label: 'Front', click: () => sendMenuAction(win, 'view-front') },
+        { label: 'Side', click: () => sendMenuAction(win, 'view-side') },
+        { type: 'separator' },
+        { label: 'Toggle Help', click: () => sendMenuAction(win, 'toggle-help') },
+      ],
+    },
+    {
+      label: 'Play',
+      submenu: [
+        { label: 'Test Map', click: () => sendMenuAction(win, 'test-map') },
+        { label: 'Export Assets', click: () => sendMenuAction(win, 'export-assets') },
+        { type: 'separator' },
+        { label: 'Build Settings…', click: () => sendMenuAction(win, 'build-settings') },
+      ],
+    },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 function createWindow(url) {
   mainWindow = new BrowserWindow({
     title: APP_TITLE,
@@ -436,6 +620,8 @@ function createWindow(url) {
     },
   });
 
+  buildApplicationMenu(mainWindow);
+  bindEditorShortcuts(mainWindow.webContents);
   mainWindow.loadURL(url);
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -466,19 +652,20 @@ async function bootstrap() {
     return;
   }
 
-  const editorDir = resolveEditorDir(repoRoot);
-  if (!editorDir) {
+  const editorPaths = resolveEditorPaths(repoRoot);
+  if (!editorPaths) {
     showStartupError(
-      `Map editor server not found under ${repoRoot}.\n\n` +
+      `Map editor not found (bundled Resources/editor/ or ${path.join(repoRoot, 'journal/uff_viewer')}).\n\n` +
+        'Rebuild: ./scripts/build-map-editor-electron.sh\n' +
         'If the repo is in iCloud Drive: Finder → right-click repo → Download Now.'
     );
     app.quit();
     return;
   }
 
-  const serveScript = path.join(editorDir, 'serve_editor.py');
-  const stateDir = resolveStateDir(repoRoot, editorDir);
-  log(`Using editor at ${editorDir}, state=${stateDir}`);
+  const { serveScript, bundleDir, source } = editorPaths;
+  const stateDir = resolveStateDir(repoRoot, source);
+  log(`Using editor source=${source}, bundle=${bundleDir || 'n/a'}, state=${stateDir}`);
 
   if (!(await ensureLocalFile(serveScript))) {
     showStartupError(
@@ -489,11 +676,11 @@ async function bootstrap() {
     return;
   }
 
-  const existing = await findHealthyPort(PORT_MIN, PORT_MAX);
+  const existing = await findHealthyPort(PORT_MIN, PORT_MAX, bundleDir);
   if (existing) {
     activePort = existing;
     log(`Reusing healthy server on port ${activePort}`);
-    createWindow(`http://${DEFAULT_HOST}:${activePort}/`);
+    createWindow(editorUrl(activePort));
     return;
   }
 
@@ -507,8 +694,8 @@ async function bootstrap() {
   }
   log(`Using python: ${pythonBin}`);
 
-  serverContext = { pythonBin, serveScript, repoRoot, stateDir };
-  serverProcess = spawnServer(pythonBin, serveScript, repoRoot, stateDir);
+  serverContext = { pythonBin, serveScript, repoRoot, stateDir, bundleDir };
+  serverProcess = spawnServer(pythonBin, serveScript, repoRoot, stateDir, bundleDir);
   log(`Server PID ${serverProcess.pid}`);
 
   try {
@@ -521,12 +708,30 @@ async function bootstrap() {
     return;
   }
 
-  const url = `http://${DEFAULT_HOST}:${activePort}/`;
+  const url = editorUrl(activePort);
   log(`Server healthy on port ${activePort}; loading ${url}`);
   createWindow(url);
 }
 
-app.whenReady().then(bootstrap);
+app.whenReady().then(() => {
+  ipcMain.handle('editor:open-json-file', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const result = await dialog.showOpenDialog(win || mainWindow, {
+      title: 'Open map JSON',
+      filters: [{ name: 'Map JSON', extensions: ['json'] }],
+      properties: ['openFile'],
+    });
+    if (result.canceled || !result.filePaths.length) return null;
+    const filePath = result.filePaths[0];
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      return { path: filePath, name: path.basename(filePath), content };
+    } catch (err) {
+      throw new Error('Could not read file: ' + err.message);
+    }
+  });
+  return bootstrap();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -541,7 +746,7 @@ app.on('before-quit', () => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0 && activePort) {
-    createWindow(`http://${DEFAULT_HOST}:${activePort}/`);
+    createWindow(editorUrl(activePort));
   }
 });
 

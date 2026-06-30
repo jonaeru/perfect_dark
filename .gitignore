@@ -27,4 +27,10 @@ CppProperties.json
 .idea
 cmake-build-debug
 journal/uff_viewer/electron/node_modules/
+journal/uff_viewer/electron/editor-bundle/
+journal/uff_viewer/maps/
 scripts/release/electron-dist/
+scripts/release/*.app/
+/Perfect Dark Map Editor.app
+/Perfect Dark Map Editor (Electron).app
+/Play Last Test Map.app

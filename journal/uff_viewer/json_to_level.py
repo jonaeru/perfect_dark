@@ -88,6 +88,8 @@ def json_to_level_py(data: dict[str, Any]) -> str:
     half = float(data.get("box_half", 5000))
     height = float(data.get("box_height", 3000))
     pads: list[dict[str, Any]] = list(data.get("pads") or [])
+    if not pads:
+        raise ValueError("Refusing to export an empty map — add spawn/weapon pads first.")
 
     spawn_pads: list[tuple[int, dict]] = []
     weapon_pads: list[tuple[int, dict]] = []
