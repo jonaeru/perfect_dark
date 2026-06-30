@@ -136,7 +136,11 @@ def floor_tile(*, half: float = 5000.0, y: float = 0.0) -> dict:
 PAD_FLOOR_OFFSET = 10.0
 
 
-def configure_matrix_test_room(half: float = 5000.0, pad_y: float = PAD_FLOOR_OFFSET) -> MapDef:
+def configure_matrix_test_room(
+    half: float = 5000.0,
+    pad_y: float = PAD_FLOOR_OFFSET,
+    name: str = "uff",
+) -> MapDef:
     """Matrix Test Room (uff) — a fully playable Combat Simulator box arena.
 
     All pads sit inside the [-half, +half] floor box (so players spawn on the
@@ -144,7 +148,7 @@ def configure_matrix_test_room(half: float = 5000.0, pad_y: float = PAD_FLOOR_OF
     the floor (so the ground search accepts the floor). The layout assumes
     ``half >= 4200`` (the outermost case pads sit at +/-4200).
     """
-    g = MapDef("uff")
+    g = MapDef(name)
 
     spawn_positions = [
         (-4000, -4000), (4000, -4000), (-4000, 4000), (4000, 4000),

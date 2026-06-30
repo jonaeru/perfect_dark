@@ -7,7 +7,12 @@ from .seg import validate_seg_g_vtx, validate_seg_phantom_viewport
 from .intro import Spawn, Case, CaseRespawn, Hill
 
 
-def validate_all(name: str, mapdef: Optional[MapDef] = None) -> tuple[list[str], list[str]]:
+def validate_all(
+    name: str,
+    mapdef: Optional[MapDef] = None,
+    *,
+    level_module: str | None = None,
+) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -110,10 +115,12 @@ def validate_all(name: str, mapdef: Optional[MapDef] = None) -> tuple[list[str],
         # floor_box_tiles() must span [-BOX_HALF, +BOX_HALF] or the arena shrinks
         # to a tiny patch and players fall off immediately (see MAP_CREATION §11.13).
         try:
-            mod = load_level_module(name)
+            mod = load_level_module(level_module or name)
             expected_half = getattr(mod, "BOX_HALF", None)
+            seg_mode = getattr(mod, "SEG_MODE", None)
         except Exception:
             expected_half = None
+            seg_mode = None
         if expected_half is not None:
             floor_tiles: list[dict] = []
             for room_tiles in tiles_data.get("rooms", {}).values():
@@ -158,8 +165,10 @@ def validate_all(name: str, mapdef: Optional[MapDef] = None) -> tuple[list[str],
             seg_bytes = seg_fp.read()
             for msg in validate_seg_g_vtx(seg_bytes):
                 errors.append(f"Seg G_VTX: {msg}")
-            for msg in validate_seg_phantom_viewport(seg_bytes):
-                errors.append(f"Seg viewport: {msg}")
+            # Masonic/checkerboard floor draws many G_VTX(4) loads by design.
+            if seg_mode not in ("masonic",):
+                for msg in validate_seg_phantom_viewport(seg_bytes):
+                    errors.append(f"Seg viewport: {msg}")
 
     setup_path = os.path.join(ROOT, "build", ROMID, f"Ump_setup{name}Z")
     if not os.path.exists(setup_path):

@@ -939,6 +939,23 @@ without matching `BOX_HALF` to the Matrix Test Room (5000). Editor blank maps
 default to `box_half: 2500`; stock `uff` uses `configure_matrix_test_room()`
 at 5000.
 
+### 11.14 Masonic checkerboard reference floor (`uff_masonic`)
+
+**Purpose:** Visible grey checkerboard on the floor for scale and bounds
+debugging (level-design “masonic” grid). Full ±5000 tile collision; no wall
+faces (avoids §11.11 phantom wall regression).
+
+**Build and play via the uff test slot:**
+
+```bash
+python3 tools/pdmap.py build uff_masonic --deploy --deploy-as uff
+./build/pd.arm64 --test-map --moddir mods/mod_allinone
+```
+
+Level module: `src/levels/uff_masonic.py`. Sets `SEG_MODE = "masonic"` (500-unit
+cells, light/dark grey). Collision still comes from `floor_box_tiles()` at
+`BOX_HALF=5000`; the seg is visual reference only.
+
 ---
 
 ## 12. Full recipe — new arena from scratch in 6 steps

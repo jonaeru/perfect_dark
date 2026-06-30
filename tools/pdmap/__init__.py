@@ -26,11 +26,14 @@ def _resolve_seg_script(mod, name: str) -> str | None:
 
 def cmd_build(args):
     name = args.name
-    print(f"Building level: {name}")
+    deploy_name = (getattr(args, "deploy_as", None) or name).strip().lower()
+    print(f"Building level: {name}" + (f" (deploy as {deploy_name})" if deploy_name != name else ""))
 
     try:
         mod = load_level_module(name)
         mapdef = mod.build()
+        if deploy_name != name:
+            mapdef.name = deploy_name
     except Exception as exc:
         print(f"ERROR: failed to load level module: {exc}", file=sys.stderr)
         sys.exit(1)
@@ -43,27 +46,32 @@ def cmd_build(args):
     # `pdmap build uff --deploy` cannot redeploy a stale G_VTX(24) seg from
     # BUILD_DIR (phantom collision wall regression).
     has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
-    if has_box_dims:
+    if hasattr(mod, "SEG_MODE"):
+        os.environ["PDMAP_SEG_MODE"] = str(mod.SEG_MODE)
+    elif has_box_dims:
         os.environ.setdefault("PDMAP_SEG_MODE", "empty")
+    if hasattr(mod, "MASONIC_CELL"):
+        os.environ["PDMAP_MASONIC_CELL"] = str(int(mod.MASONIC_CELL))
     want_seg = args.seg is not None or bool(seg_script) or has_box_dims
     if want_seg:
         try:
             if seg_script:
                 # Bespoke generator script declared by the level module.
                 print(f"  Building seg via {seg_script}")
-                build_seg(name, seg_script)
+                build_seg(deploy_name, seg_script)
             elif args.seg:
                 # Explicit script path passed on the command line.
                 print(f"  Building seg via {args.seg}")
-                build_seg(name, args.seg)
+                build_seg(deploy_name, args.seg)
             else:
                 # Bare --seg with no SEG_SCRIPT: generate a generic box arena seg
                 # directly. Box dimensions come from the level module (BOX_HALF /
                 # BOX_HEIGHT) so they match the floor tiles; defaults otherwise.
                 half = float(getattr(mod, "BOX_HALF", 5000.0))
                 height = float(getattr(mod, "BOX_HEIGHT", 3000.0))
-                print("  Building generic box seg (no SEG_SCRIPT)")
-                build_box_seg_asset(name, half=half, height=height)
+                seg_mode = os.environ.get("PDMAP_SEG_MODE", "empty")
+                print(f"  Building generic box seg (no SEG_SCRIPT; mode={seg_mode})")
+                build_box_seg_asset(deploy_name, half=half, height=height)
         except Exception as exc:
             print(f"ERROR: seg build failed: {exc}", file=sys.stderr)
             sys.exit(1)
@@ -71,12 +79,18 @@ def cmd_build(args):
     try:
         pads_json_path = write_pads_json(mapdef)
         print(f"  Generated pads JSON: {pads_json_path}")
-        compile_pads(name, pads_json_path)
+        compile_pads(deploy_name, pads_json_path)
         print("  Compiled pads binary")
 
-        tiles_json_path = os.path.join(ROOT, "src", "assets", ROMID, "tiles", f"{name}.json")
+        tiles_json_path = os.path.join(ROOT, "src", "assets", ROMID, "tiles", f"{deploy_name}.json")
         if hasattr(mod, "build_tiles_json"):
             tiles_data = mod.build_tiles_json()
+            # Room keys must match deploy asset name (bg_<deploy_name>_tilesZ).
+            if deploy_name != name:
+                rooms = {}
+                for key, val in tiles_data.get("rooms", {}).items():
+                    rooms[key.replace(name.upper(), deploy_name.upper())] = val
+                tiles_data = {"rooms": rooms}
             os.makedirs(os.path.dirname(tiles_json_path), exist_ok=True)
             with open(tiles_json_path, "w") as f:
                 json.dump(tiles_data, f, indent=4)
@@ -85,13 +99,13 @@ def cmd_build(args):
             print(f"  Using existing tiles JSON: {tiles_json_path}")
         else:
             template = getattr(mapdef, "tiles_template", "mp14")
-            tiles_json_path = copy_tiles_from_template(name, template)
+            tiles_json_path = copy_tiles_from_template(deploy_name, template)
             print(f"  Copied tiles JSON from template ({template}): {tiles_json_path}")
 
-        compile_tiles(name, tiles_json_path)
+        compile_tiles(deploy_name, tiles_json_path)
         print("  Compiled tiles binary")
 
-        setup_path = write_setup_binary(mapdef, name)
+        setup_path = write_setup_binary(mapdef, deploy_name)
         print(f"  Wrote setup binary: {setup_path}")
     except subprocess.CalledProcessError as exc:
         print(f"ERROR: asset compiler failed (exit {exc.returncode})", file=sys.stderr)
@@ -102,11 +116,11 @@ def cmd_build(args):
 
     if args.deploy:
         print("  Deploying...")
-        deploy_all(name)
+        deploy_all(deploy_name)
         print("  Deploy complete")
 
     if not args.no_validate:
-        errors, warnings = validate_all(name, mapdef)
+        errors, warnings = validate_all(deploy_name, mapdef, level_module=name)
         for w in warnings:
             print(f"  [WARN] {w}")
         for e in errors:
@@ -115,7 +129,7 @@ def cmd_build(args):
             print(f"Build finished with {len(errors)} validation error(s)", file=sys.stderr)
             sys.exit(1)
 
-    print(f"Build complete for {name}")
+    print(f"Build complete for {deploy_name}")
 
 
 def cmd_info(args):
@@ -261,6 +275,11 @@ def main():
     p_build = sub.add_parser("build", help="Build a level end-to-end")
     p_build.add_argument("name", help="Level name (e.g. uff)")
     p_build.add_argument("--deploy", "-d", action="store_true", help="Deploy to mod directories after build")
+    p_build.add_argument(
+        "--deploy-as",
+        metavar="SLOT",
+        help="Asset/mod filename slot (default: level name). Use 'uff' for --test-map.",
+    )
     p_build.add_argument("--seg", nargs="?", const="", default=None,
                          help="Build seg file (uses level SEG_SCRIPT when flag given without path)")
     p_build.add_argument("--no-validate", action="store_true",

@@ -41,6 +41,12 @@ DEFAULT_FACE_COLOURS = [
     0x40FFFFFF,  # wall -X: cyan
 ]
 
+# Masonic / checkerboard reference floor (PDMAP_SEG_MODE=masonic).
+MASONIC_FACE_COLOURS = [
+    0xE8E8E8FF,  # light tile
+    0x505050FF,  # dark tile
+]
+
 
 def zip1172(data):
     co = zlib.compressobj(9, zlib.DEFLATED, -15)
@@ -73,6 +79,34 @@ def _faces(half, height):
         ((h, 0, h), (-h, 0, h), (-h, t, h), (h, t, h), 4),
         ((-h, 0, h), (-h, 0, -h), (-h, t, -h), (-h, t, h), 5),
     ]
+
+
+def _checkerboard_floor_faces(half, cell_size, *, y=0):
+    """Grid of floor quads spanning [-half, +half] with alternating colours.
+
+    Each quad becomes one G_VTX(4) load in the room GDL (required for collision
+    correctness — see _build_gdl). ``cell_size`` is in world units (~cm); 500
+    yields a 20×20 grid over a ±5000 arena (~5 m cells).
+    """
+    h = int(half)
+    cs = max(1, int(cell_size))
+    yi = int(y)
+    faces = []
+    # Cover the full [-h, +h] footprint; last row/col may be slightly narrower
+    # when half is not an exact multiple of cell_size.
+    x = -h
+    while x < h:
+        x1 = min(x + cs, h)
+        z = -h
+        while z < h:
+            z1 = min(z + cs, h)
+            ix = (x + h) // cs
+            iz = (z + h) // cs
+            colour = (ix + iz) & 1
+            faces.append(((x, yi, z), (x1, yi, z), (x1, yi, z1), (x, yi, z1), colour))
+            z = z1
+        x = x1
+    return faces
 
 
 def _build_vertices(faces):
@@ -213,7 +247,7 @@ def _face_gdl(face_index):
     return gdl
 
 
-def _build_gdl(setup_gdl):
+def _build_gdl(setup_gdl, *, face_count: int = 6):
     """Build the room display list.
 
     Default ("full") draws the complete six-face coloured box. Getting this
@@ -230,10 +264,11 @@ def _build_gdl(setup_gdl):
         GL heap.
 
     Modes (PDMAP_SEG_MODE):
-      full   (default) ceiling + four walls (no floor face — avoids near-plane clip)
-      box    ceiling + two walls (no floor)
-      floor  floor quad only (debug; clips viewport when camera inside box)
-      empty  no geometry (collision-only; recommended for Test/Play in-box FPS)
+      full     ceiling + four walls (no floor face — avoids near-plane clip)
+      box      ceiling + two walls (no floor)
+      floor    single floor quad (debug; clips viewport when camera inside box)
+      masonic  checkerboard floor grid (reference / scale debugging; no walls)
+      empty    no geometry (collision-only; recommended for Test/Play in-box FPS)
 
     All modes are playable; floor/wall collision comes from the tiles file,
     not the seg geometry.
@@ -248,6 +283,13 @@ def _build_gdl(setup_gdl):
 
     if mode == "floor":
         return setup_gdl + _face_gdl(0) + _enddl()
+
+    if mode == "masonic":
+        # One G_VTX(4) per checker cell — never batch >16 verts per load.
+        gdl = setup_gdl
+        for fi in range(face_count):
+            gdl += _face_gdl(fi)
+        return gdl + _enddl()
 
     # Face sets for in-box cameras (Y=SPAWN_Y). Face 0 (floor at Y=0) is
     # deliberately omitted from playable modes: the huge floor quad sits behind
@@ -328,7 +370,7 @@ def _build_room_block(template_seg, faces, face_colours):
     cols = _build_colours(face_colours)
 
     setup_gdl = _extract_setup_gdl(template_seg, ncols)
-    gdl = _build_gdl(setup_gdl)
+    gdl = _build_gdl(setup_gdl, face_count=len(faces))
 
     off_blocks = 24
     off_verts = _align8(off_blocks + 20)
@@ -434,17 +476,28 @@ def build_box_seg(*, half=5000, height=3000, face_colours=None, template_seg=Non
     The box spans X,Z in [-half, +half] and Y in [0, height], floor at Y=0.
     These are world units — pass the same ``half`` used for the floor tiles so
     the visible walls match the collision floor.
+
+    Set ``PDMAP_SEG_MODE=masonic`` for a checkerboard reference floor (no walls).
+    Optional ``PDMAP_MASONIC_CELL`` (default 500) sets the grid cell size.
     """
-    if face_colours is None:
-        face_colours = DEFAULT_FACE_COLOURS
+    import os as _os
+    mode = _os.environ.get("PDMAP_SEG_MODE", "empty")
     if template_seg is None:
         template_seg = DEFAULT_TEMPLATE_SEG
+
+    if mode == "masonic":
+        cell_size = int(_os.environ.get("PDMAP_MASONIC_CELL", "500"))
+        faces = _checkerboard_floor_faces(half, cell_size)
+        if face_colours is None:
+            face_colours = MASONIC_FACE_COLOURS
+    else:
+        faces = _faces(half, height)
+        if face_colours is None:
+            face_colours = DEFAULT_FACE_COLOURS
 
     seg = open(template_seg, "rb").read()
     _, sec1_cmp, _ = struct.unpack(">III", seg[0:12])
     rest = seg[12 + sec1_cmp:]
-
-    faces = _faces(half, height)
     new_room = _build_room_block(template_seg, faces, face_colours)
     new_room_blob = zip1172(new_room)
 
