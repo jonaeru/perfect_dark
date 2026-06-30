@@ -315,6 +315,24 @@
   }
   #minimapClose:hover { color:#e6e6e6; background:rgba(36,48,73,0.95); }
   .pad-hover-ring { pointer-events:none; }
+  /* pass-11: first-run / empty-map onboarding */
+  #onboardingOverlay {
+    position:fixed; inset:0; z-index:25; display:none; align-items:center; justify-content:center;
+    background:rgba(6,8,12,0.72); backdrop-filter:blur(4px); padding:24px;
+  }
+  #onboardingOverlay.open { display:flex; }
+  #onboardingCard {
+    max-width:420px; width:100%; padding:20px 22px; border-radius:14px;
+    background:rgba(16,20,28,0.96); border:1px solid var(--border);
+    box-shadow:0 12px 40px rgba(0,0,0,0.55);
+  }
+  #onboardingCard h2 { margin:0 0 8px; font-size:16px; color:#e6e6e6; text-transform:none; letter-spacing:0; }
+  #onboardingCard ol { margin:0 0 14px 18px; padding:0; color:#cdd6e6; font-size:13px; line-height:1.55; }
+  #onboardingCard kbd {
+    background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
+    border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,monospace; font-size:11px;
+  }
+  #onboardingDismiss { width:100%; min-height:40px; font-weight:600; }
 </style>
 </head>
 <body>
@@ -416,6 +434,21 @@
   <span id="docDirtyBadge" class="doc-dirty" hidden title="Unsaved changes" aria-label="Unsaved">●</span>
   <span id="currentMapTitle" class="doc-title" title="Current map">uff</span>
   <span id="mapsStatus" class="doc-server" role="status" aria-live="polite"></span>
+</div>
+
+<!-- pass-11: empty-map onboarding — dismissed once per browser session -->
+<div id="onboardingOverlay" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" hidden>
+  <div id="onboardingCard" class="panel">
+    <h2 id="onboardingTitle">Quick start</h2>
+    <ol>
+      <li>Press <kbd>E</kbd> or click <strong>Edit</strong></li>
+      <li>Pick <strong>Spawn</strong> on the toolbar</li>
+      <li>Click the floor to place</li>
+      <li><kbd>⌘S</kbd> to save</li>
+      <li><strong>▶ Play</strong> to test in-game</li>
+    </ol>
+    <button id="onboardingDismiss" type="button">Got it</button>
+  </div>
 </div>
 
 <!-- Advanced build / test options — opened from Play menu or gear -->
@@ -625,7 +658,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-const DATA = {"name": "uff", "half": 5000.0, "height": 3000.0, "faces": [{"index": 0, "name": "F0 floor (Y=0)", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 0, 5000], [-5000, 0, 5000]], "rgba": 1078001663, "hex": "#4040FF"}, {"index": 1, "name": "F1 ceiling (Y=H)", "verts": [[-5000, 3000, -5000], [5000, 3000, -5000], [5000, 3000, 5000], [-5000, 3000, 5000]], "rgba": 1090470143, "hex": "#40FF40"}, {"index": 2, "name": "F2 wall -Z", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 3000, -5000], [-5000, 3000, -5000]], "rgba": 4282401023, "hex": "#FF4040"}, {"index": 3, "name": "F3 wall +X", "verts": [[5000, 0, -5000], [5000, 0, 5000], [5000, 3000, 5000], [5000, 3000, -5000]], "rgba": 4282449919, "hex": "#FF40FF"}, {"index": 4, "name": "F4 wall +Z", "verts": [[5000, 0, 5000], [-5000, 0, 5000], [-5000, 3000, 5000], [5000, 3000, 5000]], "rgba": 4294918399, "hex": "#FFFF40"}, {"index": 5, "name": "F5 wall -X", "verts": [[-5000, 0, 5000], [-5000, 0, -5000], [-5000, 3000, -5000], [-5000, 3000, 5000]], "rgba": 1090519039, "hex": "#40FFFF"}], "tiles": [{"room": "ROOM_UFF_0001", "verts": [[-5000, 0, -5000], [-5000, 0, 5000], [5000, 0, 5000], [5000, 0, -5000]], "floortype": "default", "floorcolour": 4095}], "pads": [{"index": 0, "pos": [-4000.0, 10, -4000.0], "room": 1, "kind": "spawn"}, {"index": 1, "pos": [4000.0, 10, -4000.0], "room": 1, "kind": "spawn"}, {"index": 2, "pos": [-4000.0, 10, 4000.0], "room": 1, "kind": "spawn"}, {"index": 3, "pos": [4000.0, 10, 4000.0], "room": 1, "kind": "spawn"}, {"index": 4, "pos": [-2000.0, 10, -2000.0], "room": 1, "kind": "spawn"}, {"index": 5, "pos": [2000.0, 10, -2000.0], "room": 1, "kind": "spawn"}, {"index": 6, "pos": [-2000.0, 10, 2000.0], "room": 1, "kind": "spawn"}, {"index": 7, "pos": [2000.0, 10, 2000.0], "room": 1, "kind": "spawn"}, {"index": 8, "pos": [0.0, 10, -3000.0], "room": 1, "kind": "spawn"}, {"index": 9, "pos": [0.0, 10, 3000.0], "room": 1, "kind": "spawn"}, {"index": 10, "pos": [-3000.0, 10, 0.0], "room": 1, "kind": "spawn"}, {"index": 11, "pos": [3000.0, 10, 0.0], "room": 1, "kind": "spawn"}, {"index": 12, "pos": [-1000.0, 10, -1000.0], "room": 1, "kind": "spawn"}, {"index": 13, "pos": [1000.0, 10, -1000.0], "room": 1, "kind": "spawn"}, {"index": 14, "pos": [-1000.0, 10, 1000.0], "room": 1, "kind": "spawn"}, {"index": 15, "pos": [1000.0, 10, 1000.0], "room": 1, "kind": "spawn"}, {"index": 16, "pos": [0.0, 10, 0.0], "room": 1, "kind": "weapon"}, {"index": 17, "pos": [0.0, 10, -1500.0], "room": 1, "kind": "weapon"}, {"index": 18, "pos": [0.0, 10, 1500.0], "room": 1, "kind": "weapon"}, {"index": 19, "pos": [-1500.0, 10, 0.0], "room": 1, "kind": "weapon"}, {"index": 20, "pos": [1500.0, 10, 0.0], "room": 1, "kind": "weapon"}, {"index": 21, "pos": [-3500.0, 10, -3500.0], "room": 1, "kind": "weapon"}, {"index": 22, "pos": [3500.0, 10, -3500.0], "room": 1, "kind": "weapon"}, {"index": 23, "pos": [-3500.0, 10, 3500.0], "room": 1, "kind": "weapon"}, {"index": 24, "pos": [3500.0, 10, 3500.0], "room": 1, "kind": "weapon"}, {"index": 25, "pos": [-4500.0, 10, 0.0], "room": 1, "kind": "weapon"}, {"index": 26, "pos": [-4200.0, 10, -4200.0], "room": 1, "kind": "scenario"}, {"index": 27, "pos": [-4200.0, 10, -4000.0], "room": 1, "kind": "scenario"}, {"index": 28, "pos": [4200.0, 10, -4200.0], "room": 1, "kind": "scenario"}, {"index": 29, "pos": [4200.0, 10, -4000.0], "room": 1, "kind": "scenario"}, {"index": 30, "pos": [-4200.0, 10, 4200.0], "room": 1, "kind": "scenario"}, {"index": 31, "pos": [-4200.0, 10, 4000.0], "room": 1, "kind": "scenario"}, {"index": 32, "pos": [4200.0, 10, 4200.0], "room": 1, "kind": "scenario"}, {"index": 33, "pos": [4200.0, 10, 4000.0], "room": 1, "kind": "scenario"}, {"index": 34, "pos": [0.0, 10, 500], "room": 1, "kind": "scenario"}, {"index": 35, "pos": [0.0, 10, -500], "room": 1, "kind": "scenario"}, {"index": 36, "pos": [-500, 10, 0.0], "room": 1, "kind": "scenario"}, {"index": 37, "pos": [500, 10, 0.0], "room": 1, "kind": "scenario"}, {"index": 38, "pos": [-3000.0, 10, -3000.0], "room": 1, "kind": "ammo"}, {"index": 39, "pos": [-1500.0, 10, -3000.0], "room": 1, "kind": "ammo"}, {"index": 40, "pos": [0.0, 10, -3000.0], "room": 1, "kind": "ammo"}, {"index": 41, "pos": [1500.0, 10, -3000.0], "room": 1, "kind": "ammo"}, {"index": 42, "pos": [3000.0, 10, -3000.0], "room": 1, "kind": "ammo"}, {"index": 43, "pos": [-3000.0, 10, -1500.0], "room": 1, "kind": "ammo"}, {"index": 44, "pos": [-1500.0, 10, -1500.0], "room": 1, "kind": "ammo"}, {"index": 45, "pos": [0.0, 10, -1500.0], "room": 1, "kind": "ammo"}, {"index": 46, "pos": [1500.0, 10, -1500.0], "room": 1, "kind": "ammo"}, {"index": 47, "pos": [3000.0, 10, -1500.0], "room": 1, "kind": "ammo"}, {"index": 48, "pos": [-3000.0, 10, 0.0], "room": 1, "kind": "ammo"}, {"index": 49, "pos": [-1500.0, 10, 0.0], "room": 1, "kind": "ammo"}, {"index": 50, "pos": [0.0, 10, 0.0], "room": 1, "kind": "ammo"}, {"index": 51, "pos": [1500.0, 10, 0.0], "room": 1, "kind": "ammo"}, {"index": 52, "pos": [3000.0, 10, 0.0], "room": 1, "kind": "ammo"}, {"index": 53, "pos": [-3000.0, 10, 1500.0], "room": 1, "kind": "ammo"}, {"index": 54, "pos": [-1500.0, 10, 1500.0], "room": 1, "kind": "ammo"}, {"index": 55, "pos": [0.0, 10, 1500.0], "room": 1, "kind": "ammo"}, {"index": 56, "pos": [1500.0, 10, 1500.0], "room": 1, "kind": "ammo"}, {"index": 57, "pos": [3000.0, 10, 1500.0], "room": 1, "kind": "ammo"}], "originRadius": 500.0, "nearFaces": [], "nearTiles": [], "gdl": {"loads": 0, "maxLoad": 0, "anyOverflow": false, "totalVerts": 24}, "levelCatalog": {"csim": {"name": "csim", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 4, "type": "ammo", "x": 0.0, "y": 10.0, "z": 0.0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 5, "type": "weapon", "x": -1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 10}, {"index": 6, "type": "weapon", "x": 1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 5}, {"index": 7, "type": "scenario", "x": -3000.0, "y": 10.0, "z": -3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 8, "type": "scenario", "x": 3000.0, "y": 10.0, "z": 3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 9, "type": "scenario", "x": 0.0, "y": 10.0, "z": 1500.0, "room": 1, "scenario": "hill", "team": 0}]}, "my_arena": {"name": "my_arena", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 4, "type": "weapon", "x": 0.0, "y": 10, "z": -1500.0, "room": 1, "weapon": 17}, {"index": 5, "type": "weapon", "x": 0.0, "y": 10, "z": 1500.0, "room": 1, "weapon": 19}, {"index": 6, "type": "ammo", "x": 0.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 7, "type": "scenario", "x": 0.0, "y": 10, "z": -500, "room": 1, "scenario": "case", "team": 0}]}, "uff": {"name": "uff", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -4000.0, "y": 10, "z": -4000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 4000.0, "y": 10, "z": -4000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -4000.0, "y": 10, "z": 4000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 4000.0, "y": 10, "z": 4000.0, "room": 1}, {"index": 4, "type": "spawn", "x": -2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 5, "type": "spawn", "x": 2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 6, "type": "spawn", "x": -2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 7, "type": "spawn", "x": 2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 8, "type": "spawn", "x": 0.0, "y": 10, "z": -3000.0, "room": 1}, {"index": 9, "type": "spawn", "x": 0.0, "y": 10, "z": 3000.0, "room": 1}, {"index": 10, "type": "spawn", "x": -3000.0, "y": 10, "z": 0.0, "room": 1}, {"index": 11, "type": "spawn", "x": 3000.0, "y": 10, "z": 0.0, "room": 1}, {"index": 12, "type": "spawn", "x": -1000.0, "y": 10, "z": -1000.0, "room": 1}, {"index": 13, "type": "spawn", "x": 1000.0, "y": 10, "z": -1000.0, "room": 1}, {"index": 14, "type": "spawn", "x": -1000.0, "y": 10, "z": 1000.0, "room": 1}, {"index": 15, "type": "spawn", "x": 1000.0, "y": 10, "z": 1000.0, "room": 1}, {"index": 16, "type": "weapon", "x": 0.0, "y": 10, "z": 0.0, "room": 1, "weapon": 17}, {"index": 17, "type": "weapon", "x": 0.0, "y": 10, "z": -1500.0, "room": 1, "weapon": 17}, {"index": 18, "type": "weapon", "x": 0.0, "y": 10, "z": 1500.0, "room": 1, "weapon": 17}, {"index": 19, "type": "weapon", "x": -1500.0, "y": 10, "z": 0.0, "room": 1, "weapon": 17}, {"index": 20, "type": "weapon", "x": 1500.0, "y": 10, "z": 0.0, "room": 1, "weapon": 17}, {"index": 21, "type": "weapon", "x": -3500.0, "y": 10, "z": -3500.0, "room": 1, "weapon": 17}, {"index": 22, "type": "weapon", "x": 3500.0, "y": 10, "z": -3500.0, "room": 1, "weapon": 17}, {"index": 23, "type": "weapon", "x": -3500.0, "y": 10, "z": 3500.0, "room": 1, "weapon": 17}, {"index": 24, "type": "weapon", "x": 3500.0, "y": 10, "z": 3500.0, "room": 1, "weapon": 17}, {"index": 25, "type": "weapon", "x": -4500.0, "y": 10, "z": 0.0, "room": 1, "weapon": 17}, {"index": 26, "type": "scenario", "x": -4200.0, "y": 10, "z": -4200.0, "room": 1, "scenario": "case", "team": 0}, {"index": 27, "type": "scenario", "x": -4200.0, "y": 10, "z": -4000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 28, "type": "scenario", "x": 4200.0, "y": 10, "z": -4200.0, "room": 1, "scenario": "case", "team": 0}, {"index": 29, "type": "scenario", "x": 4200.0, "y": 10, "z": -4000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 30, "type": "scenario", "x": -4200.0, "y": 10, "z": 4200.0, "room": 1, "scenario": "case", "team": 0}, {"index": 31, "type": "scenario", "x": -4200.0, "y": 10, "z": 4000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 32, "type": "scenario", "x": 4200.0, "y": 10, "z": 4200.0, "room": 1, "scenario": "case", "team": 0}, {"index": 33, "type": "scenario", "x": 4200.0, "y": 10, "z": 4000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 34, "type": "scenario", "x": 0.0, "y": 10, "z": 500, "room": 1, "scenario": "case", "team": 0}, {"index": 35, "type": "scenario", "x": 0.0, "y": 10, "z": -500, "room": 1, "scenario": "case", "team": 0}, {"index": 36, "type": "scenario", "x": -500, "y": 10, "z": 0.0, "room": 1, "scenario": "case", "team": 0}, {"index": 37, "type": "scenario", "x": 500, "y": 10, "z": 0.0, "room": 1, "scenario": "case", "team": 0}, {"index": 38, "type": "ammo", "x": -3000.0, "y": 10, "z": -3000.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 39, "type": "ammo", "x": -1500.0, "y": 10, "z": -3000.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 40, "type": "ammo", "x": 0.0, "y": 10, "z": -3000.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 41, "type": "ammo", "x": 1500.0, "y": 10, "z": -3000.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 42, "type": "ammo", "x": 3000.0, "y": 10, "z": -3000.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 43, "type": "ammo", "x": -3000.0, "y": 10, "z": -1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 44, "type": "ammo", "x": -1500.0, "y": 10, "z": -1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 45, "type": "ammo", "x": 0.0, "y": 10, "z": -1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 46, "type": "ammo", "x": 1500.0, "y": 10, "z": -1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 47, "type": "ammo", "x": 3000.0, "y": 10, "z": -1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 48, "type": "ammo", "x": -3000.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 49, "type": "ammo", "x": -1500.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 50, "type": "ammo", "x": 0.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 51, "type": "ammo", "x": 1500.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 52, "type": "ammo", "x": 3000.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 53, "type": "ammo", "x": -3000.0, "y": 10, "z": 1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 54, "type": "ammo", "x": -1500.0, "y": 10, "z": 1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 55, "type": "ammo", "x": 0.0, "y": 10, "z": 1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 56, "type": "ammo", "x": 1500.0, "y": 10, "z": 1500.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 57, "type": "ammo", "x": 3000.0, "y": 10, "z": 1500.0, "room": 1, "ammoType": 4, "quantity": 200}]}}, "testConfig": {"testMapSlot": "uff", "stageTestUff": 77, "mods": [{"id": "mod_allinone", "path": "mods/mod_allinone"}, {"id": "mod_dark_noon", "path": "mods/mod_dark_noon"}, {"id": "mod_gex", "path": "mods/mod_gex"}, {"id": "mod_goldfinger_64", "path": "mods/mod_goldfinger_64"}, {"id": "mod_kakariko", "path": "mods/mod_kakariko"}], "scenarios": [{"id": 0, "label": "Combat", "flag": "--scenario-0"}, {"id": 1, "label": "Hold the Briefcase", "flag": "--scenario-1"}, {"id": 2, "label": "Hacker Central", "flag": "--scenario-2"}, {"id": 3, "label": "Pop a Cap", "flag": "--scenario-3"}, {"id": 4, "label": "King of the Hill", "flag": "--scenario-4"}, {"id": 5, "label": "Capture the Case", "flag": "--scenario-5"}], "simulants": {"requested": 8, "stockCap": 4, "note": "title.c --test-map requests N bots; stock profile caps at 4 unless MPFEATURE_8BOTS is unlocked."}, "loadoutWeapons": [{"id": 0, "label": "None"}, {"id": 1, "label": "Falcon 2"}, {"id": 4, "label": "MagSec 4"}, {"id": 5, "label": "Mauler"}, {"id": 6, "label": "Phoenix"}, {"id": 9, "label": "CMP150"}, {"id": 10, "label": "Cyclone"}, {"id": 13, "label": "Laptop Gun"}, {"id": 14, "label": "Dragon"}, {"id": 16, "label": "AR34"}, {"id": 17, "label": "SuperDragon"}, {"id": 18, "label": "Shotgun"}, {"id": 20, "label": "Sniper Rifle"}, {"id": 23, "label": "Rocket Launcher"}, {"id": 26, "label": "Crossbow"}, {"id": 27, "label": "Tranquilizer"}, {"id": 37, "label": "Shield"}], "simDifficulties": [{"id": 0, "label": "Meat"}, {"id": 1, "label": "Easy"}, {"id": 2, "label": "Normal"}, {"id": 3, "label": "Hard"}, {"id": 4, "label": "Perfect"}, {"id": 5, "label": "Dark"}], "gameOptions": [{"id": 1, "label": "One hit kills"}, {"id": 2, "label": "Teams"}, {"id": 4, "label": "No radar"}, {"id": 8, "label": "No auto-aim"}, {"id": 256, "label": "Fast movement"}, {"id": 2097152, "label": "Spawn with weapon"}, {"id": 33554432, "label": "Friendly fire"}, {"id": 134217728, "label": "No doors"}], "defaults": {"numSims": 8, "simDifficulty": 2, "loadout": [1, 9, 16, 4, 0, 37], "mpOptions": 0}, "helperScript": "journal/uff_viewer/test_map.py", "artifacts": {"json": "journal/uff_viewer/.last_test.json", "shell": "journal/uff_viewer/.last_test.sh"}, "devServer": {"port": 8765, "healthPath": "/api/health", "testMapPath": "/api/test-map", "mapsPath": "/api/maps", "startCommand": "python3 journal/uff_viewer/serve_editor.py"}}};
+const DATA = {"name": "uff", "half": 2500.0, "height": 2000.0, "faces": [{"index": 0, "name": "F0 floor (Y=0)", "verts": [[-2500, 0, -2500], [2500, 0, -2500], [2500, 0, 2500], [-2500, 0, 2500]], "rgba": 1078001663, "hex": "#4040FF"}, {"index": 1, "name": "F1 ceiling (Y=H)", "verts": [[-2500, 2000, -2500], [2500, 2000, -2500], [2500, 2000, 2500], [-2500, 2000, 2500]], "rgba": 1090470143, "hex": "#40FF40"}, {"index": 2, "name": "F2 wall -Z", "verts": [[-2500, 0, -2500], [2500, 0, -2500], [2500, 2000, -2500], [-2500, 2000, -2500]], "rgba": 4282401023, "hex": "#FF4040"}, {"index": 3, "name": "F3 wall +X", "verts": [[2500, 0, -2500], [2500, 0, 2500], [2500, 2000, 2500], [2500, 2000, -2500]], "rgba": 4282449919, "hex": "#FF40FF"}, {"index": 4, "name": "F4 wall +Z", "verts": [[2500, 0, 2500], [-2500, 0, 2500], [-2500, 2000, 2500], [2500, 2000, 2500]], "rgba": 4294918399, "hex": "#FFFF40"}, {"index": 5, "name": "F5 wall -X", "verts": [[-2500, 0, 2500], [-2500, 0, -2500], [-2500, 2000, -2500], [-2500, 2000, 2500]], "rgba": 1090519039, "hex": "#40FFFF"}], "tiles": [{"room": "ROOM_UFF_0001", "verts": [[-2500, 0, -2500], [-2500, 0, 2500], [2500, 0, 2500], [2500, 0, -2500]], "floortype": "default", "floorcolour": 4095}], "pads": [{"index": 0, "pos": [-2500.0, 10, -2500.0], "room": 1, "kind": "spawn"}], "originRadius": 500.0, "nearFaces": [], "nearTiles": [], "gdl": {"loads": 0, "maxLoad": 0, "anyOverflow": false, "totalVerts": 24}, "levelCatalog": {"csim": {"name": "csim", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 4, "type": "ammo", "x": 0.0, "y": 10.0, "z": 0.0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 5, "type": "weapon", "x": -1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 10}, {"index": 6, "type": "weapon", "x": 1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 5}, {"index": 7, "type": "scenario", "x": -3000.0, "y": 10.0, "z": -3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 8, "type": "scenario", "x": 3000.0, "y": 10.0, "z": 3000.0, "room": 1, "scenario": "case_respawn", "team": 0}, {"index": 9, "type": "scenario", "x": 0.0, "y": 10.0, "z": 1500.0, "room": 1, "scenario": "hill", "team": 0}]}, "edit_play_1782849221": {"name": "edit_play_1782849221", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "edit_play_1782849718": {"name": "edit_play_1782849718", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "edit_play_1782851214": {"name": "edit_play_1782851214", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "my_arena": {"name": "my_arena", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 4, "type": "weapon", "x": 0.0, "y": 10, "z": -1500.0, "room": 1, "weapon": 17}, {"index": 5, "type": "weapon", "x": 0.0, "y": 10, "z": 1500.0, "room": 1, "weapon": 19}, {"index": 6, "type": "ammo", "x": 0.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 7, "type": "scenario", "x": 0.0, "y": 10, "z": -500, "room": 1, "scenario": "case", "team": 0}]}, "uff": {"name": "uff", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "uff_masonic": {"name": "uff_masonic", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 1, "type": "spawn", "x": 4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 2, "type": "spawn", "x": -4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 3, "type": "spawn", "x": 4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 4, "type": "spawn", "x": -2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 5, "type": "spawn", "x": 2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 6, "type": "spawn", "x": -2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 7, "type": "spawn", "x": 2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 8, "type": "spawn", "x": 0, "y": 10.0, "z": -3000, "room": 1}, {"index": 9, "type": "spawn", "x": 0, "y": 10.0, "z": 3000, "room": 1}, {"index": 10, "type": "spawn", "x": -3000, "y": 10.0, "z": 0, "room": 1}, {"index": 11, "type": "spawn", "x": 3000, "y": 10.0, "z": 0, "room": 1}, {"index": 12, "type": "spawn", "x": -1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 13, "type": "spawn", "x": 1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 14, "type": "spawn", "x": -1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 15, "type": "spawn", "x": 1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 16, "type": "weapon", "x": 0, "y": 10.0, "z": 0, "room": 1, "weapon": 2}, {"index": 17, "type": "weapon", "x": 0, "y": 10.0, "z": -1500, "room": 1, "weapon": 5}, {"index": 18, "type": "weapon", "x": 0, "y": 10.0, "z": 1500, "room": 1, "weapon": 6}, {"index": 19, "type": "weapon", "x": -1500, "y": 10.0, "z": 0, "room": 1, "weapon": 10}, {"index": 20, "type": "weapon", "x": 1500, "y": 10.0, "z": 0, "room": 1, "weapon": 18}, {"index": 21, "type": "weapon", "x": -3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 14}, {"index": 22, "type": "weapon", "x": 3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 24}, {"index": 23, "type": "weapon", "x": -3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 21}, {"index": 24, "type": "weapon", "x": 3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 27}, {"index": 25, "type": "weapon", "x": -4500, "y": 10.0, "z": 0, "room": 1, "weapon": 28}, {"index": 26, "type": "scenario", "x": -4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 0}, {"index": 27, "type": "scenario", "x": -4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case_respawn", "team": 0}, {"index": 28, "type": "scenario", "x": 4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 1}, {"index": 29, "type": "scenario", "x": 4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case_respawn", "team": 1}, {"index": 30, "type": "scenario", "x": -4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 2}, {"index": 31, "type": "scenario", "x": -4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case_respawn", "team": 2}, {"index": 32, "type": "scenario", "x": 4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 3}, {"index": 33, "type": "scenario", "x": 4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case_respawn", "team": 3}, {"index": 34, "type": "scenario", "x": 0, "y": 10.0, "z": 500, "room": 1, "scenario": "hill", "team": 0}, {"index": 35, "type": "scenario", "x": 0, "y": 10.0, "z": -500, "room": 1, "scenario": "hill", "team": 0}, {"index": 36, "type": "scenario", "x": -500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 37, "type": "scenario", "x": 500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 38, "type": "ammo", "x": -3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 39, "type": "ammo", "x": -1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 40, "type": "ammo", "x": 0, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 41, "type": "ammo", "x": 1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 42, "type": "ammo", "x": 3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 43, "type": "ammo", "x": -3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 44, "type": "ammo", "x": -1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 45, "type": "ammo", "x": 0, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 46, "type": "ammo", "x": 1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 47, "type": "ammo", "x": 3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 48, "type": "ammo", "x": -3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 49, "type": "ammo", "x": -1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 50, "type": "ammo", "x": 0, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 51, "type": "ammo", "x": 1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 52, "type": "ammo", "x": 3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 53, "type": "ammo", "x": -3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 54, "type": "ammo", "x": -1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 55, "type": "ammo", "x": 0, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 56, "type": "ammo", "x": 1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 57, "type": "ammo", "x": 3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}]}}, "testConfig": {"testMapSlot": "uff", "stageTestUff": 77, "mods": [{"id": "mod_allinone", "path": "mods/mod_allinone"}, {"id": "mod_dark_noon", "path": "mods/mod_dark_noon"}, {"id": "mod_gex", "path": "mods/mod_gex"}, {"id": "mod_goldfinger_64", "path": "mods/mod_goldfinger_64"}, {"id": "mod_kakariko", "path": "mods/mod_kakariko"}], "scenarios": [{"id": 0, "label": "Combat", "flag": "--scenario-0"}, {"id": 1, "label": "Hold the Briefcase", "flag": "--scenario-1"}, {"id": 2, "label": "Hacker Central", "flag": "--scenario-2"}, {"id": 3, "label": "Pop a Cap", "flag": "--scenario-3"}, {"id": 4, "label": "King of the Hill", "flag": "--scenario-4"}, {"id": 5, "label": "Capture the Case", "flag": "--scenario-5"}], "simulants": {"requested": 8, "stockCap": 4, "note": "title.c --test-map requests N bots; stock profile caps at 4 unless MPFEATURE_8BOTS is unlocked."}, "loadoutWeapons": [{"id": 0, "label": "None"}, {"id": 1, "label": "Falcon 2"}, {"id": 4, "label": "MagSec 4"}, {"id": 5, "label": "Mauler"}, {"id": 6, "label": "Phoenix"}, {"id": 9, "label": "CMP150"}, {"id": 10, "label": "Cyclone"}, {"id": 13, "label": "Laptop Gun"}, {"id": 14, "label": "Dragon"}, {"id": 16, "label": "AR34"}, {"id": 17, "label": "SuperDragon"}, {"id": 18, "label": "Shotgun"}, {"id": 20, "label": "Sniper Rifle"}, {"id": 23, "label": "Rocket Launcher"}, {"id": 26, "label": "Crossbow"}, {"id": 27, "label": "Tranquilizer"}, {"id": 37, "label": "Shield"}], "simDifficulties": [{"id": 0, "label": "Meat"}, {"id": 1, "label": "Easy"}, {"id": 2, "label": "Normal"}, {"id": 3, "label": "Hard"}, {"id": 4, "label": "Perfect"}, {"id": 5, "label": "Dark"}], "gameOptions": [{"id": 1, "label": "One hit kills"}, {"id": 2, "label": "Teams"}, {"id": 4, "label": "No radar"}, {"id": 8, "label": "No auto-aim"}, {"id": 256, "label": "Fast movement"}, {"id": 2097152, "label": "Spawn with weapon"}, {"id": 33554432, "label": "Friendly fire"}, {"id": 134217728, "label": "No doors"}], "defaults": {"numSims": 8, "simDifficulty": 2, "loadout": [1, 9, 16, 4, 0, 37], "mpOptions": 0}, "helperScript": "journal/uff_viewer/test_map.py", "artifacts": {"json": "journal/uff_viewer/.last_test.json", "shell": "journal/uff_viewer/.last_test.sh"}, "devServer": {"port": 8765, "healthPath": "/api/health", "testMapPath": "/api/test-map", "mapsPath": "/api/maps", "startCommand": "python3 journal/uff_viewer/serve_editor.py"}}};
+// pass-11: compared against /api/health bundleHash to detect stale Electron/browser cache.
+const EDITOR_BUNDLE_HASH = '751ce53c66d8467e';
 
 const KIND_COLORS = {
   spawn:    0x57d977,  // green
@@ -737,7 +772,11 @@ const WEAPON_CATALOG = [
 const AMMO_CATALOG = [
   [0x01, 'Pistol'], [0x03, 'Rifle'], [0x04, 'Shotgun'], [0x05, 'Rocket'],
 ];
-const SCENARIO_CATALOG = [['case', 'Capture the Case'], ['hill', 'King of the Hill']];
+const SCENARIO_CATALOG = [
+  ['case', 'Capture the Case'],
+  ['case_respawn', 'Case respawn (CTF)'],
+  ['hill', 'King of the Hill'],
+];
 
 function weaponName(id) { const e = WEAPON_CATALOG.find(w => w[0] === id); return e ? e[1] : ('0x' + id.toString(16)); }
 function ammoName(id)   { const e = AMMO_CATALOG.find(a => a[0] === id);   return e ? e[1] : ('0x' + id.toString(16)); }
@@ -755,9 +794,14 @@ const mapState = {
   name: DATA.name || 'uff',
   pads: DATA.pads.map(p => {
     const t = (KIND_ORDER.includes(p.kind) ? p.kind : 'other');
-    return Object.assign({
+    const pad = Object.assign({
       type: t, x: p.pos[0], y: p.pos[1], z: p.pos[2], room: p.room,
     }, defaultsForType(t));
+    if (t === 'scenario') {
+      if (p.scenario) pad.scenario = p.scenario;
+      if (p.team != null) pad.team = +p.team;
+    }
+    return pad;
   }),
 };
 
@@ -856,6 +900,49 @@ function showToast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+const ONBOARDING_SESSION_KEY = 'pd_editor_onboarding_dismissed';
+const onboardingOverlay = document.getElementById('onboardingOverlay');
+const onboardingDismissBtn = document.getElementById('onboardingDismiss');
+let bundleStaleToastShown = false;
+
+function isOnboardingDismissedThisSession() {
+  try { return sessionStorage.getItem(ONBOARDING_SESSION_KEY) === '1'; }
+  catch (_) { return false; }
+}
+
+function dismissOnboarding() {
+  if (onboardingOverlay) {
+    onboardingOverlay.classList.remove('open');
+    onboardingOverlay.hidden = true;
+  }
+  try { sessionStorage.setItem(ONBOARDING_SESSION_KEY, '1'); }
+  catch (_) { /* private mode */ }
+}
+
+function maybeShowOnboarding() {
+  if (isOnboardingDismissedThisSession()) return;
+  if (!mapState.pads || mapState.pads.length > 0) return;
+  if (!onboardingOverlay) return;
+  onboardingOverlay.hidden = false;
+  onboardingOverlay.classList.add('open');
+}
+
+onboardingDismissBtn?.addEventListener('click', dismissOnboarding);
+onboardingOverlay?.addEventListener('click', e => {
+  if (e.target === onboardingOverlay) dismissOnboarding();
+});
+
+function checkBundleFreshness(health) {
+  if (!health || !health.bundleHash || !EDITOR_BUNDLE_HASH || EDITOR_BUNDLE_HASH === '__BUNDLE_HASH__') return;
+  if (health.bundleHash === EDITOR_BUNDLE_HASH) {
+    bundleStaleToastShown = false;
+    return;
+  }
+  if (bundleStaleToastShown) return;
+  bundleStaleToastShown = true;
+  showToast('Editor outdated — quit and reopen app');
+}
+
 function saveToLocalStorage() {
   try {
     const data = serializeMap();
@@ -905,6 +992,7 @@ function starterMapTemplate(name) {
       { type: 'weapon', x: 0, y, z: 1500, room: 1, weapon: 0x13 },
       { type: 'ammo', x: 0, y, z: 0, room: 1, ammoType: 0x04, quantity: 200 },
       { type: 'scenario', x: 0, y, z: -500, room: 1, scenario: 'case', team: 0 },
+      { type: 'scenario', x: 0, y, z: 500, room: 1, scenario: 'case_respawn', team: 0 },
     ],
   };
 }
@@ -918,6 +1006,7 @@ function clearMap() {
   updateBuildCmds(mapState.name);
   showToast('Map cleared — click the floor to place components');
   beginPlacementMode('spawn');
+  maybeShowOnboarding();
 }
 
 // ---------- renderer / scene / camera ----------
@@ -2069,6 +2158,14 @@ function updateValidation() {
     posBuckets.set(posKey, bucket);
   }
 
+  const caseTeams = new Set(), respawnTeams = new Set();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    if (p.type !== 'scenario') continue;
+    if (p.scenario === 'case') caseTeams.add(p.team | 0);
+    else if (p.scenario === 'case_respawn') respawnTeams.add(p.team | 0);
+  }
+
   const chips = [
     `<span class="chip">${pads.length} pads</span>`,
     `<span class="chip">${c.spawn} spawn</span>`,
@@ -2085,6 +2182,12 @@ function updateValidation() {
   weaponMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: weapon type not assigned</span>`));
   ammoMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: ammo type not assigned</span>`));
   scenarioMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: scenario mode not set</span>`));
+  for (const t of caseTeams) {
+    if (!respawnTeams.has(t)) warns.push(`<span class="chip warn">Team ${t} case pad without CaseRespawn — CTF scenario 5 may fail</span>`);
+  }
+  for (const t of respawnTeams) {
+    if (!caseTeams.has(t)) warns.push(`<span class="chip warn">Team ${t} CaseRespawn without case pad</span>`);
+  }
   if (belowFloor) warns.push(`<span class="chip err">${belowFloor} pad(s) below floor (Y&lt;0)</span>`);
   if (onFloor) warns.push(`<span class="chip warn">${onFloor} pad(s) at Y=0 — use Y≥10 (SPAWN_Y) or players fall through</span>`);
   if (outside) warns.push(`<span class="chip warn">${outside} pad(s) outside box XZ footprint</span>`);
@@ -2104,7 +2207,7 @@ function updateValidation() {
 //   pads: [ { index, type, x, y, z, room,
 //             // weapon:   weapon (int id), weaponName (hint)
 //             // ammo:     ammoType (int id), ammoName (hint), quantity
-//             // scenario: scenario ('case'|'hill'), team } ]
+//             // scenario: scenario ('case'|'case_respawn'|'hill'), team } ]
 // }
 // `index` always equals the array position (contiguous 0..N-1).
 function serializeMap() {
@@ -2151,6 +2254,7 @@ function loadMap(obj, opts = {}) {
   rebuildPads();
   renderProps();
   updateValidation();
+  maybeShowOnboarding();
   return true;
 }
 document.getElementById('exportBtn').onclick = exportJSON;
@@ -2827,7 +2931,11 @@ function jsonToLevelPy(obj) {
   w('from tools.pdmap.core import MapDef');
   const intro = new Set();
   if (spawn.length) intro.add('Spawn');
-  scenario.forEach(([, p]) => intro.add(p.scenario === 'case' ? 'Case' : 'Hill'));
+  scenario.forEach(([, p]) => {
+    if (p.scenario === 'case') intro.add('Case');
+    else if (p.scenario === 'case_respawn') intro.add('CaseRespawn');
+    else intro.add('Hill');
+  });
   if (intro.size) w('from tools.pdmap.intro import ' + [...intro].sort().join(', '));
   w('from tools.pdmap import weapons as W');
   w('');
@@ -2879,7 +2987,8 @@ function jsonToLevelPy(obj) {
     scenario.forEach(([i, p]) => {
       if (p.scenario === 'case') {
         w('    g.add_intro(Case(team=' + (p.team | 0) + ', pad=' + i + '))');
-        w('    # NOTE: CaseRespawn pad not in editor export — add a second scenario pad if needed');
+      } else if (p.scenario === 'case_respawn') {
+        w('    g.add_intro(CaseRespawn(team=' + (p.team | 0) + ', pad=' + i + '))');
       } else {
         w('    g.add_intro(Hill(pad=' + i + '))');
       }
@@ -2965,6 +3074,19 @@ function collectValidationIssues() {
     if (padPositionsConflict(indices, pads)) {
       warnings.push('Pads ' + indices.join(', ') + ' share the same position');
     }
+  }
+  const caseTeams = new Set(), respawnTeams = new Set();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    if (p.type !== 'scenario') continue;
+    if (p.scenario === 'case') caseTeams.add(p.team | 0);
+    else if (p.scenario === 'case_respawn') respawnTeams.add(p.team | 0);
+  }
+  for (const t of caseTeams) {
+    if (!respawnTeams.has(t)) warnings.push('Team ' + t + ' case pad without CaseRespawn — CTF scenario 5 may fail');
+  }
+  for (const t of respawnTeams) {
+    if (!caseTeams.has(t)) warnings.push('Team ' + t + ' CaseRespawn without case pad');
   }
   return { errors, warnings };
 }
@@ -3195,6 +3317,7 @@ async function pollDevServerHealth() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     devServerHealth = await res.json();
     devServerOnline = !!devServerHealth.ok;
+    checkBundleFreshness(devServerHealth);
   } catch (_) {
     devServerOnline = false;
     devServerHealth = null;
@@ -3697,7 +3820,7 @@ window.__editor = {
   handleMenuAction, openBuildSettings, closeBuildSettings, exportDocumentJson, openSavedMapDialog,
   markDirty, markClean, updateDocTitle, resolveDocumentName,
   collectValidationIssues, getTestOptions, buildTestCommandLine, runTestPlay, runTestBuildOnly, runTestExport, updateTestPanel,
-  setMinimapVisible, drawMinimap,
+  drawMinimap,
   get currentMapId() { return currentMapId; },
   set currentMapId(v) { currentMapId = v; },
   get devServerOnline() { return devServerOnline; },

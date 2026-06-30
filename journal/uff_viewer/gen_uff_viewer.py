@@ -12,8 +12,10 @@ game source, touch git, or build the game. It is a diagnosis aid for the
 "phantom collidable surface near the origin" bug.
 """
 
+import hashlib
 import json
 import os
+import re
 import struct
 import sys
 
@@ -29,6 +31,27 @@ from tools.pdmap import seg as segmod
 from tools.pdmap.core import load_level_module
 
 ORIGIN_RADIUS = 500.0  # geometry whose verts fall within this of origin = SUSPECT
+# pass-11: embedded in uff_map.html; serve_editor.py exposes matching bundleHash in /api/health.
+BUNDLE_HASH_MARKER = "__BUNDLE_HASH__"
+
+
+def compute_bundle_hash(html: str) -> str:
+    """SHA256 (16 hex chars) of HTML with the bundle hash constant blanked."""
+    normalized = re.sub(
+        r"const EDITOR_BUNDLE_HASH = '[^']*';",
+        "const EDITOR_BUNDLE_HASH = '';",
+        html,
+    )
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
+
+
+def embed_bundle_hash(html: str) -> str:
+    """Inject digest into the EDITOR_BUNDLE_HASH constant only (not comparison literals)."""
+    digest = compute_bundle_hash(html)
+    marker_line = f"const EDITOR_BUNDLE_HASH = '{BUNDLE_HASH_MARKER}';"
+    if marker_line not in html:
+        return html
+    return html.replace(marker_line, f"const EDITOR_BUNDLE_HASH = '{digest}';", 1)
 
 
 # ===========================================================================
@@ -78,11 +101,19 @@ def load_geometry():
     # Pads from the MapDef build(), classified by how they are used.
     mapdef = uff.build()
     spawn_pads, weapon_pads, ammo_pads, scenario_pads = set(), set(), set(), set()
+    scenario_by_pad: dict[int, tuple[str, int]] = {}
     for cmd in mapdef.intro:
         if isinstance_byname(cmd, "Spawn"):
             spawn_pads.add(cmd.pad)
-        elif isinstance_byname(cmd, ("Case", "CaseRespawn", "Hill")):
+        elif isinstance_byname(cmd, "Case"):
             scenario_pads.add(cmd.pad)
+            scenario_by_pad[cmd.pad] = ("case", cmd.team)
+        elif isinstance_byname(cmd, "CaseRespawn"):
+            scenario_pads.add(cmd.pad)
+            scenario_by_pad[cmd.pad] = ("case_respawn", cmd.team)
+        elif isinstance_byname(cmd, "Hill"):
+            scenario_pads.add(cmd.pad)
+            scenario_by_pad[cmd.pad] = ("hill", 0)
     for p in mapdef.props:
         # WeaponProp / AmmoCrate both store the pad in .pad
         cls = type(p).__name__
@@ -104,12 +135,17 @@ def load_geometry():
             kind = "scenario"
         else:
             kind = "other"
-        pads.append({
+        entry = {
             "index": idx,
             "pos": [p.x, p.y, p.z],
             "room": p.room,
             "kind": kind,
-        })
+        }
+        if kind == "scenario":
+            sc, team = scenario_by_pad.get(idx, ("hill", 0))
+            entry["scenario"] = sc
+            entry["team"] = team
+        pads.append(entry)
 
     return {
         "half": half,
@@ -146,7 +182,7 @@ def level_to_editor_json(name: str) -> dict:
         elif isinstance_byname(cmd, "Case"):
             scenario_by_pad[cmd.pad] = ("case", cmd.team)
         elif isinstance_byname(cmd, "CaseRespawn"):
-            scenario_by_pad[cmd.pad] = ("case", cmd.team)
+            scenario_by_pad[cmd.pad] = ("case_respawn", cmd.team)
         elif isinstance_byname(cmd, "Hill"):
             scenario_by_pad[cmd.pad] = ("hill", 0)
 
@@ -621,6 +657,7 @@ def write_html(geo, cmds, nverts_total, path, level_catalog=None):
     data_json = json.dumps(data)
 
     html = HTML_TEMPLATE.replace("/*__DATA__*/", data_json)
+    html = embed_bundle_hash(html)
     with open(path, "w") as fp:
         fp.write(html)
 
@@ -942,6 +979,24 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   }
   #minimapClose:hover { color:#e6e6e6; background:rgba(36,48,73,0.95); }
   .pad-hover-ring { pointer-events:none; }
+  /* pass-11: first-run / empty-map onboarding */
+  #onboardingOverlay {
+    position:fixed; inset:0; z-index:25; display:none; align-items:center; justify-content:center;
+    background:rgba(6,8,12,0.72); backdrop-filter:blur(4px); padding:24px;
+  }
+  #onboardingOverlay.open { display:flex; }
+  #onboardingCard {
+    max-width:420px; width:100%; padding:20px 22px; border-radius:14px;
+    background:rgba(16,20,28,0.96); border:1px solid var(--border);
+    box-shadow:0 12px 40px rgba(0,0,0,0.55);
+  }
+  #onboardingCard h2 { margin:0 0 8px; font-size:16px; color:#e6e6e6; text-transform:none; letter-spacing:0; }
+  #onboardingCard ol { margin:0 0 14px 18px; padding:0; color:#cdd6e6; font-size:13px; line-height:1.55; }
+  #onboardingCard kbd {
+    background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
+    border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,monospace; font-size:11px;
+  }
+  #onboardingDismiss { width:100%; min-height:40px; font-weight:600; }
 </style>
 </head>
 <body>
@@ -1043,6 +1098,21 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <span id="docDirtyBadge" class="doc-dirty" hidden title="Unsaved changes" aria-label="Unsaved">●</span>
   <span id="currentMapTitle" class="doc-title" title="Current map">uff</span>
   <span id="mapsStatus" class="doc-server" role="status" aria-live="polite"></span>
+</div>
+
+<!-- pass-11: empty-map onboarding — dismissed once per browser session -->
+<div id="onboardingOverlay" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" hidden>
+  <div id="onboardingCard" class="panel">
+    <h2 id="onboardingTitle">Quick start</h2>
+    <ol>
+      <li>Press <kbd>E</kbd> or click <strong>Edit</strong></li>
+      <li>Pick <strong>Spawn</strong> on the toolbar</li>
+      <li>Click the floor to place</li>
+      <li><kbd>⌘S</kbd> to save</li>
+      <li><strong>▶ Play</strong> to test in-game</li>
+    </ol>
+    <button id="onboardingDismiss" type="button">Got it</button>
+  </div>
 </div>
 
 <!-- Advanced build / test options — opened from Play menu or gear -->
@@ -1253,6 +1323,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
 const DATA = /*__DATA__*/;
+// pass-11: compared against /api/health bundleHash to detect stale Electron/browser cache.
+const EDITOR_BUNDLE_HASH = '__BUNDLE_HASH__';
 
 const KIND_COLORS = {
   spawn:    0x57d977,  // green
@@ -1364,7 +1436,11 @@ const WEAPON_CATALOG = [
 const AMMO_CATALOG = [
   [0x01, 'Pistol'], [0x03, 'Rifle'], [0x04, 'Shotgun'], [0x05, 'Rocket'],
 ];
-const SCENARIO_CATALOG = [['case', 'Capture the Case'], ['hill', 'King of the Hill']];
+const SCENARIO_CATALOG = [
+  ['case', 'Capture the Case'],
+  ['case_respawn', 'Case respawn (CTF)'],
+  ['hill', 'King of the Hill'],
+];
 
 function weaponName(id) { const e = WEAPON_CATALOG.find(w => w[0] === id); return e ? e[1] : ('0x' + id.toString(16)); }
 function ammoName(id)   { const e = AMMO_CATALOG.find(a => a[0] === id);   return e ? e[1] : ('0x' + id.toString(16)); }
@@ -1382,9 +1458,14 @@ const mapState = {
   name: DATA.name || 'uff',
   pads: DATA.pads.map(p => {
     const t = (KIND_ORDER.includes(p.kind) ? p.kind : 'other');
-    return Object.assign({
+    const pad = Object.assign({
       type: t, x: p.pos[0], y: p.pos[1], z: p.pos[2], room: p.room,
     }, defaultsForType(t));
+    if (t === 'scenario') {
+      if (p.scenario) pad.scenario = p.scenario;
+      if (p.team != null) pad.team = +p.team;
+    }
+    return pad;
   }),
 };
 
@@ -1483,6 +1564,49 @@ function showToast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+const ONBOARDING_SESSION_KEY = 'pd_editor_onboarding_dismissed';
+const onboardingOverlay = document.getElementById('onboardingOverlay');
+const onboardingDismissBtn = document.getElementById('onboardingDismiss');
+let bundleStaleToastShown = false;
+
+function isOnboardingDismissedThisSession() {
+  try { return sessionStorage.getItem(ONBOARDING_SESSION_KEY) === '1'; }
+  catch (_) { return false; }
+}
+
+function dismissOnboarding() {
+  if (onboardingOverlay) {
+    onboardingOverlay.classList.remove('open');
+    onboardingOverlay.hidden = true;
+  }
+  try { sessionStorage.setItem(ONBOARDING_SESSION_KEY, '1'); }
+  catch (_) { /* private mode */ }
+}
+
+function maybeShowOnboarding() {
+  if (isOnboardingDismissedThisSession()) return;
+  if (!mapState.pads || mapState.pads.length > 0) return;
+  if (!onboardingOverlay) return;
+  onboardingOverlay.hidden = false;
+  onboardingOverlay.classList.add('open');
+}
+
+onboardingDismissBtn?.addEventListener('click', dismissOnboarding);
+onboardingOverlay?.addEventListener('click', e => {
+  if (e.target === onboardingOverlay) dismissOnboarding();
+});
+
+function checkBundleFreshness(health) {
+  if (!health || !health.bundleHash || !EDITOR_BUNDLE_HASH || EDITOR_BUNDLE_HASH === '__BUNDLE_HASH__') return;
+  if (health.bundleHash === EDITOR_BUNDLE_HASH) {
+    bundleStaleToastShown = false;
+    return;
+  }
+  if (bundleStaleToastShown) return;
+  bundleStaleToastShown = true;
+  showToast('Editor outdated — quit and reopen app');
+}
+
 function saveToLocalStorage() {
   try {
     const data = serializeMap();
@@ -1532,6 +1656,7 @@ function starterMapTemplate(name) {
       { type: 'weapon', x: 0, y, z: 1500, room: 1, weapon: 0x13 },
       { type: 'ammo', x: 0, y, z: 0, room: 1, ammoType: 0x04, quantity: 200 },
       { type: 'scenario', x: 0, y, z: -500, room: 1, scenario: 'case', team: 0 },
+      { type: 'scenario', x: 0, y, z: 500, room: 1, scenario: 'case_respawn', team: 0 },
     ],
   };
 }
@@ -1545,6 +1670,7 @@ function clearMap() {
   updateBuildCmds(mapState.name);
   showToast('Map cleared — click the floor to place components');
   beginPlacementMode('spawn');
+  maybeShowOnboarding();
 }
 
 // ---------- renderer / scene / camera ----------
@@ -2696,6 +2822,14 @@ function updateValidation() {
     posBuckets.set(posKey, bucket);
   }
 
+  const caseTeams = new Set(), respawnTeams = new Set();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    if (p.type !== 'scenario') continue;
+    if (p.scenario === 'case') caseTeams.add(p.team | 0);
+    else if (p.scenario === 'case_respawn') respawnTeams.add(p.team | 0);
+  }
+
   const chips = [
     `<span class="chip">${pads.length} pads</span>`,
     `<span class="chip">${c.spawn} spawn</span>`,
@@ -2712,6 +2846,12 @@ function updateValidation() {
   weaponMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: weapon type not assigned</span>`));
   ammoMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: ammo type not assigned</span>`));
   scenarioMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: scenario mode not set</span>`));
+  for (const t of caseTeams) {
+    if (!respawnTeams.has(t)) warns.push(`<span class="chip warn">Team ${t} case pad without CaseRespawn — CTF scenario 5 may fail</span>`);
+  }
+  for (const t of respawnTeams) {
+    if (!caseTeams.has(t)) warns.push(`<span class="chip warn">Team ${t} CaseRespawn without case pad</span>`);
+  }
   if (belowFloor) warns.push(`<span class="chip err">${belowFloor} pad(s) below floor (Y&lt;0)</span>`);
   if (onFloor) warns.push(`<span class="chip warn">${onFloor} pad(s) at Y=0 — use Y≥10 (SPAWN_Y) or players fall through</span>`);
   if (outside) warns.push(`<span class="chip warn">${outside} pad(s) outside box XZ footprint</span>`);
@@ -2731,7 +2871,7 @@ function updateValidation() {
 //   pads: [ { index, type, x, y, z, room,
 //             // weapon:   weapon (int id), weaponName (hint)
 //             // ammo:     ammoType (int id), ammoName (hint), quantity
-//             // scenario: scenario ('case'|'hill'), team } ]
+//             // scenario: scenario ('case'|'case_respawn'|'hill'), team } ]
 // }
 // `index` always equals the array position (contiguous 0..N-1).
 function serializeMap() {
@@ -2778,6 +2918,7 @@ function loadMap(obj, opts = {}) {
   rebuildPads();
   renderProps();
   updateValidation();
+  maybeShowOnboarding();
   return true;
 }
 document.getElementById('exportBtn').onclick = exportJSON;
@@ -3454,7 +3595,11 @@ function jsonToLevelPy(obj) {
   w('from tools.pdmap.core import MapDef');
   const intro = new Set();
   if (spawn.length) intro.add('Spawn');
-  scenario.forEach(([, p]) => intro.add(p.scenario === 'case' ? 'Case' : 'Hill'));
+  scenario.forEach(([, p]) => {
+    if (p.scenario === 'case') intro.add('Case');
+    else if (p.scenario === 'case_respawn') intro.add('CaseRespawn');
+    else intro.add('Hill');
+  });
   if (intro.size) w('from tools.pdmap.intro import ' + [...intro].sort().join(', '));
   w('from tools.pdmap import weapons as W');
   w('');
@@ -3506,7 +3651,8 @@ function jsonToLevelPy(obj) {
     scenario.forEach(([i, p]) => {
       if (p.scenario === 'case') {
         w('    g.add_intro(Case(team=' + (p.team | 0) + ', pad=' + i + '))');
-        w('    # NOTE: CaseRespawn pad not in editor export — add a second scenario pad if needed');
+      } else if (p.scenario === 'case_respawn') {
+        w('    g.add_intro(CaseRespawn(team=' + (p.team | 0) + ', pad=' + i + '))');
       } else {
         w('    g.add_intro(Hill(pad=' + i + '))');
       }
@@ -3592,6 +3738,19 @@ function collectValidationIssues() {
     if (padPositionsConflict(indices, pads)) {
       warnings.push('Pads ' + indices.join(', ') + ' share the same position');
     }
+  }
+  const caseTeams = new Set(), respawnTeams = new Set();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    if (p.type !== 'scenario') continue;
+    if (p.scenario === 'case') caseTeams.add(p.team | 0);
+    else if (p.scenario === 'case_respawn') respawnTeams.add(p.team | 0);
+  }
+  for (const t of caseTeams) {
+    if (!respawnTeams.has(t)) warnings.push('Team ' + t + ' case pad without CaseRespawn — CTF scenario 5 may fail');
+  }
+  for (const t of respawnTeams) {
+    if (!caseTeams.has(t)) warnings.push('Team ' + t + ' CaseRespawn without case pad');
   }
   return { errors, warnings };
 }
@@ -3822,6 +3981,7 @@ async function pollDevServerHealth() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     devServerHealth = await res.json();
     devServerOnline = !!devServerHealth.ok;
+    checkBundleFreshness(devServerHealth);
   } catch (_) {
     devServerOnline = false;
     devServerHealth = null;
@@ -4324,7 +4484,7 @@ window.__editor = {
   handleMenuAction, openBuildSettings, closeBuildSettings, exportDocumentJson, openSavedMapDialog,
   markDirty, markClean, updateDocTitle, resolveDocumentName,
   collectValidationIssues, getTestOptions, buildTestCommandLine, runTestPlay, runTestBuildOnly, runTestExport, updateTestPanel,
-  setMinimapVisible, drawMinimap,
+  drawMinimap,
   get currentMapId() { return currentMapId; },
   set currentMapId(v) { currentMapId = v; },
   get devServerOnline() { return devServerOnline; },

@@ -128,8 +128,11 @@ def json_to_level_py(data: dict[str, Any]) -> str:
     if spawn_pads:
         intro_imports.add("Spawn")
     for _, p in scenario_pads:
-        if p.get("scenario") == "case":
+        sc = p.get("scenario", "hill")
+        if sc == "case":
             intro_imports.add("Case")
+        elif sc == "case_respawn":
+            intro_imports.add("CaseRespawn")
         else:
             intro_imports.add("Hill")
     if intro_imports:
@@ -194,7 +197,8 @@ def json_to_level_py(data: dict[str, Any]) -> str:
             team = int(p.get("team", 0))
             if sc == "case":
                 append(f"    g.add_intro(Case(team={team}, pad={i}))")
-                append(f"    # NOTE: CaseRespawn pad not in editor export — add a second scenario pad if needed")
+            elif sc == "case_respawn":
+                append(f"    g.add_intro(CaseRespawn(team={team}, pad={i}))")
             else:
                 append(f"    g.add_intro(Hill(pad={i}))")
 
