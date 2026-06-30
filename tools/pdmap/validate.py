@@ -106,6 +106,50 @@ def validate_all(name: str, mapdef: Optional[MapDef] = None) -> tuple[list[str],
                     f"{len(room_names)} rooms"
                 )
 
+        # Empty-seg play mode has no floor collision from bg_*.seg — only tiles.
+        # floor_box_tiles() must span [-BOX_HALF, +BOX_HALF] or the arena shrinks
+        # to a tiny patch and players fall off immediately (see MAP_CREATION §11.13).
+        try:
+            mod = load_level_module(name)
+            expected_half = getattr(mod, "BOX_HALF", None)
+        except Exception:
+            expected_half = None
+        if expected_half is not None:
+            floor_tiles: list[dict] = []
+            for room_tiles in tiles_data.get("rooms", {}).values():
+                for tile in room_tiles:
+                    verts = tile.get("vertices") or []
+                    if len(verts) >= 4:
+                        floor_tiles.append(tile)
+            if not floor_tiles:
+                errors.append(
+                    "No floor tiles in tiles JSON; PDMAP_SEG_MODE=empty requires "
+                    "tile collision for the full arena"
+                )
+            else:
+                xs: list[float] = []
+                zs: list[float] = []
+                for tile in floor_tiles:
+                    for v in tile["vertices"]:
+                        xs.append(float(v["x"]))
+                        zs.append(float(v["z"]))
+                min_x, max_x = min(xs), max(xs)
+                min_z, max_z = min(zs), max(zs)
+                half = float(expected_half)
+                tol = 1.0
+                if (
+                    min_x > -half + tol
+                    or max_x < half - tol
+                    or min_z > -half + tol
+                    or max_z < half - tol
+                ):
+                    errors.append(
+                        f"Floor tile bounds x=[{min_x:.0f},{max_x:.0f}] "
+                        f"z=[{min_z:.0f},{max_z:.0f}] do not cover "
+                        f"BOX_HALF={half:.0f} (±{half:.0f}); empty seg has no "
+                        f"floor collision outside tiles"
+                    )
+
     seg_path = os.path.join(BUILD_DIR, f"bg_{name}.seg")
     if not os.path.exists(seg_path):
         warnings.append(f"Seg not built at {seg_path} — run build with --seg if needed")

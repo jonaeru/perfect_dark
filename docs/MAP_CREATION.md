@@ -909,6 +909,36 @@ overflow or stale batch indices; camera-attached dark sheet = wall seg + near pl
 
 Full decision tree: [`MAP_MAKING_WIKI.md` §6](MAP_MAKING_WIKI.md#6-visual-and-collision-artifacts-read-this).
 
+### 11.13 Tiny walkable floor after empty-seg deploy
+
+**Symptoms:** Player can stand on only a small patch near one corner (or the
+origin) and falls through everywhere else. Often reported right after fixing
+§11.11 phantom walls with `PDMAP_SEG_MODE=empty`.
+
+**Cause:** With empty seg, **all floor collision comes from `bg_*_tilesZ`**, not
+from `bg_*.seg`. If `src/levels/<name>.py` declares `BOX_HALF` but
+`build_tiles_json()` / `floor_box_tiles()` uses a smaller half — or the level
+module was overwritten by a map-editor export with editor defaults (`box_half:
+2500`) — the compiled floor quad only spans ±2500 (or smaller) while spawns and
+the intended arena expect ±5000.
+
+**Fix:**
+
+```bash
+# Restore BOX_HALF in src/levels/uff.py and regenerate tiles + deploy
+python3 tools/pdmap.py build uff --deploy
+# or: scripts/ensure-llm-map-assets.py (uff / LLM Play)
+```
+
+Confirm tile bounds in `src/assets/ntsc-final/tiles/uff.json`: the floor quad
+vertices should reach **±BOX_HALF** on X and Z. `pdmap validate uff` now fails
+when tile bounds do not cover `BOX_HALF`.
+
+**Prevention:** Do not export a blank/small editor map over stock `uff.py`
+without matching `BOX_HALF` to the Matrix Test Room (5000). Editor blank maps
+default to `box_half: 2500`; stock `uff` uses `configure_matrix_test_room()`
+at 5000.
+
 ---
 
 ## 12. Full recipe — new arena from scratch in 6 steps
