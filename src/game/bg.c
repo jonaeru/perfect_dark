@@ -3388,28 +3388,6 @@ Gfx *bgRenderRoomXlu(Gfx *gdl, s32 roomnum)
 	return gdl;
 }
 
-/**
- * Vertex count for an F3DEX2 G_VTX load. The fast3d renderer derives this from
- * the DMA byte length (w0 & 0xffff); collision originally used only the 4-bit
- * count nibble. When they disagree (e.g. G_VTX(24) wraps the nibble to 8) stale
- * slots in var800a6470 produce phantom collision near the origin/camera.
- */
-static s32 bgGVtxLoadCount(Gfx *cmd)
-{
-	s32 frombytes = (s32)(cmd->words.w0 & 0xffff) / (s32)sizeof(Vtx);
-	s32 fromnibble = (s32)(((u32)cmd->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
-
-	if (frombytes < 1) {
-		frombytes = fromnibble;
-	}
-
-	if (frombytes > 16) {
-		frombytes = 16;
-	}
-
-	return frombytes;
-}
-
 s32 bgPopulateVtxBatchType(s32 roomnum, struct vtxbatch *batches, Gfx *gdl, s32 batchindex, Vtx *vertices, s32 type)
 {
 	s32 i;
@@ -3428,7 +3406,7 @@ s32 bgPopulateVtxBatchType(s32 roomnum, struct vtxbatch *batches, Gfx *gdl, s32 
 				batches[batchindex].bbmax.f[j] = -32768.0f;
 			}
 
-			numvertices = bgGVtxLoadCount(&gdl[i]);
+			numvertices = (((u32)gdl[i].bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 			batchvertices = (Vtx *)((uintptr_t)vertices + (UNSEGADDR(gdl[i].words.w1) & 0xffffff));
 
 			for (j = 0; j < numvertices; j++) {
@@ -4323,7 +4301,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 	vtx = bgFindVerticesForGdl(roomnum, gdl);
 	iter = &gdl[batch->gbicmdindex];
 	vtx = (Vtx *)((UNSEGADDR(iter->words.w1) & 0xffffff) + (uintptr_t)vtx);
-	numvertices = bgGVtxLoadCount(iter);
+	numvertices = (((u32) iter->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 	ptr = var800a6470;
 
 	while (numvertices > 0) {
@@ -4348,21 +4326,11 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 		}
 
 		if (iter->dma.cmd == G_TRI1) {
-			s32 v0 = gdl[batch->gbicmdindex].bytes[GFX_W0_BYTE(1)] & 0xf;
-			s32 batchverts = bgGVtxLoadCount(&gdl[batch->gbicmdindex]);
-
 			trisremaining = 0;
 			triref = 0;
-			points[0] = iter->tri.tri.v[GFX_TRI_VTX(0)] / 10 - v0;
-			points[1] = iter->tri.tri.v[GFX_TRI_VTX(1)] / 10 - v0;
-			points[2] = iter->tri.tri.v[GFX_TRI_VTX(2)] / 10 - v0;
-
-			if (points[0] < 0 || points[0] >= batchverts
-					|| points[1] < 0 || points[1] >= batchverts
-					|| points[2] < 0 || points[2] >= batchverts) {
-				iter++;
-				continue;
-			}
+			points[0] = iter->tri.tri.v[GFX_TRI_VTX(0)] / 10;
+			points[1] = iter->tri.tri.v[GFX_TRI_VTX(1)] / 10;
+			points[2] = iter->tri.tri.v[GFX_TRI_VTX(2)] / 10;
 		} else if (iter->dma.cmd == G_TRI4) {
 			tri4gdl = iter;
 			trisremaining = 3;
