@@ -3,9 +3,9 @@
 		{
 			"id": "PAD_MY_ARENA_0000",
 			"pos": [
-				-2000.0,
-				10,
-				-2000.0
+				-4000.0,
+				10.0,
+				-4000.0
 			],
 			"dir": [
 				0.0,
@@ -36,9 +36,9 @@
 		{
 			"id": "PAD_MY_ARENA_0001",
 			"pos": [
-				2000.0,
-				10,
-				-2000.0
+				4000.0,
+				10.0,
+				-4000.0
 			],
 			"dir": [
 				0.0,
@@ -69,9 +69,9 @@
 		{
 			"id": "PAD_MY_ARENA_0002",
 			"pos": [
-				-2000.0,
-				10,
-				2000.0
+				-4000.0,
+				10.0,
+				4000.0
 			],
 			"dir": [
 				0.0,
@@ -102,9 +102,9 @@
 		{
 			"id": "PAD_MY_ARENA_0003",
 			"pos": [
-				2000.0,
-				10,
-				2000.0
+				4000.0,
+				10.0,
+				4000.0
 			],
 			"dir": [
 				0.0,
@@ -136,7 +136,7 @@
 			"id": "PAD_MY_ARENA_0004",
 			"pos": [
 				0.0,
-				10,
+				10.0,
 				-1500.0
 			],
 			"dir": [
@@ -169,7 +169,7 @@
 			"id": "PAD_MY_ARENA_0005",
 			"pos": [
 				0.0,
-				10,
+				10.0,
 				1500.0
 			],
 			"dir": [
@@ -201,8 +201,8 @@
 		{
 			"id": "PAD_MY_ARENA_0006",
 			"pos": [
-				0.0,
-				10,
+				-1500.0,
+				10.0,
 				0.0
 			],
 			"dir": [
@@ -234,9 +234,9 @@
 		{
 			"id": "PAD_MY_ARENA_0007",
 			"pos": [
-				0.0,
-				10,
-				-500
+				1500.0,
+				10.0,
+				0.0
 			],
 			"dir": [
 				0.0,
@@ -267,9 +267,9 @@
 		{
 			"id": "PAD_MY_ARENA_0008",
 			"pos": [
-				0.0,
-				10,
-				500
+				-4200.0,
+				10.0,
+				-4200.0
 			],
 			"dir": [
 				0.0,
@@ -300,8 +300,239 @@
 		{
 			"id": "PAD_MY_ARENA_0009",
 			"pos": [
+				-4200.0,
+				10.0,
+				-4000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_000A",
+			"pos": [
+				4200.0,
+				10.0,
+				-4200.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_000B",
+			"pos": [
+				4200.0,
+				10.0,
+				-4000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_000C",
+			"pos": [
+				-4200.0,
+				10.0,
+				4200.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_000D",
+			"pos": [
+				-4200.0,
+				10.0,
+				4000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_000E",
+			"pos": [
+				4200.0,
+				10.0,
+				4200.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_000F",
+			"pos": [
+				4200.0,
+				10.0,
+				4000.0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_MY_ARENA_0010",
+			"pos": [
 				500.0,
-				10,
+				10.0,
 				0.0
 			],
 			"dir": [
@@ -337,27 +568,17 @@
 			"pad": "PAD_MY_ARENA_0000",
 			"neighbours": [
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0001",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
-					"waypoint": "WAYPOINT_MY_ARENA_0002",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
 					"waypoint": "WAYPOINT_MY_ARENA_0004",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0006",
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"waypoint": "WAYPOINT_MY_ARENA_0006",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -368,6 +589,11 @@
 				},
 				{
 					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -379,22 +605,12 @@
 			"pad": "PAD_MY_ARENA_0001",
 			"neighbours": [
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0000",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
-					"waypoint": "WAYPOINT_MY_ARENA_0003",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
 					"waypoint": "WAYPOINT_MY_ARENA_0004",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0006",
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -404,12 +620,17 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0008",
+					"waypoint": "WAYPOINT_MY_ARENA_000A",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"waypoint": "WAYPOINT_MY_ARENA_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -421,7 +642,7 @@
 			"pad": "PAD_MY_ARENA_0002",
 			"neighbours": [
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0000",
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -436,17 +657,17 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"waypoint": "WAYPOINT_MY_ARENA_000C",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0008",
+					"waypoint": "WAYPOINT_MY_ARENA_000D",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -458,7 +679,7 @@
 			"pad": "PAD_MY_ARENA_0003",
 			"neighbours": [
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0001",
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -468,22 +689,22 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0006",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
 					"waypoint": "WAYPOINT_MY_ARENA_0007",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0008",
+					"waypoint": "WAYPOINT_MY_ARENA_000E",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"waypoint": "WAYPOINT_MY_ARENA_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -505,6 +726,21 @@
 					"flag8000": false
 				},
 				{
+					"waypoint": "WAYPOINT_MY_ARENA_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
 					"waypoint": "WAYPOINT_MY_ARENA_0006",
 					"flag4000": false,
 					"flag8000": false
@@ -521,6 +757,41 @@
 				},
 				{
 					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -532,12 +803,27 @@
 			"pad": "PAD_MY_ARENA_0005",
 			"neighbours": [
 				{
+					"waypoint": "WAYPOINT_MY_ARENA_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
 					"waypoint": "WAYPOINT_MY_ARENA_0002",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
 					"waypoint": "WAYPOINT_MY_ARENA_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -558,6 +844,41 @@
 				},
 				{
 					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -574,17 +895,7 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0001",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
 					"waypoint": "WAYPOINT_MY_ARENA_0002",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
-					"waypoint": "WAYPOINT_MY_ARENA_0003",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -612,6 +923,21 @@
 					"waypoint": "WAYPOINT_MY_ARENA_0009",
 					"flag4000": false,
 					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
 				}
 			],
 			"waygroup": "WAYGROUP_MY_ARENA_0001"
@@ -621,17 +947,7 @@
 			"pad": "PAD_MY_ARENA_0007",
 			"neighbours": [
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0000",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
 					"waypoint": "WAYPOINT_MY_ARENA_0001",
-					"flag4000": false,
-					"flag8000": false
-				},
-				{
-					"waypoint": "WAYPOINT_MY_ARENA_0002",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -656,12 +972,27 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0008",
+					"waypoint": "WAYPOINT_MY_ARENA_000A",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"waypoint": "WAYPOINT_MY_ARENA_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -678,17 +1009,39 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0001",
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0002",
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0003",
+					"waypoint": "WAYPOINT_MY_ARENA_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_0009",
+			"pad": "PAD_MY_ARENA_0009",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0000",
 					"flag4000": false,
 					"flag8000": false
 				},
@@ -708,12 +1061,12 @@
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"waypoint": "WAYPOINT_MY_ARENA_0008",
 					"flag4000": false,
 					"flag8000": false
 				},
 				{
-					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
 					"flag4000": false,
 					"flag8000": false
 				}
@@ -721,8 +1074,230 @@
 			"waygroup": "WAYGROUP_MY_ARENA_0001"
 		},
 		{
-			"id": "WAYPOINT_MY_ARENA_0009",
-			"pad": "PAD_MY_ARENA_0009",
+			"id": "WAYPOINT_MY_ARENA_000A",
+			"pad": "PAD_MY_ARENA_000A",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_000B",
+			"pad": "PAD_MY_ARENA_000B",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_000C",
+			"pad": "PAD_MY_ARENA_000C",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_000D",
+			"pad": "PAD_MY_ARENA_000D",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_000E",
+			"pad": "PAD_MY_ARENA_000E",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_000F",
+			"pad": "PAD_MY_ARENA_000F",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0010",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_MY_ARENA_0001"
+		},
+		{
+			"id": "WAYPOINT_MY_ARENA_0010",
+			"pad": "PAD_MY_ARENA_0010",
 			"neighbours": [
 				{
 					"waypoint": "WAYPOINT_MY_ARENA_0000",
@@ -766,6 +1341,41 @@
 				},
 				{
 					"waypoint": "WAYPOINT_MY_ARENA_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_MY_ARENA_000F",
 					"flag4000": false,
 					"flag8000": false
 				}
