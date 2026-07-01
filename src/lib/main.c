@@ -1043,7 +1043,9 @@ void mainTick(void)
 			lvTick();
 			playermgrShuffle();
 
-			if (g_StageNum < STAGE_TITLE) {
+			// Custom pdmap arenas (0x80+) are above STAGE_TITLE but still need
+			// per-frame viewport/FOV setup — use menu check, not numeric compare.
+			if (!STAGE_IS_MENU(g_StageNum)) {
 				for (i = 0; i < PLAYERCOUNT(); i++) {
 					setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 

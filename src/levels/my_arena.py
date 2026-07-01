@@ -19,11 +19,6 @@ SEG_MODE = "empty"
 # Pads slightly above Y=0 so ground search accepts the floor (see MAP_CREATION.md).
 SPAWN_Y = 10.0
 
-# weaponnum IDs (floor props / intro Weapon)
-WEAPON_AR34 = 0x11
-WEAPON_SHOTGUN = 0x13
-
-
 def build() -> MapDef:
     g = MapDef("my_arena")
 
@@ -59,7 +54,7 @@ def build() -> MapDef:
     g.add_intro(Spawn(pad=2))
     g.add_intro(Spawn(pad=3))
 
-    add_floor_weapons(g, [(4, WEAPON_AR34), (5, WEAPON_SHOTGUN)])
+    add_floor_weapons(g, [(4, W.WEAPON_AR34), (5, W.WEAPON_SHOTGUN)])
     add_ammo_row(g, [6], ammotype=W.AMMOTYPE_RIFLE)
     add_ammo_row(g, [7], ammotype=W.AMMOTYPE_SHOTGUN)
 

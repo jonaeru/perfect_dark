@@ -68,7 +68,7 @@ def add_floor_weapons(
         g.add_prop(WeaponProp(
             weapon=weapon_id,
             scale=scale,
-            model=0,
+            model=W.WEAPON_FLOOR_MODEL.get(weapon_id, 0),
             chr_=pad,
             flags=W.OBJFLAG_FALL,
         ))

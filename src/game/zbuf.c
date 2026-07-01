@@ -30,7 +30,7 @@ void zbufReset(s32 stagenum)
 	g_ZbufPtr1 = NULL;
 	g_ZbufPtr2 = NULL;
 
-	if (stagenum != STAGE_TITLE) {
+	if (!STAGE_IS_MENU(stagenum)) {
 		zbufAllocate();
 	}
 }
