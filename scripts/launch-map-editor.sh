@@ -3,7 +3,7 @@
 # Intended to be invoked from Perfect Dark Map Editor.app or directly:
 #   ./scripts/launch-map-editor.sh
 #
-# Reuses an already-healthy server (ports 8765–8775) or starts a fresh one with --auto-port.
+# Reuses an already-healthy server (ports 8765–8775) or starts a fresh one (auto port).
 # Stays in the foreground so Dock Quit (Cmd+Q) stops the server child process.
 
 set -euo pipefail
@@ -173,13 +173,13 @@ main() {
 		kill_stale_server "$existing_pid"
 	fi
 
-	# Start a fresh server; --auto-port picks 8765 or the next free port in range.
+	# Start a fresh server; serve_editor.py auto-picks 8765 or the next free port in range.
 	cd "$REPO_ROOT"
 	mkdir -p "$STATE_DIR"
 	rm -f "$PORT_FILE"
-	log "Starting serve_editor.py on ${DEFAULT_HOST}:${DEFAULT_PORT} (--auto-port) from ${SERVE_SCRIPT} (state=${STATE_DIR})"
+	log "Starting serve_editor.py on ${DEFAULT_HOST}:${DEFAULT_PORT} from ${SERVE_SCRIPT} (state=${STATE_DIR})"
 	PD_REPO_ROOT="$REPO_ROOT" PD_EDITOR_STATE_DIR="$STATE_DIR" \
-		"$python_bin" "$SERVE_SCRIPT" --host "$DEFAULT_HOST" --port "$DEFAULT_PORT" --auto-port >>"$LOG_FILE" 2>&1 &
+		"$python_bin" "$SERVE_SCRIPT" --host "$DEFAULT_HOST" --port "$DEFAULT_PORT" >>"$LOG_FILE" 2>&1 &
 	SERVER_PID=$!
 	echo "$SERVER_PID" >"$PID_FILE"
 	log "Server PID ${SERVER_PID}"

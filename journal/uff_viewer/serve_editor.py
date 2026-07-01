@@ -32,22 +32,6 @@ ROOT = os.path.abspath(_env_root) if _env_root else os.path.dirname(os.path.dirn
 DEFAULT_PORT = 8765
 
 
-def _resolve_bundle_dir() -> str:
-    """Directory baked into .app Contents/Resources/editor/ at build time."""
-    env_bundle = os.environ.get("PD_EDITOR_BUNDLE_DIR", "").strip()
-    if env_bundle and os.path.isdir(env_bundle):
-        return os.path.abspath(env_bundle)
-    # serve_editor.py colocated with uff_map.html inside Resources/editor/
-    if os.path.isfile(os.path.join(HERE, "uff_map.html")):
-        return HERE
-    return ""
-
-
-BUNDLE_DIR = _resolve_bundle_dir()
-# Static UI always from bundle when present; repo journal/uff_viewer is not required for HTML.
-STATIC_DIR = BUNDLE_DIR or HERE
-
-
 def _writable_state_dir() -> str:
     """Persist port/pid/last-test artifacts; honor PD_EDITOR_STATE_DIR when set."""
     env_state = os.environ.get("PD_EDITOR_STATE_DIR", "").strip()
@@ -76,26 +60,6 @@ def _writable_state_dir() -> str:
 STATE_DIR = _writable_state_dir()
 PORT_FILE = os.path.join(STATE_DIR, ".editor_server.port")
 
-
-def _resolve_maps_dir() -> str:
-    """Persist maps under repo when writable; otherwise Application Support."""
-    repo_maps = os.path.join(ROOT, "journal", "uff_viewer", "maps")
-    try:
-        os.makedirs(repo_maps, exist_ok=True)
-        probe = os.path.join(repo_maps, ".pd_editor_maps_probe")
-        with open(probe, "w", encoding="utf-8") as fp:
-            fp.write("ok")
-        os.remove(probe)
-        return repo_maps
-    except OSError:
-        pass
-    fallback = os.path.join(STATE_DIR, "maps")
-    os.makedirs(fallback, exist_ok=True)
-    return fallback
-
-
-MAPS_DIR = _resolve_maps_dir()
-
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 if HERE not in sys.path:
@@ -103,12 +67,11 @@ if HERE not in sys.path:
 
 from test_map import (  # noqa: E402
     DEFAULT_LOADOUT,
-    TEST_MAP_SLOT,
-    _detect_pd_binary,
     build_shell_script,
-    level_is_box_arena,
-    play_command,
 )
+from tools.pdmap.play import TEST_MAP_SLOT, detect_pd_binary, play_command  # noqa: E402
+
+_detect_pd_binary = detect_pd_binary  # legacy alias for editor bundle
 
 LOG_FILE = os.path.expanduser("~/Library/Logs/PerfectDarkMapEditor.log")
 
@@ -128,7 +91,6 @@ def _localhost_origin(origin: str | None) -> bool:
 def _json_response(handler: BaseHTTPRequestHandler, status: int, payload: dict[str, Any]) -> None:
     body = json.dumps(payload, indent=2).encode("utf-8")
     handler.send_response(status)
-    _cors_headers(handler)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Content-Length", str(len(body)))
     handler.end_headers()
@@ -139,166 +101,9 @@ def _cors_headers(handler: BaseHTTPRequestHandler) -> None:
     origin = handler.headers.get("Origin")
     if _localhost_origin(origin):
         handler.send_header("Access-Control-Allow-Origin", origin or "http://127.0.0.1")
-        handler.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        handler.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         handler.send_header("Access-Control-Allow-Headers", "Content-Type")
         handler.send_header("Vary", "Origin")
-
-
-def _sanitize_map_name(raw: str) -> str | None:
-    """Map filenames must match editor level-name rules (lowercase alnum + underscore)."""
-    name = (raw or "").strip().lower()
-    if not name or len(name) > 32:
-        return None
-    if not name[0].isalpha():
-        return None
-    for ch in name:
-        if not (ch.isalnum() or ch == "_"):
-            return None
-    return name
-
-
-def _map_file_path(name: str) -> str:
-    return os.path.join(MAPS_DIR, f"{name}.json")
-
-
-def _ensure_maps_dir() -> None:
-    os.makedirs(MAPS_DIR, exist_ok=True)
-
-
-def _starter_map(name: str) -> dict[str, Any]:
-    """Default box + corner spawns + a few pickups for a new arena."""
-    half = 2500.0
-    y = 10.0
-    d = 2000.0
-    pads: list[dict[str, Any]] = [
-        {"index": 0, "type": "spawn", "x": -d, "y": y, "z": -d, "room": 1},
-        {"index": 1, "type": "spawn", "x": d, "y": y, "z": -d, "room": 1},
-        {"index": 2, "type": "spawn", "x": -d, "y": y, "z": d, "room": 1},
-        {"index": 3, "type": "spawn", "x": d, "y": y, "z": d, "room": 1},
-        {"index": 4, "type": "weapon", "x": 0, "y": y, "z": -1500, "room": 1, "weapon": 0x11, "weaponName": "AR34"},
-        {"index": 5, "type": "weapon", "x": 0, "y": y, "z": 1500, "room": 1, "weapon": 0x13, "weaponName": "Shotgun"},
-        {"index": 6, "type": "ammo", "x": 0, "y": y, "z": 0, "room": 1, "ammoType": 0x04, "ammoName": "Shotgun", "quantity": 200},
-        {"index": 7, "type": "scenario", "x": 0, "y": y, "z": -500, "room": 1, "scenario": "case", "team": 0},
-    ]
-    return {"name": name, "box_half": half, "box_height": 2000.0, "pads": pads}
-
-
-def _read_map_file(name: str) -> dict[str, Any] | None:
-    path = _map_file_path(name)
-    if not os.path.isfile(path):
-        return None
-    with open(path, encoding="utf-8") as fp:
-        data = json.load(fp)
-    if not isinstance(data, dict):
-        return None
-    data.setdefault("name", name)
-    return data
-
-
-def _write_map_file(name: str, data: dict[str, Any]) -> None:
-    _ensure_maps_dir()
-    payload = dict(data)
-    payload["name"] = name
-    path = _map_file_path(name)
-    with open(path, "w", encoding="utf-8") as fp:
-        json.dump(payload, fp, indent=2)
-        fp.write("\n")
-
-
-def _delete_map_file(name: str) -> bool:
-    path = _map_file_path(name)
-    if not os.path.isfile(path):
-        return False
-    os.remove(path)
-    return True
-
-
-def _list_maps() -> list[dict[str, Any]]:
-    _ensure_maps_dir()
-    entries: list[dict[str, Any]] = []
-    for fname in sorted(os.listdir(MAPS_DIR)):
-        if not fname.endswith(".json"):
-            continue
-        name = fname[:-5]
-        path = os.path.join(MAPS_DIR, fname)
-        try:
-            st = os.stat(path)
-            with open(path, encoding="utf-8") as fp:
-                data = json.load(fp)
-            pad_count = len(data.get("pads", [])) if isinstance(data, dict) else 0
-        except (OSError, json.JSONDecodeError):
-            pad_count = 0
-            st = os.stat(path)
-        entries.append(
-            {
-                "name": name,
-                "updatedAt": int(st.st_mtime),
-                "padCount": pad_count,
-                "source": "file",
-            }
-        )
-    return entries
-
-
-def _maps_api_get(handler: BaseHTTPRequestHandler, path: str) -> bool:
-    """Handle GET /api/maps and GET /api/maps/<name>. Return True if handled."""
-    if path == "/api/maps":
-        _json_response(handler, 200, {"ok": True, "maps": _list_maps(), "mapsDir": MAPS_DIR})
-        return True
-    if path.startswith("/api/maps/"):
-        name = _sanitize_map_name(path[len("/api/maps/") :])
-        if not name:
-            _json_response(handler, 400, {"ok": False, "error": "invalid_map_name"})
-            return True
-        data = _read_map_file(name)
-        if data is None:
-            _json_response(handler, 404, {"ok": False, "error": "not_found"})
-            return True
-        _json_response(handler, 200, {"ok": True, "map": data})
-        return True
-    return False
-
-
-def _maps_api_post(handler: BaseHTTPRequestHandler, payload: dict[str, Any]) -> None:
-    """Create a new map JSON file (409 if it already exists)."""
-    raw_name = payload.get("name")
-    if not isinstance(raw_name, str):
-        _json_response(handler, 400, {"ok": False, "error": "missing_name"})
-        return
-    name = _sanitize_map_name(raw_name)
-    if not name:
-        _json_response(handler, 400, {"ok": False, "error": "invalid_map_name"})
-        return
-    if os.path.isfile(_map_file_path(name)):
-        _json_response(handler, 409, {"ok": False, "error": "already_exists", "name": name})
-        return
-    incoming = payload.get("map")
-    if isinstance(incoming, dict) and isinstance(incoming.get("pads"), list):
-        data = dict(incoming)
-        data["name"] = name
-    else:
-        data = _starter_map(name)
-    _write_map_file(name, data)
-    _json_response(handler, 201, {"ok": True, "name": name, "map": data})
-
-
-def _maps_api_put(handler: BaseHTTPRequestHandler, name: str, payload: dict[str, Any]) -> None:
-    """Save (create or overwrite) a map JSON file."""
-    incoming = payload.get("map")
-    if not isinstance(incoming, dict) or not isinstance(incoming.get("pads"), list):
-        _json_response(handler, 400, {"ok": False, "error": "invalid_map"})
-        return
-    data = dict(incoming)
-    data["name"] = name
-    _write_map_file(name, data)
-    _json_response(handler, 200, {"ok": True, "name": name, "map": data})
-
-
-def _maps_api_delete(handler: BaseHTTPRequestHandler, name: str) -> None:
-    if not _delete_map_file(name):
-        _json_response(handler, 404, {"ok": False, "error": "not_found"})
-        return
-    _json_response(handler, 200, {"ok": True, "name": name})
 
 
 def _play_params_from_opts(opts: dict[str, Any]) -> dict[str, Any]:
@@ -319,9 +124,6 @@ def _build_test_map_argv(json_path: str, opts: dict[str, Any], *, play: bool) ->
     """Mirror ``buildTestCommandLine`` / ``test_map.py`` flags from editor options."""
     level = str(opts.get("level", "uff")).strip().lower()
     deploy_as = str(opts.get("deployAs", level)).strip().lower()
-    # Box arenas must always rebuild seg; never honor Seg=off from the UI.
-    force_seg = level_is_box_arena(deploy_as)
-    build_seg = force_seg or bool(opts.get("seg", True))
     cmd = [
         sys.executable,
         os.path.join(HERE, "test_map.py"),
@@ -336,7 +138,7 @@ def _build_test_map_argv(json_path: str, opts: dict[str, Any], *, play: bool) ->
     ]
     if deploy_as != level:
         cmd.extend(["--deploy-as", deploy_as])
-    if build_seg:
+    if opts.get("seg", True):
         cmd.append("--seg")
     else:
         cmd.append("--no-seg")
@@ -574,12 +376,8 @@ class EditorHandler(BaseHTTPRequestHandler):
                 "service": "uff-editor",
                 "port": self.server.server_port,  # type: ignore[attr-defined]
                 "repoRoot": ROOT,
-                "bundleDir": BUNDLE_DIR or None,
-                "staticDir": STATIC_DIR,
-                "scriptDir": HERE,
                 "binaryFound": os.path.isfile(pd_binary),
                 "binaryPath": pd_binary,
-                "mapsDir": MAPS_DIR,
             }
             self.send_response(200)
             _cors_headers(self)
@@ -605,10 +403,7 @@ class EditorHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(payload).encode("utf-8"))
             return
 
-        if _maps_api_get(self, path):
-            return
-
-        # Static files from bundled editor/ (or journal/uff_viewer/ in dev).
+        # Static files from journal/uff_viewer/
         if path in ("/", "/index.html"):
             rel = "uff_map.html"
         else:
@@ -617,17 +412,14 @@ class EditorHandler(BaseHTTPRequestHandler):
                 self.send_error(403)
                 return
 
-        file_path = os.path.join(STATIC_DIR, rel)
+        file_path = os.path.join(HERE, rel)
         if not os.path.isfile(file_path):
             self.send_error(404, f"Not found: {rel}")
             return
 
         content_type = "application/octet-stream"
-        cache_control = "public, max-age=3600"
         if rel.endswith(".html"):
             content_type = "text/html; charset=utf-8"
-            # Bundled HTML is versioned at build time; avoid stale Electron cache.
-            cache_control = "no-cache, no-store, must-revalidate"
         elif rel.endswith(".js"):
             content_type = "application/javascript; charset=utf-8"
         elif rel.endswith(".css"):
@@ -639,7 +431,6 @@ class EditorHandler(BaseHTTPRequestHandler):
             data = fp.read()
         self.send_response(200)
         self.send_header("Content-Type", content_type)
-        self.send_header("Cache-Control", cache_control)
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -651,63 +442,8 @@ class EditorHandler(BaseHTTPRequestHandler):
             return
 
         path = urlparse(self.path).path
-        if path == "/api/test-map":
-            length = int(self.headers.get("Content-Length", "0"))
-            raw = self.rfile.read(length) if length else b""
-            try:
-                payload = json.loads(raw.decode("utf-8") if raw else "{}")
-            except json.JSONDecodeError as exc:
-                _json_response(self, 400, {"ok": False, "error": f"invalid_json: {exc}"})
-                return
-
-            try:
-                result = _run_test_map(payload)
-            except Exception as exc:
-                _log_traceback(f"POST /api/test-map failed: {exc}")
-                _json_response(self, 500, {"ok": False, "error": str(exc)})
-                return
-
-            status = 200 if result.get("ok") else 500
-            self.send_response(status)
-            _cors_headers(self)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(json.dumps(result, indent=2).encode("utf-8"))
-            return
-
-        if path == "/api/maps":
-            length = int(self.headers.get("Content-Length", "0"))
-            raw = self.rfile.read(length) if length else b""
-            try:
-                payload = json.loads(raw.decode("utf-8") if raw else "{}")
-            except json.JSONDecodeError as exc:
-                _json_response(self, 400, {"ok": False, "error": f"invalid_json: {exc}"})
-                return
-            if not isinstance(payload, dict):
-                _json_response(self, 400, {"ok": False, "error": "invalid_body"})
-                return
-            try:
-                _maps_api_post(self, payload)
-            except Exception as exc:
-                _log_traceback(f"POST /api/maps failed: {exc}")
-                _json_response(self, 500, {"ok": False, "error": str(exc)})
-            return
-
-        self.send_error(404)
-
-    def do_PUT(self) -> None:  # noqa: N802
-        if self._check_cors_preflight():
-            return
-        if self._reject_origin():
-            return
-
-        path = urlparse(self.path).path
-        if not path.startswith("/api/maps/"):
+        if path != "/api/test-map":
             self.send_error(404)
-            return
-        name = _sanitize_map_name(path[len("/api/maps/") :])
-        if not name:
-            _json_response(self, 400, {"ok": False, "error": "invalid_map_name"})
             return
 
         length = int(self.headers.get("Content-Length", "0"))
@@ -717,34 +453,20 @@ class EditorHandler(BaseHTTPRequestHandler):
         except json.JSONDecodeError as exc:
             _json_response(self, 400, {"ok": False, "error": f"invalid_json: {exc}"})
             return
-        if not isinstance(payload, dict):
-            _json_response(self, 400, {"ok": False, "error": "invalid_body"})
-            return
-        try:
-            _maps_api_put(self, name, payload)
-        except Exception as exc:
-            _log_traceback(f"PUT /api/maps/{name} failed: {exc}")
-            _json_response(self, 500, {"ok": False, "error": str(exc)})
 
-    def do_DELETE(self) -> None:  # noqa: N802
-        if self._check_cors_preflight():
-            return
-        if self._reject_origin():
+        try:
+            result = _run_test_map(payload)
+        except Exception as exc:
+            _log_traceback(f"POST /api/test-map failed: {exc}")
+            _json_response(self, 500, {"ok": False, "error": str(exc)})
             return
 
-        path = urlparse(self.path).path
-        if not path.startswith("/api/maps/"):
-            self.send_error(404)
-            return
-        name = _sanitize_map_name(path[len("/api/maps/") :])
-        if not name:
-            _json_response(self, 400, {"ok": False, "error": "invalid_map_name"})
-            return
-        try:
-            _maps_api_delete(self, name)
-        except Exception as exc:
-            _log_traceback(f"DELETE /api/maps/{name} failed: {exc}")
-            _json_response(self, 500, {"ok": False, "error": str(exc)})
+        status = 200 if result.get("ok") else 500
+        self.send_response(status)
+        _cors_headers(self)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(json.dumps(result, indent=2).encode("utf-8"))
 
 
 def _port_bindable(host: str, port: int) -> bool:
@@ -801,7 +523,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    os.chdir(STATIC_DIR)
+    os.chdir(HERE)
     port = args.port
     if args.auto_port:
         port = _pick_port(args.host, args.port)
@@ -824,10 +546,6 @@ def main(argv: list[str] | None = None) -> int:
     print(f"uff editor server at {url}")
     print(f"PORT={port}")
     print("  GET  /api/health   — server + binary probe")
-    print("  GET  /api/maps     — list saved maps (journal/uff_viewer/maps/)")
-    print("  POST /api/maps     — create map (starter template if body.map omitted)")
-    print("  PUT  /api/maps/<n> — save map JSON")
-    print("  DELETE /api/maps/<n> — delete saved map")
     print("  POST /api/test-map — build + launch via test_map.py")
     print("Press Ctrl+C to stop.")
     try:

@@ -10,15 +10,26 @@ import time
 import urllib.request
 from pathlib import Path
 
+from editor_port import discover_editor_base
+
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE.parent / "uff_evidence"
 FIXTURE = HERE / "fixtures" / "minimal_map.json"
-BASE = "http://127.0.0.1:8765"
 
 
-def curl_maps_ok() -> bool:
+def _base_url() -> str:
+    base = discover_editor_base()
+    if not base:
+        raise RuntimeError(
+            "serve_editor not reachable on ports 8765–8775 "
+            "(start: python3 journal/uff_viewer/serve_editor.py)"
+        )
+    return base.rstrip("/")
+
+
+def curl_maps_ok(base: str) -> bool:
     try:
-        with urllib.request.urlopen(BASE + "/api/maps", timeout=5) as resp:
+        with urllib.request.urlopen(base + "/api/maps", timeout=5) as resp:
             body = json.loads(resp.read().decode())
             return resp.status == 200 and isinstance(body.get("maps"), list)
     except Exception:
@@ -35,11 +46,17 @@ def main() -> int:
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     results: dict[str, str] = {}
 
+    try:
+        base = _base_url()
+    except RuntimeError as exc:
+        print(f"FAIL: {exc}")
+        return 1
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.on("dialog", lambda d: d.accept())
-        page.goto(BASE + "/?v=pass10", wait_until="load", timeout=120000)
+        page.goto(base + "/?v=pass10", wait_until="load", timeout=120000)
         page.wait_for_function("() => window.__editor", timeout=120000)
 
         # 1. Old file toolbar must be gone
@@ -170,7 +187,7 @@ def main() -> int:
 
         browser.close()
 
-    results["api_maps"] = "PASS" if curl_maps_ok() else "FAIL"
+    results["api_maps"] = "PASS" if curl_maps_ok(base) else "FAIL"
 
     print(json.dumps(results, indent=2))
     print(f"Screenshots: {EVIDENCE / 'ui_v2_viewport.png'}, {EVIDENCE / 'ui_v2_edit_mode.png'}")

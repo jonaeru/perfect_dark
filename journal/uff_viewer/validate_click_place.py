@@ -7,9 +7,20 @@ import json
 import sys
 from pathlib import Path
 
+from editor_port import discover_editor_base
+
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE.parent / "uff_evidence"
-BASE = "http://127.0.0.1:8765"
+
+
+def _base_url() -> str:
+    base = discover_editor_base()
+    if not base:
+        raise RuntimeError(
+            "serve_editor not reachable on ports 8765–8775 "
+            "(start: python3 journal/uff_viewer/serve_editor.py)"
+        )
+    return base.rstrip("/")
 
 
 def main() -> int:
@@ -19,13 +30,19 @@ def main() -> int:
         print("FAIL: pip install playwright && playwright install chromium")
         return 1
 
+    try:
+        base = _base_url()
+    except RuntimeError as exc:
+        print(f"FAIL: {exc}")
+        return 1
+
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     results: dict[str, str] = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(BASE + "/?v=clickplace", wait_until="load", timeout=120000)
+        page.goto(base + "/?v=clickplace", wait_until="load", timeout=120000)
         page.on("dialog", lambda d: d.accept())
         page.wait_for_function("() => window.__editor", timeout=120000)
 

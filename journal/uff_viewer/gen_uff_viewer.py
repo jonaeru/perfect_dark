@@ -931,6 +931,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   #mapNameSheet .sheet-actions { display:flex; justify-content:flex-end; gap:var(--space-sm);
     margin-top:var(--space-md); }
   #mapNameSheet .sheet-actions button { min-height:36px; padding:6px 14px; }
+  #mapPickList.map-pick-list { max-height:240px; overflow-y:auto; margin:0 0 var(--space-md);
+    display:flex; flex-direction:column; gap:4px; }
+  #mapPickList.map-pick-list button { text-align:left; width:100%; box-sizing:border-box;
+    font:inherit; color:#e6e6e6; background:#1b2330; border:1px solid var(--border);
+    border-radius:7px; padding:8px 10px; cursor:pointer; }
+  #mapPickList.map-pick-list button:hover { border-color:var(--accent); background:#222c3a; }
+  #mapPickList .maps-open-empty { font-size:var(--label-size); color:var(--muted); padding:8px 0; }
   #testStatus { font-size:var(--label-size); margin:var(--space-xs) 0 0; min-height:14px; line-height:1.35; }
   #runTestStatus { position:fixed; right:var(--right-gap); top:calc(var(--chrome-top) + var(--runbar-h) + 4px); z-index:6; max-width:280px; font-size:11px;
     color:var(--muted); pointer-events:none; line-height:1.35; text-align:right; }
@@ -1168,9 +1175,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <div id="mapNameModal" role="dialog" aria-modal="true" aria-labelledby="mapNameModalTitle" hidden>
   <div id="mapNameSheet" class="panel">
     <h2 id="mapNameModalTitle">Map name</h2>
-    <p id="mapNameModalHint" class="map-name-hint">Lowercase letters, digits, and underscore only.</p>
+    <p id="mapNameModalHint" class="map-name-hint">Lowercase letters, digits, underscore. Spaces become underscores.</p>
     <input type="text" id="mapNameInput" spellcheck="false" autocomplete="off"
       aria-describedby="mapNameModalHint mapNameError" />
+    <div id="mapPickList" class="map-pick-list" hidden role="listbox" aria-label="Saved maps"></div>
     <div id="mapNameError" role="alert" aria-live="polite"></div>
     <div class="sheet-actions">
       <button type="button" id="mapNameCancel">Cancel</button>
@@ -1545,8 +1553,8 @@ function updateUndoRedoButtons() {
 function localStorageKey() {
   const nameEl = document.getElementById('levelName');
   const raw = (nameEl && nameEl.value) ? nameEl.value : mapState.name;
-  const name = (raw || 'map').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_') || 'map';
-  return 'pdmap_editor_' + name;
+  try { return 'pdmap_editor_' + sanitizeLevelName(raw); }
+  catch (_) { return 'pdmap_editor_map'; }
 }
 
 function updateStorageKeyDisplay() {
@@ -3007,15 +3015,32 @@ function markClean() {
 }
 
 let mapNamePromptResolve = null;
+let mapNameDialogMode = 'input';  // 'input' | 'pick'
 const mapNameModal = document.getElementById('mapNameModal');
 const mapNameInput = document.getElementById('mapNameInput');
+const mapPickListEl = document.getElementById('mapPickList');
 const mapNameErrorEl = document.getElementById('mapNameError');
+
+function resetMapNameModalLayout() {
+  mapNameDialogMode = 'input';
+  if (mapNameInput) {
+    mapNameInput.hidden = false;
+    mapNameInput.style.display = '';
+  }
+  if (mapPickListEl) {
+    mapPickListEl.hidden = true;
+    mapPickListEl.innerHTML = '';
+  }
+  const okBtn = document.getElementById('mapNameOk');
+  if (okBtn) okBtn.style.display = '';
+}
 
 function closeMapNameModal(result) {
   if (mapNameModal) {
     mapNameModal.classList.remove('open');
     mapNameModal.hidden = true;
   }
+  resetMapNameModalLayout();
   if (mapNamePromptResolve) {
     mapNamePromptResolve(result);
     mapNamePromptResolve = null;
@@ -3027,7 +3052,7 @@ function openMapNameDialog(opts = {}) {
   const {
     defaultValue = 'my_arena',
     title = 'Map name',
-    hint = 'Lowercase letters, digits, and underscore only.',
+    hint = 'Lowercase letters, digits, underscore. Spaces become underscores.',
     confirmLabel = 'OK',
   } = opts;
   if (!mapNameModal || !mapNameInput) {
@@ -3037,6 +3062,7 @@ function openMapNameDialog(opts = {}) {
   }
   return new Promise((resolve) => {
     mapNamePromptResolve = resolve;
+    resetMapNameModalLayout();
     if (mapNameErrorEl) mapNameErrorEl.textContent = '';
     const titleEl = document.getElementById('mapNameModalTitle');
     const hintEl = document.getElementById('mapNameModalHint');
@@ -3052,11 +3078,47 @@ function openMapNameDialog(opts = {}) {
   });
 }
 
+function openMapPickDialog() {
+  if (!mapNameModal || !mapPickListEl) {
+    const names = mapsCatalog.map(m => m.name);
+    const raw = window.prompt('Saved maps: ' + names.join(', '), names[0] || '');
+    if (raw == null || !String(raw).trim()) return Promise.resolve(null);
+    try { return Promise.resolve(sanitizeLevelName(raw)); }
+    catch (e) { alert(e.message); return Promise.resolve(null); }
+  }
+  populateOpenMapList();
+  return new Promise((resolve) => {
+    mapNamePromptResolve = resolve;
+    resetMapNameModalLayout();
+    mapNameDialogMode = 'pick';
+    if (mapNameErrorEl) mapNameErrorEl.textContent = '';
+    const titleEl = document.getElementById('mapNameModalTitle');
+    const hintEl = document.getElementById('mapNameModalHint');
+    const okBtn = document.getElementById('mapNameOk');
+    if (titleEl) titleEl.textContent = 'Open saved map';
+    if (hintEl) {
+      hintEl.textContent = mapsCatalog.length
+        ? mapsCatalog.length + ' saved map(s). Click one to open.'
+        : 'No saved maps.';
+    }
+    if (okBtn) okBtn.style.display = 'none';
+    if (mapNameInput) mapNameInput.style.display = 'none';
+    mapPickListEl.hidden = false;
+    mapPickListEl.innerHTML = openMapListEl ? openMapListEl.innerHTML : '';
+    mapPickListEl.querySelectorAll('[data-map-name]').forEach(btn => {
+      btn.addEventListener('click', () => closeMapNameModal(btn.getAttribute('data-map-name')));
+    });
+    mapNameModal.hidden = false;
+    mapNameModal.classList.add('open');
+    mapPickListEl.querySelector('button')?.focus();
+  });
+}
+
 async function promptMapName(defaultName, dialogOpts = {}) {
   const raw = await openMapNameDialog(Object.assign({
     defaultValue: defaultName || 'my_arena',
     title: 'Map name',
-    hint: 'Lowercase letters, digits, and underscore only.',
+    hint: 'Lowercase letters, digits, underscore. Spaces become underscores.',
     confirmLabel: 'OK',
   }, dialogOpts));
   if (raw == null || !String(raw).trim()) return null;
@@ -3068,6 +3130,7 @@ async function promptMapName(defaultName, dialogOpts = {}) {
 }
 
 function submitMapNameModal() {
+  if (mapNameDialogMode === 'pick') return;
   if (!mapNameInput) { closeMapNameModal(null); return; }
   try {
     const name = sanitizeLevelName(mapNameInput.value);
@@ -3174,13 +3237,7 @@ async function openSavedMapDialog() {
     alert('No saved maps on server or in browser cache.');
     return;
   }
-  const names = mapsCatalog.map(m => m.name);
-  const hint = 'Saved maps: ' + names.join(', ');
-  const pick = await promptMapName(currentMapId || names[0] || '', {
-    title: 'Open saved map',
-    hint,
-    confirmLabel: 'Open',
-  });
+  const pick = await openMapPickDialog();
   if (!pick) return;
   try { await loadSelectedMap(pick); }
   catch (e) { alert(e.message); }
@@ -3559,9 +3616,16 @@ function fmtNum(v) {
 }
 function weaponExpr(id) { return WEAPON_CONST[id] || ('0x' + id.toString(16)); }
 function ammoExpr(id)   { return AMMO_CONST[id]   || ('0x' + id.toString(16)); }
+function normalizeLevelName(raw) {
+  let n = (raw || mapState.name || 'map').trim().toLowerCase();
+  n = n.replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  return n || 'map';
+}
 function sanitizeLevelName(raw) {
-  const n = (raw || mapState.name || 'map').trim().toLowerCase();
-  if (!VALID_NAME.test(n)) throw new Error('Invalid level name — use lowercase letters, digits, underscore.');
+  const n = normalizeLevelName(raw);
+  if (!VALID_NAME.test(n)) {
+    throw new Error('Invalid level name — start with a letter; use lowercase letters, digits, underscore (spaces become _).');
+  }
   return n;
 }
 

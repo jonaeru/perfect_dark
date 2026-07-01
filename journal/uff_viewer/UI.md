@@ -1,4 +1,4 @@
-# Map Editor UI — Information Architecture (pass-10)
+# Map Editor UI — Information Architecture (pass-11)
 
 Production-quality chrome for the Perfect Dark map editor. Canonical source: `gen_uff_viewer.py` → `uff_map.html` → Electron `.app`.
 
@@ -80,8 +80,8 @@ Advanced build flags (level, deploy, sims, loadout, game options, seg/deploy/reb
 | `T` | Test / Play |
 | `X` | Export assets |
 | `Del` | Delete selected pad (edit) |
-| `G` | Toggle snap grid (edit) |
-| `M` | Toggle minimap (edit) |
+| `G` | Toggle snap grid (edit; auto-enters edit if needed) |
+| `M` | Toggle minimap (works outside edit mode — auto-enters edit) |
 
 ---
 
@@ -101,7 +101,7 @@ Advanced build flags (level, deploy, sims, loadout, game options, seg/deploy/reb
 | `gen_uff_viewer.py` | HTML/CSS/JS — run bar, status pill, modal, menu bridge |
 | `electron/main.js` | Native application menu + IPC |
 | `electron/preload.js` | `openJsonFile`, `onMenuAction` |
-| `serve_editor.py` | `/api/maps` CRUD (unchanged) |
+| `serve_editor.py` | `/api/maps` CRUD + `/api/health` bundle hash |
 
 Regenerate: `python3 journal/uff_viewer/gen_uff_viewer.py`  
 Build app: `./scripts/build-map-editor-electron.sh`
@@ -126,11 +126,26 @@ Validated 2026-06-29. Re-run: `python3 journal/uff_viewer/validate_ui_v2.py` (re
 
 ---
 
+## Validation checklist (pass-11)
+
+| # | Check | Method | Status |
+|---|-------|--------|--------|
+| 10 | Bundle hash in `/api/health` | `curl /api/health` → `bundleHash` | ✅ PASS |
+| 11 | Stale HTML toast | Mismatch embedded vs server hash | ✅ PASS |
+| 12 | Empty-map onboarding overlay | Playwright `#onboardingOverlay` | ✅ PASS |
+| 13 | Edit → Save → Test Map build | `python3 validate_edit_play.py` | ✅ PASS |
+| 14 | M/G/E shortcuts (M auto-edit) | `validate_edit_play.py` | ✅ PASS |
+
+Validated 2026-06-30. Re-run pass-11: `python3 journal/uff_viewer/validate_edit_play.py` (requires `serve_editor.py` on :8765 with current `uff_map.html`).
+
+---
+
 ## User guide — standard workflow
 
 1. **Launch** — Double-click `Perfect Dark Map Editor.app`.
-2. **Open from disk** — **File → Open…** (or drag `.json` onto the canvas).
-3. **Edit** — **View → Toggle Edit Mode** or press `E`; place pads on the floor.
-4. **Save** — **File → Save** or ⌘S (writes to `journal/uff_viewer/maps/<name>.json`).
-5. **Test** — Set Mod/Scenario on the run bar → **▶ Play** or **Play → Test Map**.
-6. **Advanced** — **Play → Build Settings…** for deploy slot, sims, loadout, build flags.
+2. **New or empty map** — On first open with no pads, follow the **Quick start** overlay: **Edit** → **Spawn** → click floor → **⌘S** → **▶ Play**.
+3. **Open from disk** — **File → Open…** (or drag `.json` onto the canvas).
+4. **Edit** — **View → Toggle Edit Mode** or press `E`; place pads on the floor.
+5. **Save** — **File → Save** or ⌘S (writes to `journal/uff_viewer/maps/<name>.json`).
+6. **Test** — Set Mod/Scenario on the run bar → **▶ Play** or **Play → Test Map**.
+7. **Advanced** — **Play → Build Settings…** for deploy slot, sims, loadout, build flags.

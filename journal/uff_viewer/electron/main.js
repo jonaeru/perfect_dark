@@ -390,7 +390,6 @@ function spawnServer(pythonBin, serveScript, repoRoot, stateDir, bundleDir) {
     DEFAULT_HOST,
     '--port',
     String(PORT_MIN),
-    '--auto-port',
   ];
   const spawnEnv = buildSpawnEnv(repoRoot, stateDir, bundleDir);
   log(`Spawn command: ${formatSpawnCommand(pythonBin, spawnArgs, spawnEnv)}`);

@@ -82,10 +82,23 @@ prepare_editor_bundle() {
 		fi
 		cp "$VIEWER_DIR/$f" "$EDITOR_BUNDLE_STAGING/$f"
 	done
+	# pass-11: bundle hash must match embedded EDITOR_BUNDLE_HASH in uff_map.html.
+	local bundle_hash=""
+	bundle_hash="$(python3 - "$VIEWER_DIR/uff_map.html" <<'PY'
+import hashlib
+import re
+import sys
+from pathlib import Path
+html = Path(sys.argv[1]).read_text(encoding="utf-8")
+norm = re.sub(r"const EDITOR_BUNDLE_HASH = '[^']*';", "const EDITOR_BUNDLE_HASH = '';", html)
+print(hashlib.sha256(norm.encode("utf-8")).hexdigest()[:16])
+PY
+)"
 	# Build stamp for diagnostics (Electron also cache-busts on first load).
-	printf '{"builtAt":"%s","repoRoot":"%s","files":%s}\n' \
+	printf '{"builtAt":"%s","repoRoot":"%s","bundleHash":"%s","files":%s}\n' \
 		"$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
 		"$REPO_ROOT" \
+		"$bundle_hash" \
 		"$(printf '%s\n' "${EDITOR_BUNDLE_FILES[@]}" | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')" \
 		>"$EDITOR_BUNDLE_STAGING/manifest.json"
 	echo "  staged ${#EDITOR_BUNDLE_FILES[@]} files -> $EDITOR_BUNDLE_STAGING"
