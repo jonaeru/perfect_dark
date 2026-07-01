@@ -115,6 +115,41 @@ def cmd_list(args):
         print(f"  {fname}{suffix}")
 
 
+def cmd_register(args):
+    from .register import plan_registration, write_plan
+
+    name = args.name.strip().lower()
+    try:
+        plan = plan_registration(name)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if plan.already_registered:
+        print(f"WARNING: {name} appears already registered in files.h", file=sys.stderr)
+
+    path = write_plan(name)
+    print(plan.render_markdown() if args.print else f"Wrote registration plan -> {os.path.relpath(path, ROOT)}")
+
+    if args.apply:
+        from .register import apply_registration
+
+        try:
+            changed = apply_registration(name)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            sys.exit(1)
+        if changed:
+            print(f"\nApplied registration patches ({len(changed)} files):")
+            for p in changed:
+                print(f"  - {os.path.relpath(p, ROOT)}")
+            print(f"\nNext: make -j8 && python3 tools/pdmap.py build {name} --deploy")
+        else:
+            print(f"\n{name}: registration snippets already present (no file changes)")
+    elif not args.print:
+        print(f"\nOpen {path} and apply the four snippets, or run: pdmap register {name} --apply")
+
+
 def cmd_init(args):
     name = args.name
     level_path = os.path.join(ROOT, "src", "levels", f"{name}.py")

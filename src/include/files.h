@@ -2024,17 +2024,29 @@
 #define FILE_GHAND_SKEDAR            (VERSION == VERSION_JPN_FINAL ? 0x07e3 : 0x07e1)
 #endif
 
+// Custom pdmap arenas (my_arena, testarena)
+#define FILE_BG_MY_ARENA_SEG         0x07e2
+#define FILE_BG_MY_ARENA_TILES       0x07e3
+#define FILE_BG_MY_ARENA_PADS        0x07e4
+#define FILE_USETUPMY_ARENA          0x07e5
+#define FILE_UMP_SETUPMY_ARENA       0x07e6
+#define FILE_BG_TESTARENA_SEG        0x07e7
+#define FILE_BG_TESTARENA_TILES      0x07e8
+#define FILE_BG_TESTARENA_PADS       0x07e9
+#define FILE_USETUPTESTARENA         0x07ea
+#define FILE_UMP_SETUPTESTARENA      0x07eb
+
 #if VERSION >= VERSION_JPN_FINAL
 #ifdef PLATFORM_N64
 #define NUM_FILES 2016
 #else
-#define NUM_FILES 2020 // PD Plus Mod (+ 4)
+#define NUM_FILES 2028 // PD Plus Mod (+ 4) + custom arenas (+ 10)
 #endif
 #elif VERSION >= VERSION_NTSC_1_0
 #ifdef PLATFORM_N64
 #define NUM_FILES 2014
 #else
-#define NUM_FILES 2018 // PD Plus Mod (+ 4)
+#define NUM_FILES 2028 // PD Plus Mod (+ 4) + custom arenas (+ 10)
 #endif
 #else
 #define NUM_FILES 2013

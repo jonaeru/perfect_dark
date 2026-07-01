@@ -4,9 +4,11 @@
   "box_height": 3000,
   "pads": [
     {"index": 0, "type": "spawn", "x": -2000, "y": 10, "z": -2000, "room": 1},
-    {"index": 1, "type": "spawn", "x": 2000, "y": 10, "z": 2000, "room": 1},
-    {"index": 2, "type": "weapon", "x": 0, "y": 10, "z": 0, "room": 1, "weapon": 10},
-    {"index": 3, "type": "ammo", "x": 1500, "y": 10, "z": 0, "room": 1, "ammoType": 4, "quantity": 200},
-    {"index": 4, "type": "scenario", "x": 0, "y": 10, "z": 1500, "room": 1, "scenario": "hill", "team": 0}
+    {"index": 1, "type": "spawn", "x": 2000, "y": 10, "z": -2000, "room": 1},
+    {"index": 2, "type": "spawn", "x": -2000, "y": 10, "z": 2000, "room": 1},
+    {"index": 3, "type": "spawn", "x": 2000, "y": 10, "z": 2000, "room": 1},
+    {"index": 4, "type": "weapon", "x": 0, "y": 10, "z": 0, "room": 1, "weapon": 10},
+    {"index": 5, "type": "ammo", "x": 1500, "y": 10, "z": 0, "room": 1, "ammoType": 3, "quantity": 200},
+    {"index": 6, "type": "scenario", "x": 0, "y": 10, "z": 1500, "room": 1, "scenario": "hill", "team": 0}
   ]
 }

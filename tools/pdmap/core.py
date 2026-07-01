@@ -15,6 +15,7 @@ SEG_SRC = os.path.join(ROOT, "build", ROMID, "assets", "files", "seg")
 
 MOD_DIRS = [
     os.path.join(ROOT, "mods", "mod_allinone", "files", "bgdata"),
+    os.path.join(ROOT, "mods", "mod_moyoteg", "files", "bgdata"),
 ]
 
 ASSETMGR_DIR = os.path.join(ROOT, "tools", "assetmgr")

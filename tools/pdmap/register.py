@@ -128,8 +128,8 @@ def plan_registration(name: str) -> RegistrationPlan:
         f"/*{seg_id:#06x}*/ \"bgdata/bg_{name}.seg\",\n"
         f"/*{tiles_id:#06x}*/ \"bgdata/bg_{name}_tilesZ\",\n"
         f"/*{pads_id:#06x}*/ \"bgdata/bg_{name}_padsZ\",\n"
-        f"/*{usetup_id:#06x}*/ \"bgdata/Usetup{name}Z\",\n"
-        f"/*{ump_id:#06x}*/ \"bgdata/Ump_setup{name}Z\","
+        f"/*{usetup_id:#06x}*/ \"Usetup{name}Z\",\n"
+        f"/*{ump_id:#06x}*/ \"Ump_setup{name}Z\","
     )
 
     stagetable = (

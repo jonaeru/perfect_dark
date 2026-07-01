@@ -1,0 +1,42 @@
+# Perfect Dark Plus & All Solos in Multi Mod v13
+# Author: Jonaeru / Atari-Dude
+
+# Perfect Dark Plus by Wreck
+# http://n64vault.com/pd-multi-levels:perfect-dark-plus
+
+# All Solos in Multi by 00dark
+# http://n64vault.com/pd-multi-levels:all-solos-in-multi
+
+# Suburb by Oofjay
+# http://n64vault.com/pd-levels:suburb
+
+# Training Day by MRKane
+
+# Revision History
+# v1: Fixed Skedar left arm, Dr. Carroll left arm hitbox. Thank you so much, Wreck. (June 2, 2024)
+# v2: Merged All Solos in Multi Mod (August 23, 2024)
+# v3: Added settings for coexistence with GoldenEye X, fixed texts (Lmpmenu) (August 29, 2024)
+# v4: Fixed the collision in Carrington Villa Multi (can climb roof). Thank you so much, Atari-Dude.
+#     Added "Random GoldenEye X" texts (Lmpmenu) (September 9, 2024)
+# v5: Added "Kakariko Village" texts (Lmpmenu) (November 2, 2024)
+# v6: Renamed Skedar, Dr. Carroll Models (November 3, 2024)
+#     CtestchrZ -> Ccarroll2Z
+#     Pttb_boxZ -> Cskedar2Z
+#     PchrflashbangZ -> Ghand_carollZ
+#     PdoorconsoleZ -> Ghand_skedarZ
+# v7: Added "Dark Noon" texts (Lmpmenu) (November 22, 2024)
+#     Added MP Weapon Random Choice
+# v8: Added PAL texts (LmpmenuP, LoptionsP) (November 30, 2024)
+# v9: Fixed arena texts (from GoldenEye X 6a), added reset settings (January 26, 2025)
+# v10: Removed MP Weapon Random Choice settings (February 8, 2025)
+# v11: Extend stage table for GoldenEye X, and fix level IDs accordingly (March 1, 2025)
+# v12: Added "Suburb" and "Training Day" texts (April 10, 2025)
+#      Replaced Skedar and Dr. Carroll Models last version by Wreck. Thank you so much, Wreck.
+#      Merged Atari-Dude mod files (Carrington Institute Multi has been replaced with Jonaeru version) (April 10, 2025)
+# v13: Fixed Subub settings (stage number) and removed GoldenEye X settings back to default.
+#      Merged Atari-Dude mod files (July 20, 2025)
+
+# Suburb
+stage 0x18 {
+  allocation "-ml0 -me0 -mgfx110 -mgfxtra80 -mvtx100 -ma700"
+}

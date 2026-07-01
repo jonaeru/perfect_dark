@@ -197,7 +197,9 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_EXTRA25,         0, L_MPMENU_336 }, // Paradox
 	{ STAGE_EXTRA26,         0, L_MPMENU_337 }, // War Colors
 	{ STAGE_TEST_LAM,        0, L_MPMENU_338 }, // Grand Library
-	{ STAGE_TEST_UFF,        0, 0x7FFF       }, // Custom Box Level
+	{ STAGE_TEST_UFF,        0, 0x7FFF       }, // Matrix Test Room
+	{ STAGE_MY_ARENA,        0, 0x7FFD       }, // My Arena
+	{ STAGE_TESTARENA,       0, 0x7FFC       }, // Test Arena
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -350,7 +352,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 55, L_MPMENU_326  }, // "Bonus"
 		{ 71, 0x7FFE        }, // "Custom Maps"
-		{ 72, L_MPMENU_118  }, // "Random"
+		{ 74, L_MPMENU_118  }, // "Random"
 #endif
 	};
 

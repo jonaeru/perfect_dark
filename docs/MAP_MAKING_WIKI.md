@@ -642,7 +642,7 @@ PDMAP_SEG_MODE=empty python3 tools/pdmap.py build uff --seg --deploy
 
 ### Deploy targets (`MOD_DIRS`)
 
-`mod_allinone`, `mod_dark_noon`, `mod_gex`, `mod_kakariko`, `mod_goldfinger_64`
+`mod_allinone`, `mod_dark_noon`, `mod_gex`, `mod_kakariko`, `mod_goldfinger_64`, `mod_moyoteg`
 (dirs that exist under `mods/*/files/bgdata`).
 
 - **Setup** deploys to selected mod's `files/`

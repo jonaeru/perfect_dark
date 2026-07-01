@@ -4044,6 +4044,8 @@
 #define STAGE_TEST_OLD      0x4e
 #define STAGE_DUEL          0x4f
 #define STAGE_TEST_LAM      0x50
+#define STAGE_MY_ARENA      0x80
+#define STAGE_TESTARENA     0x81
 #define STAGE_TITLE         0x5c
 #define STAGE_BOOTPAKMENU   0x5d
 #define STAGE_CREDITS       0x5e
@@ -4166,6 +4168,8 @@
 #define STAGEINDEX_TEST_MP18     0x3a
 #define STAGEINDEX_TEST_MP19     0x3b
 #define STAGEINDEX_TEST_MP20     0x3c
+#define STAGEINDEX_MY_ARENA      0x57
+#define STAGEINDEX_TESTARENA     0x58
 
 #define SURFACETYPE_DEFAULT      0
 #define SURFACETYPE_STONE        1

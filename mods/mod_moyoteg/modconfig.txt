@@ -1,0 +1,5 @@
+# Moyoteg personal mod slot
+# Author: moyoteg
+#
+# Deploy custom map assets here via pdmap or the map editor Test/Play panel.
+# Launch with: ./build/pd.arm64 --test-map --moddir mods/mod_moyoteg

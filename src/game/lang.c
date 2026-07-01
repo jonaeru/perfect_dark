@@ -458,6 +458,8 @@ char *langGet(s32 textid)
 {
 #ifndef PLATFORM_N64
 	if (textid == 0x7FFF) return "Matrix Test Room";
+	if (textid == 0x7FFD) return "My Arena";
+	if (textid == 0x7FFC) return "Test Arena";
 	if (textid == 0x7FFE) return "Custom Maps";
 #endif
 	s32 bankindex = textid >> 9;
