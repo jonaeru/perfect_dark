@@ -109,6 +109,22 @@ python3 tools/pdmap.py info mymap
 Register the stage (§12) before expecting it in the Combat Simulator menu. Until then,
 use **Deploy → uff** in the editor to hijack the `--test-map` slot.
 
+### Deterministic path (editor JSON → playable, no level module)
+
+```bash
+# Canonical CLI — all invariants applied in code (spawn Y, loadout, ailist 0x1000, empty seg)
+python3 tools/pdmap.py from-json map.json --deploy-as uff --deploy --play
+
+# Learning engine — probe code + fixtures, track doc gaps, emit verified spec
+python3 tools/pdmap.py learn run
+python3 tools/pdmap.py learn report
+python3 tools/pdmap.py learn gaps
+python3 tools/pdmap.py register mymap   # four C wiring snippets → journal/map_learn/
+```
+
+Output: `docs/MAP_DETERMINISTIC_SPEC.md` (machine-verified facts only) and
+`journal/map_learn/gaps.md` (what still needs encoding or documentation).
+
 ---
 
 ## 2. What a map is (five files + wiring)
