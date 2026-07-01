@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """One-shot build + play pipeline for maps exported from the uff viewer editor.
 
-Reads editor JSON (file or stdin), writes ``src/levels/<name>.py``, runs
-``pdmap build``, optionally deploys to a chosen mod directory, and can launch
-``--test-map`` when the asset name matches the uff test slot.
+Reads editor JSON (file or stdin), builds assets deterministically via
+``tools.pdmap.from_json`` + ``tools.pdmap.pipeline`` (no level module required),
+optionally writes ``src/levels/<name>.py``, deploys, and launches ``--test-map``.
 
 Examples:
   python3 journal/uff_viewer/test_map.py map.json --play
-  python3 journal/uff_viewer/test_map.py - --mod mod_dark_noon --scenario 4 --dry-run <<'EOF'
-  {...}
+  python3 journal/uff_viewer/test_map.py - --deploy-as uff --play <<'EOF'
+  {"name":"uff","box_half":5000,"pads":[{"type":"spawn","x":0,"y":10,"z":0}]}
   EOF
+  python3 tools/pdmap.py from-json map.json --deploy-as uff --play
 """
 
 from __future__ import annotations
@@ -17,7 +18,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import platform
 import shutil
 import subprocess
 import sys
@@ -31,88 +31,28 @@ if ROOT not in sys.path:
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-from json_to_level import json_to_level_py  # noqa: E402
 from tools.pdmap.core import ROOT as PDMAP_ROOT  # noqa: E402
-from tools.pdmap.deploy import deploy_all, build_box_seg_asset, build_seg  # noqa: E402
-from tools.pdmap.core import (  # noqa: E402
-    load_level_module,
-    compile_tiles,
-    compile_pads,
-    BUILD_DIR,
+from tools.pdmap.from_json import EditorMapSpec  # noqa: E402
+from tools.pdmap.level_codegen import render_level_module  # noqa: E402
+from tools.pdmap.pipeline import build_from_spec  # noqa: E402
+from tools.pdmap.play import (  # noqa: E402
+    MOD_CHOICES,
+    SCENARIO_CHOICES,
+    TEST_MAP_SLOT,
+    detect_pd_binary,
+    play_command,
 )
-from tools.pdmap.pads_builder import write_pads_json  # noqa: E402
-from tools.pdmap.setup_packer import write_setup_binary  # noqa: E402
-from tools.pdmap.tiles import copy_tiles_from_template  # noqa: E402
-from tools.pdmap.validate import validate_all  # noqa: E402
 
 assert ROOT == PDMAP_ROOT
 
-# Mod directories discoverable from mods/*/files/bgdata
-MOD_CHOICES: dict[str, str] = {
-    "mod_allinone": "mods/mod_allinone",
-    "mod_dark_noon": "mods/mod_dark_noon",
-    "mod_gex": "mods/mod_gex",
-    "mod_kakariko": "mods/mod_kakariko",
-    "mod_goldfinger_64": "mods/mod_goldfinger_64",
-}
-
-# ``--test-map`` in title.c always boots STAGE_TEST_UFF (bg_uff.* assets).
-TEST_MAP_SLOT = "uff"
-STAGE_TEST_UFF = 0x4D
-
-SCENARIO_CHOICES = {
-    0: "Combat",
-    1: "Hold the Briefcase",
-    2: "Hacker Central",
-    3: "Pop a Cap",
-    4: "King of the Hill",
-    5: "Capture the Case",
-}
-
-# MPWEAPON_* ids passed to title.c --test-map (see src/include/constants.h).
-DEFAULT_LOADOUT = [0x01, 0x09, 0x10, 0x04, 0x00, 0x25]  # Falcon2, CMP150, AR34, MagSec4, None, Shield
-
-
-def parse_loadout(raw: str | None) -> list[int]:
-    """Parse six comma-separated MPWEAPON ids for --loadout."""
-    if not raw:
-        return list(DEFAULT_LOADOUT)
-    parts = [p.strip() for p in raw.split(",") if p.strip()]
-    if len(parts) != 6:
-        raise ValueError(f"--loadout needs exactly 6 weapon ids, got {len(parts)}: {raw!r}")
-    return [int(p, 0) for p in parts]
+# Default weapon loadout slots for --test-map (Falcon2, CMP150, AR34, MagSec4, None, Shield).
+DEFAULT_LOADOUT = [0x01, 0x09, 0x10, 0x04, 0x00, 0x25]
 
 
 def _mod_bgdata(mod_key: str) -> str:
     if mod_key not in MOD_CHOICES:
         raise ValueError(f"Unknown mod {mod_key!r}; choose from {', '.join(MOD_CHOICES)}")
     return os.path.join(ROOT, MOD_CHOICES[mod_key], "files", "bgdata")
-
-
-def _all_mod_bgdata_dirs() -> list[str]:
-    """Every mod bgdata folder — box segs must stay in sync across mods."""
-    return [
-        os.path.join(ROOT, MOD_CHOICES[k], "files", "bgdata")
-        for k in MOD_CHOICES
-        if os.path.isdir(os.path.join(ROOT, MOD_CHOICES[k], "files", "bgdata"))
-    ]
-
-
-def _detect_pd_binary() -> str:
-    machine = platform.machine().lower()
-    if machine in ("arm64", "aarch64"):
-        name = "pd.arm64"
-    elif sys.platform == "darwin":
-        name = "pd.arm64" if machine == "arm64" else "pd.x86_64"
-    else:
-        name = "pd.x86_64"
-    path = os.path.join(ROOT, "build", name)
-    if os.path.isfile(path):
-        return path
-    alt = os.path.join(ROOT, "build", "pd.x86_64")
-    if os.path.isfile(alt):
-        return alt
-    return path
 
 
 def _load_json(path: str | None) -> dict[str, Any]:
@@ -122,119 +62,10 @@ def _load_json(path: str | None) -> dict[str, Any]:
         return json.load(fp)
 
 
-def _resolve_seg_script(mod, name: str) -> str | None:
-    if hasattr(mod, "SEG_SCRIPT"):
-        return mod.SEG_SCRIPT
-    if hasattr(mod, "seg_script"):
-        return mod.seg_script()
-    return None
-
-
-def level_is_box_arena(name: str) -> bool:
-    """True when the level module declares BOX_HALF/BOX_HEIGHT (procedural box seg)."""
-    mod = load_level_module(name)
-    return hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
-
-
-def build_level(
-    name: str,
-    *,
-    deploy: bool,
-    seg: bool,
-    mod_key: str,
-    skip_validate: bool,
-    verbose: bool,
-) -> tuple[list[str], list[str]]:
-    """Build pads/tiles/setup/(seg) for ``name``; return (errors, warnings)."""
-    mod_dirs = [_mod_bgdata(mod_key)]
-    seg_mod_dirs = _all_mod_bgdata_dirs()
-
-    mod = load_level_module(name)
-    mapdef = mod.build()
-    seg_script = _resolve_seg_script(mod, name)
-    # Box-arena levels must always regenerate seg before deploy; skipping seg
-    # and copying BUILD_DIR redeployed the pre-fix G_VTX(24) blob (phantom wall).
-    has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
-    want_seg = seg or seg_script or has_box_dims
-    if has_box_dims and not seg and verbose:
-        print(
-            "  NOTE: box arena — seg rebuild forced (ignoring --no-seg; stale G_VTX "
-            "seg causes phantom collision wall)"
-        )
-
-    if want_seg:
-        if seg_script:
-            if verbose:
-                print(f"  Building seg via {seg_script}")
-            build_seg(name, seg_script, seg_mod_dirs)
-        else:
-            half = float(getattr(mod, "BOX_HALF", 5000.0))
-            height = float(getattr(mod, "BOX_HEIGHT", 3000.0))
-            if verbose:
-                print(f"  Building generic box seg (half={half:.0f} height={height:.0f})")
-            # Inside-box test-map cameras clip visible seg faces through the near
-            # plane (dark sheet glued to the viewport). Tiles carry collision; an
-            # empty seg keeps play clean. Override with PDMAP_SEG_MODE=full for
-            # coloured wall previews from the shell when needed.
-            os.environ.setdefault("PDMAP_SEG_MODE", "empty")
-            build_box_seg_asset(name, half=half, height=height, mod_dirs=seg_mod_dirs)
-    elif deploy and verbose:
-        print(
-            "  WARNING: seg build skipped; deploy will copy existing BUILD_DIR seg "
-            "(must pass G_VTX validation)"
-        )
-
-    pads_json_path = write_pads_json(mapdef)
-    if verbose:
-        print(f"  Generated pads JSON: {pads_json_path}")
-    compile_pads(name, pads_json_path)
-    if verbose:
-        print("  Compiled pads binary")
-
-    tiles_json_path = os.path.join(ROOT, "src", "assets", "ntsc-final", "tiles", f"{name}.json")
-    if hasattr(mod, "build_tiles_json"):
-        tiles_data = mod.build_tiles_json()
-        os.makedirs(os.path.dirname(tiles_json_path), exist_ok=True)
-        with open(tiles_json_path, "w", encoding="utf-8") as fp:
-            json.dump(tiles_data, fp, indent=4)
-        if verbose:
-            print("  Generated tiles JSON from build_tiles_json()")
-    elif os.path.exists(tiles_json_path):
-        if verbose:
-            print(f"  Using existing tiles JSON: {tiles_json_path}")
-    else:
-        template = getattr(mapdef, "tiles_template", "mp14")
-        tiles_json_path = copy_tiles_from_template(name, template)
-        if verbose:
-            print(f"  Copied tiles JSON from template ({template})")
-
-    compile_tiles(name, tiles_json_path)
-    if verbose:
-        print("  Compiled tiles binary")
-
-    setup_path = write_setup_binary(mapdef, name)
-    if verbose:
-        print(f"  Wrote setup binary: {setup_path}")
-
-    if deploy:
-        if verbose:
-            print(f"  Deploying to {mod_key}...")
-        deploy_all(name, mod_dirs)
-        if verbose:
-            print("  Deploy complete")
-
-    if skip_validate:
-        return [], []
-
-    return validate_all(name, mapdef)
-
-
-def write_level_module(data: dict[str, Any], name: str, *, backup: bool) -> str:
-    """Write ``src/levels/<name>.py`` from editor JSON; return path."""
-    level_path = os.path.join(ROOT, "src", "levels", f"{name}.py")
-    data = dict(data)
-    data["name"] = name
-    py_src = json_to_level_py(data)
+def write_level_module(spec: EditorMapSpec, *, backup: bool) -> str:
+    """Optionally persist ``src/levels/<name>.py`` for git / hand-editing."""
+    level_path = os.path.join(ROOT, "src", "levels", f"{spec.name}.py")
+    py_src = render_level_module(spec)
 
     if backup and os.path.exists(level_path):
         bak = level_path + ".bak"
@@ -246,35 +77,6 @@ def write_level_module(data: dict[str, Any], name: str, *, backup: bool) -> str:
         fp.write(py_src)
     print(f"  Wrote level module -> {os.path.relpath(level_path, ROOT)}")
     return level_path
-
-
-def play_command(
-    *,
-    mod_key: str,
-    scenario: int,
-    pd_binary: str,
-    use_test_map: bool,
-    num_sims: int = 8,
-    sim_difficulty: int = 2,
-    loadout: list[int] | None = None,
-    mp_options: int = 0,
-) -> list[str]:
-    mod_path = os.path.join(ROOT, MOD_CHOICES[mod_key])
-    cmd = [pd_binary]
-    if use_test_map:
-        cmd.append("--test-map")
-        cmd.append(f"--scenario-{scenario}")
-        cmd.extend(["--num-sims", str(num_sims)])
-        cmd.extend(["--sim-difficulty", str(sim_difficulty)])
-        weapons = loadout if loadout is not None else DEFAULT_LOADOUT
-        cmd.extend(["--loadout", ",".join(str(w) for w in weapons)])
-        if mp_options:
-            cmd.extend(["--mp-options", str(mp_options)])
-    else:
-        cmd.extend(["--boot-stage", str(STAGE_TEST_UFF)])
-        cmd.append("--skip-intro")
-    cmd.extend(["--moddir", mod_path])
-    return cmd
 
 
 def emit_last_artifacts(
@@ -303,12 +105,7 @@ def build_shell_script(args: argparse.Namespace, data: dict[str, Any]) -> str:
         f"--level {args.level}",
         f"--mod {args.mod}",
         f"--scenario {args.scenario}",
-        f"--num-sims {args.num_sims}",
-        f"--sim-difficulty {args.sim_difficulty}",
-        f"--loadout {','.join(str(w) for w in args.loadout)}",
     ]
-    if args.mp_options:
-        flags.append(f"--mp-options {args.mp_options}")
     if args.seg:
         flags.append("--seg")
     if args.deploy:
@@ -321,6 +118,8 @@ def build_shell_script(args: argparse.Namespace, data: dict[str, Any]) -> str:
         flags.append("--play")
     if args.verbose:
         flags.append("--verbose")
+    if args.write_level:
+        flags.append("--write-level")
     if args.backup:
         flags.append("--backup")
     if args.deploy_as and args.deploy_as != args.level:
@@ -344,10 +143,10 @@ def main(argv: list[str] | None = None) -> int:
         description="Build and optionally play a map from uff viewer editor JSON.",
     )
     parser.add_argument("json_file", nargs="?", default="-", help="Editor JSON file (default: stdin)")
-    parser.add_argument("--level", help="Level module / asset name (default: JSON name field)")
+    parser.add_argument("--level", help="Editor map name (default: JSON name field)")
     parser.add_argument(
         "--deploy-as",
-        help="Asset name for pdmap build/deploy (default: --level). Use 'uff' for --test-map.",
+        help="Asset name for build/deploy (default: --level). Use 'uff' for --test-map.",
     )
     parser.add_argument(
         "--mod",
@@ -362,31 +161,6 @@ def main(argv: list[str] | None = None) -> int:
         default=0,
         help="MP scenario for --test-map (default: 0 Combat)",
     )
-    parser.add_argument(
-        "--num-sims",
-        type=int,
-        default=8,
-        help="Simulant count for --test-map quick-team (default: 8, stock cap 4)",
-    )
-    parser.add_argument(
-        "--sim-difficulty",
-        type=int,
-        default=2,
-        choices=range(0, 6),
-        help="Bot difficulty 0=Meat … 5=Dark (default: 2 Normal)",
-    )
-    parser.add_argument(
-        "--loadout",
-        type=parse_loadout,
-        default=parse_loadout(None),
-        help="Six MPWEAPON ids comma-separated for match loadout",
-    )
-    parser.add_argument(
-        "--mp-options",
-        type=lambda x: int(x, 0),
-        default=0,
-        help="MP options bitmask for --test-map (decimal or 0x hex)",
-    )
     parser.add_argument("--seg", action="store_true", default=True, help="Build box seg (default: on)")
     parser.add_argument("--no-seg", dest="seg", action="store_false", help="Skip seg build")
     parser.add_argument("--deploy", action="store_true", default=True, help="Deploy to mod (default: on)")
@@ -397,10 +171,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true", help="Print planned commands only")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose build logging")
     parser.add_argument(
+        "--write-level",
+        action="store_true",
+        help="Also write src/levels/<deploy-as>.py (optional; not required to play)",
+    )
+    parser.add_argument(
         "--backup",
         action="store_true",
         default=True,
-        help="Backup existing src/levels/<name>.py before overwrite (default: on)",
+        help="Backup existing level module when --write-level (default: on)",
     )
     parser.add_argument("--no-backup", dest="backup", action="store_false")
     parser.add_argument("--binary", help="Path to pd binary (default: auto-detect pd.arm64 / pd.x86_64)")
@@ -416,17 +195,13 @@ def main(argv: list[str] | None = None) -> int:
     deploy_name = (args.deploy_as or level_name).strip().lower()
     data["name"] = level_name
 
-    pd_binary = args.binary or _detect_pd_binary()
+    pd_binary = args.binary or detect_pd_binary()
     use_test_map = deploy_name == TEST_MAP_SLOT
 
-    print(f"Level module : {level_name}")
+    print(f"Editor name  : {level_name}")
     print(f"Deploy/build : {deploy_name}")
     print(f"Mod target   : {args.mod} ({MOD_CHOICES[args.mod]})")
     print(f"Scenario     : {args.scenario} ({SCENARIO_CHOICES[args.scenario]})")
-    print(f"Simulants    : {args.num_sims} · difficulty {args.sim_difficulty}")
-    print(f"Loadout      : {','.join(str(w) for w in args.loadout)}")
-    if args.mp_options:
-        print(f"MP options   : {args.mp_options} (0x{args.mp_options:x})")
     if args.play and not use_test_map:
         print(
             f"WARNING: --test-map loads the '{TEST_MAP_SLOT}' asset slot (STAGE_TEST_UFF). "
@@ -446,11 +221,7 @@ def main(argv: list[str] | None = None) -> int:
             mod_key=args.mod,
             scenario=args.scenario,
             pd_binary=pd_binary,
-            use_test_map=use_test_map and args.play,
-            num_sims=args.num_sims,
-            sim_difficulty=args.sim_difficulty,
-            loadout=args.loadout,
-            mp_options=args.mp_options,
+            deploy_name=deploy_name if args.play else TEST_MAP_SLOT,
         )
         print("\n# play command:")
         print(" ".join(play))
@@ -459,22 +230,33 @@ def main(argv: list[str] | None = None) -> int:
     if args.write_artifacts:
         emit_last_artifacts(data, shell_script)
 
-    # Write level module (editor name) but build/deploy under deploy_name when different.
     build_data = dict(data)
     build_data["name"] = deploy_name
-    write_level_module(build_data, deploy_name, backup=args.backup)
-    if level_name != deploy_name:
-        write_level_module(data, level_name, backup=args.backup)
 
-    print(f"\nBuilding {deploy_name}...")
-    errors, warnings = build_level(
-        deploy_name,
-        deploy=args.deploy,
-        seg=args.seg,
-        mod_key=args.mod,
-        skip_validate=args.skip_validate,
-        verbose=True,
-    )
+    try:
+        spec = EditorMapSpec.from_json(build_data, deploy_name=deploy_name)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+    if args.write_level:
+        write_level_module(spec, backup=args.backup)
+
+    print(f"\nBuilding {deploy_name} (direct from JSON)...")
+    try:
+        errors, warnings = build_from_spec(
+            spec,
+            deploy=args.deploy,
+            want_seg=args.seg,
+            seg_mode="empty" if args.seg else None,
+            mod_dirs=[_mod_bgdata(args.mod)] if args.deploy else None,
+            skip_validate=args.skip_validate,
+            verbose=args.verbose or True,
+        )
+    except Exception as exc:
+        print(f"ERROR: build failed: {exc}", file=sys.stderr)
+        return 1
+
     for w in warnings:
         print(f"  [WARN] {w}")
     for e in errors:
@@ -500,11 +282,7 @@ def main(argv: list[str] | None = None) -> int:
             mod_key=args.mod,
             scenario=args.scenario,
             pd_binary=pd_binary,
-            use_test_map=use_test_map,
-            num_sims=args.num_sims,
-            sim_difficulty=args.sim_difficulty,
-            loadout=args.loadout,
-            mp_options=args.mp_options,
+            deploy_name=deploy_name,
         )
         print("\nLaunching:", " ".join(cmd))
         subprocess.run(cmd, cwd=ROOT, check=False)

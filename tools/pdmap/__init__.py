@@ -1,135 +1,73 @@
 import argparse
 import sys
 import os
-import json
 import subprocess
 
 from .core import (
-    MapDef, load_level_module, compile_tiles, compile_pads,
-    BUILD_DIR, ROOT, ROMID
+    load_level_module, ROOT, MOD_DIRS
 )
-from .pads_builder import write_pads_json
-from .setup_packer import write_setup_binary
-from .tiles import copy_tiles_from_template
-from .deploy import deploy_all, build_seg, build_box_seg_asset
 from .validate import validate_all
 from .info import info
+from .from_json import EditorMapSpec, load_editor_json
+from .pipeline import build_from_module, build_from_spec
+from .level_codegen import render_level_module
+from .play import MOD_CHOICES, play_command, detect_pd_binary, TEST_MAP_SLOT
 
 
-def _resolve_seg_script(mod, name: str) -> str | None:
-    if hasattr(mod, "SEG_SCRIPT"):
-        return mod.SEG_SCRIPT
-    if hasattr(mod, "seg_script"):
-        return mod.seg_script()
-    return None
+def _mod_bgdata(mod_key: str) -> str:
+    if mod_key not in MOD_CHOICES:
+        raise ValueError(f"Unknown mod {mod_key!r}; choose from {', '.join(MOD_CHOICES)}")
+    return os.path.join(ROOT, MOD_CHOICES[mod_key], "files", "bgdata")
 
 
 def cmd_build(args):
     name = args.name
-    deploy_name = (getattr(args, "deploy_as", None) or name).strip().lower()
-    print(f"Building level: {name}" + (f" (deploy as {deploy_name})" if deploy_name != name else ""))
+    print(f"Building level: {name}")
 
+    mod_dirs = None
+    if args.deploy:
+        mod_dirs = MOD_DIRS
+
+    seg_script = None
     try:
         mod = load_level_module(name)
-        mapdef = mod.build()
-        if deploy_name != name:
-            mapdef.name = deploy_name
-    except Exception as exc:
-        print(f"ERROR: failed to load level module: {exc}", file=sys.stderr)
-        sys.exit(1)
+        seg_script = getattr(mod, "SEG_SCRIPT", None) or (
+            mod.seg_script() if hasattr(mod, "seg_script") else None
+        )
+    except Exception:
+        mod = None
 
-    seg_script = _resolve_seg_script(mod, name)
-    # --seg is present whenever args.seg is not None (it defaults to None and is
-    # set to "" by a bare flag or to a path when one is given). A level may also
-    # opt into seg generation via SEG_SCRIPT without the flag (e.g. uff).
-    # Levels with BOX_HALF/BOX_HEIGHT always rebuild the procedural box seg so
-    # `pdmap build uff --deploy` cannot redeploy a stale G_VTX(24) seg from
-    # BUILD_DIR (phantom collision wall regression).
-    has_box_dims = hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
-    if hasattr(mod, "SEG_MODE"):
-        os.environ["PDMAP_SEG_MODE"] = str(mod.SEG_MODE)
-    elif has_box_dims:
-        os.environ.setdefault("PDMAP_SEG_MODE", "empty")
-    if hasattr(mod, "MASONIC_CELL"):
-        os.environ["PDMAP_MASONIC_CELL"] = str(int(mod.MASONIC_CELL))
+    has_box_dims = mod is not None and hasattr(mod, "BOX_HALF") and hasattr(mod, "BOX_HEIGHT")
     want_seg = args.seg is not None or bool(seg_script) or has_box_dims
-    if want_seg:
-        try:
-            if seg_script:
-                # Bespoke generator script declared by the level module.
-                print(f"  Building seg via {seg_script}")
-                build_seg(deploy_name, seg_script)
-            elif args.seg:
-                # Explicit script path passed on the command line.
-                print(f"  Building seg via {args.seg}")
-                build_seg(deploy_name, args.seg)
-            else:
-                # Bare --seg with no SEG_SCRIPT: generate a generic box arena seg
-                # directly. Box dimensions come from the level module (BOX_HALF /
-                # BOX_HEIGHT) so they match the floor tiles; defaults otherwise.
-                half = float(getattr(mod, "BOX_HALF", 5000.0))
-                height = float(getattr(mod, "BOX_HEIGHT", 3000.0))
-                seg_mode = os.environ.get("PDMAP_SEG_MODE", "empty")
-                print(f"  Building generic box seg (no SEG_SCRIPT; mode={seg_mode})")
-                build_box_seg_asset(deploy_name, half=half, height=height)
-        except Exception as exc:
-            print(f"ERROR: seg build failed: {exc}", file=sys.stderr)
-            sys.exit(1)
+    seg_script_path = None
+    if args.seg and args.seg != "":
+        seg_script_path = args.seg
+    elif seg_script:
+        seg_script_path = seg_script
 
     try:
-        pads_json_path = write_pads_json(mapdef)
-        print(f"  Generated pads JSON: {pads_json_path}")
-        compile_pads(deploy_name, pads_json_path)
-        print("  Compiled pads binary")
-
-        tiles_json_path = os.path.join(ROOT, "src", "assets", ROMID, "tiles", f"{deploy_name}.json")
-        if hasattr(mod, "build_tiles_json"):
-            tiles_data = mod.build_tiles_json()
-            # Room keys must match deploy asset name (bg_<deploy_name>_tilesZ).
-            if deploy_name != name:
-                rooms = {}
-                for key, val in tiles_data.get("rooms", {}).items():
-                    rooms[key.replace(name.upper(), deploy_name.upper())] = val
-                tiles_data = {"rooms": rooms}
-            os.makedirs(os.path.dirname(tiles_json_path), exist_ok=True)
-            with open(tiles_json_path, "w") as f:
-                json.dump(tiles_data, f, indent=4)
-            print("  Generated tiles JSON from build_tiles_json()")
-        elif os.path.exists(tiles_json_path):
-            print(f"  Using existing tiles JSON: {tiles_json_path}")
-        else:
-            template = getattr(mapdef, "tiles_template", "mp14")
-            tiles_json_path = copy_tiles_from_template(deploy_name, template)
-            print(f"  Copied tiles JSON from template ({template}): {tiles_json_path}")
-
-        compile_tiles(deploy_name, tiles_json_path)
-        print("  Compiled tiles binary")
-
-        setup_path = write_setup_binary(mapdef, deploy_name)
-        print(f"  Wrote setup binary: {setup_path}")
-    except subprocess.CalledProcessError as exc:
-        print(f"ERROR: asset compiler failed (exit {exc.returncode})", file=sys.stderr)
-        sys.exit(exc.returncode)
+        errors, warnings = build_from_module(
+            name,
+            deploy=args.deploy,
+            want_seg=want_seg,
+            seg_script_path=seg_script_path,
+            mod_dirs=mod_dirs,
+            skip_validate=args.no_validate,
+            verbose=True,
+        )
     except Exception as exc:
         print(f"ERROR: build failed: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    if args.deploy:
-        print("  Deploying...")
-        deploy_all(deploy_name)
-        print("  Deploy complete")
+    for w in warnings:
+        print(f"  [WARN] {w}")
+    for e in errors:
+        print(f"  [ERROR] {e}")
+    if errors:
+        print(f"Build finished with {len(errors)} validation error(s)", file=sys.stderr)
+        sys.exit(1)
 
-    if not args.no_validate:
-        errors, warnings = validate_all(deploy_name, mapdef, level_module=name)
-        for w in warnings:
-            print(f"  [WARN] {w}")
-        for e in errors:
-            print(f"  [ERROR] {e}")
-        if errors:
-            print(f"Build finished with {len(errors)} validation error(s)", file=sys.stderr)
-            sys.exit(1)
-
-    print(f"Build complete for {deploy_name}")
+    print(f"Build complete for {name}")
 
 
 def cmd_info(args):
@@ -264,6 +202,160 @@ def build_tiles_json():
     print("  3. Wire stage registration if this is a new stage (files.h, list.c, stagetable.c, setup.c)")
 
 
+def cmd_from_json(args):
+    """Build (and optionally play) directly from Map Editor JSON — no level module required."""
+    try:
+        data = load_editor_json(args.json_file if args.json_file != "-" else None)
+    except Exception as exc:
+        print(f"ERROR: failed to load JSON: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    deploy_name = (args.deploy_as or args.name or data.get("name") or "map").strip().lower()
+    try:
+        spec = EditorMapSpec.from_json(data, deploy_name=deploy_name)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Building from JSON → {deploy_name}")
+    print(f"  Pads: {len(spec.mapdef.pads)}  Props: {len(spec.mapdef.props)}  "
+          f"Box: {spec.box_half:.0f} × {spec.box_height:.0f}")
+
+    if args.write_level:
+        level_path = os.path.join(ROOT, "src", "levels", f"{deploy_name}.py")
+        if args.backup and os.path.exists(level_path):
+            bak = level_path + ".bak"
+            import shutil
+            shutil.copy2(level_path, bak)
+            print(f"  Backed up existing level -> {os.path.relpath(bak, ROOT)}")
+        os.makedirs(os.path.dirname(level_path), exist_ok=True)
+        with open(level_path, "w", encoding="utf-8") as fp:
+            fp.write(render_level_module(spec))
+        print(f"  Wrote level module -> {os.path.relpath(level_path, ROOT)}")
+
+    mod_dirs = [_mod_bgdata(args.mod)] if args.deploy else None
+    seg_mode = args.seg_mode or "empty"
+
+    try:
+        errors, warnings = build_from_spec(
+            spec,
+            deploy=args.deploy,
+            want_seg=not args.no_seg,
+            seg_mode=seg_mode if not args.no_seg else None,
+            mod_dirs=mod_dirs,
+            skip_validate=args.no_validate,
+            verbose=True,
+        )
+    except Exception as exc:
+        print(f"ERROR: build failed: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    for w in warnings:
+        print(f"  [WARN] {w}")
+    for e in errors:
+        print(f"  [ERROR] {e}", file=sys.stderr)
+    if errors:
+        print(f"Build finished with {len(errors)} validation error(s)", file=sys.stderr)
+        sys.exit(1)
+
+    if args.play:
+        pd_binary = args.binary or detect_pd_binary()
+        if not os.path.isfile(pd_binary):
+            print(f"ERROR: pd binary not found at {pd_binary}", file=sys.stderr)
+            print("Build the game first: cmake --build build --target pd", file=sys.stderr)
+            sys.exit(1)
+        cmd = play_command(
+            mod_key=args.mod,
+            scenario=args.scenario,
+            pd_binary=pd_binary,
+            deploy_name=deploy_name,
+        )
+        print("\nLaunching:", " ".join(cmd))
+        subprocess.run(cmd, cwd=ROOT, check=False)
+
+    print("Done.")
+
+
+def cmd_register(args):
+    from .register import plan_registration, write_plan
+
+    name = args.name.strip().lower()
+    try:
+        plan = plan_registration(name)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+    if plan.already_registered:
+        print(f"WARNING: {name} appears already registered in files.h", file=sys.stderr)
+
+    path = write_plan(name)
+    print(plan.render_markdown() if args.print else f"Wrote registration plan -> {os.path.relpath(path, ROOT)}")
+
+    if args.apply:
+        from .register import apply_registration
+
+        try:
+            changed = apply_registration(name)
+        except ValueError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            sys.exit(1)
+        if changed:
+            print(f"\nApplied registration patches ({len(changed)} files):")
+            for p in changed:
+                print(f"  - {os.path.relpath(p, ROOT)}")
+            print(f"\nNext: make -j8 && python3 tools/pdmap.py build {name} --deploy")
+        else:
+            print(f"\n{name}: registration snippets already present (no file changes)")
+    elif not args.print:
+        print(f"\nOpen {path} and apply the four snippets, or run: pdmap register {name} --apply")
+
+
+def cmd_learn(args):
+    from .learn.engine import LearnEngine, LEARN_DIR
+    import json
+
+    engine = LearnEngine()
+    state_path = os.path.join(LEARN_DIR, "state.json")
+    iteration = 1
+    if os.path.exists(state_path):
+        with open(state_path, encoding="utf-8") as fp:
+            iteration = int(json.load(fp).get("iteration", 0)) + 1
+
+    if args.learn_cmd == "run":
+        report = engine.run(iteration=iteration)
+        os.makedirs(LEARN_DIR, exist_ok=True)
+        with open(state_path, "w", encoding="utf-8") as fp:
+            json.dump({"iteration": iteration, "last_run": report.run_id}, fp, indent=2)
+        print(report.summary())
+        if report.gaps:
+            print(f"\nTop gaps written to journal/map_learn/gaps.md")
+        if report.probe_errors:
+            print("\nProbe errors:", file=sys.stderr)
+            for e in report.probe_errors:
+                print(f"  {e}", file=sys.stderr)
+            sys.exit(1)
+        print(f"\nSpec: docs/MAP_DETERMINISTIC_SPEC.md")
+        return
+
+    if args.learn_cmd == "report":
+        print(engine.report_text())
+        return
+
+    if args.learn_cmd == "emit-spec":
+        path = engine.emit_spec()
+        print(f"Wrote {path}")
+        return
+
+    if args.learn_cmd == "gaps":
+        gaps_path = os.path.join(LEARN_DIR, "gaps.md")
+        if os.path.exists(gaps_path):
+            print(open(gaps_path, encoding="utf-8").read())
+        else:
+            print("No gaps file yet — run: pdmap learn run")
+        return
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="pdmap",
@@ -275,11 +367,6 @@ def main():
     p_build = sub.add_parser("build", help="Build a level end-to-end")
     p_build.add_argument("name", help="Level name (e.g. uff)")
     p_build.add_argument("--deploy", "-d", action="store_true", help="Deploy to mod directories after build")
-    p_build.add_argument(
-        "--deploy-as",
-        metavar="SLOT",
-        help="Asset/mod filename slot (default: level name). Use 'uff' for --test-map.",
-    )
     p_build.add_argument("--seg", nargs="?", const="", default=None,
                          help="Build seg file (uses level SEG_SCRIPT when flag given without path)")
     p_build.add_argument("--no-validate", action="store_true",
@@ -304,6 +391,92 @@ def main():
     p_init = sub.add_parser("init", help="Scaffold a new level")
     p_init.add_argument("name", help="New level name")
     p_init.set_defaults(func=cmd_init)
+
+    p_json = sub.add_parser(
+        "from-json",
+        help="Build directly from Map Editor JSON (deterministic, no level module required)",
+    )
+    p_json.add_argument(
+        "json_file",
+        nargs="?",
+        default="-",
+        help="Editor JSON file (default: stdin)",
+    )
+    p_json.add_argument(
+        "--name",
+        help="Level name in JSON (default: JSON name field)",
+    )
+    p_json.add_argument(
+        "--deploy-as",
+        help=f"Asset name for build/deploy (default: name). Use '{TEST_MAP_SLOT}' for --test-map.",
+    )
+    p_json.add_argument(
+        "--mod",
+        choices=sorted(MOD_CHOICES),
+        default="mod_allinone",
+        help="Mod directory to deploy into (default: mod_allinone)",
+    )
+    p_json.add_argument(
+        "--scenario",
+        type=int,
+        choices=sorted({0, 1, 2, 3, 4, 5}),
+        default=0,
+        help="MP scenario for --test-map (default: 0 Combat)",
+    )
+    p_json.add_argument(
+        "--seg-mode",
+        default="empty",
+        help="PDMAP_SEG_MODE for box seg (default: empty — collision from tiles only)",
+    )
+    p_json.add_argument("--no-seg", action="store_true", help="Skip box seg build")
+    p_json.add_argument(
+        "--deploy", "-d",
+        action="store_true",
+        default=True,
+        help="Deploy to mod after successful validation (default: on)",
+    )
+    p_json.add_argument("--no-deploy", dest="deploy", action="store_false")
+    p_json.add_argument("--no-validate", action="store_true", help="Skip post-build validation")
+    p_json.add_argument(
+        "--write-level",
+        action="store_true",
+        help="Also write src/levels/<name>.py (optional; not required to play)",
+    )
+    p_json.add_argument(
+        "--backup",
+        action="store_true",
+        default=True,
+        help="Backup existing level module when --write-level (default: on)",
+    )
+    p_json.add_argument("--no-backup", dest="backup", action="store_false")
+    p_json.add_argument("--play", action="store_true", help="Launch pd after build")
+    p_json.add_argument("--binary", help="Path to pd binary (default: auto-detect)")
+    p_json.add_argument("-v", "--verbose", action="store_true", help="Verbose build logging")
+    p_json.set_defaults(func=cmd_from_json)
+
+    p_learn = sub.add_parser(
+        "learn",
+        help="Deterministic learning engine — probe, verify, document map creation",
+    )
+    learn_sub = p_learn.add_subparsers(dest="learn_cmd")
+    p_learn_run = learn_sub.add_parser("run", help="Run all probes and update knowledge")
+    p_learn_run.set_defaults(func=cmd_learn, learn_cmd="run")
+    p_learn_report = learn_sub.add_parser("report", help="Show knowledge status")
+    p_learn_report.set_defaults(func=cmd_learn, learn_cmd="report")
+    p_learn_emit = learn_sub.add_parser("emit-spec", help="Regenerate MAP_DETERMINISTIC_SPEC.md")
+    p_learn_emit.set_defaults(func=cmd_learn, learn_cmd="emit-spec")
+    p_learn_gaps = learn_sub.add_parser("gaps", help="Print open documentation gaps")
+    p_learn_gaps.set_defaults(func=cmd_learn, learn_cmd="gaps")
+
+    p_reg = sub.add_parser("register", help="Generate stage registration plan (four C wiring points)")
+    p_reg.add_argument("name", help="Level / asset name")
+    p_reg.add_argument("--print", action="store_true", help="Print plan to stdout instead of writing file")
+    p_reg.add_argument(
+        "--apply",
+        action="store_true",
+        help="Patch files.h, list.c, stagetable.c, setup.c, and constants.h (idempotent)",
+    )
+    p_reg.set_defaults(func=cmd_register)
 
     args = parser.parse_args()
     if args.command is None:
