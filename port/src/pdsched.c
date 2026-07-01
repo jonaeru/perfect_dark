@@ -25,6 +25,7 @@
 #include "audio.h"
 #include "input.h"
 #include "mixer.h"
+#include "llm_bridge.h"
 
 /*
  * private typedefs and defines
@@ -289,6 +290,7 @@ void schedEndFrame(OSSched *sc)
 	}
 
 	inputUpdate();
+	llmBridgeTick();
 
 	joyStartReadData(&g_PiMesgQueue);
 	joyReadData();
