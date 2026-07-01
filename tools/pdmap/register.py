@@ -180,7 +180,52 @@ def _patch_insert_before(text: str, anchor: str, insertion: str, *, marker: str)
     if pos < 0:
         raise ValueError(f"Registration patch anchor not found: {anchor!r}")
     block = insertion if insertion.endswith("\n") else insertion + "\n"
-    return text[:pos] + block + text[pos:]
+    result = text[:pos] + block + text[pos:]
+    # Guard against glued `#endif` + `#define` when anchors abut preprocessor lines.
+    return re.sub(r"#endif(#define)", r"#endif\n\1", result)
+
+
+def _patch_insert_after(text: str, anchor: str, insertion: str, *, marker: str) -> str:
+    """Insert block immediately after anchor (idempotent)."""
+    if marker in text:
+        return text
+    pos = text.find(anchor)
+    if pos < 0:
+        raise ValueError(f"Registration patch anchor not found: {anchor!r}")
+    insert_at = pos + len(anchor)
+    block = insertion if insertion.startswith("\n") else "\n" + insertion
+    if not block.endswith("\n"):
+        block += "\n"
+    result = text[:insert_at] + block + text[insert_at:]
+    return re.sub(r"#endif(#define)", r"#endif\n\1", result)
+
+
+def _files_h_anchor(text: str) -> tuple[str, bool]:
+    """Return (anchor, insert_after) for the next FILE_* block in files.h."""
+    ump = list(re.finditer(r"^#define FILE_UMP_SETUP\w+\s+0x[0-9A-Fa-f]+", text, re.M))
+    if ump:
+        line = ump[-1].group(0)
+        return line + "\n", True
+    if "\n\n// PD Plus Mod" in text:
+        return "\n\n// PD Plus Mod", False
+    if "// Custom pdmap arenas" in text:
+        return "// Custom pdmap arenas", False
+    raise ValueError("files.h: no anchor for FILE_* insertion")
+
+
+def _bump_num_files(text: str, *, delta: int = 5) -> str:
+    """Increment NUM_FILES PC-port counts when adding a five-file stage."""
+
+    def _repl(match: re.Match[str]) -> str:
+        old = int(match.group(2))
+        suffix = match.group(3) or ""
+        return f"{match.group(1)}{old + delta}{suffix}"
+
+    return re.sub(
+        r"(#define\s+NUM_FILES\s+)(\d+)(\s+//[^\n]*)?",
+        _repl,
+        text,
+    )
 
 
 def apply_registration(name: str) -> list[str]:
@@ -202,11 +247,15 @@ def apply_registration(name: str) -> list[str]:
             fp.write(new_const)
         changed.append(CONSTANTS_H)
 
-    files_block = plan.snippets["files_h"] + "\n\n"
+    files_block = plan.snippets["files_h"] + "\n"
     files_text = _read(FILES_H)
-    new_files = _patch_insert_before(
-        files_text, "\n\n// PD Plus Mod", files_block, marker=f"FILE_BG_{plan.upper}_SEG",
-    )
+    anchor, after = _files_h_anchor(files_text)
+    marker = f"FILE_BG_{plan.upper}_SEG"
+    if after:
+        new_files = _patch_insert_after(files_text, anchor, files_block, marker=marker)
+    else:
+        new_files = _patch_insert_before(files_text, anchor, files_block + "\n", marker=marker)
+    new_files = _bump_num_files(new_files)
     if new_files != files_text:
         with open(FILES_H, "w", encoding="utf-8") as fp:
             fp.write(new_files)
@@ -221,10 +270,10 @@ def apply_registration(name: str) -> list[str]:
             fp.write(new_list)
         changed.append(LIST_C)
 
-    stage_row = "\t" + plan.snippets["stagetable"] + ",\n"
+    stage_row = "\t" + plan.snippets["stagetable"].rstrip().rstrip(",") + ",\n"
     stage_text = _read(STAGETABLE)
     new_stage = _patch_insert_before(
-        stage_text, "\t#endif\n};", stage_row, marker=f"FILE_BG_{plan.upper}_SEG",
+        stage_text, "#endif\n};", stage_row, marker=f"FILE_BG_{plan.upper}_SEG",
     )
     if new_stage != stage_text:
         with open(STAGETABLE, "w", encoding="utf-8") as fp:
