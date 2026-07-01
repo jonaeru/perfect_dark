@@ -8,6 +8,7 @@
 #include "input.h"
 #include "video.h"
 #include "config.h"
+#include "llm_bridge.h"
 #include "utils.h"
 #include "system.h"
 #include "fs.h"
@@ -859,6 +860,7 @@ s32 inputReadController(s32 idx, OSContPad *npad)
 		}
 	}
 
+	llmPlayerMergePad(idx, npad);
 	return 0;
 }
 

@@ -272,6 +272,8 @@ Gfx *skyRender(Gfx *gdl)
 
 			if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 				gdl = viSetFillColour(gdl, 0, 0, 0);
+			} else if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
+				gdl = viSetFillColour(gdl, 255, 255, 255);
 			} else {
 				gdl = viSetFillColour(gdl, env->sky_r, env->sky_g, env->sky_b);
 			}
@@ -289,6 +291,8 @@ Gfx *skyRender(Gfx *gdl)
 
 		if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 			gdl = viSetFillColour(gdl, 0, 0, 0);
+		} else if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
+			gdl = viSetFillColour(gdl, 255, 255, 255);
 		} else {
 			gdl = viSetFillColour(gdl, env->sky_r, env->sky_g, env->sky_b);
 		}
@@ -304,7 +308,11 @@ Gfx *skyRender(Gfx *gdl)
 		return gdl;
 	}
 
-	gdl = viSetFillColour(gdl, env->sky_r, env->sky_g, env->sky_b);
+	if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
+		gdl = viSetFillColour(gdl, 255, 255, 255);
+	} else {
+		gdl = viSetFillColour(gdl, env->sky_r, env->sky_g, env->sky_b);
+	}
 
 	if (&tl3dpos);
 

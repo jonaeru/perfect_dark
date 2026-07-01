@@ -431,6 +431,10 @@ void wallhitsTick(void)
 
 	static s32 var8007f834 = 0;
 
+	if (g_WallhitsMax == 0 || g_WallhitCountsPerRoom == NULL) {
+		return;
+	}
+
 	sp12c = (g_Vars.lvupdate240 + 2.0f) * 0.25f;
 	fov = currentPlayerGetGunZoomFov();
 

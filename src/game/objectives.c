@@ -5,6 +5,7 @@
 #include "game/prop.h"
 #include "game/setuputils.h"
 #include "game/objectives.h"
+#include "game/pad.h"
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/hudmsg.h"
@@ -37,6 +38,36 @@ u32 var8009d0cc;
 
 s32 g_ObjectiveLastIndex = -1;
 bool g_ObjectiveChecksDisabled = false;
+
+bool g_CustomHackComplete = false;
+s32 g_CustomHackProgress = 0;
+
+void check_custom_map_logic(void) {
+    if (g_Vars.stagenum == 0x35 && !g_CustomHackComplete && g_Vars.currentplayer && g_Vars.currentplayer->prop) {
+        struct coord padpos;
+        
+        padGetCentre(0x31, &padpos);
+        
+        f32 dx = g_Vars.currentplayer->prop->pos.x - padpos.x;
+        f32 dy = g_Vars.currentplayer->prop->pos.y - padpos.y;
+        f32 dz = g_Vars.currentplayer->prop->pos.z - padpos.z;
+        f32 dist_sq = dx*dx + dy*dy + dz*dz;
+        
+        if (dist_sq < 10000.0f) {
+            g_CustomHackProgress += 1;
+            
+            if (g_CustomHackProgress >= 500) {
+                struct coord destpos;
+                padGetCentre(0x36, &destpos);
+                g_Vars.currentplayer->prop->pos = destpos;
+                
+                g_CustomHackComplete = true;
+            }
+        } else {
+            g_CustomHackProgress = 0;
+        }
+    }
+}
 
 #if PIRACYCHECKS
 u32 xorBaffbeff(u32 value)
@@ -383,6 +414,8 @@ void objectivesShowHudmsg(char *buffer, s32 hudmsgtype)
 
 void objectivesCheckAll(void)
 {
+	check_custom_map_logic();
+
 	s32 availableindex = 0;
 	s32 i;
 	char buffer[50] = "";

@@ -1,0 +1,968 @@
+{
+  "facts": {
+    "doc_0e1802809acadd2d": {
+      "category": "doc",
+      "claim": "Required-topic doc coverage: 100.0% (12/12)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 12,
+        "ratio": 1.0,
+        "total": 12
+      },
+      "id": "doc_0e1802809acadd2d",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_1635ffdcdb68b210": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'pads' (spawn Y above floor)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_1635ffdcdb68b210",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "pads"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_263dfead6abdab69": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'five files' (tilesZ)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_263dfead6abdab69",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "five files"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_51d52563cecd2be1": {
+      "category": "doc",
+      "claim": "Documentation covers topic '--test-map' (STAGE_TEST_UFF)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_51d52563cecd2be1",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "--test-map"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_531a30e6758a0d72": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'register' (pdmap register)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_531a30e6758a0d72",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "register"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_5f8597faa879f780": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'PDMAP_SEG_MODE' (empty)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_5f8597faa879f780",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "PDMAP_SEG_MODE"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_63a277fb6c5ca078": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/45)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 45
+      },
+      "id": "doc_63a277fb6c5ca078",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_7b9dbc3bc07bf629": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'ailist' (0x1000)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_7b9dbc3bc07bf629",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "ailist"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_7c67009ce2ce29a9": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'intro' (dualweapon)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_7c67009ce2ce29a9",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "intro"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_892d8141b87d2fab": {
+      "category": "doc",
+      "claim": "Documentation covers topic '--moddir' (mod_allinone)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_892d8141b87d2fab",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "--moddir"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_92e824788c1eca0b": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/44)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 44
+      },
+      "id": "doc_92e824788c1eca0b",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_97c0349d1dd2b9ae": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'chrslots' (0x01)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_97c0349d1dd2b9ae",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "chrslots"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_98a20685f7bfbf41": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/59)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 59
+      },
+      "id": "doc_98a20685f7bfbf41",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_9a1d0496f1a96408": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/58)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 58
+      },
+      "id": "doc_9a1d0496f1a96408",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_9cc08ad53cddd63a": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/51)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 51
+      },
+      "id": "doc_9cc08ad53cddd63a",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_a942e7ed3946fd71": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'from-json' (from-json)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": false,
+        "in_wiki": true
+      },
+      "id": "doc_a942e7ed3946fd71",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "from-json"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_bc2dd973fe225e5d": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/47)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 47
+      },
+      "id": "doc_bc2dd973fe225e5d",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_bd73c2a9a15aaf0c": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'learn' (pdmap learn)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": false,
+        "in_wiki": true
+      },
+      "id": "doc_bd73c2a9a15aaf0c",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "learn"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_d3b57b704b1b855c": {
+      "category": "doc",
+      "claim": "Learned-claim doc coverage ratio: 0.0% (0/41)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 41
+      },
+      "id": "doc_d3b57b704b1b855c",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_db07878b0600c405": {
+      "category": "doc",
+      "claim": "Required-topic doc coverage: 100.0% (10/10)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 10,
+        "ratio": 1.0,
+        "total": 10
+      },
+      "id": "doc_db07878b0600c405",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_e2c9bc6227d5bae6": {
+      "category": "doc",
+      "claim": "Documentation covers topic 'symmetric' (waypoint)",
+      "confidence": 1.0,
+      "evidence": {
+        "in_creation": true,
+        "in_wiki": true
+      },
+      "id": "doc_e2c9bc6227d5bae6",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/docs/MAP_MAKING_WIKI.md",
+      "tags": [
+        "doc-coverage",
+        "symmetric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_f71c35c317e2b52a": {
+      "category": "doc",
+      "claim": "Learned-claim substring coverage: 0.0% (0/42)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 42
+      },
+      "id": "doc_f71c35c317e2b52a",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "claim-metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "doc_fa6476c737578e74": {
+      "category": "doc",
+      "claim": "Learned-claim doc coverage ratio: 0.0% (0/26)",
+      "confidence": 1.0,
+      "evidence": {
+        "documented": 0,
+        "ratio": 0.0,
+        "total": 26
+      },
+      "id": "doc_fa6476c737578e74",
+      "source": "docs/MAP_MAKING_WIKI.md + docs/MAP_CREATION.md",
+      "tags": [
+        "doc-coverage",
+        "metric"
+      ],
+      "verified_by": "probe_doc_coverage"
+    },
+    "engine_05d7a07b18aa300a": {
+      "category": "engine",
+      "claim": "pdmap register emits four C wiring snippets to journal/map_learn/register_<name>.md",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "engine_05d7a07b18aa300a",
+      "source": "tools/pdmap/register.py",
+      "tags": [
+        "registration",
+        "codegen"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "engine_1ee06256070d60c6": {
+      "category": "engine",
+      "claim": "pdmap register --apply patches files.h, list.c, stagetable.c, setup.c, and constants.h",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "engine_1ee06256070d60c6",
+      "source": "tools/pdmap/register.py:apply_registration",
+      "tags": [
+        "registration",
+        "codegen"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "engine_4055615318c0e963": {
+      "category": "engine",
+      "claim": "Quick-team --test-map sets g_MpSetup.chrslots=0x01 (player only) before bot allocation",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "engine_4055615318c0e963",
+      "source": "src/game/title.c",
+      "tags": [
+        "bots",
+        "test-map"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "engine_4dc2432d735ec0d5": {
+      "category": "engine",
+      "claim": "stagetable.c maps STAGE_* ids to five bgdata file ids per stage",
+      "confidence": 1.0,
+      "evidence": {
+        "stage_symbol_refs": 87
+      },
+      "id": "engine_4dc2432d735ec0d5",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/game/stagetable.c",
+      "tags": [
+        "registration",
+        "stagetable"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "engine_ad44bd3dd331cd8c": {
+      "category": "engine",
+      "claim": "Reference map uff pairs case/case_respawn for teams ['0', '1', '2', '3']",
+      "confidence": 1.0,
+      "evidence": {
+        "case_teams": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "paired": true,
+        "respawn_teams": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      "id": "engine_ad44bd3dd331cd8c",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/setups/mp_setupuff.c",
+      "tags": [
+        "scenario",
+        "uff",
+        "reference"
+      ],
+      "verified_by": "probe_scenario_pairing"
+    },
+    "engine_d99e30a8eea4f457": {
+      "category": "engine",
+      "claim": "files.h defines 180 FILE_BG_* asset constants",
+      "confidence": 1.0,
+      "evidence": {
+        "count": 180
+      },
+      "id": "engine_d99e30a8eea4f457",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/include/files.h",
+      "tags": [
+        "registration",
+        "files.h"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "engine_eff2779b53fc5d95": {
+      "category": "engine",
+      "claim": "--test-map loads STAGE_TEST_UFF via bg_uff.* (FILE_BG_UFF_SEG=0x0025)",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "engine_eff2779b53fc5d95",
+      "source": "src/game/title.c + files.h",
+      "tags": [
+        "test-map",
+        "uff"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "engine_f471ce6be58e5c40": {
+      "category": "engine",
+      "claim": "g_MpArenas[] in setup.c lists Combat Simulator menu entries",
+      "confidence": 1.0,
+      "evidence": {
+        "arena_row_refs": 89
+      },
+      "id": "engine_f471ce6be58e5c40",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/game/mplayer/setup.c",
+      "tags": [
+        "registration",
+        "menu"
+      ],
+      "verified_by": "probe_engine_wiring"
+    },
+    "invariant_01369ca6033a990f": {
+      "category": "invariant",
+      "claim": "Waypoint graph must be symmetric (bidirectional edges)",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_01369ca6033a990f",
+      "source": "tools/pdmap/core.py:MapDef.pack_pads_json",
+      "tags": [
+        "bots",
+        "waypoints"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_4ed42277061e19a0": {
+      "category": "invariant",
+      "claim": "BOX_HALF+BOX_HEIGHT levels get procedural box seg; SEG_SCRIPT overrides with custom generator",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_4ed42277061e19a0",
+      "source": "tools/pdmap/pipeline.py",
+      "tags": [
+        "seg",
+        "pipeline"
+      ],
+      "verified_by": "probe_seg_script_inventory"
+    },
+    "invariant_62c56963067a87eb": {
+      "category": "invariant",
+      "claim": "G_VTX vertex count nibble max 16; box seg uses G_VTX(4) per face",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_62c56963067a87eb",
+      "source": "tools/pdmap/seg.py",
+      "tags": [
+        "seg",
+        "collision"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_64d2b8ad4ae3995c": {
+      "category": "invariant",
+      "claim": "Room 0 in tiles JSON must be empty (engine void room)",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_64d2b8ad4ae3995c",
+      "source": "docs/MAP_CREATION.md + tools/pdmap/builders.py:floor_box_tiles",
+      "tags": [
+        "tiles",
+        "rooms"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_7d5734ec1ad09717": {
+      "category": "invariant",
+      "claim": "Pad indices must be contiguous 0..N-1 matching array order",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_7d5734ec1ad09717",
+      "source": "tools/pdmap/validate.py:validate_mapdef",
+      "tags": [
+        "pads",
+        "mkpads"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_7e5c88948009af9e": {
+      "category": "invariant",
+      "claim": "Intro Ammo param2 is quantity, not pad index",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_7e5c88948009af9e",
+      "source": "tools/pdmap/intro.py",
+      "tags": [
+        "intro",
+        "loadout"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_8b19f8c2e7751279": {
+      "category": "invariant",
+      "claim": "Each CTF team with a Case pad must have at least one CaseRespawn pad for that team",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_8b19f8c2e7751279",
+      "source": "tools/pdmap/validate.py:validate_mapdef",
+      "tags": [
+        "scenario",
+        "ctf",
+        "case_respawn"
+      ],
+      "verified_by": "probe_scenario_pairing"
+    },
+    "invariant_966bf57a076bf117": {
+      "category": "invariant",
+      "claim": "Spawn pads must have Y > floor Y (default offset 10.0)",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_966bf57a076bf117",
+      "source": "tools/pdmap/builders.py:PAD_FLOOR_OFFSET",
+      "tags": [
+        "pads",
+        "collision"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_bf4fc7e07b43dc68": {
+      "category": "invariant",
+      "claim": "Box arena collision comes from tiles; seg is visual + room bboxes",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_bf4fc7e07b43dc68",
+      "source": "docs/MAP_MAKING_WIKI.md \u00a72",
+      "tags": [
+        "seg",
+        "tiles"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_c161488ec58a0c39": {
+      "category": "invariant",
+      "claim": "PDMAP_SEG_MODE=empty avoids near-plane viewport sheet in FPS",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_c161488ec58a0c39",
+      "source": "tools/pdmap/pipeline.py:build_from_spec",
+      "tags": [
+        "seg",
+        "rendering"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_c5d0ddf0554a2e37": {
+      "category": "invariant",
+      "claim": "Intro Weapon param2 is dual-wield weapon id or -1, not pad index",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_c5d0ddf0554a2e37",
+      "source": "tools/pdmap/intro.py",
+      "tags": [
+        "intro",
+        "loadout"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "invariant_edc37b5a1f4b1abb": {
+      "category": "invariant",
+      "claim": "MP setup must emit ailist id 0x1000 (mp_init_simulants)",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "invariant_edc37b5a1f4b1abb",
+      "source": "tools/pdmap/core.py:MapDef.pack_setup",
+      "tags": [
+        "bots",
+        "setup"
+      ],
+      "verified_by": "probe_coded_invariants"
+    },
+    "pipeline_0267083335d5b605": {
+      "category": "pipeline",
+      "claim": "Level module my_arena: 8 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 13,
+        "pads": 8,
+        "props": 3
+      },
+      "id": "pipeline_0267083335d5b605",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/my_arena.py",
+      "tags": [
+        "level-module",
+        "my_arena"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_1291157c51667b6c": {
+      "category": "pipeline",
+      "claim": "validate_mapdef rejects Case pads without matching case_respawn team",
+      "confidence": 1.0,
+      "evidence": {
+        "detected": true,
+        "errors": [
+          "CTF team 0 has Case pad(s) but no case_respawn pad (add scenario pads with scenario='case_respawn' and matching team)"
+        ]
+      },
+      "id": "pipeline_1291157c51667b6c",
+      "source": "tools/pdmap/validate.py",
+      "tags": [
+        "scenario",
+        "validation"
+      ],
+      "verified_by": "probe_scenario_pairing"
+    },
+    "pipeline_21de6fe5468c9401": {
+      "category": "pipeline",
+      "claim": "Level modules with SEG_SCRIPT: 0 (none)",
+      "confidence": 1.0,
+      "evidence": {
+        "modules": []
+      },
+      "id": "pipeline_21de6fe5468c9401",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels",
+      "tags": [
+        "seg",
+        "SEG_SCRIPT"
+      ],
+      "verified_by": "probe_seg_script_inventory"
+    },
+    "pipeline_27c5772bd6947e96": {
+      "category": "pipeline",
+      "claim": "Level module edit_play_1782851648: 1 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 9,
+        "pads": 1,
+        "props": 0
+      },
+      "id": "pipeline_27c5772bd6947e96",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/edit_play_1782851648.py",
+      "tags": [
+        "level-module",
+        "edit_play_1782851648"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_2c64b5a246b6c8da": {
+      "category": "pipeline",
+      "claim": "build_from_spec produces five assets from editor JSON without level module",
+      "confidence": 1.0,
+      "evidence": {
+        "assets_exist": {
+          "pads": true,
+          "seg": true,
+          "setup": true,
+          "tiles": true
+        },
+        "errors": [],
+        "warnings": [
+          "Auto-corrected pad Y to 10.0 for pad(s) [0] (must be above floor Y=0)",
+          "Intro has no Case commands \u2014 Capture the Case scenario will not work",
+          "Intro has no Hill commands \u2014 King of the Hill scenario will not work"
+        ]
+      },
+      "id": "pipeline_2c64b5a246b6c8da",
+      "source": "tools/pdmap/pipeline.py",
+      "tags": [
+        "from-json",
+        "build"
+      ],
+      "verified_by": "probe_pipeline_contract"
+    },
+    "pipeline_492cb036302e0ac7": {
+      "category": "pipeline",
+      "claim": "validate_mapdef passes after Y correction on minimal spawn map",
+      "confidence": 1.0,
+      "evidence": {
+        "pre_build_errors": []
+      },
+      "id": "pipeline_492cb036302e0ac7",
+      "source": "tools/pdmap/validate.py",
+      "tags": [
+        "validate"
+      ],
+      "verified_by": "probe_pipeline_contract"
+    },
+    "pipeline_49426c98e0d3c519": {
+      "category": "pipeline",
+      "claim": "Level module edit_play_1782852555: 1 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 9,
+        "pads": 1,
+        "props": 0
+      },
+      "id": "pipeline_49426c98e0d3c519",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/edit_play_1782852555.py",
+      "tags": [
+        "level-module",
+        "edit_play_1782852555"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_68940ec276b70f77": {
+      "category": "pipeline",
+      "claim": "pdmap from-json is the canonical entry point for deterministic box maps",
+      "confidence": 1.0,
+      "evidence": {},
+      "id": "pipeline_68940ec276b70f77",
+      "source": "tools/pdmap/__init__.py:cmd_from_json",
+      "tags": [
+        "cli"
+      ],
+      "verified_by": "probe_pipeline_contract"
+    },
+    "pipeline_87c86f0160f7f34a": {
+      "category": "pipeline",
+      "claim": "EditorMapSpec.from_json auto-corrects Y<=0 pads to spawn_y",
+      "confidence": 1.0,
+      "evidence": {
+        "y_corrected": [
+          0
+        ]
+      },
+      "id": "pipeline_87c86f0160f7f34a",
+      "source": "tools/pdmap/from_json.py",
+      "tags": [
+        "from-json"
+      ],
+      "verified_by": "probe_pipeline_contract"
+    },
+    "pipeline_8e4c93b0ecdc4f94": {
+      "category": "pipeline",
+      "claim": "Fixture minimal_map 2.json builds cleanly via from-json pipeline",
+      "confidence": 1.0,
+      "evidence": {
+        "errors": [],
+        "ok": true,
+        "pads": 5
+      },
+      "id": "pipeline_8e4c93b0ecdc4f94",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/journal/uff_viewer/fixtures/minimal_map 2.json",
+      "tags": [
+        "fixture",
+        "minimal_map 2.json"
+      ],
+      "verified_by": "probe_fixtures"
+    },
+    "pipeline_a3f2e84860d31bc6": {
+      "category": "pipeline",
+      "claim": "Box-arena modules without SEG_SCRIPT (procedural seg): 8",
+      "confidence": 1.0,
+      "evidence": {
+        "count": 8,
+        "modules": [
+          "csim",
+          "edit_play_1782849221",
+          "edit_play_1782849718",
+          "edit_play_1782851214",
+          "edit_play_1782851648",
+          "edit_play_1782852555",
+          "my_arena",
+          "uff"
+        ]
+      },
+      "id": "pipeline_a3f2e84860d31bc6",
+      "source": "tools/pdmap/pipeline.py:build_from_spec",
+      "tags": [
+        "seg",
+        "box"
+      ],
+      "verified_by": "probe_seg_script_inventory"
+    },
+    "pipeline_ad0573f5d224fa3b": {
+      "category": "pipeline",
+      "claim": "Level module csim: 10 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 15,
+        "pads": 10,
+        "props": 3
+      },
+      "id": "pipeline_ad0573f5d224fa3b",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/csim.py",
+      "tags": [
+        "level-module",
+        "csim"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_b5dfdd55d6186e6e": {
+      "category": "pipeline",
+      "claim": "Fixture minimal_map.json builds cleanly via from-json pipeline",
+      "confidence": 1.0,
+      "evidence": {
+        "errors": [],
+        "ok": true,
+        "pads": 5
+      },
+      "id": "pipeline_b5dfdd55d6186e6e",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/journal/uff_viewer/fixtures/minimal_map.json",
+      "tags": [
+        "fixture",
+        "minimal_map.json"
+      ],
+      "verified_by": "probe_fixtures"
+    },
+    "pipeline_d2fc95abee40609f": {
+      "category": "pipeline",
+      "claim": "Level module uff: 58 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 36,
+        "pads": 58,
+        "props": 30
+      },
+      "id": "pipeline_d2fc95abee40609f",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/uff.py",
+      "tags": [
+        "level-module",
+        "uff"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_e3ec56e45ff49402": {
+      "category": "pipeline",
+      "claim": "Level module edit_play_1782851214: 1 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 9,
+        "pads": 1,
+        "props": 0
+      },
+      "id": "pipeline_e3ec56e45ff49402",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/edit_play_1782851214.py",
+      "tags": [
+        "level-module",
+        "edit_play_1782851214"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_f1ab1fd894c1a10a": {
+      "category": "pipeline",
+      "claim": "Level module edit_play_1782849718: 1 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 9,
+        "pads": 1,
+        "props": 0
+      },
+      "id": "pipeline_f1ab1fd894c1a10a",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/edit_play_1782849718.py",
+      "tags": [
+        "level-module",
+        "edit_play_1782849718"
+      ],
+      "verified_by": "probe_level_modules"
+    },
+    "pipeline_f2c3d42da801ac29": {
+      "category": "pipeline",
+      "claim": "Level module edit_play_1782849221: 1 pads, box_arena=True, custom_tiles=True",
+      "confidence": 1.0,
+      "evidence": {
+        "intro": 9,
+        "pads": 1,
+        "props": 0
+      },
+      "id": "pipeline_f2c3d42da801ac29",
+      "source": "/Users/moigutierrez/Library/Mobile Documents/com~apple~CloudDocs/Work/Personal/Games/perfect_dark_jonaeru_aio/src/levels/edit_play_1782849221.py",
+      "tags": [
+        "level-module",
+        "edit_play_1782849221"
+      ],
+      "verified_by": "probe_level_modules"
+    }
+  },
+  "meta": {
+    "doc_coverage_ratio": 1.0,
+    "gap_count": 0,
+    "iteration": 9,
+    "last_run": "20260701T003450Z"
+  },
+  "version": 1
+}

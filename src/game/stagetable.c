@@ -7,7 +7,7 @@
 // When adding or removing items from this table you must also update the
 // STAGEINDEX constants in constants.h.
 // NOTE: extra fields have been appended to stagetableentry in the PC port
-struct stagetableentry g_Stages[87] = {
+struct stagetableentry g_Stages[89] = {
 	//       id,                  ?, lia, liw, lih, ?, bg,               tiles,              pads,              setup,           mpsetp,             ?                0x18,            0x1c, ?, ?,  ?, 0x24,      0x28,   ?,   ?,   ?  ?  alarm                   extragunmem
 	/*0x00*/ STAGE_MAIANSOS,      2, 255, 100, 100, 0, FILE_BG_LUE_SEG,  FILE_BG_LUE_TILES,  FILE_BG_SEV_PADS,  FILE_USETUPSEV,  FILE_UMP_SETUPSEV,  1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 	/*0x01*/ STAGE_TEST_SILO,     2, 255, 100, 100, 0, FILE_BG_OAT_SEG,  FILE_BG_OAT_TILES,  FILE_BG_OAT_PADS,  FILE_USETUPSILO, FILE_UMP_SETUPSILO, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, 700, 800, 400, 1, SFX_ALARM_DEFAULT,      0,
@@ -101,6 +101,8 @@ struct stagetableentry g_Stages[87] = {
 	/*0x54*/ STAGE_EXTRA24,       2, 255, 100, 100, 0, FILE_BG_MP13_SEG, FILE_BG_MP13_TILES, FILE_BG_MP13_PADS, FILE_USETUPMP13, FILE_UMP_SETUPMP13, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 	/*0x55*/ STAGE_EXTRA25,       2, 255, 100, 100, 0, FILE_BG_STAT_SEG, FILE_BG_STAT_TILES, FILE_BG_STAT_PADS, FILE_USETUPSTAT, FILE_UMP_SETUPSTAT, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
 	/*0x56*/ STAGE_EXTRA26,       2, 255, 100, 100, 0, FILE_BG_MP13_SEG, FILE_BG_MP13_TILES, FILE_BG_MP13_PADS, FILE_USETUPMP13, FILE_UMP_SETUPMP13, 1,                1,   100,             0, 0, -1, 255, 0x3e19999a, -1,  400, 0,   1, SFX_ALARM_DEFAULT,      0,
+	/*0x7e2*/ STAGE_MY_ARENA,      2, 255, 100, 100, 0, FILE_BG_MY_ARENA_SEG, FILE_BG_MY_ARENA_TILES, FILE_BG_MY_ARENA_PADS, FILE_USETUPMY_ARENA, FILE_UMP_SETUPMY_ARENA, 1, 1, 100, 0, 0, -1, 255, 0x3e19999a, -1, 400, 0, 1, SFX_ALARM_DEFAULT, 0,
+	/*0x7e7*/ STAGE_TESTARENA,     2, 255, 100, 100, 0, FILE_BG_TESTARENA_SEG, FILE_BG_TESTARENA_TILES, FILE_BG_TESTARENA_PADS, FILE_USETUPTESTARENA, FILE_UMP_SETUPTESTARENA, 1, 1, 100, 0, 0, -1, 255, 0x3e19999a, -1, 400, 0, 1, SFX_ALARM_DEFAULT, 0,
 #endif
 };
 

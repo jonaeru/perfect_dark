@@ -14,7 +14,7 @@
 #define true  1
 
 #define MAX_ARTIFACTS          120
-#define MAX_BOTS               8
+#define MAX_BOTS               24
 #define MAX_CHRSPERSQUADRON    16
 #define MAX_CHRSPERTEAM        32
 #define MAX_CHRWAYPOINTS       6
@@ -23,6 +23,7 @@
 #define MAX_MPPLAYERCONFIGS    (MAX_PLAYERS + 2)
 #define MAX_OBJECTIVES         10
 #define MAX_PLAYERS            4
+#define MAX_SPAWN_POINTS       256
 #define MAX_PROPSPERROOMCHUNK  7
 #define MAX_ROOMPROPLISTCHUNKS 256
 #define MAX_SQUADRONS          16
@@ -45,7 +46,11 @@
 #define S32_MAX  2147483647
 #define U32_MAX  4294967295
 #define MINFLOAT ((float)-3.40282346638528860e+38)
+// Some host <math.h> headers already define MAXFLOAT; guard to avoid a
+// -Wmacro-redefined warning emitted by every translation unit.
+#ifndef MAXFLOAT
 #define MAXFLOAT ((float)3.40282346638528860e+38)
+#endif
 
 #define ABS(val)            ((val) > 0 ? (val) : -(val))
 #define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
@@ -1746,6 +1751,8 @@
 #define MENUOP_OPEN                100
 #define MENUOP_CLOSE               101
 #define MENUOP_TICK                102
+#define MENUOP_PREOPEN             103
+
 
 #define MENUPLANE_00 0
 #define MENUPLANE_01 1
@@ -4037,10 +4044,26 @@
 #define STAGE_TEST_OLD      0x4e
 #define STAGE_DUEL          0x4f
 #define STAGE_TEST_LAM      0x50
+#define STAGE_MY_ARENA      0x80
+#define STAGE_TESTARENA     0x81
 #define STAGE_TITLE         0x5c
 #define STAGE_BOOTPAKMENU   0x5d
 #define STAGE_CREDITS       0x5e
 #define STAGE_4MBMENU       0x5d
+
+// Title/boot/credits only — NOT a numeric range. Custom pdmap arenas use ids
+// such as 0x80/0x81 (above STAGE_TITLE) and must still allocate gameplay pools.
+#define STAGE_IS_MENU(stage) \
+	((stage) == STAGE_TITLE \
+		|| (stage) == STAGE_BOOTPAKMENU \
+		|| (stage) == STAGE_CREDITS \
+		|| (stage) == STAGE_4MBMENU)
+
+// pdmap box arenas: force room-1 bbox to match ±5000 floor / 3000 ceiling tiles.
+#define STAGE_IS_PDMAP_BOX_ARENA(stage) \
+	((stage) == STAGE_TEST_UFF \
+		|| (stage) == STAGE_MY_ARENA \
+		|| (stage) == STAGE_TESTARENA)
 
 #define STAGE_MP_RANDOM_MULTI 0x02
 #define STAGE_MP_RANDOM_SOLO  0x03
@@ -4159,6 +4182,8 @@
 #define STAGEINDEX_TEST_MP18     0x3a
 #define STAGEINDEX_TEST_MP19     0x3b
 #define STAGEINDEX_TEST_MP20     0x3c
+#define STAGEINDEX_MY_ARENA      0x57
+#define STAGEINDEX_TESTARENA     0x58
 
 #define SURFACETYPE_DEFAULT      0
 #define SURFACETYPE_STONE        1
@@ -4798,7 +4823,7 @@ enum weaponnum {
 
 #define MPSETUP_MAXSETUPS 128
 #define MPSETUP_MAXNAME 17
-#define MPSETUP_BLOCKSIZE 80
+#define MPSETUP_BLOCKSIZE 128
 
 #endif
 

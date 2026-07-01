@@ -4101,7 +4101,7 @@ struct mpsetup {
 	 * Bits 0x0ff0 are for sims
 	 * Bits 0xf000 are probably not used
 	 */
-	/*0x800acb9e*/ u16 chrslots;
+	/*0x800acb9e*/ u32 chrslots;
 	/*0x800acba0*/ u8 weapons[NUM_MPWEAPONSLOTS];
 	/*0x800acba6*/ u8 paused;
 	/*0x800acba8*/ struct fileguid fileguid;

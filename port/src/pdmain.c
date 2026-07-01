@@ -156,6 +156,8 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ STAGE_2B,            "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
 	{ STAGE_WAR,           "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
 	{ STAGE_TEST_UFF,      "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
+	{ STAGE_MY_ARENA,      "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
+	{ STAGE_TESTARENA,     "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
 	{ STAGE_TEST_OLD,      "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
 	{ STAGE_DUEL,          "-ml0 -me0 -mgfx120 -mvtx100 -ma700"            },
 	{ STAGE_TEST_LAM,      "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
@@ -459,7 +461,9 @@ void mainLoop(void)
 		langReset(g_StageNum);
 		playermgrReset();
 
-		if (g_StageNum >= STAGE_TITLE) {
+		// Match src/lib/main.c: custom pdmap arenas (0x80+) are gameplay stages,
+		// not title/boot menus — only true menu stages get numplayers=0.
+		if (STAGE_IS_MENU(g_StageNum)) {
 			numplayers = 0;
 		} else {
 			if (argFindByPrefix(1, "-play")) {
@@ -516,6 +520,14 @@ void mainLoop(void)
 
 			g_MpSetup.stagenum = g_StageNum;
 			mpReset();
+		} else if (STAGE_IS_PDMAP_BOX_ARENA(g_StageNum) && g_Vars.mplayerisrunning == false) {
+			// validate-maps / --boot-stage into a pdmap arena: need MP setup + spawns
+			// without going through Combat Simulator menus.
+			g_MpSetup.chrslots = 0x01;
+			g_MpSetup.stagenum = g_StageNum;
+			g_MpSetup.options = 0;
+			g_MpSetup.scenario = 0;
+			mpReset();
 		}
 
 		gfxReset();
@@ -524,6 +536,10 @@ void mainLoop(void)
 		zbufReset(g_StageNum);
 		lvReset(g_StageNum);
 		viReset(g_StageNum);
+		// --boot-stage skips title.c, which normally clears viBlack after load.
+		if (!STAGE_IS_MENU(g_StageNum)) {
+			viBlack(false);
+		}
 		frametimeCalculate();
 		profileReset();
 
@@ -574,7 +590,9 @@ void mainTick(void)
 			lvTick();
 			playermgrShuffle();
 
-			if (g_StageNum < STAGE_TITLE) {
+			// Custom pdmap arenas (0x80+) are above STAGE_TITLE but still need
+			// per-frame viewport/FOV setup — use menu check, not numeric compare.
+			if (!STAGE_IS_MENU(g_StageNum)) {
 				for (i = 0; i < PLAYERCOUNT(); i++) {
 					setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 

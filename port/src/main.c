@@ -17,6 +17,7 @@
 #include "mod.h"
 #include "system.h"
 #include "utils.h"
+#include "llm_bridge.h"
 
 u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 16;
@@ -88,6 +89,7 @@ static void cleanup(void)
 	sysLogPrintf(LOG_NOTE, "shutdown");
 	inputSaveBinds();
 	configSave(CONFIG_PATH);
+	llmBridgeShutdown();
 	videoShutdown();
 	crashShutdown();
 	// TODO: actually shut down all subsystems
@@ -117,6 +119,7 @@ int main(int argc, const char **argv)
 		modConfigLoad(MOD_CONFIG_FNAME);
 	}
 
+	llmBridgeInit();
 	atexit(cleanup);
 
 	bootCreateSched();
@@ -139,7 +142,7 @@ int main(int argc, const char **argv)
 	if (g_StageNum == STAGE_TITLE && (sysArgCheck("--skip-intro") || g_SkipIntro)) {
 		// shorthand for --boot-stage 0x26
 		g_StageNum = STAGE_CITRAINING;
-	} else if (g_StageNum < 0x01 || g_StageNum > 0x5d) {
+	} else if (g_StageNum < 0x01 || g_StageNum > 0xff) {
 		// stage num out of range
 		g_StageNum = STAGE_TITLE;
 	}

@@ -444,7 +444,8 @@ static u32 convertSection1(u8 *dst, u8 *src, u32 ofs)
 
 void preprocessBgSection1(u8 *data, u32 size, u32 ofs)
 {
-	u8 *dst = sysMemZeroAlloc(size);
+	u32 allocSize = size * 2 + 16384;
+	u8 *dst = sysMemZeroAlloc(allocSize);
 
 	u32 newSize = convertSection1(dst, data, ofs);
 

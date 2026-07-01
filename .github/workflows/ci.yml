@@ -1,0 +1,31 @@
+name: Fork CI (port-mods/all-in-one)
+
+on:
+  push:
+    branches: [port-mods/all-in-one]
+  pull_request:
+    branches: [port-mods/all-in-one]
+  workflow_dispatch:
+
+jobs:
+  build-and-validate-macos-arm64:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install zlib sdl2 cmake python3
+
+      - name: Configure CMake (arm64)
+        run: |
+          cmake -G"Unix Makefiles" -Bbuild \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 .
+
+      - name: Build pd target
+        run: cmake --build build --target pd -j4
+
+      - name: Validate custom Combat Sim arenas
+        run: |
+          python3 tools/pdmap.py validate my_arena
+          python3 tools/pdmap.py validate testarena

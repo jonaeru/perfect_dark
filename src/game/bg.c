@@ -179,10 +179,6 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 {
 	s32 index;
 
-#if VERSION < VERSION_NTSC_1_0
-	g_Rooms[roomnum].flags |= ROOMFLAG_ONSCREEN;
-#endif
-
 	if ((g_Rooms[roomnum].flags & ROOMFLAG_DISABLEDBYSCRIPT) == 0) {
 #if VERSION >= VERSION_NTSC_1_0
 		g_Rooms[roomnum].flags |= ROOMFLAG_ONSCREEN;
@@ -1986,6 +1982,22 @@ void bgBuildTables(s32 stagenum)
 					+ (g_Rooms[r].bbmin[1] - g_Rooms[r].bbmax[1]) * (g_Rooms[r].bbmin[1] - g_Rooms[r].bbmax[1])
 					+ (g_Rooms[r].bbmin[2] - g_Rooms[r].bbmax[2]) * (g_Rooms[r].bbmin[2] - g_Rooms[r].bbmax[2])) / 2.0f;
 		}
+		if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
+			// pdmap box arena: force room 1's bbox to the full box so collision-
+			// geo collection and culling cover every spawn. Extents MUST match
+			// BOX_HALF / BOX_HEIGHT in src/levels/*.py and the floor tiles.
+			g_Rooms[1].bbmin[0] = -5000.0f;
+			g_Rooms[1].bbmin[1] = 0.0f;
+			g_Rooms[1].bbmin[2] = -5000.0f;
+			g_Rooms[1].bbmax[0] = 5000.0f;
+			g_Rooms[1].bbmax[1] = 3000.0f;
+			g_Rooms[1].bbmax[2] = 5000.0f;
+			g_Rooms[1].centre.x = 0.0f;
+			g_Rooms[1].centre.y = 1500.0f;
+			g_Rooms[1].centre.z = 0.0f;
+			// Bounding sphere radius: half the box diagonal (~7416).
+			g_Rooms[1].radius = 7500.0f;
+		}
 
 		// The next part of section 3 is a list of roomgfxdata sizes.
 		// There is one per room and the value needs to be multiplied by 0x10.
@@ -2856,6 +2868,22 @@ void bgLoadRoom(s32 roomnum)
 		readlen = ((g_BgRooms[roomnum + 1].unk00 - g_BgRooms[roomnum].unk00) + 0xf) & ~0xf;
 		fileoffset = (g_BgPrimaryData + g_BgRooms[roomnum].unk00 - g_BgPrimaryData) - 0x0f000000;
 		fileoffset -= var8007fc54;
+		// A zero-length room has no compressed geometry. This happens for the
+		// phantom rooms emitted by the procedural single-room arena builder
+		// (tools/pdmap): the room table needs an end-marker entry, which the
+		// engine otherwise treats as a real (empty) room. Inflating/preprocessing
+		// 0 bytes overflows the scratch buffer and crashes ("overflow when
+		// trying to preprocess a bg room, size 0"). Treat it as an empty loaded
+		// room with no gfxdata instead.
+		if (readlen == 0) {
+#ifndef PLATFORM_N64
+			sysMemFree(allocation);
+#endif
+			g_Rooms[roomnum].gfxdata = NULL;
+			g_Rooms[roomnum].loaded240 = 1;
+			dyntexSetCurrentRoom(-1);
+			return;
+		}
 
 		if (readlen > alloclen) {
 			dyntexSetCurrentRoom(-1);
@@ -3031,7 +3059,10 @@ void bgLoadRoom(s32 roomnum)
 		}
 
 		// Do some find/replaces in the gdls based on environment configuration
-		if (g_FogEnabled) {
+		if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
+			gfxMakeRoomUseShadeRecursively(g_Rooms[roomnum].gfxdata->opablocks);
+			gfxMakeRoomUseShadeRecursively(g_Rooms[roomnum].gfxdata->xlublocks);
+		} else if (g_FogEnabled) {
 			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->opablocks, 1);
 			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->xlublocks, 5);
 		} else if (!g_EnvHasTransparency) {
@@ -3303,7 +3334,10 @@ Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool arg3)
  */
 Gfx *bgRenderRoomOpaque(Gfx *gdl, s32 roomnum)
 {
-	if (g_Rooms[roomnum].loaded240 == 0) {
+	// Skip unloaded rooms and empty rooms with no geometry (e.g. the phantom
+	// end-marker rooms emitted by the procedural arena builder, which load with
+	// a NULL gfxdata). Without this guard, dereferencing gfxdata crashes.
+	if (g_Rooms[roomnum].loaded240 == 0 || g_Rooms[roomnum].gfxdata == NULL) {
 		return gdl;
 	}
 
@@ -3330,7 +3364,8 @@ Gfx *bgRenderRoomXlu(Gfx *gdl, s32 roomnum)
 	}
 
 	if (g_Rooms[roomnum].loaded240) {
-		if (g_Rooms[roomnum].gfxdata->xlublocks == NULL) {
+		// Empty rooms (phantom end-markers) load with NULL gfxdata; skip them.
+		if (g_Rooms[roomnum].gfxdata == NULL || g_Rooms[roomnum].gfxdata->xlublocks == NULL) {
 			return gdl;
 		}
 
@@ -5858,8 +5893,21 @@ void bgTickPortals(void)
 
 		if (!g_BgRoomTestsDisabled) {
 			if (g_BgPortals[0].verticesoffset == 0) {
+				// Portal-less arenas (e.g. the Matrix Test Room box) have no PVS
+				// graph, so the room the player stands in must be forced on every
+				// frame — exactly like the portal path below does for g_CamRoom.
+				// Without this the screen-box test can reject the camera room, it
+				// never loads (loaded240 stays 0), its floor collision is never
+				// collected, and the player falls through the world.
+				if (g_CamRoom >= 1 && g_CamRoom < g_Vars.roomcount) {
+					bgSetRoomOnscreen(g_CamRoom, 0, &box);
+				}
 				for (room = 1; room < g_Vars.roomcount; room++) {
-					if (bgRoomIntersectsScreenBox(room, &box)
+					if (room == g_CamRoom) {
+						continue; // already forced on above
+					}
+					bool intersects = bgRoomIntersectsScreenBox(room, &box);
+					if (intersects
 							&& ((g_StageIndex != STAGEINDEX_INFILTRATION && g_StageIndex != STAGEINDEX_RESCUE && g_StageIndex != STAGEINDEX_ESCAPE) || room != 0xf)
 							&& (g_StageIndex != STAGEINDEX_SKEDARRUINS || room != 0x02)
 							&& ((g_StageIndex != STAGEINDEX_DEFECTION && g_StageIndex != STAGEINDEX_EXTRACTION) || room != 0x01)

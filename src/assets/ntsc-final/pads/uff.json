@@ -1,6 +1,4653 @@
 {
-    "pads": [],
-    "waypoints": [],
-    "waygroups": [],
-    "cover": []
+	"pads": [
+		{
+			"id": "PAD_UFF_0000",
+			"pos": [
+				-4000,
+				10.0,
+				-4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0001",
+			"pos": [
+				4000,
+				10.0,
+				-4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0002",
+			"pos": [
+				-4000,
+				10.0,
+				4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0003",
+			"pos": [
+				4000,
+				10.0,
+				4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0004",
+			"pos": [
+				-2000,
+				10.0,
+				-2000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0005",
+			"pos": [
+				2000,
+				10.0,
+				-2000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0006",
+			"pos": [
+				-2000,
+				10.0,
+				2000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0007",
+			"pos": [
+				2000,
+				10.0,
+				2000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0008",
+			"pos": [
+				0,
+				10.0,
+				-3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0009",
+			"pos": [
+				0,
+				10.0,
+				3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_000A",
+			"pos": [
+				-3000,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_000B",
+			"pos": [
+				3000,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_000C",
+			"pos": [
+				-1000,
+				10.0,
+				-1000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_000D",
+			"pos": [
+				1000,
+				10.0,
+				-1000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_000E",
+			"pos": [
+				-1000,
+				10.0,
+				1000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_000F",
+			"pos": [
+				1000,
+				10.0,
+				1000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0010",
+			"pos": [
+				0,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0011",
+			"pos": [
+				0,
+				10.0,
+				-1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0012",
+			"pos": [
+				0,
+				10.0,
+				1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0013",
+			"pos": [
+				-1500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0014",
+			"pos": [
+				1500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0015",
+			"pos": [
+				-3500,
+				10.0,
+				-3500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0016",
+			"pos": [
+				3500,
+				10.0,
+				-3500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0017",
+			"pos": [
+				-3500,
+				10.0,
+				3500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0018",
+			"pos": [
+				3500,
+				10.0,
+				3500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0019",
+			"pos": [
+				-4500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_001A",
+			"pos": [
+				-4200,
+				10.0,
+				-4200
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_001B",
+			"pos": [
+				-4200,
+				10.0,
+				-4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_001C",
+			"pos": [
+				4200,
+				10.0,
+				-4200
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_001D",
+			"pos": [
+				4200,
+				10.0,
+				-4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_001E",
+			"pos": [
+				-4200,
+				10.0,
+				4200
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_001F",
+			"pos": [
+				-4200,
+				10.0,
+				4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0020",
+			"pos": [
+				4200,
+				10.0,
+				4200
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0021",
+			"pos": [
+				4200,
+				10.0,
+				4000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0022",
+			"pos": [
+				0,
+				10.0,
+				500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0023",
+			"pos": [
+				0,
+				10.0,
+				-500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0024",
+			"pos": [
+				-500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0025",
+			"pos": [
+				500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0026",
+			"pos": [
+				-3000,
+				10.0,
+				-3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0027",
+			"pos": [
+				-1500,
+				10.0,
+				-3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0028",
+			"pos": [
+				0,
+				10.0,
+				-3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0029",
+			"pos": [
+				1500,
+				10.0,
+				-3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_002A",
+			"pos": [
+				3000,
+				10.0,
+				-3000
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_002B",
+			"pos": [
+				-3000,
+				10.0,
+				-1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_002C",
+			"pos": [
+				-1500,
+				10.0,
+				-1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_002D",
+			"pos": [
+				0,
+				10.0,
+				-1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_002E",
+			"pos": [
+				1500,
+				10.0,
+				-1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_002F",
+			"pos": [
+				3000,
+				10.0,
+				-1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0030",
+			"pos": [
+				-3000,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0031",
+			"pos": [
+				-1500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0032",
+			"pos": [
+				0,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0033",
+			"pos": [
+				1500,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0034",
+			"pos": [
+				3000,
+				10.0,
+				0
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0035",
+			"pos": [
+				-3000,
+				10.0,
+				1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0036",
+			"pos": [
+				-1500,
+				10.0,
+				1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0037",
+			"pos": [
+				0,
+				10.0,
+				1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0038",
+			"pos": [
+				1500,
+				10.0,
+				1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		},
+		{
+			"id": "PAD_UFF_0039",
+			"pos": [
+				3000,
+				10.0,
+				1500
+			],
+			"dir": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"up": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"xmin": -100.0,
+			"xmax": 100.0,
+			"ymin": -100.0,
+			"ymax": 100.0,
+			"zmin": -100.0,
+			"zmax": 100.0,
+			"aiwaitlift": false,
+			"aionlift": false,
+			"aiwalkdirect": false,
+			"aidrop": false,
+			"aicrouch": false,
+			"aiignorey": false,
+			"aiduck": false,
+			"liftnum": 0,
+			"room": 1
+		}
+	],
+	"waypoints": [
+		{
+			"id": "WAYPOINT_UFF_0000",
+			"pad": "PAD_UFF_0000",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0015",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0001",
+			"pad": "PAD_UFF_0001",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0016",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0002",
+			"pad": "PAD_UFF_0002",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0017",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0003",
+			"pad": "PAD_UFF_0003",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0018",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0020",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0021",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0004",
+			"pad": "PAD_UFF_0004",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0005",
+			"pad": "PAD_UFF_0005",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0006",
+			"pad": "PAD_UFF_0006",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0017",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0007",
+			"pad": "PAD_UFF_0007",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0018",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0020",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0021",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0008",
+			"pad": "PAD_UFF_0008",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0028",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0009",
+			"pad": "PAD_UFF_0009",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_000A",
+			"pad": "PAD_UFF_000A",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0019",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0030",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_000B",
+			"pad": "PAD_UFF_000B",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0034",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_000C",
+			"pad": "PAD_UFF_000C",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0032",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_000D",
+			"pad": "PAD_UFF_000D",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_000E",
+			"pad": "PAD_UFF_000E",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_000F",
+			"pad": "PAD_UFF_000F",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0010",
+			"pad": "PAD_UFF_0010",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0032",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0011",
+			"pad": "PAD_UFF_0011",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0028",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0012",
+			"pad": "PAD_UFF_0012",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0013",
+			"pad": "PAD_UFF_0013",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0019",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0030",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0014",
+			"pad": "PAD_UFF_0014",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0034",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0015",
+			"pad": "PAD_UFF_0015",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0016",
+			"pad": "PAD_UFF_0016",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0017",
+			"pad": "PAD_UFF_0017",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0018",
+			"pad": "PAD_UFF_0018",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0020",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0021",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0019",
+			"pad": "PAD_UFF_0019",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0030",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_001A",
+			"pad": "PAD_UFF_001A",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0015",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_001B",
+			"pad": "PAD_UFF_001B",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0015",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_001C",
+			"pad": "PAD_UFF_001C",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0016",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_001D",
+			"pad": "PAD_UFF_001D",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0016",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_001E",
+			"pad": "PAD_UFF_001E",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0017",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_001F",
+			"pad": "PAD_UFF_001F",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0017",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0020",
+			"pad": "PAD_UFF_0020",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0018",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0021",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0021",
+			"pad": "PAD_UFF_0021",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0018",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0020",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0022",
+			"pad": "PAD_UFF_0022",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0032",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0023",
+			"pad": "PAD_UFF_0023",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0032",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0024",
+			"pad": "PAD_UFF_0024",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0032",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0025",
+			"pad": "PAD_UFF_0025",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0032",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0026",
+			"pad": "PAD_UFF_0026",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0015",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0027",
+			"pad": "PAD_UFF_0027",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0015",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0028",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0028",
+			"pad": "PAD_UFF_0028",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0029",
+			"pad": "PAD_UFF_0029",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0016",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0028",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_002A",
+			"pad": "PAD_UFF_002A",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0016",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_002B",
+			"pad": "PAD_UFF_002B",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0000",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0015",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0019",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0026",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0030",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_002C",
+			"pad": "PAD_UFF_002C",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0004",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0027",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0028",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_002D",
+			"pad": "PAD_UFF_002D",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0008",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0028",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_002E",
+			"pad": "PAD_UFF_002E",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0011",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0029",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0034",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_002F",
+			"pad": "PAD_UFF_002F",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0001",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0005",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0016",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0034",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0030",
+			"pad": "PAD_UFF_0030",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0019",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0031",
+			"pad": "PAD_UFF_0031",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0019",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0030",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0032",
+			"pad": "PAD_UFF_0032",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000C",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0023",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0024",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0033",
+			"pad": "PAD_UFF_0033",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000D",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0025",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0034",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0034",
+			"pad": "PAD_UFF_0034",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_002F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0035",
+			"pad": "PAD_UFF_0035",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000A",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0017",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0019",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0030",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0036",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0036",
+			"pad": "PAD_UFF_0036",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0002",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0006",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0013",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0017",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_001F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0031",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0035",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0037",
+			"pad": "PAD_UFF_0037",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000E",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0010",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0022",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0038",
+			"pad": "PAD_UFF_0038",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0009",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0012",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0014",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0018",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0020",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0021",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0033",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0037",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0039",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		},
+		{
+			"id": "WAYPOINT_UFF_0039",
+			"pad": "PAD_UFF_0039",
+			"neighbours": [
+				{
+					"waypoint": "WAYPOINT_UFF_0003",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0007",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000B",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_000F",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0018",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0020",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0021",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0034",
+					"flag4000": false,
+					"flag8000": false
+				},
+				{
+					"waypoint": "WAYPOINT_UFF_0038",
+					"flag4000": false,
+					"flag8000": false
+				}
+			],
+			"waygroup": "WAYGROUP_UFF_0001"
+		}
+	],
+	"waygroups": [
+		{
+			"id": "WAYGROUP_UFF_0001",
+			"neighbours": []
+		}
+	],
+	"cover": []
 }

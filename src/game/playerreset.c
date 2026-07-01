@@ -168,7 +168,9 @@ void playerReset(void)
 			switch (cmd->type) {
 			case INTROCMD_SPAWN:
 				if (cmd->param2 == 0) {
-					g_SpawnPoints[g_NumSpawnPoints++] = cmd->param1;
+					if (g_NumSpawnPoints < MAX_SPAWN_POINTS) {
+						g_SpawnPoints[g_NumSpawnPoints++] = cmd->param1;
+					}
 				}
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 12);
 				break;

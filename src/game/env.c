@@ -135,7 +135,9 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_MP_G5BUILDING, 15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x5a90a5),  4500,   0, 0, RGB(0x000000), -20000,    0, 0, 0 },
 	{ STAGE_MP_TEMPLE,     15, 10000,   0,  0,  0, RGB(0x001080), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x00ffff),  -1850,    1, 0, 1 },
 	{ STAGE_MP_COMPLEX,    15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_UFF,      10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+	{ STAGE_TEST_UFF,      10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xcccccc),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+	{ STAGE_MY_ARENA,      10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xcccccc),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+	{ STAGE_TESTARENA,     10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xcccccc),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_OLD,      15, 30000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 #ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_LAM,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },

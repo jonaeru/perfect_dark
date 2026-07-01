@@ -1,0 +1,3992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Perfect Dark Map Editor</title>
+<style>
+  :root {
+    --panel: rgba(16,20,28,0.88); --border:#2a3242; --muted:#8a93a6; --accent:#2c7be5;
+    --space-xs:4px; --space-sm:6px; --space-md:10px; --space-lg:14px;
+    --label-size:11px; --control-size:12px; --toolbar-size:10px;
+    --menu-h: 0px;
+    --chrome-top: 12px;
+    --runbar-h: 52px;
+    --edit-col-w: 276px;
+    --right-gap: 12px;
+    --bottom-bar-h: 92px;
+  }
+  body.browser-mode { --menu-h: 28px; --chrome-top: 36px; }
+  html, body { margin:0; height:100%; overflow:hidden; background:#0b0e14; color:#e6e6e6;
+    font:13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif; }
+  #c { position:fixed; inset:0; display:block; width:100vw; height:100vh; }
+  .panel { position:fixed; background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:12px 14px; backdrop-filter:blur(6px); box-shadow:0 6px 24px rgba(0,0,0,0.45); }
+  #hud { top:var(--chrome-top); left:12px; width:262px; max-height:calc(100vh - var(--chrome-top) - var(--bottom-bar-h) - 16px); overflow-y:auto; z-index:4; }
+  /* View/mode panel — fixed under slim run bar (pass-10 native Mac IA). */
+  #panelRight { top:calc(var(--chrome-top) + var(--runbar-h) + 8px); right:var(--right-gap); width:210px; z-index:5; }
+  #hud h1 { font-size:14px; margin:0 0 4px; letter-spacing:.2px; }
+  #hud .sub { color:var(--muted); margin:0 0 10px; font-size:12px; }
+  h2 { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:0 0 6px; }
+  .row { display:flex; align-items:center; gap:8px; margin:3px 0; justify-content:space-between; }
+  .row > span:first-child { display:flex; align-items:center; gap:8px; }
+  .sw { width:12px; height:12px; border-radius:3px; flex:0 0 auto; border:1px solid rgba(255,255,255,.25); }
+  .muted { color:var(--muted); }
+  .danger { color:#ff5d5d; font-weight:600; }
+  .ok { color:#57d977; font-weight:600; }
+  hr { border:0; border-top:1px solid #232a37; margin:10px 0; }
+  .toggle { cursor:pointer; user-select:none; display:flex; align-items:center; gap:7px; margin:4px 0; }
+  .toggle input { margin:0; }
+  .sub-toggles { margin-left:18px; padding-left:8px; border-left:1px solid #232a37; }
+  .btns { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; }
+  button { font:inherit; color:#e6e6e6; background:#1b2330; border:1px solid var(--border);
+    border-radius:7px; padding:6px 8px; cursor:pointer; transition:background .12s, border-color .12s; }
+  button:hover { background:#243049; border-color:#3a465c; }
+  button:disabled { opacity:0.45; cursor:not-allowed; background:#141820; }
+  button.wide { grid-column:1 / -1; }
+  button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  #toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:20;
+    background:rgba(16,20,28,0.92); border:1px solid var(--border); border-radius:8px;
+    padding:8px 16px; font-size:12px; color:#cdd6e6; pointer-events:none; opacity:0;
+    transition:opacity .25s; }
+  #toast.show { opacity:1; }
+  body.editing #toast { bottom:calc(var(--bottom-bar-h) + 52px); }
+  .drag-hint { position:fixed; pointer-events:none; z-index:4; color:#8a93a6; font-size:11px;
+    background:rgba(16,20,28,0.85); padding:3px 8px; border-radius:6px; display:none;
+    border:1px solid var(--border); }
+  #help { left:12px; bottom:12px; max-width:420px; font-size:12px; color:#c7cedb; z-index:4; }
+  #help kbd { background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
+    border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#e6e6e6; }
+  #help .hint { color:var(--muted); margin-top:4px; }
+  #info { right:12px; bottom:12px; width:240px; display:none; }
+  #info .close { float:right; cursor:pointer; color:var(--muted); }
+  #info h2 { margin:0 0 6px; color:#e6e6e6; text-transform:none; font-size:13px; letter-spacing:0; }
+  #info code { color:#cdd6e6; }
+  .small { font-size:11px; color:var(--muted); }
+  code { color:#cdd6e6; }
+
+  /* ---------- pass-2: edit-mode UI ---------- */
+  /* Edit inspector stacks under run bar in one right column; view presets hide while editing. */
+  #editPanel {
+    top:calc(var(--chrome-top) + var(--runbar-h) + 8px);
+    right:var(--right-gap);
+    width:var(--edit-col-w);
+    max-height:calc(100vh - var(--chrome-top) - var(--runbar-h) - var(--bottom-bar-h) - 24px);
+    overflow-y:auto; display:none; z-index:5;
+  }
+  body.editing #editPanel { display:block; }
+  body.editing #panelRight { display:none !important; }
+  body.editing #help { display:none !important; }
+  body.editing .editbadge { display:none !important; }
+  #editPanel h1 { font-size:13px; margin:0 0 1px; }
+  #editPanel .sub { color:var(--muted); margin:0 0 var(--space-sm); font-size:11px; line-height:1.35; }
+  #editPanel hr { margin:var(--space-sm) 0; }
+  #editPanel h2 { margin:0 0 var(--space-xs); font-size:10px; }
+  #editPanel .field { margin:3px 0; }
+  #editPanel .btns { gap:var(--space-xs); margin-bottom:var(--space-sm); }
+  #editPanel .export-note { margin:var(--space-xs) 0 0; font-size:10px; line-height:1.4; }
+  #editPanel details.edit-advanced { margin-top:6px; border:1px solid var(--border); border-radius:6px; padding:6px 8px; }
+  #editPanel details.edit-advanced > summary { cursor:pointer; font-size:11px; color:var(--muted); user-select:none; }
+  #editPanel details.edit-advanced[open] > summary { margin-bottom:6px; color:#cdd6e6; }
+  /* Side-panel tool grid removed — floating #placeToolbar is the primary placement UX. */
+  .tools { display:none; }
+  /* Floating canvas toolbar — big visual component buttons for click-to-place. */
+  #placeToolbar {
+    position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:8;
+    display:none; align-items:center; gap:8px; padding:8px 12px; border-radius:12px;
+    background:rgba(12,16,24,0.94); border:1px solid var(--border);
+    box-shadow:0 8px 32px rgba(0,0,0,0.45); backdrop-filter:blur(12px);
+    max-width:calc(100vw - var(--edit-col-w) - var(--right-gap) - 48px);
+  }
+  body.editing #placeToolbar { display:flex; }
+  #placeToolBtns { display:flex; align-items:center; gap:6px; }
+  #placeToolbar button {
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    min-width:68px; min-height:58px; padding:6px 8px; font-size:11px;
+  }
+  #placeToolbar .pt-dot { width:14px; height:14px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.35); }
+  #placeToolbar button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  #placeToolbar .pt-hint { font-size:10px; color:var(--muted); max-width:180px; line-height:1.35; }
+  #placeVariants {
+    position:fixed; bottom:calc(var(--bottom-bar-h) - 4px); left:50%; transform:translateX(-50%); z-index:8;
+    display:none; flex-wrap:wrap; gap:5px; justify-content:center;
+    max-width:calc(100vw - var(--edit-col-w) - var(--right-gap) - 48px); padding:8px 10px; border-radius:10px;
+    background:rgba(12,16,24,0.92); border:1px solid var(--border);
+    box-shadow:0 4px 20px rgba(0,0,0,0.35);
+  }
+  #placeVariants.open { display:flex; }
+  #placeVariants button { font-size:10px; padding:4px 8px; min-height:28px; }
+  #placeVariants button.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  /* Numeric field rows in the properties / geometry panels. */
+  .field { display:flex; align-items:center; gap:8px; margin:5px 0; }
+  .field label { flex:0 0 64px; color:var(--muted); }
+  .field input[type=number], .field input[type=text], .field select {
+    flex:1 1 auto; min-width:0; font:inherit; color:#e6e6e6; background:#10141c;
+    border:1px solid var(--border); border-radius:6px; padding:4px 6px; }
+  .field.xyz input { flex:1 1 0; width:0; }
+  .field input[type=range] { flex:1 1 auto; }
+  .field .val { flex:0 0 64px; text-align:right; color:#cdd6e6; font-variant-numeric:tabular-nums; }
+  /* Properties panel (bottom-right) for the selected pad. */
+  /* Properties panel — floats left of edit column while editing. */
+  #props { right:12px; bottom:12px; width:268px; display:none; max-height:60vh; overflow-y:auto; z-index:6; }
+  body.editing #props.shown {
+    display:block;
+    right:calc(var(--edit-col-w) + var(--right-gap) + 12px);
+    bottom:calc(var(--bottom-bar-h) + 8px);
+    max-height:min(46vh, 380px);
+  }
+  #props h2 { color:#e6e6e6; text-transform:none; font-size:13px; letter-spacing:0; margin:0 0 6px; }
+  #props .close { float:right; cursor:pointer; color:var(--muted); }
+  /* Validation status line: green ok / yellow warn / red error chips. */
+  #validate { font-size:12px; }
+  #validate .chip { display:inline-block; padding:1px 7px; border-radius:10px; margin:2px 4px 2px 0;
+    background:#1b2330; border:1px solid var(--border); }
+  #validate .warn { color:#ffd166; }
+  #validate .err  { color:#ff5d5d; }
+  /* Export/import textarea. */
+  #ioWrap, #pyWrap { display:none; margin-top:6px; }
+  #ioWrap.shown, #pyWrap.shown { display:block; }
+  #ioText, #pyText { width:100%; box-sizing:border-box; height:150px; resize:vertical; font:11px/1.45 ui-monospace,Menlo,monospace;
+    color:#cdd6e6; background:#0c0f16; border:1px solid var(--border); border-radius:7px; padding:6px; }
+  #buildCmds { margin:0; padding:8px; background:#0c0f16; border:1px solid var(--border); border-radius:7px;
+    font:11px/1.5 ui-monospace,Menlo,monospace; color:#cdd6e6; white-space:pre-wrap; word-break:break-all; }
+  #testCmds { margin:0; padding:8px; background:#0c0f16; border:1px solid var(--border); border-radius:7px;
+    font:11px/1.5 ui-monospace,Menlo,monospace; color:#cdd6e6; white-space:pre-wrap; word-break:break-all;
+    max-height:220px; overflow-y:auto; }
+  #testStatus { font-size:12px; margin:6px 0 0; min-height:18px; }
+  #testStatus .ok { color:#57d977; }
+  #testStatus .warn { color:#ffd166; }
+  #testStatus .err { color:#ff5d5d; }
+  button.test-primary { background:#1a6638; border-color:#2a8f4e; font-weight:600; }
+  button.test-primary:hover:not(:disabled) { background:#22884a; border-color:#3cb868; }
+  button.test-primary:disabled { opacity:0.55; cursor:wait; }
+  button.test-export { background:#2a4a6e; border-color:#3a6a9e; font-weight:600; }
+  button.test-export:hover:not(:disabled) { background:#356089; border-color:#4a82b8; }
+  button.test-export:disabled { opacity:0.55; cursor:wait; }
+  .test-export-details { margin-top:6px; font-size:12px; color:var(--muted); }
+  .test-export-details summary { cursor:pointer; color:#cdd6e6; user-select:none; margin-bottom:4px; }
+  .test-export-details[open] summary { margin-bottom:6px; }
+  .test-export-details .export-note { margin:0 0 6px; font-size:11px; }
+  #testServerHint { font-size:11px; color:var(--muted); margin:4px 0 0; line-height:1.35; }
+  #testServerHint .live { color:#57d977; }
+  #testServerHint .off { color:#ffd166; }
+  .export-note { font-size:11px; color:var(--muted); margin:4px 0 0; line-height:1.45; }
+  .editbadge { position:fixed; top:calc(var(--chrome-top) + 4px); left:50%; transform:translateX(-50%); z-index:8;
+    background:#2c7be5; color:#fff; font-weight:700; letter-spacing:.4px; padding:5px 14px;
+    border-radius:20px; box-shadow:0 4px 16px rgba(0,0,0,.4); display:none; pointer-events:none; }
+  body.editing:not(.browser-mode) .editbadge { display:block; }
+  /* pass-10: Run bar — Mod + Scenario + Play only; file ops live in menu bar. */
+  #runBar { position:fixed; top:var(--chrome-top); right:var(--right-gap); z-index:7; display:flex; align-items:center;
+    gap:var(--space-sm); padding:6px 10px; border-radius:10px; max-height:44px;
+    background:var(--panel); border:1px solid var(--border); backdrop-filter:blur(6px);
+    box-shadow:0 6px 24px rgba(0,0,0,0.45); }
+  #runBar .run-field { display:flex; align-items:center; gap:var(--space-xs); margin:0; }
+  #runBar .run-field label { flex:0 0 auto; font-size:var(--label-size); color:var(--muted);
+    text-transform:uppercase; letter-spacing:.4px; }
+  #runBar .run-field select { font-size:var(--control-size); padding:6px 8px; min-height:32px;
+    min-width:88px; border-radius:7px; border:1px solid var(--border); background:#10141c; color:#e6e6e6; }
+  #runBar #testPlayBtn { min-height:44px; min-width:88px; padding:8px 14px; font-size:13px;
+    font-weight:600; border-radius:8px; }
+  #runBar #editModeBtn { min-height:44px; min-width:56px; padding:8px 12px; font-size:13px; font-weight:600; border-radius:8px; }
+  #runBar #editModeBtn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  #runBar #buildSettingsBtn { min-width:44px; min-height:44px; padding:0; font-size:16px;
+    line-height:1; border-radius:8px; background:#1b2330; }
+  #runBar #buildSettingsBtn:focus-visible, #runBar select:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  body.drag-over-canvas { outline:3px dashed var(--accent); outline-offset:-3px; }
+  /* Document status pill — map name + dirty (replaces in-panel file chrome). */
+  #statusPill { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:9;
+    display:flex; align-items:center; gap:8px; padding:8px 16px; min-height:36px;
+    border-radius:20px; background:rgba(16,20,28,0.9); border:1px solid var(--border);
+    backdrop-filter:blur(8px); box-shadow:0 4px 20px rgba(0,0,0,.4); pointer-events:none;
+    font-size:13px; font-weight:500; color:#f0f3fa; max-width:min(420px, calc(100vw - 48px)); }
+  body.editing #statusPill {
+    bottom:calc(var(--bottom-bar-h) + 6px);
+    max-width:min(420px, calc(100vw - var(--edit-col-w) - var(--right-gap) - 48px));
+  }
+  #statusPill .doc-dirty { color:#ffb020; font-size:11px; font-weight:700; flex:0 0 auto; }
+  #statusPill .doc-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  #statusPill .doc-server { font-size:10px; color:var(--muted); font-weight:400; flex:0 0 auto; }
+  /* Browser-only menu strip when Electron app menu is unavailable. */
+  #browserMenuBar { position:fixed; top:0; left:0; right:0; z-index:12; height:28px;
+    display:none; align-items:center; gap:2px; padding:0 8px;
+    background:rgba(22,26,34,0.96); border-bottom:1px solid var(--border);
+    font-size:12px; -webkit-app-region:no-drag; }
+  body.browser-mode #browserMenuBar { display:flex; }
+  body.browser-mode #hud { top:var(--chrome-top); }
+  .browser-menu { position:relative; }
+  .browser-menu summary { list-style:none; cursor:pointer; padding:4px 10px; border-radius:4px;
+    color:#cdd6e6; user-select:none; }
+  .browser-menu summary::-webkit-details-marker { display:none; }
+  .browser-menu summary:hover, .browser-menu[open] summary { background:rgba(255,255,255,.08); }
+  .browser-menu-panel { position:absolute; left:0; top:100%; min-width:180px; padding:4px;
+    background:#141c2a; border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.45); z-index:20; }
+  .browser-menu-panel button { display:block; width:100%; text-align:left; padding:6px 10px;
+    font-size:12px; border:none; background:transparent; color:#e6e6e6; border-radius:4px; cursor:pointer; }
+  .browser-menu-panel button:hover { background:rgba(255,255,255,.08); }
+  /* Build Settings sheet — advanced test/build flags off the canvas. */
+  #buildSettingsModal { position:fixed; inset:0; z-index:30; display:none; align-items:center;
+    justify-content:center; background:rgba(0,0,0,.55); backdrop-filter:blur(2px); }
+  #buildSettingsModal.open { display:flex; }
+  #buildSettingsSheet { width:min(420px, calc(100vw - 32px)); max-height:min(80vh, 720px);
+    overflow-y:auto; padding:var(--space-lg); border-radius:12px; background:#121820;
+    border:1px solid var(--border); box-shadow:0 12px 40px rgba(0,0,0,.55); }
+  #buildSettingsSheet h2 { margin:0 0 var(--space-md); font-size:15px; color:#f0f3fa;
+    text-transform:none; letter-spacing:0; }
+  #buildSettingsSheet .sheet-section { margin:var(--space-md) 0; }
+  #buildSettingsSheet .sheet-section h3 { margin:0 0 var(--space-xs); font-size:var(--label-size);
+    text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+  #buildSettingsSheet .opt-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-xs) var(--space-sm); }
+  #buildSettingsSheet .field { margin:0; gap:var(--space-xs); }
+  #buildSettingsSheet .field label { flex:0 0 52px; font-size:var(--label-size); }
+  #buildSettingsSheet .loadout-grid { display:grid; grid-template-columns:26px 1fr; gap:2px var(--space-sm); }
+  #buildSettingsSheet .loadout-grid label { font-size:10px; color:var(--muted); align-self:center; }
+  #buildSettingsSheet .loadout-grid select { font-size:var(--label-size); padding:4px 6px; width:100%; }
+  #buildSettingsSheet .opt-checks { display:flex; flex-wrap:wrap; gap:var(--space-xs) var(--space-sm); }
+  #buildSettingsSheet .opt-checks label { display:inline-flex; align-items:center; gap:4px;
+    font-size:var(--label-size); color:#cdd6e6; cursor:pointer; min-height:28px; }
+  #buildSettingsSheet .opt-meta { display:flex; gap:var(--space-sm); font-size:var(--label-size);
+    color:var(--muted); margin-bottom:var(--space-xs); }
+  #buildSettingsSheet .sheet-actions { display:flex; justify-content:flex-end; gap:var(--space-sm);
+    margin-top:var(--space-lg); padding-top:var(--space-md); border-top:1px solid var(--border); }
+  #buildSettingsSheet .sheet-actions button { min-height:44px; padding:8px 16px; }
+  /* Map name prompt — Electron does not support window.prompt(); use in-app modal. */
+  #mapNameModal { position:fixed; inset:0; z-index:31; display:none; align-items:center;
+    justify-content:center; background:rgba(0,0,0,.55); backdrop-filter:blur(2px); }
+  #mapNameModal.open { display:flex; }
+  #mapNameSheet { width:min(380px, calc(100vw - 32px)); padding:var(--space-lg); border-radius:12px;
+    background:#121820; border:1px solid var(--border); box-shadow:0 12px 40px rgba(0,0,0,.55); }
+  #mapNameSheet h2 { margin:0 0 var(--space-xs); font-size:15px; color:#f0f3fa;
+    text-transform:none; letter-spacing:0; }
+  #mapNameSheet .map-name-hint { margin:0 0 var(--space-md); font-size:var(--label-size); color:var(--muted); }
+  #mapNameSheet input { width:100%; box-sizing:border-box; font:inherit; color:#e6e6e6;
+    background:#1b2330; border:1px solid var(--border); border-radius:7px; padding:8px 10px; }
+  #mapNameSheet input:focus { outline:none; border-color:var(--accent); }
+  #mapNameError { min-height:16px; margin:var(--space-xs) 0 0; font-size:var(--label-size); color:#ff5d5d; }
+  #mapNameSheet .sheet-actions { display:flex; justify-content:flex-end; gap:var(--space-sm);
+    margin-top:var(--space-md); }
+  #mapNameSheet .sheet-actions button { min-height:36px; padding:6px 14px; }
+  #mapPickList.map-pick-list { max-height:240px; overflow-y:auto; margin:0 0 var(--space-md);
+    display:flex; flex-direction:column; gap:4px; }
+  #mapPickList.map-pick-list button { text-align:left; width:100%; box-sizing:border-box;
+    font:inherit; color:#e6e6e6; background:#1b2330; border:1px solid var(--border);
+    border-radius:7px; padding:8px 10px; cursor:pointer; }
+  #mapPickList.map-pick-list button:hover { border-color:var(--accent); background:#222c3a; }
+  #mapPickList .maps-open-empty { font-size:var(--label-size); color:var(--muted); padding:8px 0; }
+  #testStatus { font-size:var(--label-size); margin:var(--space-xs) 0 0; min-height:14px; line-height:1.35; }
+  #runTestStatus { position:fixed; right:var(--right-gap); top:calc(var(--chrome-top) + var(--runbar-h) + 4px); z-index:6; max-width:280px; font-size:11px;
+    color:var(--muted); pointer-events:none; line-height:1.35; text-align:right; }
+  body.editing #runTestStatus { display:none; }
+  /* Collapsed command log — hidden in edit mode unless explicitly opened. */
+  #testOutput { position:fixed; right:var(--right-gap); bottom:12px; width:320px; z-index:6;
+    padding:8px 12px; max-height:40vh; overflow-y:auto; }
+  body.editing #testOutput:not([open]) { display:none; }
+  body.editing #testOutput[open] {
+    left:auto;
+    right:calc(var(--edit-col-w) + var(--right-gap) + 12px);
+    bottom:calc(var(--bottom-bar-h) + 8px);
+    width:min(300px, calc(100vw - var(--edit-col-w) - 48px));
+  }
+  #testOutput summary { cursor:pointer; color:#cdd6e6; font-size:12px; user-select:none; }
+  #testOutput .export-note { margin:6px 0; }
+  /* pass-8: saved maps + minimap + pad visual polish */
+  #mapsStatus { min-height:0; margin:2px 0 0; font-size:10px; line-height:1.25;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #mapsStatus .live { color:#57d977; }
+  #mapsStatus .off { color:#ffd166; }
+  #mapsStatus .err { color:#ff5d5d; }
+  /* Compact square minimap — floats in the canvas margin above the edit column. */
+  #minimapWrap {
+    position:fixed;
+    display:none;
+    right:calc(var(--edit-col-w) + var(--right-gap) + 10px);
+    top:calc(var(--chrome-top) + var(--runbar-h) + 10px);
+    width:96px;
+    height:96px;
+    z-index:6;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:rgba(12,16,24,0.88);
+    box-shadow:0 4px 18px rgba(0,0,0,0.35);
+    overflow:hidden;
+    backdrop-filter:blur(6px);
+    pointer-events:auto;
+  }
+  #minimapWrap.visible { display:block; }
+  #minimapWrap canvas { display:block; width:96px; height:96px; }
+  #minimapClose {
+    position:absolute; top:3px; right:3px; width:18px; height:18px; padding:0;
+    font-size:10px; line-height:1; border-radius:4px; min-height:0; z-index:1;
+    background:rgba(16,20,28,0.9); border:1px solid var(--border); color:var(--muted);
+  }
+  #minimapClose:hover { color:#e6e6e6; background:rgba(36,48,73,0.95); }
+  .pad-hover-ring { pointer-events:none; }
+  /* pass-11: first-run / empty-map onboarding */
+  #onboardingOverlay {
+    position:fixed; inset:0; z-index:25; display:none; align-items:center; justify-content:center;
+    background:rgba(6,8,12,0.72); backdrop-filter:blur(4px); padding:24px;
+  }
+  #onboardingOverlay.open { display:flex; }
+  #onboardingCard {
+    max-width:420px; width:100%; padding:20px 22px; border-radius:14px;
+    background:rgba(16,20,28,0.96); border:1px solid var(--border);
+    box-shadow:0 12px 40px rgba(0,0,0,0.55);
+  }
+  #onboardingCard h2 { margin:0 0 8px; font-size:16px; color:#e6e6e6; text-transform:none; letter-spacing:0; }
+  #onboardingCard ol { margin:0 0 14px 18px; padding:0; color:#cdd6e6; font-size:13px; line-height:1.55; }
+  #onboardingCard kbd {
+    background:#1b2330; border:1px solid var(--border); border-bottom-width:2px;
+    border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,monospace; font-size:11px;
+  }
+  #onboardingDismiss { width:100%; min-height:40px; font-weight:600; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- Browser fallback: mimics macOS menu when Electron app menu is absent -->
+<nav id="browserMenuBar" aria-label="Application menu">
+  <details class="browser-menu" id="browserFileMenu">
+    <summary>File</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="new">New Map</button>
+      <button type="button" data-menu="open">Open…</button>
+      <button type="button" data-menu="save">Save</button>
+      <button type="button" data-menu="save-as">Save As…</button>
+      <button type="button" data-menu="export">Export JSON</button>
+      <button type="button" data-menu="revert-cached">Revert to Cached</button>
+      <button type="button" data-menu="delete">Delete Map…</button>
+    </div>
+  </details>
+  <details class="browser-menu">
+    <summary>Edit</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="undo">Undo</button>
+      <button type="button" data-menu="redo">Redo</button>
+    </div>
+  </details>
+  <details class="browser-menu">
+    <summary>View</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="toggle-fly">Toggle Fly Mode</button>
+      <button type="button" data-menu="toggle-edit">Toggle Edit Mode</button>
+      <button type="button" data-menu="toggle-minimap">Toggle Minimap</button>
+      <button type="button" data-menu="view-iso">Isometric</button>
+      <button type="button" data-menu="view-top">Top</button>
+      <button type="button" data-menu="toggle-help">Toggle Help</button>
+    </div>
+  </details>
+  <details class="browser-menu">
+    <summary>Play</summary>
+    <div class="browser-menu-panel" role="menu">
+      <button type="button" data-menu="test-map">Test Map</button>
+      <button type="button" data-menu="export-assets">Export Assets</button>
+      <button type="button" data-menu="build-settings">Build Settings…</button>
+    </div>
+  </details>
+</nav>
+
+<div id="hud" class="panel">
+  <h1>uff — Matrix combat-sim arena</h1>
+  <p class="sub">±5000 box · 1 unit = 1 in-game world unit</p>
+  <div id="counts"></div>
+  <hr/>
+  <h2>Layers</h2>
+  <div id="toggles"></div>
+  <hr/>
+  <h2>Legend</h2>
+  <div id="legend"></div>
+  <hr/>
+  <div id="origin"></div>
+  <div id="gdl"></div>
+</div>
+
+<div id="panelRight" class="panel">
+  <h2>View presets</h2>
+  <div class="btns">
+    <button data-view="iso">Isometric</button>
+    <button data-view="top">Top</button>
+    <button data-view="front">Front</button>
+    <button data-view="side">Side</button>
+    <button data-view="eye" class="wide">Player eye (floor)</button>
+    <button id="resetBtn" class="wide">Reset view</button>
+  </div>
+  <h2>Mode</h2>
+  <button id="flyBtn" class="wide">Enter fly mode (F)</button>
+  <button id="editBtn" class="wide" style="margin-top:6px">Enter edit mode (E)</button>
+  <button id="helpBtn" class="wide" style="margin-top:6px">Hide help</button>
+</div>
+
+<div class="editbadge">● EDIT MODE</div>
+
+<!-- pass-10: slim Run bar — play workflow only; documents use menu bar -->
+<div id="runBar" class="panel" role="toolbar" aria-label="Play test map">
+  <div class="run-field">
+    <label for="testMod">Mod</label>
+    <select id="testMod" title="Mod directory under mods/"></select>
+  </div>
+  <div class="run-field">
+    <label for="testScenario">Scenario</label>
+    <select id="testScenario" title="Multiplayer scenario"></select>
+  </div>
+  <button id="editModeBtn" type="button" title="Toggle edit mode (E)" aria-pressed="false">Edit</button>
+  <button id="testPlayBtn" class="test-primary" type="button" title="Validate, build, deploy, launch (T)" aria-label="Play test map">▶ Play</button>
+  <button id="buildSettingsBtn" type="button" title="Build Settings…" aria-label="Build settings">⚙</button>
+</div>
+<div id="runTestStatus" aria-live="polite"></div>
+
+<!-- Floating document status — name, dirty, server hint -->
+<div id="statusPill" aria-label="Document status">
+  <span id="docDirtyBadge" class="doc-dirty" hidden title="Unsaved changes" aria-label="Unsaved">●</span>
+  <span id="currentMapTitle" class="doc-title" title="Current map">uff</span>
+  <span id="mapsStatus" class="doc-server" role="status" aria-live="polite"></span>
+</div>
+
+<!-- pass-11: empty-map onboarding — dismissed once per browser session -->
+<div id="onboardingOverlay" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" hidden>
+  <div id="onboardingCard" class="panel">
+    <h2 id="onboardingTitle">Quick start</h2>
+    <ol>
+      <li>Press <kbd>E</kbd> or click <strong>Edit</strong></li>
+      <li>Pick <strong>Spawn</strong> on the toolbar</li>
+      <li>Click the floor to place</li>
+      <li><kbd>⌘S</kbd> to save</li>
+      <li><strong>▶ Play</strong> to test in-game</li>
+    </ol>
+    <button id="onboardingDismiss" type="button">Got it</button>
+  </div>
+</div>
+
+<!-- Advanced build / test options — opened from Play menu or gear -->
+<div id="buildSettingsModal" role="dialog" aria-modal="true" aria-labelledby="buildSettingsTitle" hidden>
+  <div id="buildSettingsSheet" class="panel">
+    <h2 id="buildSettingsTitle">Build Settings</h2>
+    <div class="sheet-section">
+      <h3>Level &amp; deploy</h3>
+      <div class="opt-grid">
+        <div class="field"><label for="testLevelName">Level</label>
+          <input type="text" id="testLevelName" spellcheck="false" placeholder="uff" /></div>
+        <div class="field"><label for="testDeployAs">Deploy</label>
+          <select id="testDeployAs"></select></div>
+        <div class="field"><label for="testNumSims">Sims</label>
+          <select id="testNumSims"></select></div>
+        <div class="field"><label for="testSimDiff">Diff</label>
+          <select id="testSimDiff"></select></div>
+      </div>
+    </div>
+    <div class="sheet-section">
+      <h3>Loadout</h3>
+      <div class="loadout-grid" id="testLoadoutGrid"></div>
+    </div>
+    <div class="sheet-section">
+      <h3>Game options</h3>
+      <div class="opt-checks" id="testGameOptions"></div>
+    </div>
+    <div class="sheet-section">
+      <h3>Build flags</h3>
+      <div class="opt-meta">
+        <span id="testBoxInfo" title="From box geometry">Box —</span>
+        <span id="testSimInfo" title="Bot count vs stock cap">Simulants —</span>
+      </div>
+      <div class="opt-checks">
+        <label title="Build seg display list (--seg)"><input type="checkbox" id="testSegChk" checked /> Seg</label>
+        <label title="Copy assets to mod (--deploy)"><input type="checkbox" id="testDeployChk" checked /> Deploy</label>
+        <label title="cmake --build before play"><input type="checkbox" id="testRebuildChk" /> Rebuild</label>
+        <label title="Launch pd.arm64 --test-map"><input type="checkbox" id="testPlayChk" checked /> Play</label>
+        <label title="Skip pdmap validate"><input type="checkbox" id="testSkipValChk" /> Skip val</label>
+        <label title="Backup existing level .py"><input type="checkbox" id="testBackupChk" checked /> Backup</label>
+        <label title="Proceed when validation warns"><input type="checkbox" id="testWarnOkChk" /> Warn OK</label>
+      </div>
+      <div id="testServerHint"></div>
+      <div id="testStatus"></div>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" id="buildSettingsClose">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Map name entry — replaces window.prompt (unsupported in Electron). -->
+<div id="mapNameModal" role="dialog" aria-modal="true" aria-labelledby="mapNameModalTitle" hidden>
+  <div id="mapNameSheet" class="panel">
+    <h2 id="mapNameModalTitle">Map name</h2>
+    <p id="mapNameModalHint" class="map-name-hint">Lowercase letters, digits, underscore. Spaces become underscores.</p>
+    <input type="text" id="mapNameInput" spellcheck="false" autocomplete="off"
+      aria-describedby="mapNameModalHint mapNameError" />
+    <div id="mapPickList" class="map-pick-list" hidden role="listbox" aria-label="Saved maps"></div>
+    <div id="mapNameError" role="alert" aria-live="polite"></div>
+    <div class="sheet-actions">
+      <button type="button" id="mapNameCancel">Cancel</button>
+      <button type="button" id="mapNameOk" class="active">Create</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="openFileInput" accept=".json,application/json" hidden aria-hidden="true" tabindex="-1" />
+<input type="text" id="newMapName" spellcheck="false" placeholder="my_arena" hidden aria-hidden="true" tabindex="-1" />
+<div id="openMapList" hidden aria-hidden="true"></div>
+
+<!-- pass-2: map-editing panel (visible only in edit mode) -->
+<div id="editPanel" class="panel">
+  <h1>Map editor</h1>
+  <p class="sub">Use the bottom toolbar to pick a component, then click the floor. Click a pad to select · drag to move.</p>
+  <label class="toggle"><input type="checkbox" id="snapChk" checked /> Snap to 250-unit grid</label>
+  <label class="toggle"><input type="checkbox" id="minimapChk" /> Minimap overlay (M)</label>
+  <div id="tools" hidden aria-hidden="true"></div>
+  <hr/>
+  <h2>Box geometry</h2>
+  <div class="field"><label>Half (XZ)</label><input type="range" id="halfRange" min="500" max="12000" step="100"><span class="val" id="halfVal"></span></div>
+  <div class="field"><label>Height (Y)</label><input type="range" id="heightRange" min="500" max="8000" step="100"><span class="val" id="heightVal"></span></div>
+  <button id="reframeBtn" class="wide">Reframe camera to box</button>
+  <hr/>
+  <h2>Validation</h2>
+  <div id="validate"></div>
+  <hr/>
+  <h2>Session &amp; undo</h2>
+  <div class="btns">
+    <button id="undoBtn" title="Undo last edit">Undo</button>
+    <button id="redoBtn" title="Redo undone edit">Redo</button>
+  </div>
+  <p class="export-note">Use <strong>File → Save</strong> for server maps. Session backup below is browser-only.</p>
+  <details class="opt-section" style="margin-top:6px;border:1px solid var(--border);border-radius:6px;padding:6px 8px;">
+    <summary style="cursor:pointer;font-size:11px;color:var(--muted);">Session backup (browser)</summary>
+    <div class="btns" style="margin-top:6px;">
+      <button id="saveLocalBtn" title="Save to browser LocalStorage">Cache locally</button>
+      <button id="loadLocalBtn" title="Load from browser LocalStorage">Load cache</button>
+    </div>
+  </details>
+  <div class="btns">
+    <button id="clearMapBtn" class="wide">Clear map</button>
+  </div>
+  <p class="export-note"><code id="storageKey"></code></p>
+  <details class="edit-advanced">
+    <summary>Export, import &amp; build</summary>
+  <h2>Export &amp; import</h2>
+  <div class="btns">
+    <button id="exportBtn">Export JSON</button>
+    <button id="importBtn">Import JSON</button>
+    <button id="copyBtn">Copy</button>
+    <button id="downloadBtn">Download</button>
+  </div>
+  <div id="ioWrap">
+    <textarea id="ioText" spellcheck="false" placeholder="Map JSON appears here on Export. Paste JSON and press Import to load it."></textarea>
+  </div>
+  <hr/>
+  <h2>Export to pdmap</h2>
+  <div class="field"><label>Level name</label><input type="text" id="levelName" spellcheck="false" placeholder="csim" /></div>
+  <div class="btns">
+    <button id="exportPyBtn">Export Python</button>
+    <button id="copyPyBtn">Copy Python</button>
+    <button id="downloadPyBtn">Download .py</button>
+  </div>
+  <div id="pyWrap">
+    <textarea id="pyText" spellcheck="false" readonly placeholder="Generated src/levels/&lt;name&gt;.py appears here."></textarea>
+  </div>
+  <p class="export-note">Save as <code>src/levels/&lt;name&gt;.py</code>, then run the build commands below. CLI: <code>python3 journal/uff_viewer/json_to_level.py map.json</code></p>
+  <hr/>
+  <h2>Import from level</h2>
+  <div class="field"><label>Catalog</label><select id="levelSelect"></select></div>
+  <button id="loadLevelBtn" class="wide">Load selected level</button>
+  <p class="export-note">Embedded snapshots of repo levels, or <code>?level=csim</code> in the URL. You can also Export JSON above and re-import later.</p>
+  <hr/>
+  <h2>Manual build</h2>
+  <pre id="buildCmds"></pre>
+  <p class="export-note"><strong>Tip:</strong> Use <strong>Play → Test Map</strong> or the ▶ Play run bar. Set <em>Deploy → uff (test-map slot)</em> in Build Settings unless your map is in <code>stagetable.c</code>.</p>
+  </details>
+</div>
+
+<!-- pass-6: Collapsed command log + terminal fallback (bottom-right) -->
+<details id="testOutput" class="panel">
+  <summary>Build log &amp; terminal fallback</summary>
+  <p class="export-note">When the local server is unavailable (<code>file://</code>), save downloads to <code>journal/uff_viewer/</code>.</p>
+  <div class="btns">
+    <button id="testExportJsonBtn" title="Download map JSON">JSON</button>
+    <button id="testExportPyBtn" title="Download src/levels/&lt;name&gt;.py">Python</button>
+    <button id="copyTestCmdBtn" title="Copy terminal build command">Copy cmd</button>
+    <button id="downloadTestShBtn" title="Download .last_test.sh">.sh</button>
+    <button id="testExportBtn" class="wide">Export JSON + .sh</button>
+    <button id="downloadTestJsonBtn">Download JSON</button>
+  </div>
+  <pre id="testCmds"></pre>
+</details>
+
+<!-- pass-2: selected-pad properties (bottom-right, edit mode only) -->
+<div id="props" class="panel">
+  <span class="close" id="propsClose">✕</span>
+  <div id="propsBody"></div>
+</div>
+
+<div id="help" class="panel">
+  <div id="helpOrbit">
+    <strong>Orbit</strong> · <kbd>drag</kbd> rotate · <kbd>scroll</kbd> zoom · <kbd>F</kbd> fly · <kbd>E</kbd> edit ·
+    <kbd>T</kbd> test/play · <kbd>X</kbd> export
+  </div>
+  <div id="helpFly" style="display:none">
+    <strong>Fly</strong> · <kbd>WASD</kbd> move · <kbd>mouse</kbd> look · <kbd>Space</kbd> up · <kbd>F</kbd> exit
+    <div class="hint">Click scene to capture mouse.</div>
+  </div>
+  <div id="helpEdit" style="display:none">
+    <strong>Edit</strong> · tool + <kbd>click floor</kbd> add · ghost preview · <kbd>drag</kbd> move pad ·
+    <kbd>Del</kbd> delete · <kbd>G</kbd> snap grid · <kbd>M</kbd> minimap ·
+    <kbd>Ctrl+Z/Y</kbd> undo/redo · <kbd>Ctrl+N</kbd> new · <kbd>Ctrl+S</kbd> save · <kbd>Ctrl+O</kbd> open · <kbd>E</kbd> exit
+  </div>
+  <div class="hint" style="margin-top:6px"><strong>Run bar</strong> (top-right): Mod, Scenario, ▶ Play. Advanced options in <strong>Play → Build Settings…</strong>.
+    Server: <code>python3 journal/uff_viewer/serve_editor.py</code> or <strong>Perfect Dark Map Editor.app</strong>.</div>
+</div>
+
+<div id="info" class="panel">
+  <span class="close" id="infoClose">✕</span>
+  <div id="infoBody"></div>
+</div>
+
+<!-- Floating click-to-place toolbar (edit mode) — primary placement UX -->
+<div id="placeToolbar" role="toolbar" aria-label="Place map components">
+  <div id="placeToolBtns"></div>
+  <span class="pt-hint" id="placeHint">Click the floor to place</span>
+</div>
+<div id="placeVariants" role="toolbar" aria-label="Component variant"></div>
+
+<div id="minimapWrap" aria-hidden="true" title="Top-down pad preview">
+  <button type="button" id="minimapClose" title="Hide minimap (M)" aria-label="Hide minimap">✕</button>
+  <canvas id="minimap" width="128" height="128"></canvas>
+</div>
+
+<div id="toast"></div>
+<div id="dragHint" class="drag-hint"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+const DATA = {"name": "uff", "half": 5000.0, "height": 3000.0, "faces": [{"index": 0, "name": "F0 floor (Y=0)", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 0, 5000], [-5000, 0, 5000]], "rgba": 1078001663, "hex": "#4040FF"}, {"index": 1, "name": "F1 ceiling (Y=H)", "verts": [[-5000, 3000, -5000], [5000, 3000, -5000], [5000, 3000, 5000], [-5000, 3000, 5000]], "rgba": 1090470143, "hex": "#40FF40"}, {"index": 2, "name": "F2 wall -Z", "verts": [[-5000, 0, -5000], [5000, 0, -5000], [5000, 3000, -5000], [-5000, 3000, -5000]], "rgba": 4282401023, "hex": "#FF4040"}, {"index": 3, "name": "F3 wall +X", "verts": [[5000, 0, -5000], [5000, 0, 5000], [5000, 3000, 5000], [5000, 3000, -5000]], "rgba": 4282449919, "hex": "#FF40FF"}, {"index": 4, "name": "F4 wall +Z", "verts": [[5000, 0, 5000], [-5000, 0, 5000], [-5000, 3000, 5000], [5000, 3000, 5000]], "rgba": 4294918399, "hex": "#FFFF40"}, {"index": 5, "name": "F5 wall -X", "verts": [[-5000, 0, 5000], [-5000, 0, -5000], [-5000, 3000, -5000], [-5000, 3000, 5000]], "rgba": 1090519039, "hex": "#40FFFF"}], "tiles": [{"room": "ROOM_UFF_0001", "verts": [[-5000, 0, -5000], [-5000, 0, 5000], [5000, 0, 5000], [5000, 0, -5000]], "floortype": "default", "floorcolour": 4095}], "pads": [{"index": 0, "pos": [-4000, 10.0, -4000], "room": 1, "kind": "spawn"}, {"index": 1, "pos": [4000, 10.0, -4000], "room": 1, "kind": "spawn"}, {"index": 2, "pos": [-4000, 10.0, 4000], "room": 1, "kind": "spawn"}, {"index": 3, "pos": [4000, 10.0, 4000], "room": 1, "kind": "spawn"}, {"index": 4, "pos": [-2000, 10.0, -2000], "room": 1, "kind": "spawn"}, {"index": 5, "pos": [2000, 10.0, -2000], "room": 1, "kind": "spawn"}, {"index": 6, "pos": [-2000, 10.0, 2000], "room": 1, "kind": "spawn"}, {"index": 7, "pos": [2000, 10.0, 2000], "room": 1, "kind": "spawn"}, {"index": 8, "pos": [0, 10.0, -3000], "room": 1, "kind": "spawn"}, {"index": 9, "pos": [0, 10.0, 3000], "room": 1, "kind": "spawn"}, {"index": 10, "pos": [-3000, 10.0, 0], "room": 1, "kind": "spawn"}, {"index": 11, "pos": [3000, 10.0, 0], "room": 1, "kind": "spawn"}, {"index": 12, "pos": [-1000, 10.0, -1000], "room": 1, "kind": "spawn"}, {"index": 13, "pos": [1000, 10.0, -1000], "room": 1, "kind": "spawn"}, {"index": 14, "pos": [-1000, 10.0, 1000], "room": 1, "kind": "spawn"}, {"index": 15, "pos": [1000, 10.0, 1000], "room": 1, "kind": "spawn"}, {"index": 16, "pos": [0, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 17, "pos": [0, 10.0, -1500], "room": 1, "kind": "weapon"}, {"index": 18, "pos": [0, 10.0, 1500], "room": 1, "kind": "weapon"}, {"index": 19, "pos": [-1500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 20, "pos": [1500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 21, "pos": [-3500, 10.0, -3500], "room": 1, "kind": "weapon"}, {"index": 22, "pos": [3500, 10.0, -3500], "room": 1, "kind": "weapon"}, {"index": 23, "pos": [-3500, 10.0, 3500], "room": 1, "kind": "weapon"}, {"index": 24, "pos": [3500, 10.0, 3500], "room": 1, "kind": "weapon"}, {"index": 25, "pos": [-4500, 10.0, 0], "room": 1, "kind": "weapon"}, {"index": 26, "pos": [-4200, 10.0, -4200], "room": 1, "kind": "scenario", "scenario": "case", "team": 0}, {"index": 27, "pos": [-4200, 10.0, -4000], "room": 1, "kind": "scenario", "scenario": "case_respawn", "team": 0}, {"index": 28, "pos": [4200, 10.0, -4200], "room": 1, "kind": "scenario", "scenario": "case", "team": 1}, {"index": 29, "pos": [4200, 10.0, -4000], "room": 1, "kind": "scenario", "scenario": "case_respawn", "team": 1}, {"index": 30, "pos": [-4200, 10.0, 4200], "room": 1, "kind": "scenario", "scenario": "case", "team": 2}, {"index": 31, "pos": [-4200, 10.0, 4000], "room": 1, "kind": "scenario", "scenario": "case_respawn", "team": 2}, {"index": 32, "pos": [4200, 10.0, 4200], "room": 1, "kind": "scenario", "scenario": "case", "team": 3}, {"index": 33, "pos": [4200, 10.0, 4000], "room": 1, "kind": "scenario", "scenario": "case_respawn", "team": 3}, {"index": 34, "pos": [0, 10.0, 500], "room": 1, "kind": "scenario", "scenario": "hill", "team": 0}, {"index": 35, "pos": [0, 10.0, -500], "room": 1, "kind": "scenario", "scenario": "hill", "team": 0}, {"index": 36, "pos": [-500, 10.0, 0], "room": 1, "kind": "scenario", "scenario": "hill", "team": 0}, {"index": 37, "pos": [500, 10.0, 0], "room": 1, "kind": "scenario", "scenario": "hill", "team": 0}, {"index": 38, "pos": [-3000, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 39, "pos": [-1500, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 40, "pos": [0, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 41, "pos": [1500, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 42, "pos": [3000, 10.0, -3000], "room": 1, "kind": "ammo"}, {"index": 43, "pos": [-3000, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 44, "pos": [-1500, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 45, "pos": [0, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 46, "pos": [1500, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 47, "pos": [3000, 10.0, -1500], "room": 1, "kind": "ammo"}, {"index": 48, "pos": [-3000, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 49, "pos": [-1500, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 50, "pos": [0, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 51, "pos": [1500, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 52, "pos": [3000, 10.0, 0], "room": 1, "kind": "ammo"}, {"index": 53, "pos": [-3000, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 54, "pos": [-1500, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 55, "pos": [0, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 56, "pos": [1500, 10.0, 1500], "room": 1, "kind": "ammo"}, {"index": 57, "pos": [3000, 10.0, 1500], "room": 1, "kind": "ammo"}], "originRadius": 500.0, "nearFaces": [], "nearTiles": [], "gdl": {"loads": 0, "maxLoad": 0, "anyOverflow": false, "totalVerts": 24}, "levelCatalog": {"csim": {"name": "csim", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10.0, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10.0, "z": 2000.0, "room": 1}, {"index": 4, "type": "ammo", "x": 0.0, "y": 10.0, "z": 0.0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 5, "type": "weapon", "x": -1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 10}, {"index": 6, "type": "weapon", "x": 1500.0, "y": 10.0, "z": 0.0, "room": 1, "weapon": 5}, {"index": 7, "type": "scenario", "x": -3000.0, "y": 10.0, "z": -3000.0, "room": 1, "scenario": "case", "team": 0}, {"index": 8, "type": "scenario", "x": 3000.0, "y": 10.0, "z": 3000.0, "room": 1, "scenario": "case_respawn", "team": 0}, {"index": 9, "type": "scenario", "x": 0.0, "y": 10.0, "z": 1500.0, "room": 1, "scenario": "hill", "team": 0}]}, "edit_play_1782849221": {"name": "edit_play_1782849221", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "edit_play_1782849718": {"name": "edit_play_1782849718", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "edit_play_1782851214": {"name": "edit_play_1782851214", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "edit_play_1782851648": {"name": "edit_play_1782851648", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "edit_play_1782852555": {"name": "edit_play_1782852555", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2500.0, "y": 10, "z": -2500.0, "room": 1}]}, "my_arena": {"name": "my_arena", "box_half": 2500.0, "box_height": 2000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 4, "type": "weapon", "x": 0.0, "y": 10, "z": -1500.0, "room": 1, "weapon": 17}, {"index": 5, "type": "weapon", "x": 0.0, "y": 10, "z": 1500.0, "room": 1, "weapon": 19}, {"index": 6, "type": "ammo", "x": 0.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 4, "quantity": 200}, {"index": 7, "type": "scenario", "x": 0.0, "y": 10, "z": -500, "room": 1, "scenario": "case", "team": 0}, {"index": 8, "type": "scenario", "x": 0.0, "y": 10, "z": 500, "room": 1, "scenario": "case_respawn", "team": 0}, {"index": 9, "type": "scenario", "x": 500.0, "y": 10, "z": 0.0, "room": 1, "scenario": "hill", "team": 0}]}, "testarena": {"name": "testarena", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 1, "type": "spawn", "x": 2000.0, "y": 10, "z": -2000.0, "room": 1}, {"index": 2, "type": "spawn", "x": -2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 3, "type": "spawn", "x": 2000.0, "y": 10, "z": 2000.0, "room": 1}, {"index": 4, "type": "weapon", "x": 0.0, "y": 10, "z": 0.0, "room": 1, "weapon": 10}, {"index": 5, "type": "ammo", "x": 1500.0, "y": 10, "z": 0.0, "room": 1, "ammoType": 3, "quantity": 200}, {"index": 6, "type": "scenario", "x": 0.0, "y": 10, "z": 1500.0, "room": 1, "scenario": "hill", "team": 0}]}, "uff": {"name": "uff", "box_half": 5000.0, "box_height": 3000.0, "pads": [{"index": 0, "type": "spawn", "x": -4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 1, "type": "spawn", "x": 4000, "y": 10.0, "z": -4000, "room": 1}, {"index": 2, "type": "spawn", "x": -4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 3, "type": "spawn", "x": 4000, "y": 10.0, "z": 4000, "room": 1}, {"index": 4, "type": "spawn", "x": -2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 5, "type": "spawn", "x": 2000, "y": 10.0, "z": -2000, "room": 1}, {"index": 6, "type": "spawn", "x": -2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 7, "type": "spawn", "x": 2000, "y": 10.0, "z": 2000, "room": 1}, {"index": 8, "type": "spawn", "x": 0, "y": 10.0, "z": -3000, "room": 1}, {"index": 9, "type": "spawn", "x": 0, "y": 10.0, "z": 3000, "room": 1}, {"index": 10, "type": "spawn", "x": -3000, "y": 10.0, "z": 0, "room": 1}, {"index": 11, "type": "spawn", "x": 3000, "y": 10.0, "z": 0, "room": 1}, {"index": 12, "type": "spawn", "x": -1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 13, "type": "spawn", "x": 1000, "y": 10.0, "z": -1000, "room": 1}, {"index": 14, "type": "spawn", "x": -1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 15, "type": "spawn", "x": 1000, "y": 10.0, "z": 1000, "room": 1}, {"index": 16, "type": "weapon", "x": 0, "y": 10.0, "z": 0, "room": 1, "weapon": 2}, {"index": 17, "type": "weapon", "x": 0, "y": 10.0, "z": -1500, "room": 1, "weapon": 5}, {"index": 18, "type": "weapon", "x": 0, "y": 10.0, "z": 1500, "room": 1, "weapon": 6}, {"index": 19, "type": "weapon", "x": -1500, "y": 10.0, "z": 0, "room": 1, "weapon": 10}, {"index": 20, "type": "weapon", "x": 1500, "y": 10.0, "z": 0, "room": 1, "weapon": 18}, {"index": 21, "type": "weapon", "x": -3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 14}, {"index": 22, "type": "weapon", "x": 3500, "y": 10.0, "z": -3500, "room": 1, "weapon": 24}, {"index": 23, "type": "weapon", "x": -3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 21}, {"index": 24, "type": "weapon", "x": 3500, "y": 10.0, "z": 3500, "room": 1, "weapon": 27}, {"index": 25, "type": "weapon", "x": -4500, "y": 10.0, "z": 0, "room": 1, "weapon": 28}, {"index": 26, "type": "scenario", "x": -4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 0}, {"index": 27, "type": "scenario", "x": -4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case_respawn", "team": 0}, {"index": 28, "type": "scenario", "x": 4200, "y": 10.0, "z": -4200, "room": 1, "scenario": "case", "team": 1}, {"index": 29, "type": "scenario", "x": 4200, "y": 10.0, "z": -4000, "room": 1, "scenario": "case_respawn", "team": 1}, {"index": 30, "type": "scenario", "x": -4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 2}, {"index": 31, "type": "scenario", "x": -4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case_respawn", "team": 2}, {"index": 32, "type": "scenario", "x": 4200, "y": 10.0, "z": 4200, "room": 1, "scenario": "case", "team": 3}, {"index": 33, "type": "scenario", "x": 4200, "y": 10.0, "z": 4000, "room": 1, "scenario": "case_respawn", "team": 3}, {"index": 34, "type": "scenario", "x": 0, "y": 10.0, "z": 500, "room": 1, "scenario": "hill", "team": 0}, {"index": 35, "type": "scenario", "x": 0, "y": 10.0, "z": -500, "room": 1, "scenario": "hill", "team": 0}, {"index": 36, "type": "scenario", "x": -500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 37, "type": "scenario", "x": 500, "y": 10.0, "z": 0, "room": 1, "scenario": "hill", "team": 0}, {"index": 38, "type": "ammo", "x": -3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 39, "type": "ammo", "x": -1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 40, "type": "ammo", "x": 0, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 41, "type": "ammo", "x": 1500, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 42, "type": "ammo", "x": 3000, "y": 10.0, "z": -3000, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 43, "type": "ammo", "x": -3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 44, "type": "ammo", "x": -1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 45, "type": "ammo", "x": 0, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 46, "type": "ammo", "x": 1500, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 47, "type": "ammo", "x": 3000, "y": 10.0, "z": -1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 48, "type": "ammo", "x": -3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 49, "type": "ammo", "x": -1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 50, "type": "ammo", "x": 0, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 51, "type": "ammo", "x": 1500, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 52, "type": "ammo", "x": 3000, "y": 10.0, "z": 0, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 53, "type": "ammo", "x": -3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 54, "type": "ammo", "x": -1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 55, "type": "ammo", "x": 0, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 56, "type": "ammo", "x": 1500, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}, {"index": 57, "type": "ammo", "x": 3000, "y": 10.0, "z": 1500, "room": 1, "ammoType": 1, "quantity": 200}]}}, "testConfig": {"testMapSlot": "uff", "stageTestUff": 77, "mods": [{"id": "mod_allinone", "path": "mods/mod_allinone"}, {"id": "mod_dark_noon", "path": "mods/mod_dark_noon"}, {"id": "mod_gex", "path": "mods/mod_gex"}, {"id": "mod_goldfinger_64", "path": "mods/mod_goldfinger_64"}, {"id": "mod_kakariko", "path": "mods/mod_kakariko"}, {"id": "mod_moyoteg", "path": "mods/mod_moyoteg"}], "scenarios": [{"id": 0, "label": "Combat", "flag": "--scenario-0"}, {"id": 1, "label": "Hold the Briefcase", "flag": "--scenario-1"}, {"id": 2, "label": "Hacker Central", "flag": "--scenario-2"}, {"id": 3, "label": "Pop a Cap", "flag": "--scenario-3"}, {"id": 4, "label": "King of the Hill", "flag": "--scenario-4"}, {"id": 5, "label": "Capture the Case", "flag": "--scenario-5"}], "simulants": {"requested": 8, "stockCap": 4, "note": "title.c --test-map requests N bots; stock profile caps at 4 unless MPFEATURE_8BOTS is unlocked."}, "loadoutWeapons": [{"id": 0, "label": "None"}, {"id": 1, "label": "Falcon 2"}, {"id": 4, "label": "MagSec 4"}, {"id": 5, "label": "Mauler"}, {"id": 6, "label": "Phoenix"}, {"id": 9, "label": "CMP150"}, {"id": 10, "label": "Cyclone"}, {"id": 13, "label": "Laptop Gun"}, {"id": 14, "label": "Dragon"}, {"id": 16, "label": "AR34"}, {"id": 17, "label": "SuperDragon"}, {"id": 18, "label": "Shotgun"}, {"id": 20, "label": "Sniper Rifle"}, {"id": 23, "label": "Rocket Launcher"}, {"id": 26, "label": "Crossbow"}, {"id": 27, "label": "Tranquilizer"}, {"id": 37, "label": "Shield"}], "simDifficulties": [{"id": 0, "label": "Meat"}, {"id": 1, "label": "Easy"}, {"id": 2, "label": "Normal"}, {"id": 3, "label": "Hard"}, {"id": 4, "label": "Perfect"}, {"id": 5, "label": "Dark"}], "gameOptions": [{"id": 1, "label": "One hit kills"}, {"id": 2, "label": "Teams"}, {"id": 4, "label": "No radar"}, {"id": 8, "label": "No auto-aim"}, {"id": 256, "label": "Fast movement"}, {"id": 2097152, "label": "Spawn with weapon"}, {"id": 33554432, "label": "Friendly fire"}, {"id": 134217728, "label": "No doors"}], "defaults": {"numSims": 8, "simDifficulty": 2, "loadout": [1, 9, 16, 4, 0, 37], "mpOptions": 0}, "helperScript": "journal/uff_viewer/test_map.py", "artifacts": {"json": "journal/uff_viewer/.last_test.json", "shell": "journal/uff_viewer/.last_test.sh"}, "devServer": {"port": 8765, "healthPath": "/api/health", "testMapPath": "/api/test-map", "mapsPath": "/api/maps", "startCommand": "python3 journal/uff_viewer/serve_editor.py"}}};
+// pass-11: compared against /api/health bundleHash to detect stale Electron/browser cache.
+const EDITOR_BUNDLE_HASH = '807e53fab9bd9e13';
+
+const KIND_COLORS = {
+  spawn:    0x57d977,  // green
+  weapon:   0xffa43d,  // orange
+  ammo:     0x3dc5ff,  // cyan
+  scenario: 0xc77dff,  // purple
+  other:    0x999999,
+};
+// pass-8: pad sphere radius + selection ring scale vary by type for clearer read.
+const PAD_RADIUS = { spawn: 110, weapon: 95, ammo: 80, scenario: 100, other: 85 };
+const PAD_RING_SCALE = { spawn: 1.48, weapon: 1.40, ammo: 1.34, scenario: 1.44, other: 1.36 };
+const padGeomCache = {};
+function padGeometryFor(kind) {
+  const k = KIND_ORDER.includes(kind) ? kind : 'other';
+  if (!padGeomCache[k]) padGeomCache[k] = new THREE.SphereGeometry(PAD_RADIUS[k], 18, 14);
+  return padGeomCache[k];
+}
+let hoverIndex = -1;
+let animTime = 0;
+let showMinimap = false;
+let editing = false;  // must be declared before drawMinimap / first rebuildPads()
+// pass-8: minimap ctx must exist before the first rebuildPads() — drawMinimap() is hoisted.
+const minimapCanvas = document.getElementById('minimap');
+let minimapCtx = minimapCanvas ? minimapCanvas.getContext('2d') : null;
+function drawMinimap() {
+  if (!minimapCtx || !showMinimap || !editing) return;
+  const w = minimapCanvas.width;
+  const h = minimapCanvas.height;
+  const pad = 8;
+  const span = HALF * 2 || 1;
+  const inner = Math.min(w, h) - pad * 2;
+  const scale = inner / span;
+  const sx = scale;
+  const sz = scale;
+  const toX = x => pad + (x + HALF) * sx;
+  const toY = z => pad + (z + HALF) * sz;
+
+  minimapCtx.clearRect(0, 0, w, h);
+  minimapCtx.fillStyle = '#0c1018';
+  minimapCtx.fillRect(0, 0, w, h);
+  minimapCtx.strokeStyle = '#3a465c';
+  minimapCtx.strokeRect(pad, pad, span * sx, span * sz);
+
+  mapState.pads.forEach((p, i) => {
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    minimapCtx.beginPath();
+    minimapCtx.fillStyle = '#' + (KIND_COLORS[kind] || 0xffffff).toString(16).padStart(6, '0');
+    minimapCtx.arc(toX(p.x), toY(p.z), i === selectedIndex ? 5 : 3.5, 0, Math.PI * 2);
+    minimapCtx.fill();
+    if (i === selectedIndex) {
+      minimapCtx.strokeStyle = '#ffffff';
+      minimapCtx.lineWidth = 1.5;
+      minimapCtx.stroke();
+    }
+  });
+}
+const KIND_LABEL = {
+  spawn: 'Spawn', weapon: 'Weapon', ammo: 'Ammo',
+  scenario: 'Scenario (case/hill)', other: 'Other',
+};
+const TILE_COLOR = 0x00e0c0;     // teal wireframe
+const SUSPECT_COLOR = 0xff3b3b;  // RED = within originRadius
+
+// Box dimensions are mutable in pass-2 (the geometry sliders live-resize the box).
+let HALF = DATA.half;
+let HEIGHT = DATA.height;
+const CENTER = new THREE.Vector3(0, HEIGHT / 2, 0);
+const EYE_H = 170;  // approx in-game player eye height (world units)
+
+// ===========================================================================
+// pass-2 editor: data model + catalogs
+// ---------------------------------------------------------------------------
+// The map editor keeps a single mutable source-of-truth array `mapState.pads`.
+// A pad's INDEX is implicitly its array position, so indices are *always*
+// contiguous (0..N-1) — this mirrors pdmap, where props/intro reference pads by
+// array position and any gap silently breaks pickups/spawns. Every add/delete
+// calls rebuildPads() which re-derives indices + 3D meshes from this array.
+// ===========================================================================
+const KIND_ORDER = ['spawn', 'weapon', 'ammo', 'scenario', 'other'];
+const PAD_FLOOR_Y = 10;  // pads must sit above floor (Y=0) or spawns fall through in-game
+const rnd = v => Math.round(v);
+
+// Validation: weapon/ammo may share a spawn XZ in stock maps; only duplicate spawns
+// (or two weapons / two ammo crates at the same spot) should block Test / Play.
+function padPositionsConflict(indices, pads) {
+  if (indices.length <= 1) return false;
+  for (const kind of ['spawn', 'weapon', 'ammo']) {
+    if (indices.filter(i => pads[i].type === kind).length > 1) return true;
+  }
+  return false;
+}
+// Near-origin gate for Test / Play: spawn pads hugging world origin (phantom-floor class).
+function padNearOriginForTest(p) {
+  return p.type === 'spawn' && Math.hypot(p.x, p.z) <= 80 && p.y <= 20;
+}
+
+// Curated weapon catalog (weaponnum enum from src/include/constants.h, the same
+// IDs tools/pdmap/weapons.py uses for WeaponProp). Values are the integer IDs.
+const WEAPON_CATALOG = [
+  [0x02, 'Falcon 2'], [0x05, 'MagSec 4'], [0x06, 'Mauler'], [0x07, 'Phoenix'],
+  [0x08, 'DY357 Magnum'], [0x09, 'DY357-LX'], [0x0a, 'CMP150'], [0x0b, 'Cyclone'],
+  [0x0c, 'Callisto NTG'], [0x0d, 'RC-P120'], [0x0e, 'Laptop Gun'], [0x0f, 'Dragon'],
+  [0x10, 'K7 Avenger'], [0x11, 'AR34'], [0x12, 'SuperDragon'], [0x13, 'Shotgun'],
+  [0x14, 'Reaper'], [0x15, 'Sniper Rifle'], [0x16, 'FarSight XR-20'],
+  [0x17, 'Devastator'], [0x18, 'Rocket Launcher'], [0x19, 'Slayer'],
+  [0x1b, 'Crossbow'], [0x1c, 'Tranquilizer'],
+];
+// Ammo type catalog (AMMOTYPE_* from tools/pdmap/weapons.py / constants.h).
+const AMMO_CATALOG = [
+  [0x01, 'Pistol'], [0x03, 'Rifle'], [0x04, 'Shotgun'], [0x05, 'Rocket'],
+];
+const SCENARIO_CATALOG = [
+  ['case', 'Capture the Case'],
+  ['case_respawn', 'Case respawn (CTF)'],
+  ['hill', 'King of the Hill'],
+];
+
+function weaponName(id) { const e = WEAPON_CATALOG.find(w => w[0] === id); return e ? e[1] : ('0x' + id.toString(16)); }
+function ammoName(id)   { const e = AMMO_CATALOG.find(a => a[0] === id);   return e ? e[1] : ('0x' + id.toString(16)); }
+
+// Default type-specific fields applied when a pad is created / changes type.
+function defaultsForType(t) {
+  if (t === 'weapon')   return { weapon: 0x11 };           // AR34
+  if (t === 'ammo')     return { ammoType: 0x04, quantity: 200 }; // Rifle x200
+  if (t === 'scenario') return { scenario: 'case', team: 0 };
+  return {};
+}
+
+// Build the initial editor model from the read-only DATA.pads scene.
+const mapState = {
+  name: DATA.name || 'uff',
+  pads: DATA.pads.map(p => {
+    const t = (KIND_ORDER.includes(p.kind) ? p.kind : 'other');
+    const pad = Object.assign({
+      type: t, x: p.pos[0], y: p.pos[1], z: p.pos[2], room: p.room,
+    }, defaultsForType(t));
+    if (t === 'scenario') {
+      if (p.scenario) pad.scenario = p.scenario;
+      if (p.team != null) pad.team = +p.team;
+    }
+    return pad;
+  }),
+};
+
+// ===========================================================================
+// pass-4: undo/redo history + browser LocalStorage persistence
+// ---------------------------------------------------------------------------
+// Snapshots capture the full editable state (pads, box size, selection). Every
+// user-facing mutation pushes the *pre-change* snapshot so undo restores it.
+// ===========================================================================
+const MAX_HISTORY = 80;
+const historyStack = [];
+const redoStack = [];
+let suppressHistory = false;   // true while undo/redo/restore is in flight
+let boxSliderPushed = false;   // one history entry per box-slider drag session
+
+function captureSnapshot() {
+  return {
+    name: mapState.name,
+    half: HALF,
+    height: HEIGHT,
+    pads: mapState.pads.map(p => JSON.parse(JSON.stringify(p))),
+    selectedIndex: selectedIndex,
+  };
+}
+
+function restoreSnapshot(snap) {
+  suppressHistory = true;
+  mapState.name = snap.name;
+  mapState.pads = snap.pads.map(p => JSON.parse(JSON.stringify(p)));
+  halfRange.value = snap.half;
+  heightRange.value = snap.height;
+  applyBoxSize(snap.half, snap.height);
+  selectedIndex = (snap.selectedIndex >= 0 && snap.selectedIndex < mapState.pads.length)
+    ? snap.selectedIndex : -1;
+  rebuildPads();
+  renderProps();
+  updateStorageKeyDisplay();
+  suppressHistory = false;
+}
+
+function pushHistory() {
+  if (suppressHistory) return;
+  historyStack.push(captureSnapshot());
+  if (historyStack.length > MAX_HISTORY) historyStack.shift();
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+  markDirty();
+}
+
+function undo() {
+  if (!historyStack.length) return;
+  suppressHistory = true;
+  redoStack.push(captureSnapshot());
+  const snap = historyStack.pop();
+  restoreSnapshot(snap);
+  updateUndoRedoButtons();
+  showToast('Undo');
+}
+
+function redo() {
+  if (!redoStack.length) return;
+  suppressHistory = true;
+  historyStack.push(captureSnapshot());
+  const snap = redoStack.pop();
+  restoreSnapshot(snap);
+  updateUndoRedoButtons();
+  showToast('Redo');
+}
+
+function updateUndoRedoButtons() {
+  const u = document.getElementById('undoBtn');
+  const r = document.getElementById('redoBtn');
+  if (u) u.disabled = historyStack.length === 0;
+  if (r) r.disabled = redoStack.length === 0;
+}
+
+function localStorageKey() {
+  const nameEl = document.getElementById('levelName');
+  const raw = (nameEl && nameEl.value) ? nameEl.value : mapState.name;
+  try { return 'pdmap_editor_' + sanitizeLevelName(raw); }
+  catch (_) { return 'pdmap_editor_map'; }
+}
+
+function updateStorageKeyDisplay() {
+  const el = document.getElementById('storageKey');
+  if (el) el.textContent = localStorageKey();
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+const ONBOARDING_SESSION_KEY = 'pd_editor_onboarding_dismissed';
+const onboardingOverlay = document.getElementById('onboardingOverlay');
+const onboardingDismissBtn = document.getElementById('onboardingDismiss');
+let bundleStaleToastShown = false;
+
+function isOnboardingDismissedThisSession() {
+  try { return sessionStorage.getItem(ONBOARDING_SESSION_KEY) === '1'; }
+  catch (_) { return false; }
+}
+
+function dismissOnboarding() {
+  if (onboardingOverlay) {
+    onboardingOverlay.classList.remove('open');
+    onboardingOverlay.hidden = true;
+  }
+  try { sessionStorage.setItem(ONBOARDING_SESSION_KEY, '1'); }
+  catch (_) { /* private mode */ }
+}
+
+function maybeShowOnboarding() {
+  if (isOnboardingDismissedThisSession()) return;
+  if (!mapState.pads || mapState.pads.length > 0) return;
+  if (!onboardingOverlay) return;
+  onboardingOverlay.hidden = false;
+  onboardingOverlay.classList.add('open');
+}
+
+onboardingDismissBtn?.addEventListener('click', dismissOnboarding);
+onboardingOverlay?.addEventListener('click', e => {
+  if (e.target === onboardingOverlay) dismissOnboarding();
+});
+
+function checkBundleFreshness(health) {
+  if (!health || !health.bundleHash || !EDITOR_BUNDLE_HASH || EDITOR_BUNDLE_HASH === '__BUNDLE_HASH__') return;
+  if (health.bundleHash === EDITOR_BUNDLE_HASH) {
+    bundleStaleToastShown = false;
+    return;
+  }
+  if (bundleStaleToastShown) return;
+  bundleStaleToastShown = true;
+  showToast('Editor outdated — quit and reopen app');
+}
+
+function saveToLocalStorage() {
+  try {
+    const data = serializeMap();
+    localStorage.setItem(localStorageKey(), JSON.stringify(data));
+    showToast('Saved to ' + localStorageKey());
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+  }
+}
+
+function loadFromLocalStorage() {
+  const key = localStorageKey();
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    alert('No saved map in LocalStorage for key "' + key + '". Save first or change the map name.');
+    return false;
+  }
+  try {
+    pushHistory();
+    const obj = JSON.parse(raw);
+    loadMap(obj, { skipHistory: true });
+    showToast('Loaded from ' + key);
+    return true;
+  } catch (e) {
+    alert('Load failed: ' + e.message);
+    return false;
+  }
+}
+
+const BLANK_MAP_DEFAULTS = { box_half: 2500, box_height: 2000, pads: [] };
+
+/** Starter template: box + four corner spawns + weapons/ammo/scenario. */
+function starterMapTemplate(name) {
+  const half = 2500;
+  const y = 10;
+  const d = 2000;
+  return {
+    name: name || 'map',
+    box_half: half,
+    box_height: 2000,
+    pads: [
+      { type: 'spawn', x: -d, y, z: -d, room: 1 },
+      { type: 'spawn', x: d, y, z: -d, room: 1 },
+      { type: 'spawn', x: -d, y, z: d, room: 1 },
+      { type: 'spawn', x: d, y, z: d, room: 1 },
+      { type: 'weapon', x: 0, y, z: -1500, room: 1, weapon: 0x11 },
+      { type: 'weapon', x: 0, y, z: 1500, room: 1, weapon: 0x13 },
+      { type: 'ammo', x: 0, y, z: 0, room: 1, ammoType: 0x04, quantity: 200 },
+      { type: 'scenario', x: 0, y, z: -500, room: 1, scenario: 'case', team: 0 },
+      { type: 'scenario', x: 0, y, z: 500, room: 1, scenario: 'case_respawn', team: 0 },
+    ],
+  };
+}
+
+function clearMap() {
+  if (!confirm('Clear all pads and reset box to minimal defaults (±2500, height 2000)?')) return;
+  pushHistory();
+  const blank = Object.assign({ name: mapState.name || 'map' }, BLANK_MAP_DEFAULTS);
+  loadMap(blank, { skipHistory: true });
+  levelNameInput.value = mapState.name;
+  updateBuildCmds(mapState.name);
+  showToast('Map cleared — click the floor to place components');
+  beginPlacementMode('spawn');
+  maybeShowOnboarding();
+}
+
+// ---------- renderer / scene / camera ----------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.autoClear = false;  // we clear manually so the corner gizmo can overlay
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0e14);
+
+// Perspective camera: near/far chosen to frame a +-5000 (10000-wide) box with
+// 3000 height without clipping. far is generous; near small enough to fly inside.
+const camera = new THREE.PerspectiveCamera(45, 1, 1, 400000);
+
+// Orbit controls: damped, targeted at the box CENTER, with zoom limits that fit
+// the room (you can pull back to see the whole box, push in to fly through it).
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.rotateSpeed = 0.8;
+controls.panSpeed = 0.9;
+controls.zoomSpeed = 0.9;
+controls.target.copy(CENTER);
+controls.minDistance = 60;
+controls.maxDistance = HALF * 8;
+
+// ---------- lights ----------
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
+dirLight.position.set(1, 2, 1);
+scene.add(dirLight);
+
+// ---------- bounding sphere + framing helper ----------
+const box3 = new THREE.Box3(
+  new THREE.Vector3(-HALF, 0, -HALF),
+  new THREE.Vector3(HALF, HEIGHT, HALF)
+);
+const bsphere = box3.getBoundingSphere(new THREE.Sphere());
+
+// Distance at which the whole box fits, honoring the *narrower* of the vertical
+// and horizontal FOV so it frames correctly on any window aspect ratio.
+function fitDistance(margin = 1.6) {
+  const vFov = THREE.MathUtils.degToRad(camera.fov);
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  return (bsphere.radius / Math.sin(Math.min(vFov, hFov) / 2)) * margin;
+}
+
+// ---------- grid / axes / origin marker ----------
+// grid + axes are rebuilt when the box is resized (pass-2), so they are `let`.
+let grid = new THREE.GridHelper(HALF * 2, 20, 0x39435a, 0x222a38);
+scene.add(grid);
+
+let axes = new THREE.AxesHelper(HALF * 0.6);
+scene.add(axes);
+
+const originRing = new THREE.Mesh(
+  new THREE.SphereGeometry(DATA.originRadius, 24, 16),
+  new THREE.MeshBasicMaterial({ color: SUSPECT_COLOR, wireframe: true, transparent: true, opacity: 0.35 })
+);
+scene.add(originRing);
+
+function nearOrigin(verts) {
+  for (const v of verts) {
+    if (Math.hypot(v[0], v[1], v[2]) <= DATA.originRadius) return true;
+  }
+  return false;
+}
+function centroid(v) {
+  const n = v.length; let x = 0, y = 0, z = 0;
+  for (const p of v) { x += p[0]; y += p[1]; z += p[2]; }
+  return new THREE.Vector3(x / n, y / n, z / n);
+}
+
+// ---------- billboard labels (off by default, distance-scaled in the loop) ----------
+const labelGroup = new THREE.Group();    labelGroup.visible = false;    scene.add(labelGroup);
+const padLabelGroup = new THREE.Group(); padLabelGroup.visible = false; scene.add(padLabelGroup);
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function makeLabel(text, color) {
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+  ctx.font = 'bold 40px monospace';
+  const w = Math.ceil(ctx.measureText(text).width) + 28;
+  const h = 72;
+  cv.width = w; cv.height = h;
+  ctx.font = 'bold 40px monospace';
+  ctx.fillStyle = 'rgba(8,10,16,0.82)';
+  roundRect(ctx, 1, 1, w - 2, h - 2, 14); ctx.fill();
+  ctx.fillStyle = color; ctx.textBaseline = 'middle';
+  ctx.fillText(text, 14, h / 2 + 2);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.minFilter = THREE.LinearFilter;
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+  spr.userData.aspect = w / h;
+  return spr;
+}
+
+// ---------- box faces (semi-transparent, double-sided, pickable) ----------
+// The arena box is the exact axis-aligned ±half / 0..height volume that the
+// pdmap builder (seg._faces) produces, so we can regenerate it procedurally in
+// JS for live resize without losing fidelity. Face colours/names come from the
+// builder output (DATA.faces) in canonical order: floor, ceiling, -Z, +X, +Z, -X.
+const faceGroup = new THREE.Group(); scene.add(faceGroup);
+const faceLabelGroup = new THREE.Group(); faceLabelGroup.visible = false; scene.add(faceLabelGroup);
+let pickFaces = [];
+
+// Canonical face vertex sets for a box of the given half-extent / height.
+function boxFaceVerts(h, H) {
+  return [
+    [[-h, 0, -h], [h, 0, -h], [h, 0, h], [-h, 0, h]],       // F0 floor   Y=0
+    [[-h, H, -h], [h, H, -h], [h, H, h], [-h, H, h]],       // F1 ceiling Y=H
+    [[-h, 0, -h], [h, 0, -h], [h, H, -h], [-h, H, -h]],     // F2 wall -Z
+    [[h, 0, -h], [h, 0, h], [h, H, h], [h, H, -h]],         // F3 wall +X
+    [[-h, 0, h], [h, 0, h], [h, H, h], [-h, H, h]],         // F4 wall +Z
+    [[-h, 0, -h], [-h, 0, h], [-h, H, h], [-h, H, -h]],     // F5 wall -X
+  ];
+}
+
+let boxEdges = null;
+// (re)build the 6 translucent box faces + bright edge outline + face labels.
+function buildBox() {
+  for (const m of faceGroup.children) { m.geometry?.dispose?.(); m.material?.dispose?.(); }
+  faceGroup.clear();
+  for (const s of faceLabelGroup.children) { s.material?.map?.dispose?.(); s.material?.dispose?.(); }
+  faceLabelGroup.clear();
+  pickFaces = [];
+
+  const vsets = boxFaceVerts(HALF, HEIGHT);
+  for (let i = 0; i < vsets.length; i++) {
+    const v = vsets[i];
+    const meta = DATA.faces[i] || { name: 'face ' + i, hex: '#8899aa' };
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+      ...v[0], ...v[1], ...v[2],
+      ...v[0], ...v[2], ...v[3],
+    ]), 3));
+    geom.computeVertexNormals();
+    const suspect = nearOrigin(v);
+    const col = suspect ? SUSPECT_COLOR : parseInt(meta.hex.slice(1), 16);
+    // Flat (unlit) so every face reads its true colour evenly.
+    const mat = new THREE.MeshBasicMaterial({
+      color: col, transparent: true, opacity: suspect ? 0.5 : 0.22,
+      side: THREE.DoubleSide, depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.userData = { type: 'face', name: meta.name, hex: meta.hex, verts: v, suspect };
+    faceGroup.add(mesh);
+    pickFaces.push(mesh);
+
+    const c = centroid(v);
+    const lab = makeLabel(meta.name, suspect ? '#ff5d5d' : meta.hex);
+    lab.position.set(c.x, c.y + 120, c.z);
+    faceLabelGroup.add(lab);
+  }
+
+  // crisp, bright cube outline so the room reads clearly even with faint faces.
+  boxEdges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(HALF * 2, HEIGHT, HALF * 2)),
+    new THREE.LineBasicMaterial({ color: 0xdbe4f5, transparent: true, opacity: 0.9 })
+  );
+  boxEdges.position.copy(CENTER);
+  faceGroup.add(boxEdges);
+}
+buildBox();
+
+// ---------- collision tiles (wireframe + faint fill) ----------
+const tileGroup = new THREE.Group();
+scene.add(tileGroup);
+for (let ti = 0; ti < DATA.tiles.length; ti++) {
+  const t = DATA.tiles[ti];
+  const v = t.verts;
+  const suspect = nearOrigin(v);
+  const pts = v.map(p => new THREE.Vector3(p[0], p[1], p[2]));
+  pts.push(pts[0].clone());
+  tileGroup.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({ color: suspect ? SUSPECT_COLOR : TILE_COLOR })
+  ));
+  if (v.length >= 3) {
+    const arr = [];
+    for (let k = 1; k < v.length - 1; k++) { arr.push(...v[0], ...v[k], ...v[k + 1]); }
+    const fg = new THREE.BufferGeometry();
+    fg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arr), 3));
+    fg.computeVertexNormals();
+    tileGroup.add(new THREE.Mesh(fg, new THREE.MeshBasicMaterial({
+      color: suspect ? SUSPECT_COLOR : TILE_COLOR, transparent: true,
+      opacity: suspect ? 0.4 : 0.10, side: THREE.DoubleSide, depthWrite: false,
+    })));
+  }
+  const c = centroid(v);
+  const lab = makeLabel('tile ' + ti + ' · ' + t.room, suspect ? '#ff5d5d' : '#00e0c0');
+  lab.position.set(c.x, 80, c.z);
+  labelGroup.add(lab);
+}
+
+// ---------- pads (rebuilt from mapState; grouped by kind so each kind can toggle) ----------
+const padRoot = new THREE.Group();
+scene.add(padRoot);
+const padGroups = {};
+for (const k of KIND_ORDER) { padGroups[k] = new THREE.Group(); padRoot.add(padGroups[k]); }
+const padKindVisible = {}; for (const k of KIND_ORDER) padKindVisible[k] = true;
+let pickPads = [];            // pad meshes for raycasting (rebuilt each time)
+let selectedIndex = -1;       // index into mapState.pads, or -1 = none
+
+// pass-8: selection gizmo — outer type-colored ring + inner pulse + floor crosshair.
+const selectionGroup = new THREE.Group();
+selectionGroup.visible = false;
+scene.add(selectionGroup);
+const selectionRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.92, 1.0, 32),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthTest: false })
+);
+selectionRing.rotation.x = -Math.PI / 2;
+selectionGroup.add(selectionRing);
+const selectionPulse = new THREE.Mesh(
+  new THREE.RingGeometry(0.78, 0.86, 32),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthTest: false })
+);
+selectionPulse.rotation.x = -Math.PI / 2;
+selectionGroup.add(selectionPulse);
+const gizmoCross = new THREE.Group();
+const gizmoMat = new THREE.LineBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.65, depthTest: false });
+const gizmoLineA = new THREE.Line(new THREE.BufferGeometry(), gizmoMat);
+const gizmoLineB = new THREE.Line(new THREE.BufferGeometry(), gizmoMat);
+const gizmoPillar = new THREE.Line(new THREE.BufferGeometry(), gizmoMat.clone());
+gizmoCross.add(gizmoLineA, gizmoLineB, gizmoPillar);
+selectionGroup.add(gizmoCross);
+
+// Hover highlight ring (follows hovered pad).
+const hoverRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.88, 1.0, 28),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthTest: false })
+);
+hoverRing.rotation.x = -Math.PI / 2;
+hoverRing.visible = false;
+scene.add(hoverRing);
+
+// Ghost preview while a place tool is active.
+const ghostPad = new THREE.Mesh(
+  new THREE.SphereGeometry(90, 16, 12),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.38, depthWrite: false })
+);
+ghostPad.visible = false;
+scene.add(ghostPad);
+const ghostRing = new THREE.Mesh(
+  new THREE.RingGeometry(120, 140, 32),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthTest: false })
+);
+ghostRing.rotation.x = -Math.PI / 2;
+ghostRing.visible = false;
+scene.add(ghostRing);
+
+// Snap grid dots (optional, when snap enabled in edit mode).
+const snapGridGroup = new THREE.Group();
+snapGridGroup.visible = false;
+scene.add(snapGridGroup);
+function rebuildSnapGrid() {
+  for (const c of snapGridGroup.children) { c.geometry?.dispose?.(); c.material?.dispose?.(); }
+  snapGridGroup.clear();
+  const step = 250;
+  const dotGeom = new THREE.RingGeometry(18, 28, 12);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0x4a5870, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthTest: false });
+  for (let x = -HALF; x <= HALF; x += step) {
+    for (let z = -HALF; z <= HALF; z += step) {
+      const d = new THREE.Mesh(dotGeom, dotMat);
+      d.rotation.x = -Math.PI / 2;
+      d.position.set(x, 0.5, z);
+      snapGridGroup.add(d);
+    }
+  }
+}
+rebuildSnapGrid();
+
+// pass-4: visual line from dragged pad to floor snap point.
+const dragLine = new THREE.Line(
+  new THREE.BufferGeometry(),
+  new THREE.LineBasicMaterial({ color: 0xaaccff, transparent: true, opacity: 0.45 })
+);
+dragLine.visible = false;
+scene.add(dragLine);
+
+// Regenerate every pad mesh + label from mapState.pads.
+// indices are assigned (index = array position) so they are always contiguous.
+function rebuildPads() {
+  for (const k of KIND_ORDER) {
+    for (const m of padGroups[k].children) { m.material?.dispose?.(); }
+    padGroups[k].clear();
+  }
+  for (const s of padLabelGroup.children) { s.material?.map?.dispose?.(); s.material?.dispose?.(); }
+  padLabelGroup.clear();
+  pickPads = [];
+
+  mapState.pads.forEach((p, i) => {
+    p.index = i;  // enforce contiguous index == array position
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    const suspect = Math.hypot(p.x, p.y, p.z) <= DATA.originRadius;
+    const col = suspect ? SUSPECT_COLOR : (KIND_COLORS[kind] || 0xffffff);
+    const m = new THREE.Mesh(padGeometryFor(kind), new THREE.MeshBasicMaterial({ color: col }));
+    m.position.set(p.x, p.y, p.z);
+    m.userData = { type: 'pad', index: i, kind, ref: p, suspect, baseScale: 1 };
+    if (i === selectedIndex) m.scale.setScalar(1.12);
+    else if (i === hoverIndex) m.scale.setScalar(1.08);
+    padGroups[kind].add(m);
+    pickPads.push(m);
+
+    const lab = makeLabel('p' + i, '#cdd6e6');
+    lab.position.set(p.x, p.y + PAD_RADIUS[kind] + 20, p.z);
+    padLabelGroup.add(lab);
+  });
+
+  for (const k of KIND_ORDER) padGroups[k].visible = padKindVisible[k];
+  // keep selection valid + marker positioned
+  if (selectedIndex >= mapState.pads.length) selectedIndex = -1;
+  if (hoverIndex >= mapState.pads.length) hoverIndex = -1;
+  updateSelectionMarker();
+  updateHoverRing();
+  if (typeof updateValidation === 'function') updateValidation();
+  if (typeof updateCounts === 'function') updateCounts();
+  if (typeof drawMinimap === 'function') drawMinimap();
+}
+
+function updateSelectionMarker() {
+  if (selectedIndex < 0 || selectedIndex >= mapState.pads.length) {
+    selectionGroup.visible = false;
+    return;
+  }
+  const p = mapState.pads[selectedIndex];
+  const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+  const r = PAD_RADIUS[kind] * (PAD_RING_SCALE[kind] || 1.4);
+  selectionGroup.position.set(p.x, p.y, p.z);
+  selectionGroup.visible = padRoot.visible;
+  selectionRing.scale.set(r, r, 1);
+  selectionPulse.scale.set(r * 0.92, r * 0.92, 1);
+  const col = KIND_COLORS[kind] || 0xffffff;
+  selectionRing.material.color.set(col);
+  selectionPulse.material.color.set(col);
+  const span = Math.max(160, r * 0.85);
+  gizmoLineA.geometry.setFromPoints([new THREE.Vector3(-span, 0, 0), new THREE.Vector3(span, 0, 0)]);
+  gizmoLineB.geometry.setFromPoints([new THREE.Vector3(0, 0, -span), new THREE.Vector3(0, 0, span)]);
+  gizmoPillar.geometry.setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, p.y, 0)]);
+  gizmoLineA.position.y = 0.5 - p.y;
+  gizmoLineB.position.y = 0.5 - p.y;
+}
+
+function updateHoverRing() {
+  if (hoverIndex < 0 || hoverIndex >= mapState.pads.length || hoverIndex === selectedIndex) {
+    hoverRing.visible = false;
+    return;
+  }
+  const p = mapState.pads[hoverIndex];
+  const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+  const r = PAD_RADIUS[kind] * 1.22;
+  hoverRing.position.set(p.x, p.y + 2, p.z);
+  hoverRing.scale.set(r, r, 1);
+  hoverRing.material.color.set(KIND_COLORS[kind] || 0xffffff);
+  hoverRing.visible = padRoot.visible && editing;
+}
+
+function updateGhostPreview(pt, kind) {
+  if (!editing || !activeTool || !pt) {
+    ghostPad.visible = false;
+    ghostRing.visible = false;
+    return;
+  }
+  const k = activeTool || kind || 'spawn';
+  const s = snapClamp(pt);
+  const col = KIND_COLORS[k] || 0xffffff;
+  ghostPad.geometry = padGeometryFor(k);
+  ghostPad.material.color.set(col);
+  ghostPad.position.set(rnd(s.x), PAD_FLOOR_Y, rnd(s.z));
+  ghostPad.visible = padRoot.visible;
+  ghostRing.position.set(rnd(s.x), PAD_FLOOR_Y + 0.5, rnd(s.z));
+  ghostRing.material.color.set(col);
+  ghostRing.visible = padRoot.visible && snapChk.checked;
+}
+
+function animatePadVisuals(dt) {
+  animTime += dt;
+  const pulse = 0.45 + 0.25 * Math.sin(animTime * 4.5);
+  if (selectionPulse.visible) selectionPulse.material.opacity = pulse;
+  if (ghostPad.visible) ghostPad.material.opacity = 0.28 + 0.12 * Math.sin(animTime * 5);
+}
+rebuildPads();
+
+// ---------- HUD: counts + legend ----------
+// counts reflect the live editor model + current box size (pass-2).
+function updateCounts() {
+  document.getElementById('counts').innerHTML =
+    `<div class="row"><span>Box faces</span><span class="muted">${DATA.faces.length}</span></div>` +
+    `<div class="row"><span>Collision tiles</span><span class="muted">${DATA.tiles.length}</span></div>` +
+    `<div class="row"><span>Pads</span><span class="muted">${mapState.pads.length}</span></div>` +
+    `<div class="row"><span>Box extent</span><span class="muted">±${HALF} XZ · 0..${HEIGHT} Y</span></div>`;
+}
+updateCounts();
+
+function legendRow(color, label) {
+  const hex = '#' + color.toString(16).padStart(6, '0');
+  return `<div class="row"><span><span class="sw" style="background:${hex}"></span>${label}</span></div>`;
+}
+document.getElementById('legend').innerHTML =
+  legendRow(KIND_COLORS.spawn, 'Spawn pad') +
+  legendRow(KIND_COLORS.weapon, 'Weapon pad') +
+  legendRow(KIND_COLORS.ammo, 'Ammo pad') +
+  legendRow(KIND_COLORS.scenario, 'Scenario pad (case/hill)') +
+  legendRow(TILE_COLOR, 'Collision tile') +
+  legendRow(SUSPECT_COLOR, `Within ${DATA.originRadius} of origin`);
+
+// ---------- HUD: layer toggles (with pad sub-toggles by kind) ----------
+const togglesEl = document.getElementById('toggles');
+function addToggle(parent, label, checked, onChange) {
+  const lab = document.createElement('label'); lab.className = 'toggle';
+  const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = checked;
+  cb.addEventListener('change', () => onChange(cb.checked));
+  lab.appendChild(cb); lab.appendChild(document.createTextNode(label));
+  parent.appendChild(lab);
+  onChange(checked);  // apply initial state
+  return cb;
+}
+addToggle(togglesEl, 'Box faces', true, v => { faceGroup.visible = v; });
+addToggle(togglesEl, 'Collision tiles', true, v => { tileGroup.visible = v; });
+addToggle(togglesEl, 'Pads', true, v => { padRoot.visible = v; updateSelectionMarker(); updateHoverRing(); });
+const subWrap = document.createElement('div'); subWrap.className = 'sub-toggles'; togglesEl.appendChild(subWrap);
+// Sub-toggles for every pad kind (not just present ones) so visibility persists
+// across edits that add/remove a kind.
+for (const k of KIND_ORDER) addToggle(subWrap, KIND_LABEL[k] || k, true, v => { padKindVisible[k] = v; padGroups[k].visible = v; });
+addToggle(togglesEl, 'Labels (faces / tiles)', false, v => { faceLabelGroup.visible = v; labelGroup.visible = v; });
+addToggle(togglesEl, 'Pad IDs', false, v => { padLabelGroup.visible = v; });
+addToggle(togglesEl, 'Grid', true, v => { grid.visible = v; });
+addToggle(togglesEl, 'Axes', true, v => { axes.visible = v; });
+addToggle(togglesEl, 'Origin ' + DATA.originRadius + ' sphere', true, v => { originRing.visible = v; });
+
+// ---------- HUD: origin proximity + GDL diagnostics ----------
+const nearTxt = (DATA.nearFaces.length || DATA.nearTiles.length)
+  ? `<span class="danger">FACES: ${DATA.nearFaces.join(', ') || 'none'} · TILES: ${DATA.nearTiles.join(', ') || 'none'}</span>`
+  : `<span class="ok">none near origin</span>`;
+document.getElementById('origin').innerHTML =
+  `<div class="row"><span>Near origin</span></div><div>${nearTxt}</div>`;
+
+const g = DATA.gdl;
+const gdlTxt = g.anyOverflow
+  ? `<span class="danger">G_VTX OVERFLOW: a load exceeds 16 verts → phantom-surface suspect</span>`
+  : `<span class="ok">max G_VTX load = ${g.maxLoad} verts (≤16, no nibble overflow)</span>`;
+document.getElementById('gdl').innerHTML =
+  `<hr/><div class="row"><span>GDL G_VTX loads</span><span class="muted">${g.loads} · ${g.totalVerts} verts</span></div><div>${gdlTxt}</div>`;
+
+// ---------- camera tween + view presets ----------
+let tween = null;
+function moveCamera(pos, look, dur = 650) {
+  tween = {
+    fp: camera.position.clone(), tp: pos.clone(),
+    ft: controls.target.clone(), tt: look.clone(),
+    t0: performance.now(), dur,
+  };
+}
+function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+
+const PRESET_DIRS = {
+  iso:   new THREE.Vector3(1, 0.42, 1),
+  top:   new THREE.Vector3(0, 1, 0.0001),
+  front: new THREE.Vector3(0, 0.12, 1),
+  side:  new THREE.Vector3(1, 0.12, 0),
+};
+function presetView(name) {
+  if (mode !== 'orbit') setMode('orbit');
+  if (name === 'eye') {
+    // camera near the floor at room center, looking outward toward the +Z wall
+    moveCamera(new THREE.Vector3(0, EYE_H, 0), new THREE.Vector3(0, EYE_H, HALF), 700);
+    setActiveView('eye');
+    return;
+  }
+  const dir = (PRESET_DIRS[name] || PRESET_DIRS.iso).clone().normalize();
+  moveCamera(CENTER.clone().add(dir.multiplyScalar(fitDistance())), CENTER.clone());
+  setActiveView(name);
+}
+function setActiveView(name) {
+  document.querySelectorAll('[data-view]').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === name && mode === 'orbit'));
+}
+
+// ---------- fly / first-person mode (pointer-lock + WASD) ----------
+const fly = new PointerLockControls(camera, renderer.domElement);
+let mode = 'orbit';
+const keys = {};
+const clock = new THREE.Clock();
+const flyBtn = document.getElementById('flyBtn');
+
+function setMode(m) {
+  if (m === mode) return;
+  mode = m;
+  if (m === 'fly') {
+    setEditing(false);  // fly and edit are mutually exclusive (function is hoisted)
+    tween = null;
+    controls.enabled = false;
+    document.getElementById('helpOrbit').style.display = 'none';
+    document.getElementById('helpFly').style.display = '';
+    flyBtn.textContent = 'Exit fly mode (F)';
+    flyBtn.classList.add('active');
+    setActiveView(null);
+    try { fly.lock(); } catch (e) { /* pointer lock unavailable (e.g. headless) */ }
+  } else {
+    controls.enabled = true;
+    if (fly.isLocked) fly.unlock();
+    // re-anchor the orbit target a bit ahead of where the camera is now
+    const fwd = new THREE.Vector3();
+    camera.getWorldDirection(fwd);
+    controls.target.copy(camera.position).add(fwd.multiplyScalar(900));
+    document.getElementById('helpOrbit').style.display = '';
+    document.getElementById('helpFly').style.display = 'none';
+    flyBtn.textContent = 'Enter fly mode (F)';
+    flyBtn.classList.remove('active');
+  }
+}
+function updateFly(dt) {
+  const fast = keys['ShiftLeft'] || keys['ShiftRight'];
+  const step = (fast ? 9000 : 3200) * dt;
+  if (keys['KeyW']) fly.moveForward(step);
+  if (keys['KeyS']) fly.moveForward(-step);
+  if (keys['KeyA']) fly.moveRight(-step);
+  if (keys['KeyD']) fly.moveRight(step);
+  if (keys['Space']) camera.position.y += step;  // E is reserved for edit mode (pass-2)
+  if (keys['ControlLeft'] || keys['ControlRight'] || keys['KeyQ']) camera.position.y -= step;
+}
+
+function isTypingInForm(el) {
+  const node = el || document.activeElement;
+  if (!node) return false;
+  const tag = node.tagName || '';
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || node.isContentEditable;
+}
+
+addEventListener('keydown', e => {
+  // Ignore shortcuts while typing in an editor input/textarea/select.
+  const typing = isTypingInForm(e.target);
+  if (!typing) {
+    if (e.code === 'KeyF' && !e.repeat) { e.preventDefault(); setMode(mode === 'fly' ? 'orbit' : 'fly'); }
+    if (e.code === 'KeyE' && !e.repeat) { e.preventDefault(); setEditing(!editing); }
+    if ((e.code === 'Delete' || e.code === 'Backspace') && editing && selectedIndex >= 0) {
+      e.preventDefault(); deletePad();
+    }
+    if (e.code === 'KeyT' && !e.repeat && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      runTestPlay();
+    }
+    if (e.code === 'KeyX' && !e.repeat && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      e.preventDefault();
+      runTestBuildOnly();
+    }
+    if (e.code === 'KeyG' && !e.repeat) {
+      e.preventDefault();
+      toggleSnapGrid();
+    }
+    if (e.code === 'KeyM' && !e.repeat) {
+      e.preventDefault();
+      toggleMinimap();
+    }
+    // pass-4/8: global edit shortcuts (undo/redo/save/load maps).
+    if (e.ctrlKey || e.metaKey) {
+      const k = e.key.toLowerCase();
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+      else if (k === 's') { e.preventDefault(); saveCurrentMap(); }
+      else if (k === 'o') { e.preventDefault(); triggerOpenFilePicker(); }
+      else if (k === 'n') { e.preventDefault(); createNewMap(); }
+      else if (k === 'l') { e.preventDefault(); loadFromLocalStorage(); }
+    }
+  }
+  if (mode === 'fly' && (e.code === 'Space' || e.code.startsWith('Control'))) e.preventDefault();
+  keys[e.code] = true;
+}, true);
+addEventListener('keyup', e => { keys[e.code] = false; }, true);
+
+// re-lock the pointer if the user pressed Esc but is still in fly mode
+canvas.addEventListener('click', () => { if (mode === 'fly' && !fly.isLocked) { try { fly.lock(); } catch (e) {} } });
+
+// ---------- click-to-inspect (orbit mode) ----------
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let downXY = null;
+canvas.addEventListener('pointerdown', e => { downXY = { x: e.clientX, y: e.clientY }; });
+canvas.addEventListener('pointerup', e => {
+  if (editing) return;  // edit-mode pointer handling lives in the editor block
+  if (mode !== 'orbit' || !downXY) { downXY = null; return; }
+  const moved = Math.hypot(e.clientX - downXY.x, e.clientY - downXY.y);
+  downXY = null;
+  if (moved > 5) return;  // it was a drag, not a click
+  ndc.x = (e.clientX / window.innerWidth) * 2 - 1;
+  ndc.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+  let hits = raycaster.intersectObjects(pickPads, false);  // pads take priority
+  if (!hits.length) hits = raycaster.intersectObjects(pickFaces, false);
+  if (hits.length) showInfo(hits[0].object.userData);
+});
+function showInfo(u) {
+  const el = document.getElementById('infoBody');
+  if (u.type === 'pad') {
+    const p = u.ref;
+    el.innerHTML =
+      `<h2>Pad ${u.index}</h2>` +
+      `<div class="row"><span>Type</span><span class="muted">${KIND_LABEL[u.kind] || u.kind}</span></div>` +
+      `<div class="row"><span>Room</span><span class="muted">${p.room}</span></div>` +
+      `<div class="row"><span>Position</span><span class="muted"><code>${Math.round(p.x)}, ${Math.round(p.y)}, ${Math.round(p.z)}</code></span></div>` +
+      (u.suspect ? `<div class="danger small">within ${DATA.originRadius} of origin</div>` : '');
+  } else {
+    el.innerHTML =
+      `<h2>${u.name}</h2>` +
+      `<div class="row"><span>Colour</span><span><span class="sw" style="background:${u.hex}"></span><span class="muted">${u.hex}</span></span></div>` +
+      `<div class="small" style="margin-top:4px">vertices:</div>` +
+      u.verts.map(v => `<div class="small"><code>[${v[0]}, ${v[1]}, ${v[2]}]</code></div>`).join('') +
+      (u.suspect ? `<div class="danger small">within ${DATA.originRadius} of origin</div>` : '');
+  }
+  document.getElementById('info').style.display = 'block';
+}
+document.getElementById('infoClose').onclick = () => { document.getElementById('info').style.display = 'none'; };
+
+// ---------- button wiring ----------
+flyBtn.onclick = () => setMode(mode === 'fly' ? 'orbit' : 'fly');
+document.getElementById('resetBtn').onclick = () => presetView('iso');
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => presetView(b.dataset.view));
+const helpBtn = document.getElementById('helpBtn');
+const helpPanel = document.getElementById('help');
+helpBtn.onclick = () => {
+  const hidden = helpPanel.style.display === 'none';
+  helpPanel.style.display = hidden ? '' : 'none';
+  helpBtn.textContent = hidden ? 'Hide help' : 'Show help';
+};
+
+// ===========================================================================
+// pass-2 EDITOR: edit mode, place/select/drag/delete, properties, geometry,
+// validation, JSON import/export.
+// ===========================================================================
+let activeTool = null;        // null = select/move; else 'spawn'|'weapon'|'ammo'|'scenario'
+let dragging = false;         // currently dragging the selected pad on the floor
+let editDownXY = null;        // pointer-down screen pos (to distinguish click vs orbit-drag)
+const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);  // Y=0 floor
+const editBtn = document.getElementById('editBtn');
+const editModeBtn = document.getElementById('editModeBtn');
+const snapChk = document.getElementById('snapChk');
+const minimapChk = document.getElementById('minimapChk');
+const minimapWrap = document.getElementById('minimapWrap');
+
+function syncMinimapDisplay() {
+  if (minimapChk) minimapChk.checked = showMinimap;
+  if (minimapWrap) {
+    minimapWrap.classList.toggle('visible', editing && showMinimap);
+    minimapWrap.setAttribute('aria-hidden', (editing && showMinimap) ? 'false' : 'true');
+  }
+  if (editing && showMinimap) drawMinimap();
+}
+function setMinimapVisible(on, opts = {}) {
+  showMinimap = !!on;
+  syncMinimapDisplay();
+  if (!opts.silent) showToast(showMinimap ? 'Minimap on' : 'Minimap off');
+}
+function toggleMinimap() {
+  if (!editing) setEditing(true);
+  setMinimapVisible(!showMinimap);
+}
+function toggleSnapGrid() {
+  if (!editing) setEditing(true);
+  if (!snapChk) return;
+  snapChk.checked = !snapChk.checked;
+  snapGridGroup.visible = editing && snapChk.checked;
+  rebuildSnapGrid();
+  showToast(snapChk.checked ? 'Snap grid on' : 'Snap grid off');
+}
+minimapChk?.addEventListener('change', () => setMinimapVisible(minimapChk.checked));
+document.getElementById('minimapClose')?.addEventListener('click', () => setMinimapVisible(false));
+
+function updateDragVisual(px, py, pz, sx, sz, clientX, clientY) {
+  dragLine.geometry.setFromPoints([
+    new THREE.Vector3(px, py, pz),
+    new THREE.Vector3(sx, 0, sz),
+    new THREE.Vector3(sx, py, sz),
+  ]);
+  dragLine.visible = padRoot.visible;
+  const hint = document.getElementById('dragHint');
+  if (hint) {
+    hint.style.display = 'block';
+    hint.style.left = (clientX + 14) + 'px';
+    hint.style.top = (clientY + 14) + 'px';
+    hint.textContent = 'X ' + rnd(sx) + '  Z ' + rnd(sz) + (snapChk.checked ? ' (snapped)' : '');
+  }
+}
+
+function hideDragVisual() {
+  dragLine.visible = false;
+  const hint = document.getElementById('dragHint');
+  if (hint) hint.style.display = 'none';
+}
+
+// ---- mode toggle ----------------------------------------------------------
+function setEditing(on) {
+  if (on === editing) return;
+  editing = on;
+  document.body.classList.toggle('editing', on);
+  if (editBtn) {
+    editBtn.textContent = on ? 'Exit edit mode (E)' : 'Enter edit mode (E)';
+    editBtn.classList.toggle('active', on);
+  }
+  if (editModeBtn) {
+    editModeBtn.textContent = on ? 'Done' : 'Edit';
+    editModeBtn.classList.toggle('active', on);
+    editModeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    editModeBtn.title = on ? 'Exit edit mode (E)' : 'Enter edit mode (E)';
+  }
+  if (on && mode === 'fly') setMode('orbit');
+  document.getElementById('helpEdit').style.display = on ? '' : 'none';
+  document.getElementById('helpOrbit').style.display = (!on && mode === 'orbit') ? '' : 'none';
+  if (on) document.getElementById('info').style.display = 'none';  // hide inspect popup
+  else { selectPad(-1); canvas.style.cursor = 'default'; hideGhostPreview(); }
+  snapGridGroup.visible = on && snapChk.checked;
+  syncMinimapDisplay();
+  if (on) closeMapMenus();
+  updatePlaceVariants();
+  layoutChrome();
+}
+function hideGhostPreview() {
+  ghostPad.visible = false;
+  ghostRing.visible = false;
+}
+/** Enter edit mode with an optional placement tool pre-selected (spawn by default). */
+function beginPlacementMode(tool) {
+  if (!editing) setEditing(true);
+  setTool(tool != null ? tool : 'spawn');
+}
+editBtn?.addEventListener('click', () => setEditing(!editing));
+editModeBtn?.addEventListener('click', () => setEditing(!editing));
+
+// ---- tool palette (side panel + floating canvas toolbar) ------------------
+const toolsEl = document.getElementById('tools');
+const toolBtns = {};
+const placeToolBtnsEl = document.getElementById('placeToolBtns');
+const placeVariantsEl = document.getElementById('placeVariants');
+const placeHintEl = document.getElementById('placeHint');
+const placeToolBtns = {};
+const TOOL_DEFS = [['spawn', 'Spawn'], ['weapon', 'Weapon'], ['ammo', 'Ammo'], ['scenario', 'Scenario']];
+// Quick-pick variants shown above the floating toolbar when placing weapons/ammo/scenario.
+const QUICK_WEAPONS = [0x11, 0x13, 0x15, 0x18, 0x0e, 0x02];
+const QUICK_AMMO = [0x03, 0x04, 0x01, 0x05];
+let placeWeapon = 0x11;
+let placeAmmo = 0x04;
+let placeScenario = 'case';
+
+function syncToolButtonStates() {
+  for (const k of Object.keys(toolBtns)) toolBtns[k].classList.toggle('active', (activeTool || '_select') === k);
+  for (const k of Object.keys(placeToolBtns)) placeToolBtns[k].classList.toggle('active', (activeTool || '_select') === k);
+  canvas.style.cursor = (editing && activeTool) ? 'crosshair' : 'default';
+}
+
+function updatePlaceHint() {
+  if (!placeHintEl) return;
+  if (!editing) { placeHintEl.textContent = ''; return; }
+  if (!activeTool) placeHintEl.textContent = 'Select — click a pad · drag to move';
+  else if (activeTool === 'spawn') placeHintEl.textContent = 'Spawn — click the floor';
+  else if (activeTool === 'weapon') placeHintEl.textContent = weaponName(placeWeapon) + ' — click floor';
+  else if (activeTool === 'ammo') placeHintEl.textContent = ammoName(placeAmmo) + ' ×200 — click floor';
+  else if (activeTool === 'scenario') {
+    const sc = SCENARIO_CATALOG.find(([id]) => id === placeScenario);
+    placeHintEl.textContent = (sc ? sc[1] : placeScenario) + ' — click floor';
+  } else placeHintEl.textContent = 'Click the floor to place';
+}
+
+function updatePlaceVariants() {
+  if (!placeVariantsEl) return;
+  placeVariantsEl.innerHTML = '';
+  if (!editing || !activeTool || activeTool === 'spawn') {
+    placeVariantsEl.classList.remove('open');
+    updatePlaceHint();
+    return;
+  }
+  placeVariantsEl.classList.add('open');
+  if (activeTool === 'weapon') {
+    for (const id of QUICK_WEAPONS) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = weaponName(id);
+      b.classList.toggle('active', placeWeapon === id);
+      b.onclick = () => { placeWeapon = id; updatePlaceVariants(); };
+      placeVariantsEl.appendChild(b);
+    }
+  } else if (activeTool === 'ammo') {
+    for (const id of QUICK_AMMO) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = ammoName(id);
+      b.classList.toggle('active', placeAmmo === id);
+      b.onclick = () => { placeAmmo = id; updatePlaceVariants(); };
+      placeVariantsEl.appendChild(b);
+    }
+  } else if (activeTool === 'scenario') {
+    for (const [id, label] of SCENARIO_CATALOG) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.classList.toggle('active', placeScenario === id);
+      b.onclick = () => { placeScenario = id; updatePlaceVariants(); };
+      placeVariantsEl.appendChild(b);
+    }
+  }
+  updatePlaceHint();
+}
+
+(function buildTools() {
+  // Legacy hidden container keeps toolBtns map alive for syncToolButtonStates().
+  if (toolsEl) {
+    const selBtn = document.createElement('button');
+    selBtn.textContent = 'Select / Move';
+    selBtn.onclick = () => setTool(null);
+    toolBtns['_select'] = selBtn;
+    for (const [t, label] of TOOL_DEFS) {
+      const b = document.createElement('button');
+      b.onclick = () => setTool(t);
+      toolBtns[t] = b;
+    }
+  }
+  // Floating canvas toolbar — primary placement UX.
+  const mkPlaceBtn = (key, label, col) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.title = label;
+    if (col != null) {
+      const dot = document.createElement('span');
+      dot.className = 'pt-dot';
+      dot.style.background = '#' + col.toString(16).padStart(6, '0');
+      b.appendChild(dot);
+    }
+    b.appendChild(document.createTextNode(label));
+    b.onclick = () => setTool(key === '_select' ? null : key);
+    placeToolBtnsEl.appendChild(b);
+    placeToolBtns[key] = b;
+  };
+  mkPlaceBtn('_select', 'Select', null);
+  for (const [t, label] of TOOL_DEFS) mkPlaceBtn(t, label, KIND_COLORS[t] || 0xffffff);
+  setTool(null);
+})();
+function setTool(t) {
+  activeTool = (t === activeTool) ? null : t;  // clicking the active tool returns to select
+  syncToolButtonStates();
+  if (!activeTool) hideGhostPreview();
+  updatePlaceVariants();
+  layoutChrome();
+}
+snapChk.addEventListener('change', () => {
+  snapGridGroup.visible = editing && snapChk.checked;
+  rebuildSnapGrid();
+});
+
+// ---- raycast helpers ------------------------------------------------------
+function setNdc(e) {
+  ndc.x = (e.clientX / window.innerWidth) * 2 - 1;
+  ndc.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+}
+function padMeshAt(e) {
+  setNdc(e);
+  const hits = raycaster.intersectObjects(pickPads, false);
+  return hits.length ? hits[0].object : null;
+}
+function floorPointAt(e) {
+  setNdc(e);
+  const pt = new THREE.Vector3();
+  return raycaster.ray.intersectPlane(FLOOR_PLANE, pt) ? pt : null;
+}
+function snapClamp(pt) {
+  let x = THREE.MathUtils.clamp(pt.x, -HALF, HALF);
+  let z = THREE.MathUtils.clamp(pt.z, -HALF, HALF);
+  if (snapChk.checked) { x = Math.round(x / 250) * 250; z = Math.round(z / 250) * 250; }
+  return { x, z };
+}
+
+// ---- model ops (add / delete / select) ------------------------------------
+function defaultRoom() {
+  if (selectedIndex >= 0) return mapState.pads[selectedIndex].room;
+  if (mapState.pads.length) return mapState.pads[0].room;
+  return 1;
+}
+function addPad(type, pt) {
+  pushHistory();
+  const s = snapClamp(pt);
+  const pad = Object.assign({
+    type, x: rnd(s.x), y: PAD_FLOOR_Y, z: rnd(s.z), room: defaultRoom(),
+  }, defaultsForType(type));
+  if (type === 'weapon') pad.weapon = placeWeapon;
+  if (type === 'ammo') { pad.ammoType = placeAmmo; pad.quantity = 200; }
+  if (type === 'scenario') pad.scenario = placeScenario;
+  mapState.pads.push(pad);
+  rebuildPads();               // reassigns contiguous indices + meshes
+  selectPad(mapState.pads.length - 1);
+  updateValidation();
+}
+function deletePad() {
+  if (selectedIndex < 0) return;
+  pushHistory();
+  mapState.pads.splice(selectedIndex, 1);  // splice keeps the array dense → indices stay 0..N-1
+  selectedIndex = -1;
+  rebuildPads();
+  renderProps();
+}
+function selectPad(i) {
+  selectedIndex = (i >= 0 && i < mapState.pads.length) ? i : -1;
+  updateSelectionMarker();
+  renderProps();
+  updateHoverRing();
+  if (typeof drawMinimap === 'function') drawMinimap();
+}
+
+// Live-sync only the selected pad's mesh/label/marker during a drag (cheap).
+function syncSelectedMesh() {
+  const i = selectedIndex; if (i < 0 || i >= mapState.pads.length) return;
+  const p = mapState.pads[i];
+  const mesh = pickPads[i];
+  if (mesh) {
+    mesh.position.set(p.x, p.y, p.z);
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    const suspect = Math.hypot(p.x, p.y, p.z) <= DATA.originRadius;
+    mesh.material.color.set(suspect ? SUSPECT_COLOR : (KIND_COLORS[kind] || 0xffffff));
+  }
+  const lab = padLabelGroup.children[i];
+  if (lab) {
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    lab.position.set(p.x, p.y + PAD_RADIUS[kind] + 20, p.z);
+  }
+  updateSelectionMarker();
+}
+
+// ---- pointer interactions (capture phase so we win over OrbitControls) -----
+canvas.addEventListener('pointerdown', e => {
+  if (!editing || mode !== 'orbit' || e.button !== 0) return;
+  editDownXY = { x: e.clientX, y: e.clientY };
+  const hit = padMeshAt(e);
+  if (hit) {
+    pushHistory();  // one undo step for the whole drag gesture
+    selectPad(hit.userData.index);
+    dragging = true;
+    controls.enabled = false;  // OrbitControls.onPointerDown bails when disabled
+  }
+}, true);
+
+canvas.addEventListener('pointermove', e => {
+  if (!editing || mode !== 'orbit') return;
+  if (dragging) {
+    const pt = floorPointAt(e); if (!pt) return;
+    const s = snapClamp(pt);
+    const p = mapState.pads[selectedIndex];
+    p.x = rnd(s.x); p.z = rnd(s.z);
+    syncSelectedMesh();
+    updateDragVisual(p.x, p.y, p.z, s.x, s.z, e.clientX, e.clientY);
+    refreshPropsLive();
+    updateValidation();
+    return;
+  }
+  // Hover highlight + placement ghost when not dragging.
+  const hit = padMeshAt(e);
+  const nextHover = hit ? hit.userData.index : -1;
+  if (nextHover !== hoverIndex) {
+    hoverIndex = nextHover;
+    pickPads.forEach((m, idx) => {
+      const base = (idx === selectedIndex) ? 1.12 : (idx === hoverIndex) ? 1.08 : 1;
+      m.scale.setScalar(base);
+    });
+    updateHoverRing();
+  }
+  if (activeTool) {
+    const pt = floorPointAt(e);
+    updateGhostPreview(pt, activeTool);
+  } else {
+    hideGhostPreview();
+  }
+}, true);
+
+canvas.addEventListener('pointerup', e => {
+  if (!editing || mode !== 'orbit') return;
+  if (dragging) {
+    dragging = false;
+    controls.enabled = true;
+    hideDragVisual();
+    renderProps();
+    return;
+  }
+  hideGhostPreview();
+  if (!editDownXY) return;
+  const moved = Math.hypot(e.clientX - editDownXY.x, e.clientY - editDownXY.y);
+  editDownXY = null;
+  if (moved > 5) return;            // was an orbit drag on empty space
+  const hit = padMeshAt(e);
+  if (hit) { selectPad(hit.userData.index); return; }
+  if (activeTool) { const pt = floorPointAt(e); if (pt) addPad(activeTool, pt); }
+  else selectPad(-1);               // click empty in select mode → deselect
+}, true);
+
+// ---- properties panel -----------------------------------------------------
+const propsPanel = document.getElementById('props');
+document.getElementById('propsClose').onclick = () => selectPad(-1);
+
+function optionList(pairs, sel) {
+  return pairs.map(([v, label]) =>
+    `<option value="${v}"${String(v) === String(sel) ? ' selected' : ''}>${label}</option>`).join('');
+}
+function fieldSelect(label, id, pairs, sel) {
+  return `<div class="field"><label>${label}</label><select id="${id}">${optionList(pairs, sel)}</select></div>`;
+}
+function renderProps() {
+  if (selectedIndex < 0) { propsPanel.classList.remove('shown'); return; }
+  const p = mapState.pads[selectedIndex];
+  const body = document.getElementById('propsBody');
+  let html = `<span class="close" id="propsClose2">✕</span>` +
+    `<h2>Pad ${selectedIndex} &nbsp;<span class="muted">${KIND_LABEL[p.type] || p.type}</span></h2>`;
+  html += fieldSelect('Type', 'pType', KIND_ORDER.map(k => [k, KIND_LABEL[k] || k]), p.type);
+  html += `<div class="field xyz"><label>X / Y / Z</label>` +
+    `<input type="number" id="pX" step="10" value="${rnd(p.x)}">` +
+    `<input type="number" id="pY" step="10" value="${rnd(p.y)}">` +
+    `<input type="number" id="pZ" step="10" value="${rnd(p.z)}"></div>`;
+  html += `<div class="field"><label>Room</label><input type="number" id="pRoom" step="1" value="${p.room}"></div>`;
+  if (p.type === 'weapon') {
+    html += fieldSelect('Weapon', 'pWeapon', WEAPON_CATALOG.map(([id, n]) => [id, n + '  (0x' + id.toString(16) + ')']), p.weapon);
+  } else if (p.type === 'ammo') {
+    html += fieldSelect('Ammo', 'pAmmo', AMMO_CATALOG.map(([id, n]) => [id, n + '  (0x' + id.toString(16) + ')']), p.ammoType);
+    html += `<div class="field"><label>Quantity</label><input type="number" id="pQty" step="10" value="${p.quantity}"></div>`;
+  } else if (p.type === 'scenario') {
+    html += fieldSelect('Mode', 'pScenario', SCENARIO_CATALOG, p.scenario);
+    html += `<div class="field"><label>Team</label><input type="number" id="pTeam" step="1" value="${p.team}"></div>`;
+  }
+  html += `<button id="delPadBtn" class="wide" style="margin-top:8px">Delete pad (Del)</button>`;
+  const warns = [];
+  if (Math.hypot(p.x, p.y, p.z) <= DATA.originRadius) warns.push(`within ${DATA.originRadius} of origin`);
+  if (p.y < 0) warns.push('Y &lt; 0 — pad is below the floor');
+  if (Math.abs(p.x) > HALF || Math.abs(p.z) > HALF) warns.push('outside the box footprint');
+  if (warns.length) html += `<div class="danger small" style="margin-top:6px">⚠ ${warns.join(' · ')}</div>`;
+  body.innerHTML = html;
+  propsPanel.classList.add('shown');
+
+  document.getElementById('propsClose2').onclick = () => selectPad(-1);
+  // One history entry per properties-panel edit session (not per keystroke).
+  let propsPushed = false;
+  const maybePushProps = () => { if (!propsPushed) { pushHistory(); propsPushed = true; } };
+  const onPos = () => {
+    maybePushProps();
+    p.x = parseFloat(document.getElementById('pX').value) || 0;
+    p.y = parseFloat(document.getElementById('pY').value) || 0;
+    p.z = parseFloat(document.getElementById('pZ').value) || 0;
+    syncSelectedMesh(); updateValidation();
+  };
+  document.getElementById('pX').addEventListener('input', onPos);
+  document.getElementById('pY').addEventListener('input', onPos);
+  document.getElementById('pZ').addEventListener('input', onPos);
+  document.getElementById('pRoom').addEventListener('input', () => {
+    maybePushProps();
+    p.room = parseInt(document.getElementById('pRoom').value, 10) || 0; updateValidation();
+  });
+  document.getElementById('pType').addEventListener('change', () => {
+    pushHistory();
+    p.type = document.getElementById('pType').value;
+    // merge in any missing type-specific defaults without clobbering shared fields
+    const d = defaultsForType(p.type);
+    for (const k in d) if (!(k in p)) p[k] = d[k];
+    rebuildPads(); renderProps();
+  });
+  const wpn = document.getElementById('pWeapon');
+  if (wpn) wpn.addEventListener('change', () => { pushHistory(); p.weapon = parseInt(wpn.value, 10); });
+  const amm = document.getElementById('pAmmo');
+  if (amm) amm.addEventListener('change', () => { pushHistory(); p.ammoType = parseInt(amm.value, 10); });
+  const qty = document.getElementById('pQty');
+  if (qty) qty.addEventListener('input', () => { maybePushProps(); p.quantity = parseInt(qty.value, 10) || 0; });
+  const scn = document.getElementById('pScenario');
+  if (scn) scn.addEventListener('change', () => { pushHistory(); p.scenario = scn.value; });
+  const team = document.getElementById('pTeam');
+  if (team) team.addEventListener('input', () => { maybePushProps(); p.team = parseInt(team.value, 10) || 0; });
+  document.getElementById('delPadBtn').onclick = () => deletePad();
+}
+// During a drag, just push the new X/Z into the (already open) position inputs.
+function refreshPropsLive() {
+  if (selectedIndex < 0) return;
+  const p = mapState.pads[selectedIndex];
+  const x = document.getElementById('pX'), z = document.getElementById('pZ');
+  if (x) x.value = rnd(p.x); if (z) z.value = rnd(p.z);
+}
+
+// ---- box geometry controls ------------------------------------------------
+const halfRange = document.getElementById('halfRange');
+const heightRange = document.getElementById('heightRange');
+const halfVal = document.getElementById('halfVal');
+const heightVal = document.getElementById('heightVal');
+halfRange.value = HALF; heightRange.value = HEIGHT;
+halfVal.textContent = HALF; heightVal.textContent = HEIGHT;
+
+// Live-resize the box: rebuild faces/edges/grid/axes + reframe references.
+function applyBoxSize(half, height) {
+  HALF = half; HEIGHT = height;
+  CENTER.set(0, HEIGHT / 2, 0);
+  buildBox();
+  const gv = grid.visible, av = axes.visible;
+  scene.remove(grid); grid.geometry.dispose(); grid.material.dispose();
+  grid = new THREE.GridHelper(HALF * 2, 20, 0x39435a, 0x222a38); grid.visible = gv; scene.add(grid);
+  scene.remove(axes); axes.geometry.dispose(); axes.material.dispose();
+  axes = new THREE.AxesHelper(HALF * 0.6); axes.visible = av; scene.add(axes);
+  box3.min.set(-HALF, 0, -HALF); box3.max.set(HALF, HEIGHT, HALF);
+  box3.getBoundingSphere(bsphere);
+  controls.maxDistance = HALF * 8;
+  halfVal.textContent = HALF; heightVal.textContent = HEIGHT;
+  rebuildSnapGrid();
+  updateCounts(); updateValidation();
+  if (typeof drawMinimap === 'function') drawMinimap();
+}
+halfRange.addEventListener('pointerdown', () => {
+  if (!boxSliderPushed) { pushHistory(); boxSliderPushed = true; }
+});
+halfRange.addEventListener('pointerup', () => { boxSliderPushed = false; });
+heightRange.addEventListener('pointerdown', () => {
+  if (!boxSliderPushed) { pushHistory(); boxSliderPushed = true; }
+});
+heightRange.addEventListener('pointerup', () => { boxSliderPushed = false; });
+halfRange.addEventListener('input', () => applyBoxSize(parseFloat(halfRange.value), HEIGHT));
+heightRange.addEventListener('input', () => applyBoxSize(HALF, parseFloat(heightRange.value)));
+document.getElementById('reframeBtn').onclick = () => presetView('iso');
+
+// ---- validation status ----------------------------------------------------
+function updateValidation() {
+  const el = document.getElementById('validate');
+  if (!el) return;
+  const pads = mapState.pads;
+  const c = { spawn: 0, weapon: 0, ammo: 0, scenario: 0, other: 0 };
+  let belowFloor = 0, outside = 0, onFloor = 0;
+  const weaponMissing = [], ammoMissing = [], scenarioMissing = [], nearOriginPads = [];
+  const posBuckets = new Map();
+
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    c[kind]++;
+    if (p.y < 0) belowFloor++;
+    else if (p.y === 0 && (kind === 'spawn' || kind === 'weapon' || kind === 'ammo')) onFloor++;
+    if (Math.abs(p.x) > HALF || Math.abs(p.z) > HALF) outside++;
+    if (kind === 'weapon' && p.weapon == null) weaponMissing.push(i);
+    if (kind === 'ammo' && p.ammoType == null) ammoMissing.push(i);
+    if (kind === 'scenario' && !p.scenario) scenarioMissing.push(i);
+    if (Math.hypot(p.x, p.y, p.z) <= DATA.originRadius) nearOriginPads.push(i);
+    const posKey = rnd(p.x) + ',' + rnd(p.y) + ',' + rnd(p.z);
+    const bucket = posBuckets.get(posKey) || [];
+    bucket.push(i);
+    posBuckets.set(posKey, bucket);
+  }
+
+  const caseTeams = new Set(), respawnTeams = new Set();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    if (p.type !== 'scenario') continue;
+    if (p.scenario === 'case') caseTeams.add(p.team | 0);
+    else if (p.scenario === 'case_respawn') respawnTeams.add(p.team | 0);
+  }
+
+  const chips = [
+    `<span class="chip">${pads.length} pads</span>`,
+    `<span class="chip">${c.spawn} spawn</span>`,
+    `<span class="chip">${c.weapon} wpn</span>`,
+    `<span class="chip">${c.ammo} ammo</span>`,
+    `<span class="chip">${c.scenario} scen</span>`,
+    `<span class="chip" style="color:#57d977">idx 0..${Math.max(0, pads.length - 1)} contiguous</span>`,
+  ];
+  const warns = [];
+  if (pads.length === 0) warns.push(`<span class="chip warn">Empty map — add spawn pads before export</span>`);
+  if (c.spawn === 0 && pads.length > 0) warns.push(`<span class="chip err">0 spawn pads — players cannot spawn</span>`);
+  else if (c.spawn > 0 && c.spawn < 4) warns.push(`<span class="chip warn">Only ${c.spawn} spawn pad(s) — recommend ≥4 for MP</span>`);
+  if (c.weapon === 0 && pads.length > 0) warns.push(`<span class="chip warn">0 weapon pads — no floor weapon pickups</span>`);
+  weaponMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: weapon type not assigned</span>`));
+  ammoMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: ammo type not assigned</span>`));
+  scenarioMissing.forEach(i => warns.push(`<span class="chip err">Pad ${i}: scenario mode not set</span>`));
+  for (const t of caseTeams) {
+    if (!respawnTeams.has(t)) warns.push(`<span class="chip warn">Team ${t} case pad without CaseRespawn — CTF scenario 5 may fail</span>`);
+  }
+  for (const t of respawnTeams) {
+    if (!caseTeams.has(t)) warns.push(`<span class="chip warn">Team ${t} CaseRespawn without case pad</span>`);
+  }
+  if (belowFloor) warns.push(`<span class="chip err">${belowFloor} pad(s) below floor (Y&lt;0)</span>`);
+  if (onFloor) warns.push(`<span class="chip warn">${onFloor} pad(s) at Y=0 — use Y≥10 (SPAWN_Y) or players fall through</span>`);
+  if (outside) warns.push(`<span class="chip warn">${outside} pad(s) outside box XZ footprint</span>`);
+  if (nearOriginPads.length) warns.push(`<span class="chip warn">Pad(s) ${nearOriginPads.join(', ')} within ${DATA.originRadius} of origin</span>`);
+  for (const [, indices] of posBuckets) {
+    if (padPositionsConflict(indices, pads)) {
+      warns.push(`<span class="chip warn">Pads ${indices.join(', ')} share the same position</span>`);
+    }
+  }
+  if (!warns.length && pads.length > 0) warns.push(`<span class="chip ok">No issues detected</span>`);
+  el.innerHTML = chips.join('') + (warns.length ? '<div style="margin-top:4px">' + warns.join(' ') + '</div>' : '');
+}
+
+// ---- JSON import / export -------------------------------------------------
+// SCHEMA (pass-3 target): {
+//   name: string, box_half: number, box_height: number,
+//   pads: [ { index, type, x, y, z, room,
+//             // weapon:   weapon (int id), weaponName (hint)
+//             // ammo:     ammoType (int id), ammoName (hint), quantity
+//             // scenario: scenario ('case'|'case_respawn'|'hill'), team } ]
+// }
+// `index` always equals the array position (contiguous 0..N-1).
+function serializeMap() {
+  return {
+    name: mapState.name,
+    box_half: HALF,
+    box_height: HEIGHT,
+    pads: mapState.pads.map((p, i) => {
+      const o = { index: i, type: p.type, x: rnd(p.x), y: rnd(p.y), z: rnd(p.z), room: p.room };
+      if (p.type === 'weapon') { o.weapon = p.weapon; o.weaponName = weaponName(p.weapon); }
+      else if (p.type === 'ammo') { o.ammoType = p.ammoType; o.ammoName = ammoName(p.ammoType); o.quantity = p.quantity; }
+      else if (p.type === 'scenario') { o.scenario = p.scenario; o.team = p.team; }
+      return o;
+    }),
+  };
+}
+const ioWrap = document.getElementById('ioWrap');
+const ioText = document.getElementById('ioText');
+function exportJSON() {
+  const txt = JSON.stringify(serializeMap(), null, 2);
+  ioText.value = txt;
+  ioWrap.classList.add('shown');
+  return txt;
+}
+function loadMap(obj, opts = {}) {
+  if (!obj || !Array.isArray(obj.pads)) { alert('Map JSON must have a pads[] array.'); return false; }
+  if (!opts.skipHistory && !suppressHistory) pushHistory();
+  mapState.name = obj.name || mapState.name;
+  syncMapNameFields(mapState.name);
+  updateStorageKeyDisplay();
+  if (Number.isFinite(+obj.box_half) && Number.isFinite(+obj.box_height)) {
+    halfRange.value = +obj.box_half; heightRange.value = +obj.box_height;
+    applyBoxSize(+obj.box_half, +obj.box_height);
+  }
+  mapState.pads = obj.pads.map(p => {
+    const t = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    const pad = Object.assign({ type: t, x: +p.x || 0, y: +p.y || 0, z: +p.z || 0, room: (p.room | 0) }, defaultsForType(t));
+    if (t === 'weapon' && p.weapon != null) pad.weapon = +p.weapon;
+    if (t === 'ammo') { if (p.ammoType != null) pad.ammoType = +p.ammoType; if (p.quantity != null) pad.quantity = +p.quantity; }
+    if (t === 'scenario') { if (p.scenario) pad.scenario = p.scenario; if (p.team != null) pad.team = +p.team; }
+    return pad;
+  });
+  selectedIndex = -1;
+  rebuildPads();
+  renderProps();
+  updateValidation();
+  maybeShowOnboarding();
+  return true;
+}
+document.getElementById('exportBtn').onclick = exportJSON;
+document.getElementById('importBtn').onclick = () => {
+  if (!ioWrap.classList.contains('shown')) { ioWrap.classList.add('shown'); ioText.focus(); return; }
+  let obj; try { obj = JSON.parse(ioText.value); } catch (err) { alert('Invalid JSON: ' + err.message); return; }
+  pushHistory();
+  loadMap(obj, { skipHistory: true });
+};
+document.getElementById('copyBtn').onclick = () => {
+  const txt = exportJSON();
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
+  else { ioText.select(); document.execCommand('copy'); }
+};
+document.getElementById('downloadBtn').onclick = () => {
+  const txt = exportJSON();
+  const blob = new Blob([txt], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (mapState.name || 'map') + '_map.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+// ===========================================================================
+// pass-3: Export to pdmap (Python level module), import from level catalog,
+// build-command panel.
+// ===========================================================================
+const LEVEL_CATALOG = DATA.levelCatalog || {};
+const TEST_CONFIG = DATA.testConfig || {};
+const DEV_SERVER = TEST_CONFIG.devServer || {};
+const DEV_SERVER_PORT = DEV_SERVER.port || 8765;
+let DEV_SERVER_BASE = (typeof location !== 'undefined' && location.protocol.startsWith('http'))
+  ? location.origin
+  : ('http://127.0.0.1:' + DEV_SERVER_PORT);
+let devServerOnline = false;
+let devServerHealth = null;
+let devServerPollTimer = null;
+let testPlayBusy = false;
+let mapsCatalog = [];
+let currentMapId = null;
+let docDirty = false;
+
+const openMapListEl = document.getElementById('openMapList');
+const openFileInput = document.getElementById('openFileInput');
+const newMapNameInput = document.getElementById('newMapName');
+const mapsStatusEl = document.getElementById('mapsStatus');
+const currentMapTitleEl = document.getElementById('currentMapTitle');
+const docDirtyBadgeEl = document.getElementById('docDirtyBadge');
+const buildSettingsModal = document.getElementById('buildSettingsModal');
+const runTestStatusEl = document.getElementById('runTestStatus');
+
+async function resolveDevServerBase() {
+  if (typeof location !== 'undefined' && location.protocol.startsWith('http')) {
+    return location.origin;
+  }
+  for (let port = DEV_SERVER_PORT; port <= DEV_SERVER_PORT + 10; port++) {
+    try {
+      const res = await fetch('http://127.0.0.1:' + port + (DEV_SERVER.healthPath || '/api/health'),
+        { method: 'GET', cache: 'no-store' });
+      if (res.ok) return 'http://127.0.0.1:' + port;
+    } catch (_) { /* try next port */ }
+  }
+  return 'http://127.0.0.1:' + DEV_SERVER_PORT;
+}
+
+function updateDocTitle() {
+  const name = currentMapId || mapState.name || 'untitled';
+  if (currentMapTitleEl) {
+    currentMapTitleEl.textContent = name;
+    currentMapTitleEl.title = docDirty ? name + ' — unsaved changes' : 'Current map: ' + name;
+  }
+  if (docDirtyBadgeEl) docDirtyBadgeEl.hidden = !docDirty;
+  if (typeof document !== 'undefined') {
+    document.title = name + ' — Perfect Dark Map Editor';
+  }
+}
+
+function markDirty() {
+  if (!docDirty) { docDirty = true; updateDocTitle(); }
+}
+
+function markClean() {
+  docDirty = false;
+  updateDocTitle();
+}
+
+let mapNamePromptResolve = null;
+let mapNameDialogMode = 'input';  // 'input' | 'pick'
+const mapNameModal = document.getElementById('mapNameModal');
+const mapNameInput = document.getElementById('mapNameInput');
+const mapPickListEl = document.getElementById('mapPickList');
+const mapNameErrorEl = document.getElementById('mapNameError');
+
+function resetMapNameModalLayout() {
+  mapNameDialogMode = 'input';
+  if (mapNameInput) {
+    mapNameInput.hidden = false;
+    mapNameInput.style.display = '';
+  }
+  if (mapPickListEl) {
+    mapPickListEl.hidden = true;
+    mapPickListEl.innerHTML = '';
+  }
+  const okBtn = document.getElementById('mapNameOk');
+  if (okBtn) okBtn.style.display = '';
+}
+
+function closeMapNameModal(result) {
+  if (mapNameModal) {
+    mapNameModal.classList.remove('open');
+    mapNameModal.hidden = true;
+  }
+  resetMapNameModalLayout();
+  if (mapNamePromptResolve) {
+    mapNamePromptResolve(result);
+    mapNamePromptResolve = null;
+  }
+}
+
+/** In-app name dialog — window.prompt() is unsupported in Electron (returns null silently). */
+function openMapNameDialog(opts = {}) {
+  const {
+    defaultValue = 'my_arena',
+    title = 'Map name',
+    hint = 'Lowercase letters, digits, underscore. Spaces become underscores.',
+    confirmLabel = 'OK',
+  } = opts;
+  if (!mapNameModal || !mapNameInput) {
+    // Last-resort browser fallback (plain http:// dev, not Electron).
+    const raw = window.prompt(hint, defaultValue);
+    return Promise.resolve(raw == null ? null : raw.trim());
+  }
+  return new Promise((resolve) => {
+    mapNamePromptResolve = resolve;
+    resetMapNameModalLayout();
+    if (mapNameErrorEl) mapNameErrorEl.textContent = '';
+    const titleEl = document.getElementById('mapNameModalTitle');
+    const hintEl = document.getElementById('mapNameModalHint');
+    const okBtn = document.getElementById('mapNameOk');
+    if (titleEl) titleEl.textContent = title;
+    if (hintEl) hintEl.textContent = hint;
+    if (okBtn) okBtn.textContent = confirmLabel;
+    mapNameInput.value = defaultValue || 'my_arena';
+    mapNameModal.hidden = false;
+    mapNameModal.classList.add('open');
+    mapNameInput.focus();
+    mapNameInput.select();
+  });
+}
+
+function openMapPickDialog() {
+  if (!mapNameModal || !mapPickListEl) {
+    const names = mapsCatalog.map(m => m.name);
+    const raw = window.prompt('Saved maps: ' + names.join(', '), names[0] || '');
+    if (raw == null || !String(raw).trim()) return Promise.resolve(null);
+    try { return Promise.resolve(sanitizeLevelName(raw)); }
+    catch (e) { alert(e.message); return Promise.resolve(null); }
+  }
+  populateOpenMapList();
+  return new Promise((resolve) => {
+    mapNamePromptResolve = resolve;
+    resetMapNameModalLayout();
+    mapNameDialogMode = 'pick';
+    if (mapNameErrorEl) mapNameErrorEl.textContent = '';
+    const titleEl = document.getElementById('mapNameModalTitle');
+    const hintEl = document.getElementById('mapNameModalHint');
+    const okBtn = document.getElementById('mapNameOk');
+    if (titleEl) titleEl.textContent = 'Open saved map';
+    if (hintEl) {
+      hintEl.textContent = mapsCatalog.length
+        ? mapsCatalog.length + ' saved map(s). Click one to open.'
+        : 'No saved maps.';
+    }
+    if (okBtn) okBtn.style.display = 'none';
+    if (mapNameInput) mapNameInput.style.display = 'none';
+    mapPickListEl.hidden = false;
+    mapPickListEl.innerHTML = openMapListEl ? openMapListEl.innerHTML : '';
+    mapPickListEl.querySelectorAll('[data-map-name]').forEach(btn => {
+      btn.addEventListener('click', () => closeMapNameModal(btn.getAttribute('data-map-name')));
+    });
+    mapNameModal.hidden = false;
+    mapNameModal.classList.add('open');
+    mapPickListEl.querySelector('button')?.focus();
+  });
+}
+
+async function promptMapName(defaultName, dialogOpts = {}) {
+  const raw = await openMapNameDialog(Object.assign({
+    defaultValue: defaultName || 'my_arena',
+    title: 'Map name',
+    hint: 'Lowercase letters, digits, underscore. Spaces become underscores.',
+    confirmLabel: 'OK',
+  }, dialogOpts));
+  if (raw == null || !String(raw).trim()) return null;
+  try { return sanitizeLevelName(raw); }
+  catch (e) {
+    alert(e.message);
+    return null;
+  }
+}
+
+function submitMapNameModal() {
+  if (mapNameDialogMode === 'pick') return;
+  if (!mapNameInput) { closeMapNameModal(null); return; }
+  try {
+    const name = sanitizeLevelName(mapNameInput.value);
+    if (mapNameErrorEl) mapNameErrorEl.textContent = '';
+    closeMapNameModal(name);
+  } catch (e) {
+    if (mapNameErrorEl) mapNameErrorEl.textContent = e.message;
+    mapNameInput.focus();
+  }
+}
+
+async function resolveDocumentName({ saveAs = false } = {}) {
+  if (saveAs) {
+    const typed = newMapNameInput?.value.trim();
+    if (typed) return sanitizeLevelName(typed);
+    const prompted = await promptMapName((currentMapId || mapState.name || 'my_arena') + '_copy', {
+      title: 'Save as',
+      confirmLabel: 'Save',
+    });
+    if (!prompted) throw new Error('Save cancelled.');
+    return prompted;
+  }
+  if (currentMapId) return sanitizeLevelName(currentMapId);
+  const typed = newMapNameInput?.value.trim();
+  if (typed) return sanitizeLevelName(typed);
+  const prompted = await promptMapName(mapState.name && mapState.name !== 'uff' ? mapState.name : 'my_arena', {
+    title: 'Save map',
+    confirmLabel: 'Save',
+  });
+  if (!prompted) throw new Error('Save cancelled.');
+  return prompted;
+}
+
+function syncMapNameFields(name) {
+  const n = name || mapState.name || 'map';
+  mapState.name = n;
+  if (levelNameInput) levelNameInput.value = n;
+  if (testLevelInput && !testLevelInput.dataset.userEdited) testLevelInput.value = n;
+  if (newMapNameInput && !newMapNameInput.value.trim()) newMapNameInput.placeholder = n + '_copy';
+  updateBuildCmds(n);
+  updateStorageKeyDisplay();
+  updateDocTitle();
+}
+
+function setMapsStatus(kind, msg) {
+  if (!mapsStatusEl) return;
+  const cls = kind === 'ok' ? 'live' : (kind === 'warn' ? 'off' : (kind === 'err' ? 'err' : ''));
+  const short = (msg || '').length > 28 ? String(msg).slice(0, 26) + '…' : (msg || '');
+  mapsStatusEl.innerHTML = short ? (cls ? `<span class="${cls}">${short}</span>` : short) : '';
+  mapsStatusEl.title = msg || '';
+}
+
+function listLocalStorageMaps() {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith('pdmap_editor_')) continue;
+    const name = key.slice('pdmap_editor_'.length);
+    let padCount = 0;
+    try {
+      const obj = JSON.parse(localStorage.getItem(key) || '{}');
+      padCount = Array.isArray(obj.pads) ? obj.pads.length : 0;
+    } catch (_) { /* ignore corrupt entries */ }
+    out.push({ name, padCount, source: 'local', updatedAt: 0 });
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function mergeMapsCatalog(serverMaps, localMaps) {
+  const byName = new Map();
+  localMaps.forEach(m => byName.set(m.name, m));
+  serverMaps.forEach(m => byName.set(m.name, m));  // server wins on name clash
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function closeMapMenus() {
+  document.querySelectorAll('.browser-menu[open]').forEach(el => el.removeAttribute('open'));
+}
+
+function openBuildSettings() {
+  if (!buildSettingsModal) return;
+  buildSettingsModal.hidden = false;
+  buildSettingsModal.classList.add('open');
+  document.getElementById('buildSettingsClose')?.focus();
+}
+
+function closeBuildSettings() {
+  if (!buildSettingsModal) return;
+  buildSettingsModal.classList.remove('open');
+  buildSettingsModal.hidden = true;
+}
+
+function exportDocumentJson() {
+  const data = serializeMap();
+  try { data.name = sanitizeLevelName(data.name || mapState.name || 'map'); }
+  catch (e) { alert(e.message); return; }
+  downloadText(data.name + '.json', JSON.stringify(data, null, 2), 'application/json');
+  showToast('Exported ' + data.name + '.json');
+}
+
+async function openSavedMapDialog() {
+  await refreshMapsList();
+  if (!mapsCatalog.length) {
+    alert('No saved maps on server or in browser cache.');
+    return;
+  }
+  const pick = await openMapPickDialog();
+  if (!pick) return;
+  try { await loadSelectedMap(pick); }
+  catch (e) { alert(e.message); }
+}
+
+function handleMenuAction(action) {
+  closeMapMenus();
+  const modeKeys = new Set(['toggle-edit', 'toggle-fly', 'toggle-minimap', 'toggle-snap-grid', 'test-map', 'export-assets']);
+  if (modeKeys.has(action) && isTypingInForm()) return;
+  switch (action) {
+    case 'new': createNewMap(); break;
+    case 'open': triggerOpenFilePicker(); break;
+    case 'open-saved': openSavedMapDialog(); break;
+    case 'save': saveCurrentMap(); break;
+    case 'save-as': saveCurrentMap({ saveAs: true }); break;
+    case 'export': exportDocumentJson(); break;
+    case 'revert-cached': loadFromLocalStorage(); break;
+    case 'delete': deleteSelectedMap(); break;
+    case 'undo': undo(); break;
+    case 'redo': redo(); break;
+    case 'toggle-fly': setMode(mode === 'fly' ? 'orbit' : 'fly'); break;
+    case 'toggle-edit': setEditing(!editing); break;
+    case 'toggle-minimap': toggleMinimap(); break;
+    case 'toggle-snap-grid': toggleSnapGrid(); break;
+    case 'view-iso': presetView('iso'); break;
+    case 'view-top': presetView('top'); break;
+    case 'view-front': presetView('front'); break;
+    case 'view-side': presetView('side'); break;
+    case 'toggle-help': helpBtn?.click(); break;
+    case 'test-map': runTestPlay(); break;
+    case 'export-assets': runTestBuildOnly(); break;
+    case 'build-settings': openBuildSettings(); break;
+    default: break;
+  }
+}
+
+function populateOpenMapList() {
+  if (!openMapListEl) return;
+  if (!mapsCatalog.length) {
+    openMapListEl.innerHTML = '<div class="maps-open-empty">No saved maps</div>';
+    return;
+  }
+  openMapListEl.innerHTML = mapsCatalog.map(m => {
+    const src = m.source === 'file' ? 'disk' : 'browser';
+    const meta = m.padCount != null ? ` · ${m.padCount}p` : '';
+    const active = (currentMapId === m.name || (!currentMapId && mapState.name === m.name)) ? ' aria-current="true"' : '';
+    return `<button type="button" role="menuitem" data-map-name="${m.name}" title="${m.name} (${src})"${active}>${m.name}${meta}</button>`;
+  }).join('');
+}
+
+async function refreshMapsList() {
+  let serverMaps = [];
+  if (devServerOnline) {
+    try {
+      const path = DEV_SERVER.mapsPath || '/api/maps';
+      const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        serverMaps = Array.isArray(data.maps) ? data.maps : [];
+      }
+    } catch (_) { /* fall back to local only */ }
+  }
+  mapsCatalog = mergeMapsCatalog(serverMaps, listLocalStorageMaps());
+  populateOpenMapList();
+  setMapsStatus(devServerOnline ? 'ok' : 'warn', devServerOnline ? 'Server online' : 'Offline');
+}
+
+async function loadSelectedMap(nameOverride) {
+  const name = nameOverride || '';
+  if (!name) { alert('Choose a saved map via File → Open Saved…'); return false; }
+  closeMapMenus();
+  if (docDirty && !confirm('Discard unsaved changes and open "' + name + '"?')) return false;
+
+  if (devServerOnline) {
+    try {
+      const path = (DEV_SERVER.mapsPath || '/api/maps') + '/' + encodeURIComponent(name);
+      const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        suppressHistory = true;
+        loadMap(data.map, { skipHistory: true });
+        suppressHistory = false;
+        historyStack.length = 0;
+        redoStack.length = 0;
+        updateUndoRedoButtons();
+        currentMapId = name;
+        syncMapNameFields(name);
+        markClean();
+        showToast('Opened ' + name);
+        setMapsStatus('ok', 'Opened from server');
+        return true;
+      }
+      if (res.status === 404) {
+        /* fall through to LocalStorage */
+      } else {
+        alert('Could not load "' + name + '" from server (HTTP ' + res.status + ').');
+        return false;
+      }
+    } catch (e) {
+      alert('Could not reach editor server: ' + e.message);
+      return false;
+    }
+  }
+  const key = 'pdmap_editor_' + name;
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    alert('Map "' + name + '" not found on server or in LocalStorage.');
+    return false;
+  }
+  try {
+    suppressHistory = true;
+    loadMap(JSON.parse(raw), { skipHistory: true });
+    suppressHistory = false;
+    historyStack.length = 0;
+    redoStack.length = 0;
+    updateUndoRedoButtons();
+    currentMapId = name;
+    syncMapNameFields(name);
+    markClean();
+    showToast('Opened ' + name + ' from browser');
+    setMapsStatus('warn', 'Opened from cache');
+    return true;
+  } catch (e) {
+    alert('Load failed: ' + e.message);
+    return false;
+  }
+}
+
+function loadMapFromJsonText(text, label) {
+  let obj;
+  try { obj = JSON.parse(text); }
+  catch (e) { alert('Invalid JSON: ' + e.message); return false; }
+  if (docDirty && !confirm('Discard unsaved changes and open "' + (label || 'file') + '"?')) return false;
+  suppressHistory = true;
+  const ok = loadMap(obj, { skipHistory: true });
+  suppressHistory = false;
+  if (!ok) return false;
+  historyStack.length = 0;
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+  currentMapId = null;
+  const baseName = (label || '').replace(/\.json$/i, '') || obj.name || 'imported';
+  syncMapNameFields(obj.name || baseName);
+  markDirty();
+  showToast('Opened ' + (label || baseName));
+  setMapsStatus('ok', 'Unsaved file');
+  return true;
+}
+
+async function openMapFromFile(file) {
+  if (!file) return false;
+  closeMapMenus();
+  try {
+    const text = await file.text();
+    return loadMapFromJsonText(text, file.name);
+  } catch (e) {
+    alert('Could not read file: ' + e.message);
+    return false;
+  }
+}
+
+async function triggerOpenFilePicker() {
+  closeMapMenus();
+  if (window.electronAPI?.openJsonFile) {
+    try {
+      const result = await window.electronAPI.openJsonFile();
+      if (!result) return false;
+      return loadMapFromJsonText(result.content, result.name || result.path || 'file');
+    } catch (e) {
+      alert('Open file failed: ' + e.message);
+      return false;
+    }
+  }
+  openFileInput?.click();
+  return false;
+}
+
+function handleJsonFileDrop(fileList) {
+  const file = fileList && fileList[0];
+  if (!file) return;
+  const name = (file.name || '').toLowerCase();
+  if (!name.endsWith('.json') && file.type && file.type !== 'application/json') {
+    showToast('Drop a .json map file');
+    return;
+  }
+  openMapFromFile(file);
+}
+
+async function saveCurrentMap(opts = {}) {
+  const saveAs = opts.saveAs === true;
+  let name;
+  try { name = await resolveDocumentName({ saveAs }); }
+  catch (e) {
+    if (e.message !== 'Save cancelled.') alert(e.message);
+    return false;
+  }
+
+  const data = serializeMap();
+  data.name = name;
+  mapState.name = name;
+  syncMapNameFields(name);
+
+  if (devServerOnline) {
+    try {
+      const path = (DEV_SERVER.mapsPath || '/api/maps') + '/' + encodeURIComponent(name);
+      const res = await fetch(DEV_SERVER_BASE + path, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ map: data }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (res.ok && payload.ok !== false) {
+        currentMapId = name;
+        if (newMapNameInput) newMapNameInput.value = '';
+        markClean();
+        await refreshMapsList();
+        showToast('Saved ' + name);
+        setMapsStatus('ok', 'Saved to journal/uff_viewer/maps/' + name + '.json');
+        return true;
+      }
+      const err = payload.error || ('HTTP ' + res.status);
+      alert('Save failed: ' + err);
+      setMapsStatus('err', 'Save failed: ' + err);
+      return false;
+    } catch (e) {
+      alert('Could not reach editor server: ' + e.message);
+      setMapsStatus('err', 'Server unreachable');
+      return false;
+    }
+  }
+
+  try {
+    localStorage.setItem('pdmap_editor_' + name, JSON.stringify(data));
+    currentMapId = name;
+    if (newMapNameInput) newMapNameInput.value = '';
+    markClean();
+    await refreshMapsList();
+    showToast('Saved ' + name + ' locally');
+    setMapsStatus('warn', 'Offline — saved to LocalStorage (pdmap_editor_' + name + ')');
+    return true;
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+    return false;
+  }
+}
+
+async function createNewMap() {
+  if (docDirty && !confirm('Discard unsaved changes and create a new map?')) return;
+
+  let name = null;
+  const typed = newMapNameInput?.value.trim();
+  if (typed) {
+    try { name = sanitizeLevelName(typed); }
+    catch (e) { alert(e.message); return; }
+  } else {
+    name = await promptMapName('my_arena', { title: 'New map', confirmLabel: 'Create' });
+    if (!name) return;
+  }
+
+  if (devServerOnline) {
+    try {
+      const path = DEV_SERVER.mapsPath || '/api/maps';
+      const res = await fetch(DEV_SERVER_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        alert('Map "' + name + '" already exists. Open it or pick another name.');
+        return;
+      }
+      if (res.ok && payload.map) {
+        suppressHistory = true;
+        loadMap(payload.map, { skipHistory: true });
+        suppressHistory = false;
+        historyStack.length = 0;
+        redoStack.length = 0;
+        updateUndoRedoButtons();
+        currentMapId = name;
+        syncMapNameFields(name);
+        if (newMapNameInput) newMapNameInput.value = '';
+        markClean();
+        await refreshMapsList();
+        showToast('Created ' + name + ' — click the floor to place components');
+        setMapsStatus('ok', 'Created "' + name + '" with starter pads');
+        beginPlacementMode('spawn');
+        return;
+      }
+      alert('Create failed: ' + (payload.error || ('HTTP ' + res.status)));
+      return;
+    } catch (e) {
+      alert('Could not reach editor server: ' + e.message);
+      return;
+    }
+  }
+
+  const template = starterMapTemplate(name);
+  suppressHistory = true;
+  loadMap(template, { skipHistory: true });
+  suppressHistory = false;
+  historyStack.length = 0;
+  redoStack.length = 0;
+  updateUndoRedoButtons();
+  currentMapId = name;
+  syncMapNameFields(name);
+  if (newMapNameInput) newMapNameInput.value = '';
+  localStorage.setItem('pdmap_editor_' + name, JSON.stringify(template));
+  markClean();
+  await refreshMapsList();
+  showToast('Created ' + name + ' — click the floor to place components');
+  setMapsStatus('warn', 'Offline — created in LocalStorage');
+  beginPlacementMode('spawn');
+}
+
+async function deleteSelectedMap() {
+  let name = currentMapId || mapState.name || '';
+  if (!name || name === 'uff') {
+    const picked = await promptMapName(currentMapId || '', {
+      title: 'Delete map',
+      hint: 'Enter the map name to delete permanently.',
+      confirmLabel: 'Continue',
+    });
+    if (!picked) return;
+    name = picked;
+  }
+  if (!confirm('Delete saved map "' + name + '"? This cannot be undone.')) return;
+  closeMapMenus();
+
+  let deleted = false;
+  if (devServerOnline) {
+    try {
+      const path = (DEV_SERVER.mapsPath || '/api/maps') + '/' + encodeURIComponent(name);
+      const res = await fetch(DEV_SERVER_BASE + path, { method: 'DELETE' });
+      if (res.ok) deleted = true;
+    } catch (_) { /* try local */ }
+  }
+  const key = 'pdmap_editor_' + name;
+  if (localStorage.getItem(key)) {
+    localStorage.removeItem(key);
+    deleted = true;
+  }
+  if (!deleted) {
+    alert('Could not delete "' + name + '".');
+    return;
+  }
+  if (currentMapId === name) currentMapId = null;
+  await refreshMapsList();
+  showToast('Deleted ' + name);
+  setMapsStatus('ok', 'Deleted "' + name + '"');
+}
+
+const levelNameInput = document.getElementById('levelName');
+const pyWrap = document.getElementById('pyWrap');
+const pyText = document.getElementById('pyText');
+const buildCmdsEl = document.getElementById('buildCmds');
+const levelSelect = document.getElementById('levelSelect');
+
+// Weapon / ammo ID → W.* constant (mirrors journal/uff_viewer/json_to_level.py).
+const WEAPON_CONST = {
+  0x02: 'W.WEAPON_FALCON2', 0x05: 'W.WEAPON_MAGSEC4', 0x06: 'W.WEAPON_MAULER',
+  0x0a: 'W.WEAPON_CMP150', 0x0e: 'W.WEAPON_LAPTOPGUN', 0x12: 'W.WEAPON_SUPERDRAGON',
+  0x15: 'W.WEAPON_SNIPERRIFLE', 0x18: 'W.WEAPON_ROCKETLAUNCHER',
+  0x1b: 'W.WEAPON_CROSSBOW', 0x1c: 'W.WEAPON_TRANQUILIZER',
+};
+const AMMO_CONST = {
+  0x01: 'W.AMMOTYPE_PISTOL', 0x03: 'W.AMMOTYPE_RIFLE',
+  0x04: 'W.AMMOTYPE_SHOTGUN', 0x05: 'W.AMMOTYPE_ROCKET',
+};
+const VALID_NAME = /^[a-z][a-z0-9_]{0,31}$/;
+
+function fmtNum(v) {
+  v = +v;
+  if (Number.isInteger(v)) return (Math.abs(v) >= 1000 || v === 0) ? v + '.0' : String(v);
+  return String(parseFloat(v.toFixed(1)));
+}
+function weaponExpr(id) { return WEAPON_CONST[id] || ('0x' + id.toString(16)); }
+function ammoExpr(id)   { return AMMO_CONST[id]   || ('0x' + id.toString(16)); }
+function normalizeLevelName(raw) {
+  let n = (raw || mapState.name || 'map').trim().toLowerCase();
+  n = n.replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  return n || 'map';
+}
+function sanitizeLevelName(raw) {
+  const n = normalizeLevelName(raw);
+  if (!VALID_NAME.test(n)) {
+    throw new Error('Invalid level name — start with a letter; use lowercase letters, digits, underscore (spaces become _).');
+  }
+  return n;
+}
+
+/** Render editor state as a complete src/levels/<name>.py module (pdmap-ready). */
+function jsonToLevelPy(obj) {
+  const name = sanitizeLevelName(obj.name);
+  const half = +obj.box_half || HALF;
+  const height = +obj.box_height || HEIGHT;
+  const pads = obj.pads || [];
+  const spawn = [], weapon = [], ammo = [], scenario = [];
+  pads.forEach((p, i) => {
+    const idx = (p.index != null) ? +p.index : i;
+    if (idx !== i) throw new Error('Pad index ' + idx + ' at position ' + i + ' — indices must be contiguous 0..N-1.');
+    const row = [i, p];
+    if (p.type === 'spawn') spawn.push(row);
+    else if (p.type === 'weapon') weapon.push(row);
+    else if (p.type === 'ammo') ammo.push(row);
+    else if (p.type === 'scenario') scenario.push(row);
+  });
+
+  const L = [];
+  const w = s => L.push(s);
+  w('# Generated by journal/uff_viewer (pass-3 export).');
+  w('');
+  w('from tools.pdmap.builders import (');
+  w('    add_loadout_intro,');
+  if (weapon.length) w('    add_floor_weapons,');
+  if (ammo.length) w('    add_ammo_row,');
+  w('    floor_box_tiles,');
+  w(')');
+  w('from tools.pdmap.core import MapDef');
+  const intro = new Set();
+  if (spawn.length) intro.add('Spawn');
+  scenario.forEach(([, p]) => {
+    if (p.scenario === 'case') intro.add('Case');
+    else if (p.scenario === 'case_respawn') intro.add('CaseRespawn');
+    else intro.add('Hill');
+  });
+  if (intro.size) w('from tools.pdmap.intro import ' + [...intro].sort().join(', '));
+  w('from tools.pdmap import weapons as W');
+  w('');
+  w('# Arena dimensions — shared by floor tiles and generic box seg (--seg).');
+  w('BOX_HALF = ' + fmtNum(half));
+  w('BOX_HEIGHT = ' + fmtNum(height));
+  w('');
+  w('# Pads slightly above Y=0 so ground search accepts the floor (see MAP_CREATION.md).');
+  w('SPAWN_Y = 10.0');
+  w('');
+  w('');
+  w('def build() -> MapDef:');
+  w('    g = MapDef("' + name + '")');
+  w('');
+  w('    # --- Pads (indices MUST match array order 0..N-1) ---');
+  pads.forEach((p, i) => {
+    w('    g.add_pad(index=' + i + ', x=' + fmtNum(p.x) + ', y=' + fmtNum(p.y) +
+      ', z=' + fmtNum(p.z) + ', room=' + (p.room | 0) + ')  # ' + (p.type || 'other'));
+  });
+  if (spawn.length) {
+    w('');
+    w('    # --- Spawn intro commands ---');
+    spawn.forEach(([i]) => w('    g.add_intro(Spawn(pad=' + i + '))'));
+  }
+  if (weapon.length) {
+    w('');
+    w('    # --- Weapon pickups (floor props) ---');
+    const pairs = weapon.filter(([, p]) => p.weapon != null)
+      .map(([i, p]) => '(' + i + ', ' + weaponExpr(+p.weapon) + ')').join(', ');
+    if (pairs) w('    add_floor_weapons(g, [' + pairs + '])');
+    const miss = weapon.filter(([, p]) => p.weapon == null).map(([i]) => i);
+    if (miss.length) w('    # WARNING: weapon pad(s) ' + miss.join(', ') + ' missing weapon id');
+  }
+  if (ammo.length) {
+    w('');
+    w('    # --- Ammo crates (floor props) ---');
+    const byType = {};
+    ammo.forEach(([i, p]) => {
+      const t = +(p.ammoType != null ? p.ammoType : 0x04);
+      (byType[t] = byType[t] || []).push(i);
+    });
+    Object.keys(byType).sort((a, b) => +a - +b).forEach(t => {
+      w('    add_ammo_row(g, [' + byType[t].join(', ') + '], ammotype=' + ammoExpr(+t) + ')');
+    });
+  }
+  if (scenario.length) {
+    w('');
+    w('    # --- Scenario anchors (Capture the Case / King of the Hill) ---');
+    scenario.forEach(([i, p]) => {
+      if (p.scenario === 'case') {
+        w('    g.add_intro(Case(team=' + (p.team | 0) + ', pad=' + i + '))');
+      } else if (p.scenario === 'case_respawn') {
+        w('    g.add_intro(CaseRespawn(team=' + (p.team | 0) + ', pad=' + i + '))');
+      } else {
+        w('    g.add_intro(Hill(pad=' + i + '))');
+      }
+    });
+  }
+  w('');
+  w('    add_loadout_intro(g)');
+  w('    return g');
+  w('');
+  w('');
+  w('def build_tiles_json():');
+  w('    return floor_box_tiles("' + name + '", half=BOX_HALF, y=0.0, room_index=1)');
+  w('');
+  return L.join('\n');
+}
+
+function exportPython() {
+  if (mapState.pads.length === 0) {
+    alert('Cannot export an empty map — add spawn/weapon pads first.');
+    return '';
+  }
+  const obj = serializeMap();
+  obj.name = sanitizeLevelName(levelNameInput.value || mapState.name);
+  const txt = jsonToLevelPy(obj);
+  pyText.value = txt;
+  pyWrap.classList.add('shown');
+  updateBuildCmds(obj.name);
+  return txt;
+}
+
+function updateBuildCmds(name) {
+  let lvl;
+  try { lvl = sanitizeLevelName(name); } catch (e) { lvl = 'myarena'; }
+  buildCmdsEl.textContent =
+    '# Manual pdmap path (Test / Play panel automates this):\n' +
+    'python3 journal/uff_viewer/json_to_level.py map.json -o src/levels/' + lvl + '.py\n' +
+    'python3 tools/pdmap.py build ' + lvl + ' --deploy --seg\n\n' +
+    './build/pd.arm64 --test-map --scenario-0 --moddir mods/mod_allinone';
+  if (typeof updateTestPanel === 'function') updateTestPanel();
+}
+
+// ===========================================================================
+// pass-5: Test / Play — validate, export JSON, emit test_map.py command/script
+// ===========================================================================
+const testLevelInput = document.getElementById('testLevelName');
+const testDeployAs = document.getElementById('testDeployAs');
+const testModSelect = document.getElementById('testMod');
+const testScenarioSelect = document.getElementById('testScenario');
+const testCmdsEl = document.getElementById('testCmds');
+const testStatusEl = document.getElementById('testStatus');
+let lastTestPayload = null;
+let lastTestShell = '';
+
+function collectValidationIssues() {
+  const pads = mapState.pads;
+  const errors = [];
+  const warnings = [];
+  const c = { spawn: 0, weapon: 0, ammo: 0, scenario: 0 };
+  const posBuckets = new Map();
+
+  if (pads.length === 0) errors.push('Empty map — add pads before testing');
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    const kind = KIND_ORDER.includes(p.type) ? p.type : 'other';
+    if (kind in c) c[kind]++;
+    if (p.y < 0) errors.push('Pad ' + i + ' below floor (Y<0)');
+    if (kind === 'weapon' && p.weapon == null) errors.push('Pad ' + i + ': weapon not assigned');
+    if (kind === 'ammo' && p.ammoType == null) errors.push('Pad ' + i + ': ammo type not assigned');
+    if (kind === 'scenario' && !p.scenario) errors.push('Pad ' + i + ': scenario mode not set');
+    if (Math.abs(p.x) > HALF || Math.abs(p.z) > HALF) warnings.push('Pad ' + i + ' outside box XZ footprint');
+    if (p.y === 0 && (kind === 'spawn' || kind === 'weapon' || kind === 'ammo'))
+      warnings.push('Pad ' + i + ' at Y=0 — use Y≥10 (SPAWN_Y)');
+    if (padNearOriginForTest(p)) warnings.push('Pad ' + i + ' near origin');
+    const posKey = rnd(p.x) + ',' + rnd(p.y) + ',' + rnd(p.z);
+    const bucket = posBuckets.get(posKey) || [];
+    bucket.push(i);
+    posBuckets.set(posKey, bucket);
+  }
+  if (pads.length > 0 && c.spawn === 0) errors.push('0 spawn pads — players cannot spawn');
+  else if (c.spawn > 0 && c.spawn < 4) warnings.push('Only ' + c.spawn + ' spawn pad(s) — recommend ≥4 for MP');
+  if (pads.length > 0 && c.weapon === 0) warnings.push('0 weapon pads — no floor weapon pickups');
+  for (const [, indices] of posBuckets) {
+    if (padPositionsConflict(indices, pads)) {
+      warnings.push('Pads ' + indices.join(', ') + ' share the same position');
+    }
+  }
+  const caseTeams = new Set(), respawnTeams = new Set();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    if (p.type !== 'scenario') continue;
+    if (p.scenario === 'case') caseTeams.add(p.team | 0);
+    else if (p.scenario === 'case_respawn') respawnTeams.add(p.team | 0);
+  }
+  for (const t of caseTeams) {
+    if (!respawnTeams.has(t)) warnings.push('Team ' + t + ' case pad without CaseRespawn — CTF scenario 5 may fail');
+  }
+  for (const t of respawnTeams) {
+    if (!caseTeams.has(t)) warnings.push('Team ' + t + ' CaseRespawn without case pad');
+  }
+  return { errors, warnings };
+}
+
+function populateTestSelects() {
+  const slot = TEST_CONFIG.testMapSlot || 'uff';
+  const defs = TEST_CONFIG.defaults || {};
+  if (testDeployAs) {
+    testDeployAs.innerHTML =
+      '<option value="__same__">Same as level module</option>' +
+      '<option value="' + slot + '">' + slot + ' (test-map slot)</option>';
+  }
+  if (testModSelect && Array.isArray(TEST_CONFIG.mods)) {
+    testModSelect.innerHTML = TEST_CONFIG.mods.map(m =>
+      '<option value="' + m.id + '">' + m.id + ' (' + m.path + ')</option>').join('');
+  }
+  if (testScenarioSelect && Array.isArray(TEST_CONFIG.scenarios)) {
+    testScenarioSelect.innerHTML = TEST_CONFIG.scenarios.map(s =>
+      '<option value="' + s.id + '">' + s.id + ' — ' + s.label + '</option>').join('');
+  }
+  const numSimsEl = document.getElementById('testNumSims');
+  if (numSimsEl) {
+    let opts = '';
+    for (let n = 0; n <= 8; n++) opts += '<option value="' + n + '">' + n + '</option>';
+    numSimsEl.innerHTML = opts;
+    numSimsEl.value = String(defs.numSims != null ? defs.numSims : 8);
+  }
+  const simDiffEl = document.getElementById('testSimDiff');
+  if (simDiffEl && Array.isArray(TEST_CONFIG.simDifficulties)) {
+    simDiffEl.innerHTML = TEST_CONFIG.simDifficulties.map(d =>
+      '<option value="' + d.id + '">' + d.label + '</option>').join('');
+    simDiffEl.value = String(defs.simDifficulty != null ? defs.simDifficulty : 2);
+  }
+  populateLoadoutSelects();
+  populateGameOptions();
+  updateSimInfoReadout();
+}
+
+function populateLoadoutSelects() {
+  const grid = document.getElementById('testLoadoutGrid');
+  const weapons = TEST_CONFIG.loadoutWeapons || [];
+  const defaults = (TEST_CONFIG.defaults && TEST_CONFIG.defaults.loadout) || [0x01, 0x09, 0x10, 0x04, 0x00, 0x25];
+  if (!grid) return;
+  grid.innerHTML = '';
+  const optsHtml = weapons.map(w =>
+    '<option value="' + w.id + '">' + w.label + '</option>').join('');
+  for (let i = 0; i < 6; i++) {
+    const lbl = document.createElement('label');
+    lbl.textContent = String(i + 1);
+    lbl.setAttribute('for', 'testLoadout' + i);
+    const sel = document.createElement('select');
+    sel.id = 'testLoadout' + i;
+    sel.innerHTML = optsHtml;
+    sel.value = String(defaults[i] != null ? defaults[i] : 0);
+    sel.addEventListener('change', () => { updateTestPanel(); });
+    grid.appendChild(lbl);
+    grid.appendChild(sel);
+  }
+}
+
+function populateGameOptions() {
+  const container = document.getElementById('testGameOptions');
+  const options = TEST_CONFIG.gameOptions || [];
+  const defaultMask = (TEST_CONFIG.defaults && TEST_CONFIG.defaults.mpOptions) || 0;
+  if (!container) return;
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const label = document.createElement('label');
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.dataset.mpOpt = String(opt.id);
+    chk.checked = (defaultMask & opt.id) !== 0;
+    chk.addEventListener('change', () => { updateTestPanel(); });
+    label.appendChild(chk);
+    label.appendChild(document.createTextNode(' ' + opt.label));
+    container.appendChild(label);
+  });
+}
+
+function getLoadoutFromUI() {
+  const out = [];
+  for (let i = 0; i < 6; i++) {
+    const el = document.getElementById('testLoadout' + i);
+    out.push(el ? parseInt(el.value, 10) : 0);
+  }
+  return out;
+}
+
+function getMpOptionsFromUI() {
+  let mask = 0;
+  document.querySelectorAll('#testGameOptions input[data-mp-opt]').forEach(chk => {
+    if (chk.checked) mask |= parseInt(chk.dataset.mpOpt, 10);
+  });
+  return mask;
+}
+
+function updateSimInfoReadout() {
+  const simEl = document.getElementById('testSimInfo');
+  if (!simEl) return;
+  const numEl = document.getElementById('testNumSims');
+  const requested = numEl ? parseInt(numEl.value, 10) : ((TEST_CONFIG.defaults && TEST_CONFIG.defaults.numSims) || 8);
+  const cap = (TEST_CONFIG.simulants && TEST_CONFIG.simulants.stockCap) || 4;
+  simEl.textContent = requested + ' sims · cap ' + cap;
+  simEl.title = (TEST_CONFIG.simulants && TEST_CONFIG.simulants.note) || '';
+}
+
+function getTestOptions() {
+  let level;
+  try { level = sanitizeLevelName(testLevelInput.value || levelNameInput.value || mapState.name); }
+  catch (e) { throw new Error(e.message); }
+  const deployChoice = testDeployAs ? testDeployAs.value : '__same__';
+  const deployAs = (deployChoice === '__same__') ? level : deployChoice;
+  return {
+    level,
+    deployAs,
+    mod: testModSelect ? testModSelect.value : 'mod_allinone',
+    scenario: testScenarioSelect ? parseInt(testScenarioSelect.value, 10) : 0,
+    numSims: parseInt(document.getElementById('testNumSims')?.value || '8', 10),
+    simDifficulty: parseInt(document.getElementById('testSimDiff')?.value || '2', 10),
+    loadout: getLoadoutFromUI(),
+    mpOptions: getMpOptionsFromUI(),
+    seg: document.getElementById('testSegChk')?.checked !== false,
+    deploy: document.getElementById('testDeployChk')?.checked !== false,
+    skipValidate: document.getElementById('testSkipValChk')?.checked === true,
+    rebuildGame: document.getElementById('testRebuildChk')?.checked === true,
+    play: document.getElementById('testPlayChk')?.checked !== false,
+    backup: document.getElementById('testBackupChk')?.checked !== false,
+    warnOk: document.getElementById('testWarnOkChk')?.checked === true,
+    half: HALF,
+    height: HEIGHT,
+  };
+}
+
+function buildTestShellScript(data, opts) {
+  const jsonBlob = JSON.stringify(data, null, 2);
+  const flags = [
+    '--level ' + opts.level,
+    '--mod ' + opts.mod,
+    '--scenario ' + opts.scenario,
+    '--num-sims ' + opts.numSims,
+    '--sim-difficulty ' + opts.simDifficulty,
+    '--loadout ' + opts.loadout.join(','),
+  ];
+  if (opts.mpOptions) flags.push('--mp-options ' + opts.mpOptions);
+  if (opts.deployAs !== opts.level) flags.push('--deploy-as ' + opts.deployAs);
+  if (opts.seg) flags.push('--seg');
+  if (opts.deploy) flags.push('--deploy');
+  if (opts.skipValidate) flags.push('--skip-validate');
+  if (opts.rebuildGame) flags.push('--rebuild-game');
+  if (opts.play) flags.push('--play');
+  if (opts.backup) flags.push('--backup');
+  flags.push('--write-artifacts');
+  const flagBlock = flags.map(f => '  ' + f).join(' \\\n');
+  return (
+    '#!/bin/bash\n' +
+    '# Generated by uff viewer — save as journal/uff_viewer/.last_test.sh and run from repo root.\n' +
+    'set -euo pipefail\n' +
+    'ROOT="$(cd "$(dirname "$0")/../.." && pwd)"\n' +
+    'cd "$ROOT"\n' +
+    'python3 journal/uff_viewer/test_map.py - \\\n' +
+    flagBlock + ' <<\'__PDMAP_EDITOR_JSON__\'\n' +
+    jsonBlob + '\n' +
+    '__PDMAP_EDITOR_JSON__\n'
+  );
+}
+
+function buildTestCommandLine(opts) {
+  const parts = ['python3 journal/uff_viewer/test_map.py journal/uff_viewer/.last_test.json'];
+  parts.push('--level', opts.level);
+  parts.push('--mod', opts.mod);
+  parts.push('--scenario', String(opts.scenario));
+  parts.push('--num-sims', String(opts.numSims));
+  parts.push('--sim-difficulty', String(opts.simDifficulty));
+  parts.push('--loadout', opts.loadout.join(','));
+  if (opts.mpOptions) parts.push('--mp-options', String(opts.mpOptions));
+  if (opts.deployAs !== opts.level) parts.push('--deploy-as', opts.deployAs);
+  if (opts.seg) parts.push('--seg');
+  if (opts.deploy) parts.push('--deploy');
+  if (opts.skipValidate) parts.push('--skip-validate');
+  if (opts.rebuildGame) parts.push('--rebuild-game');
+  if (opts.play) parts.push('--play');
+  if (opts.backup) parts.push('--backup');
+  parts.push('--write-artifacts');
+  return parts.join(' ');
+}
+
+function setTestStatus(kind, html) {
+  const span = '<span class="' + kind + '">' + html + '</span>';
+  if (testStatusEl) testStatusEl.innerHTML = span;
+  if (runTestStatusEl && html) runTestStatusEl.innerHTML = span;
+  else if (runTestStatusEl) runTestStatusEl.innerHTML = '';
+}
+
+function updateTestServerHint() {
+  const hint = document.getElementById('testServerHint');
+  const playBtn = document.getElementById('testPlayBtn');
+  const startCmd = DEV_SERVER.startCommand || 'python3 journal/uff_viewer/serve_editor.py';
+  const isFileProtocol = typeof location !== 'undefined' && location.protocol === 'file:';
+
+  if (playBtn) {
+    playBtn.disabled = testPlayBusy;
+    playBtn.title = devServerOnline
+      ? 'Validate, build, deploy, and launch ./build/pd.arm64 --test-map'
+      : 'Start local server to play in-game';
+  }
+
+  if (!hint) return;
+  if (devServerOnline) {
+    const bin = devServerHealth && devServerHealth.binaryFound;
+    hint.innerHTML = '<span class="live">● Server online</span> at ' + DEV_SERVER_BASE +
+      (bin === false ? ' · <span class="warn">pd binary missing — build game first</span>' : '') +
+      ' · Test / Play launches in-game';
+  } else if (isFileProtocol) {
+    hint.innerHTML = '<span class="off">● Opened via file://</span> — cannot launch the game from the browser. ' +
+      'Double-click <strong>scripts/release/Perfect Dark Map Editor.app</strong> or run <code>' + startCmd +
+      '</code>, then use Test / Play.';
+  } else {
+    hint.innerHTML = '<span class="off">● Server offline</span> — start with <code>' + startCmd +
+      '</code> then open <code>' + DEV_SERVER_BASE + '/</code>';
+  }
+}
+
+async function pollDevServerHealth() {
+  DEV_SERVER_BASE = await resolveDevServerBase();
+  const path = DEV_SERVER.healthPath || '/api/health';
+  try {
+    const res = await fetch(DEV_SERVER_BASE + path, { method: 'GET', cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    devServerHealth = await res.json();
+    devServerOnline = !!devServerHealth.ok;
+    checkBundleFreshness(devServerHealth);
+  } catch (_) {
+    devServerOnline = false;
+    devServerHealth = null;
+  }
+  updateTestServerHint();
+  refreshMapsList();
+}
+
+function startDevServerPolling() {
+  pollDevServerHealth();
+  if (devServerPollTimer) clearInterval(devServerPollTimer);
+  devServerPollTimer = setInterval(pollDevServerHealth, 5000);
+}
+
+async function runTestPlay() {
+  if (testPlayBusy) return;
+
+  const { errors, warnings } = collectValidationIssues();
+  const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
+  if (errors.length) {
+    setTestStatus('err', errors.join(' · '));
+    alert('Fix validation errors before testing:\n\n' + errors.join('\n'));
+    return;
+  }
+  if (warnings.length && !warnOk) {
+    const proceed = confirm(
+      'Validation warnings:\n\n' + warnings.join('\n') + '\n\nProceed with Test / Play anyway?');
+    if (!proceed) {
+      setTestStatus('warn', 'Test cancelled — fix warnings or enable "Allow warnings"');
+      return;
+    }
+  }
+
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  lastTestPayload = data;
+  lastTestShell = buildTestShellScript(data, opts);
+
+  if (!devServerOnline) {
+    const startCmd = DEV_SERVER.startCommand || 'python3 journal/uff_viewer/serve_editor.py';
+    setTestStatus('warn',
+      'Cannot launch from here — open scripts/release/Perfect Dark Map Editor.app or run: ' + startCmd);
+    showToast('Start the editor server to play in-game — use Export below for files');
+    return;
+  }
+
+  if (document.getElementById('testPlayChk')?.checked === false) {
+    setTestStatus('warn', 'Launch disabled — enable "Launch game after build" or use Export below');
+    return;
+  }
+
+  testPlayBusy = true;
+  updateTestServerHint();
+  setTestStatus('', 'Building map and launching game…');
+  showToast('Building + launching…');
+
+  const path = DEV_SERVER.testMapPath || '/api/test-map';
+  opts.play = true;
+  try {
+    const res = await fetch(DEV_SERVER_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ map: data, options: opts }),
+    });
+    const body = await res.json();
+    if (testCmdsEl) {
+      testCmdsEl.textContent =
+        (body.command || '') + '\n\n' +
+        (body.playCommand ? '# play:\n' + body.playCommand + '\n\n' : '') +
+        (body.stdout || '') +
+        (body.stderr ? '\n# stderr:\n' + body.stderr : '');
+    }
+    if (body.ok) {
+      const pidMsg = body.pid ? ' (game pid ' + body.pid + ')' : '';
+      setTestStatus('ok', 'Build OK — game launched' + pidMsg);
+      showToast('Game launched' + pidMsg);
+    } else {
+      const err = body.error || body.stderr || 'Build or launch failed';
+      setTestStatus('err', String(err).slice(0, 500));
+      showToast('Test / Play failed — see status');
+    }
+  } catch (e) {
+    setTestStatus('err', 'Server request failed: ' + e.message);
+    showToast('Could not reach local server');
+  } finally {
+    testPlayBusy = false;
+    updateTestServerHint();
+    updateTestPanel();
+  }
+}
+
+function updateTestPanel() {
+  const boxEl = document.getElementById('testBoxInfo');
+  if (boxEl) boxEl.textContent = 'Box ±' + HALF + ' × ' + HEIGHT;
+  updateSimInfoReadout();
+  try {
+    const opts = getTestOptions();
+    const data = serializeMap();
+    data.name = opts.level;
+    lastTestPayload = data;
+    lastTestShell = buildTestShellScript(data, opts);
+    if (testCmdsEl) {
+      testCmdsEl.textContent =
+        '# Test / Play (server): POST ' + (DEV_SERVER.testMapPath || '/api/test-map') + '\n' +
+        '# Terminal fallback:\n' +
+        buildTestCommandLine(opts) + '\n\n' +
+        '# Box: half=' + opts.half + ' height=' + opts.height +
+        ' · deploy=' + opts.deployAs + ' · mod=' + opts.mod +
+        ' · scenario=' + opts.scenario +
+        ' · sims=' + opts.numSims + ' diff=' + opts.simDifficulty +
+        ' · loadout=' + opts.loadout.join(',') +
+        (opts.mpOptions ? ' · mpOptions=0x' + opts.mpOptions.toString(16) : '');
+    }
+    if (opts.play && opts.deployAs !== (TEST_CONFIG.testMapSlot || 'uff')) {
+      setTestStatus('warn', 'Deploy as is not "' + (TEST_CONFIG.testMapSlot || 'uff') +
+        '" — --test-map may not load these assets unless the stage is registered.');
+    } else {
+      setTestStatus('', '');
+    }
+    updateTestServerHint();
+  } catch (e) {
+    if (testCmdsEl) testCmdsEl.textContent = '# ' + e.message;
+  }
+}
+
+/** Legacy hook — run bar is fixed height; panelRight uses static top offset. */
+function layoutRightStack() {
+  layoutChrome();
+}
+function layoutChrome() {
+  const root = document.documentElement;
+  const runBar = document.getElementById('runBar');
+  const placeBar = document.getElementById('placeToolbar');
+  const variants = document.getElementById('placeVariants');
+  if (runBar) {
+    const h = Math.ceil(runBar.getBoundingClientRect().height);
+    if (h > 0) root.style.setProperty('--runbar-h', h + 'px');
+  }
+  if (editing && placeBar) {
+    let bottomH = Math.ceil(placeBar.getBoundingClientRect().height) + 28;
+    if (variants && variants.classList.contains('open')) {
+      bottomH += Math.ceil(variants.getBoundingClientRect().height) + 8;
+    }
+    root.style.setProperty('--bottom-bar-h', Math.max(92, bottomH) + 'px');
+  } else {
+    root.style.setProperty('--bottom-bar-h', '24px');
+  }
+}
+window.addEventListener('resize', layoutChrome);
+
+function downloadText(filename, text, mime) {
+  const blob = new Blob([text], { type: mime || 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+async function runTestBuildOnly() {
+  if (testPlayBusy) return;
+
+  const { errors, warnings } = collectValidationIssues();
+  const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
+  if (errors.length) {
+    setTestStatus('err', errors.join(' · '));
+    alert('Fix validation errors before exporting:\n\n' + errors.join('\n'));
+    return;
+  }
+  if (warnings.length && !warnOk) {
+    const proceed = confirm(
+      'Validation warnings:\n\n' + warnings.join('\n') + '\n\nProceed with export anyway?');
+    if (!proceed) {
+      setTestStatus('warn', 'Export cancelled — fix warnings or enable "Allow warnings"');
+      return;
+    }
+  }
+
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  lastTestPayload = data;
+  opts.play = false;
+  lastTestShell = buildTestShellScript(data, opts);
+
+  if (!devServerOnline) {
+    runTestExport();
+    return;
+  }
+
+  testPlayBusy = true;
+  updateTestServerHint();
+  setTestStatus('', 'Building map artifacts (no launch)…');
+  showToast('Exporting build…');
+
+  const path = DEV_SERVER.testMapPath || '/api/test-map';
+  try {
+    const res = await fetch(DEV_SERVER_BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ map: data, options: opts }),
+    });
+    const body = await res.json();
+    if (testCmdsEl) {
+      testCmdsEl.textContent =
+        (body.command || body.fullCommand || '') + '\n\n' +
+        (body.stdout || '') +
+        (body.stderr ? '\n# stderr:\n' + body.stderr : '');
+    }
+    if (body.ok) {
+      setTestStatus('ok', 'Build OK — artifacts deployed (game not launched)');
+      showToast('Export build complete');
+    } else {
+      const err = body.error || body.stderr || 'Build failed';
+      setTestStatus('err', String(err).slice(0, 500));
+      showToast('Export build failed — see status');
+    }
+  } catch (e) {
+    setTestStatus('err', 'Server request failed: ' + e.message);
+    showToast('Could not reach local server — try terminal fallback');
+  } finally {
+    testPlayBusy = false;
+    updateTestServerHint();
+    updateTestPanel();
+  }
+}
+
+function downloadTestMapJson() {
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  downloadText(opts.level + '.json', JSON.stringify(data, null, 2), 'application/json');
+  showToast('Downloaded ' + opts.level + '.json');
+}
+
+function downloadTestMapPython() {
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  const txt = jsonToLevelPy(data);
+  downloadText(opts.level + '.py', txt, 'text/x-python');
+  showToast('Downloaded ' + opts.level + '.py');
+}
+
+function runTestExport() {
+  const { errors, warnings } = collectValidationIssues();
+  const warnOk = document.getElementById('testWarnOkChk')?.checked === true;
+  if (errors.length) {
+    setTestStatus('err', errors.join(' · '));
+    alert('Fix validation errors before testing:\n\n' + errors.join('\n'));
+    return;
+  }
+  if (warnings.length && !warnOk) {
+    const proceed = confirm(
+      'Validation warnings:\n\n' + warnings.join('\n') + '\n\nProceed with test export anyway?');
+    if (!proceed) {
+      setTestStatus('warn', 'Test cancelled — fix warnings or enable "Allow warnings"');
+      return;
+    }
+  }
+
+  let opts;
+  try { opts = getTestOptions(); }
+  catch (e) { alert(e.message); return; }
+
+  const data = serializeMap();
+  data.name = opts.level;
+  data.box_half = opts.half;
+  data.box_height = opts.height;
+  opts.play = false;
+  lastTestPayload = data;
+  lastTestShell = buildTestShellScript(data, opts);
+
+  downloadText('.last_test.json', JSON.stringify(data, null, 2), 'application/json');
+  downloadText('.last_test.sh', lastTestShell, 'application/x-sh');
+  if (testCmdsEl) testCmdsEl.textContent = buildTestCommandLine(opts) + '\n\n' + lastTestShell;
+
+  const msg = warnings.length
+    ? 'Exported with ' + warnings.length + ' warning(s). Save files to journal/uff_viewer/ and run the command.'
+    : 'Exported .last_test.json + .last_test.sh — save to journal/uff_viewer/ and run in terminal.';
+  setTestStatus('ok', msg);
+  showToast('Export ready — run command in terminal');
+}
+
+function populateLevelSelect() {
+  levelSelect.innerHTML = '';
+  const names = Object.keys(LEVEL_CATALOG).sort();
+  if (!names.length) {
+    const o = document.createElement('option');
+    o.value = ''; o.textContent = '(no embedded levels)';
+    levelSelect.appendChild(o);
+    return;
+  }
+  names.forEach(n => {
+    const o = document.createElement('option');
+    o.value = n;
+    o.textContent = n + ' (' + (LEVEL_CATALOG[n].pads || []).length + ' pads)';
+    levelSelect.appendChild(o);
+  });
+}
+
+function loadFromCatalog(name, opts = {}) {
+  const snap = LEVEL_CATALOG[name];
+  if (!snap) { alert('Level "' + name + '" not in embedded catalog.'); return false; }
+  if (!loadMap(snap, opts)) return false;
+  levelNameInput.value = name;
+  updateBuildCmds(name);
+  return true;
+}
+
+document.getElementById('exportPyBtn').onclick = exportPython;
+document.getElementById('copyPyBtn').onclick = () => {
+  const txt = exportPython();
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(() => {});
+  else { pyText.select(); document.execCommand('copy'); }
+};
+document.getElementById('downloadPyBtn').onclick = () => {
+  const obj = serializeMap();
+  obj.name = sanitizeLevelName(levelNameInput.value || mapState.name);
+  const txt = jsonToLevelPy(obj);
+  const blob = new Blob([txt], { type: 'text/x-python' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = obj.name + '.py';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  pyText.value = txt;
+  pyWrap.classList.add('shown');
+  updateBuildCmds(obj.name);
+};
+document.getElementById('loadLevelBtn').onclick = () => {
+  const n = levelSelect.value;
+  if (n) { pushHistory(); loadFromCatalog(n, { skipHistory: true }); }
+};
+levelNameInput.addEventListener('input', () => {
+  updateBuildCmds(levelNameInput.value || mapState.name);
+  updateStorageKeyDisplay();
+  if (testLevelInput && !testLevelInput.dataset.userEdited) testLevelInput.value = levelNameInput.value;
+});
+
+// pass-5: Test / Play panel wiring
+populateTestSelects();
+if (testLevelInput) {
+  testLevelInput.value = mapState.name || 'uff';
+  testLevelInput.addEventListener('input', () => { testLevelInput.dataset.userEdited = '1'; updateTestPanel(); });
+}
+[testDeployAs, testModSelect, testScenarioSelect,
+ document.getElementById('testNumSims'), document.getElementById('testSimDiff'),
+ document.getElementById('testSegChk'), document.getElementById('testDeployChk'),
+ document.getElementById('testSkipValChk'), document.getElementById('testRebuildChk'),
+ document.getElementById('testPlayChk'), document.getElementById('testBackupChk'),
+ document.getElementById('testWarnOkChk')].forEach(el => {
+  if (el) el.addEventListener('change', () => { updateTestPanel(); updateTestServerHint(); });
+});
+document.getElementById('testPlayBtn')?.addEventListener('click', runTestPlay);
+document.getElementById('buildSettingsBtn')?.addEventListener('click', openBuildSettings);
+document.getElementById('buildSettingsClose')?.addEventListener('click', closeBuildSettings);
+buildSettingsModal?.addEventListener('click', e => {
+  if (e.target === buildSettingsModal) closeBuildSettings();
+});
+document.getElementById('mapNameOk')?.addEventListener('click', submitMapNameModal);
+document.getElementById('mapNameCancel')?.addEventListener('click', () => closeMapNameModal(null));
+mapNameModal?.addEventListener('click', e => {
+  if (e.target === mapNameModal) closeMapNameModal(null);
+});
+mapNameInput?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); submitMapNameModal(); }
+  if (e.key === 'Escape') { e.preventDefault(); closeMapNameModal(null); }
+});
+document.getElementById('testExportBtn')?.addEventListener('click', runTestExport);
+document.getElementById('testExportJsonBtn')?.addEventListener('click', downloadTestMapJson);
+document.getElementById('testExportPyBtn')?.addEventListener('click', downloadTestMapPython);
+document.getElementById('copyTestCmdBtn')?.addEventListener('click', () => {
+  try {
+    const cmd = buildTestCommandLine(getTestOptions());
+    if (navigator.clipboard) navigator.clipboard.writeText(cmd).catch(() => {});
+    else { if (testCmdsEl) { testCmdsEl.textContent = cmd; testCmdsEl.focus(); } }
+    showToast('Copied test command');
+  } catch (e) { alert(e.message); }
+});
+document.getElementById('downloadTestShBtn')?.addEventListener('click', () => {
+  try {
+    const opts = getTestOptions();
+    const data = serializeMap(); data.name = opts.level;
+    downloadText('.last_test.sh', buildTestShellScript(data, opts), 'application/x-sh');
+    showToast('Downloaded .last_test.sh');
+  } catch (e) { alert(e.message); }
+});
+document.getElementById('downloadTestJsonBtn')?.addEventListener('click', () => {
+  try {
+    const opts = getTestOptions();
+    const data = serializeMap(); data.name = opts.level;
+    downloadText('.last_test.json', JSON.stringify(data, null, 2), 'application/json');
+    showToast('Downloaded .last_test.json');
+  } catch (e) { alert(e.message); }
+});
+halfRange.addEventListener('input', () => updateTestPanel());
+heightRange.addEventListener('input', () => updateTestPanel());
+updateTestPanel();
+startDevServerPolling();
+
+// pass-4: session controls (undo/redo, LocalStorage, clear).
+document.getElementById('undoBtn').onclick = undo;
+document.getElementById('redoBtn').onclick = redo;
+document.getElementById('saveLocalBtn').onclick = saveToLocalStorage;
+document.getElementById('loadLocalBtn').onclick = loadFromLocalStorage;
+document.getElementById('clearMapBtn').onclick = clearMap;
+
+// pass-10: menu bar bridge (Electron) + browser fallback strip.
+if (!window.electronAPI) document.body.classList.add('browser-mode');
+window.electronAPI?.onMenuAction?.(handleMenuAction);
+document.querySelectorAll('#browserMenuBar [data-menu]').forEach(btn => {
+  btn.addEventListener('click', () => handleMenuAction(btn.getAttribute('data-menu')));
+});
+document.getElementById('browserFileMenu')?.querySelector('[data-menu="open-saved"]')?.remove();
+// Inject Open Saved into browser File menu after Open…
+(function addOpenSavedBrowserItem() {
+  const filePanel = document.querySelector('#browserFileMenu .browser-menu-panel');
+  const openBtn = filePanel?.querySelector('[data-menu="open"]');
+  if (!filePanel || !openBtn) return;
+  const savedBtn = document.createElement('button');
+  savedBtn.type = 'button';
+  savedBtn.dataset.menu = 'open-saved';
+  savedBtn.textContent = 'Open Saved…';
+  openBtn.insertAdjacentElement('afterend', savedBtn);
+  savedBtn.addEventListener('click', () => handleMenuAction('open-saved'));
+})();
+
+openFileInput?.addEventListener('change', () => {
+  const f = openFileInput.files && openFileInput.files[0];
+  if (f) openMapFromFile(f);
+  openFileInput.value = '';
+});
+['dragenter', 'dragover'].forEach(ev => {
+  const handler = e => {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    e.preventDefault();
+    document.body.classList.add('drag-over-canvas');
+  };
+  document.body.addEventListener(ev, handler);
+  canvas.addEventListener(ev, handler);
+});
+['dragleave', 'drop'].forEach(ev => {
+  const handler = e => {
+    if (ev === 'dragleave' && e.target !== document.body && e.target !== canvas) return;
+    document.body.classList.remove('drag-over-canvas');
+    if (ev === 'drop') {
+      e.preventDefault();
+      handleJsonFileDrop(e.dataTransfer?.files);
+    }
+  };
+  document.body.addEventListener(ev, handler);
+  canvas.addEventListener(ev, handler);
+});
+updateUndoRedoButtons();
+updateStorageKeyDisplay();
+refreshMapsList();
+currentMapId = null;
+markClean();
+updateDocTitle();
+
+populateLevelSelect();
+levelNameInput.value = mapState.name || 'uff';
+updateBuildCmds(mapState.name);
+
+// ?level=csim URL param switches the initial embedded snapshot.
+(function applyLevelQueryParam() {
+  const q = new URLSearchParams(location.search).get('level');
+  if (q && LEVEL_CATALOG[q]) loadFromCatalog(q);
+})();
+
+// expose hooks for headless scripted sanity checks (pass-2/3 VERIFY)
+window.__editor = {
+  setEditing, beginPlacementMode, toggleMinimap, toggleSnapGrid, setMinimapVisible, addPad, selectPad, deletePad, exportJSON, loadMap, serializeMap, mapState, setTool,
+  exportPython, jsonToLevelPy, loadFromCatalog,
+  undo, redo, pushHistory, saveToLocalStorage, loadFromLocalStorage, clearMap,
+  saveCurrentMap, loadSelectedMap, createNewMap, deleteSelectedMap, refreshMapsList,
+  openMapFromFile, triggerOpenFilePicker, loadMapFromJsonText, closeMapMenus,
+  handleMenuAction, openBuildSettings, closeBuildSettings, exportDocumentJson, openSavedMapDialog,
+  markDirty, markClean, updateDocTitle, resolveDocumentName,
+  collectValidationIssues, getTestOptions, buildTestCommandLine, runTestPlay, runTestBuildOnly, runTestExport, updateTestPanel,
+  drawMinimap,
+  get currentMapId() { return currentMapId; },
+  set currentMapId(v) { currentMapId = v; },
+  get devServerOnline() { return devServerOnline; },
+  promptMapName, openMapNameDialog,
+};
+
+updateValidation();  // initial pass once everything is defined
+layoutChrome();
+
+// ---------- corner orientation gizmo (mini axis indicator) ----------
+const gizmoScene = new THREE.Scene();
+gizmoScene.add(new THREE.AxesHelper(1));
+const gizmoCam = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+function makeGizmoLabel(text, color) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const ctx = cv.getContext('2d');
+  ctx.font = 'bold 44px monospace'; ctx.fillStyle = color;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, 32, 34);
+  const tex = new THREE.CanvasTexture(cv);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  s.scale.set(0.45, 0.45, 0.45);
+  return s;
+}
+[['X', '#ff6b6b', new THREE.Vector3(1.25, 0, 0)],
+ ['Y', '#6bff6b', new THREE.Vector3(0, 1.25, 0)],
+ ['Z', '#6ba8ff', new THREE.Vector3(0, 0, 1.25)]].forEach(([t, c, p]) => {
+  const s = makeGizmoLabel(t, c); s.position.copy(p); gizmoScene.add(s);
+});
+
+// ---------- resize + initial framing ----------
+let W = 1, H = 1;
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  renderer.setSize(W, H);  // updateStyle=true: also sets canvas CSS size so the
+                           // 2x-DPI drawing buffer is displayed at viewport size
+                           // (without this the canvas overflows on retina displays)
+  camera.aspect = W / H;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// snap to the isometric framing on load (no tween) so the box fills the view
+(function setInitialView() {
+  const dir = PRESET_DIRS.iso.clone().normalize();
+  camera.position.copy(CENTER.clone().add(dir.multiplyScalar(fitDistance())));
+  controls.target.copy(CENTER);
+  controls.update();
+  setActiveView('iso');
+})();
+
+// keep billboard labels a readable size regardless of camera distance
+function updateLabels() {
+  for (const grp of [labelGroup, faceLabelGroup, padLabelGroup]) {
+    if (!grp.visible) continue;
+    for (const s of grp.children) {
+      const d = camera.position.distanceTo(s.position);
+      const h = Math.max(120, d * 0.045);
+      s.scale.set(h * (s.userData.aspect || 4), h, 1);
+    }
+  }
+}
+
+const GIZ = 110;
+function renderGizmo() {
+  renderer.clearDepth();
+  renderer.setScissorTest(true);
+  renderer.setViewport(W - GIZ - 8, 8, GIZ, GIZ);
+  renderer.setScissor(W - GIZ - 8, 8, GIZ, GIZ);
+  gizmoCam.position.set(0, 0, 0);
+  gizmoCam.quaternion.copy(camera.quaternion);
+  gizmoCam.translateZ(3.2);          // back off along the view axis
+  gizmoCam.lookAt(0, 0, 0);
+  renderer.render(gizmoScene, gizmoCam);
+  renderer.setScissorTest(false);
+  renderer.setViewport(0, 0, W, H);
+}
+
+(function loop() {
+  requestAnimationFrame(loop);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (mode === 'orbit') {
+    if (tween) {
+      const k = easeInOut(Math.min(1, (performance.now() - tween.t0) / tween.dur));
+      camera.position.lerpVectors(tween.fp, tween.tp, k);
+      controls.target.lerpVectors(tween.ft, tween.tt, k);
+      camera.lookAt(controls.target);
+      if (k >= 1) tween = null;
+    } else {
+      controls.update();
+    }
+  } else {
+    updateFly(dt);
+  }
+  updateLabels();
+  animatePadVisuals(dt);
+  if (editing && showMinimap) drawMinimap();
+  renderer.clear();
+  renderer.render(scene, camera);
+  renderGizmo();
+})();
+</script>
+</body>
+</html>

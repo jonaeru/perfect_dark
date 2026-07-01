@@ -1191,6 +1191,85 @@ static inline int gfx_lod_tile_offset(const int i) {
     return (rdp.tex_lod ? rdp.tex_detail : i);
 }
 
+// Interpolate every attribute of a LoadedVertex along the edge a->b at t.
+static void gfx_clip_lerp_vertex(struct LoadedVertex* out, const struct LoadedVertex* a,
+                                 const struct LoadedVertex* b, float t) {
+    out->x = a->x + (b->x - a->x) * t;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = a->z + (b->z - a->z) * t;
+    out->w = a->w + (b->w - a->w) * t;
+    out->u = a->u + (b->u - a->u) * t;
+    out->v = a->v + (b->v - a->v) * t;
+    out->color.r = (uint8_t)(a->color.r + (b->color.r - a->color.r) * t);
+    out->color.g = (uint8_t)(a->color.g + (b->color.g - a->color.g) * t);
+    out->color.b = (uint8_t)(a->color.b + (b->color.b - a->color.b) * t);
+    out->color.a = (uint8_t)(a->color.a + (b->color.a - a->color.a) * t);
+    out->fog = (uint8_t)(a->fog + (b->fog - a->fog) * t);
+    out->clip_rej = 0;
+}
+
+// Clip a triangle against the near plane (clip-space z + w >= 0). This port
+// otherwise leaves near clipping to the GL driver, but vertices behind the eye
+// (w <= 0) project to garbage coordinates that intermittently corrupt the
+// macOS GL driver's heap. Produces up to two output triangles whose vertices
+// all lie in front of the near plane. New vertices are written into
+// clip_storage (needs room for 2). Returns the number of triangles (0, 1 or 2).
+static int gfx_clip_triangle_near(struct LoadedVertex* v1, struct LoadedVertex* v2, struct LoadedVertex* v3,
+                                  struct LoadedVertex* out_tris[2][3], struct LoadedVertex clip_storage[2]) {
+    struct LoadedVertex* in[3] = { v1, v2, v3 };
+    float d[3];
+    int n_in = 0;
+    for (int i = 0; i < 3; i++) {
+        d[i] = in[i]->z + in[i]->w; // signed distance to near plane
+        if (d[i] >= 0.0f) {
+            n_in++;
+        }
+    }
+    if (n_in == 3) {
+        out_tris[0][0] = v1;
+        out_tris[0][1] = v2;
+        out_tris[0][2] = v3;
+        return 1;
+    }
+    if (n_in == 0) {
+        return 0;
+    }
+
+    // Sutherland-Hodgman against the single near plane.
+    struct LoadedVertex* poly[4];
+    int poly_n = 0;
+    int storage_used = 0;
+    for (int i = 0; i < 3; i++) {
+        int j = (i + 1) % 3;
+        bool ini = d[i] >= 0.0f;
+        bool inj = d[j] >= 0.0f;
+        if (ini) {
+            poly[poly_n++] = in[i];
+        }
+        if (ini != inj) {
+            float t = d[i] / (d[i] - d[j]);
+            struct LoadedVertex* nv = &clip_storage[storage_used++];
+            gfx_clip_lerp_vertex(nv, in[i], in[j], t);
+            poly[poly_n++] = nv;
+        }
+    }
+
+    if (poly_n < 3) {
+        return 0;
+    }
+
+    out_tris[0][0] = poly[0];
+    out_tris[0][1] = poly[1];
+    out_tris[0][2] = poly[2];
+    if (poly_n == 4) {
+        out_tris[1][0] = poly[0];
+        out_tris[1][1] = poly[2];
+        out_tris[1][2] = poly[3];
+        return 2;
+    }
+    return 1;
+}
+
 static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bool is_rect) {
     struct LoadedVertex* v1 = &rsp.loaded_vertices[vtx1_idx];
     struct LoadedVertex* v2 = &rsp.loaded_vertices[vtx2_idx];
@@ -1416,6 +1495,26 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
 
     struct GfxClipParameters clip_parameters = gfx_rapi->get_clip_parameters();
 
+    // Near-plane clip this triangle into 0-2 triangles whose vertices are all
+    // in front of the eye, then emit each. Without this, behind-eye vertices
+    // reach the GL driver and corrupt its heap (crash during buffer swap).
+    struct LoadedVertex gfx_clip_storage[2];
+    struct LoadedVertex* gfx_clip_tris[2][3];
+    int gfx_num_clip_tris;
+    if (!is_rect && (rsp.extra_geometry_mode & G_NO_CLIPPING_EXT) == 0) {
+        gfx_num_clip_tris = gfx_clip_triangle_near(v1, v2, v3, gfx_clip_tris, gfx_clip_storage);
+    } else {
+        gfx_clip_tris[0][0] = v1;
+        gfx_clip_tris[0][1] = v2;
+        gfx_clip_tris[0][2] = v3;
+        gfx_num_clip_tris = 1;
+    }
+
+    for (int ct = 0; ct < gfx_num_clip_tris; ct++) {
+        v_arr[0] = gfx_clip_tris[ct][0];
+        v_arr[1] = gfx_clip_tris[ct][1];
+        v_arr[2] = gfx_clip_tris[ct][2];
+
     for (int i = 0; i < 3; i++) {
         float z = v_arr[i]->z, w = v_arr[i]->w;
         if (clip_parameters.z_is_from_0_to_1) {
@@ -1569,6 +1668,7 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
     if (++buf_vbo_num_tris == MAX_BUFFERED) {
         gfx_flush();
     }
+    } // end near-plane-clipped triangle loop
 }
 
 static inline void gfx_sp_tri4(Gfx *cmd) {
@@ -2501,7 +2601,7 @@ static void gfx_run_dl(Gfx* cmd) {
             case G_RDPTILESYNC:
                 break;
             default:
-                sysFatalError("Unknown GBI opcode 0x%02x at %p.\nw0 %08x\nw1 %08x", opcode, cmd, cmd->words.w0, cmd->words.w1);
+                sysFatalError("Unknown GBI opcode 0x%02x at %p.\nw0 0x%08llx\nw1 0x%08llx", (unsigned int)opcode, cmd, (unsigned long long)cmd->words.w0, (unsigned long long)cmd->words.w1);
                 break;
         }
         ++cmd;

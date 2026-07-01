@@ -186,7 +186,7 @@ void propsReset(void)
 	g_MaxProjectiles = IS4MB() ? 20 : 100;
 	g_MaxEmbedments = IS4MB() ? 40 : 80;
 
-	if (g_Vars.stagenum >= STAGE_TITLE) {
+	if (STAGE_IS_MENU(g_Vars.stagenum)) {
 		g_MaxWeaponSlots = 0;
 		g_MaxHatSlots = 0;
 		g_MaxAmmoCrates = 0;
@@ -749,6 +749,16 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 		}
 
 		if (weapon->weaponnum != WEAPON_NONE && createweapon) {
+			// Floor pickups use model 0 in setup files; resolve to the CHR weapon
+			// model before instantiating (stock Ump_setup* and pdmap both do this).
+			if (weapon->base.modelnum == 0) {
+				s32 resolved = playermgrGetModelOfWeapon(weapon->weaponnum);
+
+				if (resolved >= 0) {
+					weapon->base.modelnum = resolved;
+				}
+			}
+
 			modelmgrLoadProjectileModeldefs(weapon->weaponnum);
 			setupCreateObject(&weapon->base, cmdindex);
 		}
@@ -1310,8 +1320,11 @@ void setupLoadFiles(s32 stagenum)
 		g_ModelStates[i].modeldef = NULL;
 	}
 
-	if (stagenum < STAGE_TITLE) {
-		if (g_Vars.normmplayerisrunning) {
+	// Custom pdmap arenas (0x80+) are above STAGE_TITLE but still need setup/pads.
+	if (!STAGE_IS_MENU(stagenum)) {
+		// pdmap only emits gameplay content in Ump_setup*; the solo Usetup* stub is
+		// a minimal placeholder and must not be parsed as props.
+		if (g_Vars.normmplayerisrunning || STAGE_IS_PDMAP_BOX_ARENA(stagenum)) {
 			filenum = g_Stages[g_StageIndex].mpsetupfileid;
 		} else {
 			filenum = g_Stages[g_StageIndex].setupfileid;
@@ -1513,7 +1526,8 @@ void setupCreateProps(s32 stagenum)
 
 	g_Briefing.briefingtextnum = L_MISC_042; // "No briefing for this mission"
 
-	if (stagenum < STAGE_TITLE) {
+	// Custom pdmap arenas (0x80+) are above STAGE_TITLE but still need props/spawns.
+	if (!STAGE_IS_MENU(stagenum)) {
 		if (g_StageSetup.padfiledata) {
 			setupPreparePads();
 		}
@@ -2111,7 +2125,7 @@ void setupCreateProps(s32 stagenum)
 						slotnum = (slotnum + 1) % maxsimulants;
 					}
 
-					if ((g_MpSetup.chrslots & (1 << (slotnum + 4)))
+					if (mpIsChrParticipating(slotnum + MAX_PLAYERS)
 							&& mpIsSimSlotEnabled(slotnum)) {
 						botmgrAllocateBot(chrnum, slotnum);
 						chrnum++;

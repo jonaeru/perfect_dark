@@ -99,6 +99,7 @@ void mpCopySimulant(s32 index);
 bool mpHasSimulants(void);
 bool mpHasUnusedBotSlots(void);
 bool mpIsSimSlotEnabled(s32 slot);
+bool mpIsChrParticipating(s32 index);
 s32 mpFindBotProfile(s32 type, s32 difficulty);
 void mpGenerateBotNames(void);
 s32 mpPlayerGetIndex(struct chrdata *chr);

@@ -2016,4 +2016,20 @@ char *filenames[] = {
 	/*0x7db*/ "Ap16_03_joM",
 	/*0x7dc*/ "Acarrbye02M",
 	/*0x7dd*/ "Asaucerexp1M",
+#ifndef PLATFORM_N64
+	/*0x7de*/ "Ccarroll2Z",
+	/*0x7df*/ "Cskedar2Z",
+	/*0x7e0*/ "Ghand_carollZ",
+	/*0x7e1*/ "Ghand_skedarZ",
+	/*0x7e2*/ "bgdata/bg_my_arena.seg",
+	/*0x7e3*/ "bgdata/bg_my_arena_tilesZ",
+	/*0x7e4*/ "bgdata/bg_my_arena_padsZ",
+	/*0x7e5*/ "Usetupmy_arenaZ",
+	/*0x7e6*/ "Ump_setupmy_arenaZ",
+	/*0x7e7*/ "bgdata/bg_testarena.seg",
+	/*0x7e8*/ "bgdata/bg_testarena_tilesZ",
+	/*0x7e9*/ "bgdata/bg_testarena_padsZ",
+	/*0x7ea*/ "UsetuptestarenaZ",
+	/*0x7eb*/ "Ump_setuptestarenaZ",
+#endif
 };

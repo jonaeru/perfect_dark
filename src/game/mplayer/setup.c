@@ -197,6 +197,9 @@ struct mparena g_MpArenas[] = {
 	{ STAGE_EXTRA25,         0, L_MPMENU_336 }, // Paradox
 	{ STAGE_EXTRA26,         0, L_MPMENU_337 }, // War Colors
 	{ STAGE_TEST_LAM,        0, L_MPMENU_338 }, // Grand Library
+	{ STAGE_TEST_UFF,        0, 0x7FFF       }, // Matrix Test Room
+	{ STAGE_MY_ARENA,        0, 0x7FFD       }, // My Arena
+	{ STAGE_TESTARENA,       0, 0x7FFC       }, // Test Arena
 	// Random
 	{ STAGE_MP_RANDOM_MULTI, 0, L_MPMENU_294 }, // Random Multi
 	{ STAGE_MP_RANDOM_SOLO,  0, L_MPMENU_295 }, // Random Solo
@@ -209,8 +212,8 @@ s32 mpGetNumStages(void)
 {
 #ifdef PLATFORM_N64
 	return 17;
-#else // All Solos in Multi Mod (71 Stage + 4 Random)
-	return 75;
+#else
+	return ARRAYCOUNT(g_MpArenas);
 #endif
 }
 
@@ -223,7 +226,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 71; i++) {
+	for (i = 0; i < 72; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			numchallengescomplete++;
@@ -235,7 +238,7 @@ s16 mpChooseRandomStage(void)
 #ifdef PLATFORM_N64
 	for (i = 0; i < 16; i++) {
 #else // All Solos in Multi Mod
-	for (i = 0; i < 71; i++) {
+	for (i = 0; i < 72; i++) {
 #endif
 		if (challengeIsFeatureUnlocked(g_MpArenas[i].requirefeature)) {
 			if (index == 0) {
@@ -348,7 +351,8 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 		{ 32, L_MPMENU_296  }, // "GoldenEye X"
 		{ 43, L_MPMENU_297  }, // "GoldenEye X Bonus"
 		{ 55, L_MPMENU_326  }, // "Bonus"
-		{ 71, L_MPMENU_118  }, // "Random"
+		{ 71, 0x7FFE        }, // "Custom Maps"
+		{ 74, L_MPMENU_118  }, // "Random"
 #endif
 	};
 
@@ -405,7 +409,7 @@ MenuItemHandlerResult mpArenaMenuHandler(s32 operation, struct menuitem *item, u
 #ifdef PLATFORM_N64
 		data->list.value = 3;
 #else // All Solos in Multi Mod
-		data->list.value = 7;
+		data->list.value = 8;
 #endif
 
 #ifdef PLATFORM_N64 // All Solos in Multi Mod
@@ -3143,7 +3147,7 @@ MenuItemHandlerResult mpAddChangeSimulantMenuHandler(s32 operation, struct menui
 		if (botnum < 0) {
 			botnum = mpGetSlotForNewBot();
 			creating = 1;
-		} else if ((g_MpSetup.chrslots & (1 << (botnum + 4))) == 0) {
+		} else if (!mpIsChrParticipating(botnum + MAX_PLAYERS)) {
 			creating = 1;
 		}
 
@@ -3401,7 +3405,7 @@ MenuItemHandlerResult menuhandlerMpSimulantSlot(s32 operation, struct menuitem *
 	case MENUOP_SET:
 		g_Menus[g_MpPlayerNum].mpsetup.slotindex = item->param;
 
-		if ((g_MpSetup.chrslots & (1 << (item->param + 4))) == 0) {
+		if (!mpIsChrParticipating(item->param + MAX_PLAYERS)) {
 			menuPushDialog(&g_MpAddSimulantMenuDialog);
 		} else if (IS4MB()) {
 			menuPushDialog(&g_MpEditSimulant4MbMenuDialog);
@@ -3427,7 +3431,7 @@ char *mpMenuTextSimulantName(struct menuitem *item)
 {
 	s32 index = item->param;
 
-	if (g_BotConfigsArray[index].base.name[0] == '\0' || (g_MpSetup.chrslots & 1 << (index + 4)) == 0) {
+	if (g_BotConfigsArray[index].base.name[0] == '\0' || !mpIsChrParticipating(index + MAX_PLAYERS)) {
 		return "";
 	}
 
@@ -3439,7 +3443,7 @@ char *func0f17d3dc(struct menuitem *item)
 	s32 index = item->param;
 
 	if (g_BotConfigsArray[index].base.name[0] == '\0'
-			|| ((g_MpSetup.chrslots & 1 << (index + 4)) == 0)) {
+			|| (!mpIsChrParticipating(index + MAX_PLAYERS))) {
 		return "";
 	}
 
@@ -3447,10 +3451,83 @@ char *func0f17d3dc(struct menuitem *item)
 	return g_StringPointer;
 }
 
+struct menuitem g_MpSimulantsMenuItems[MAX_BOTS + 6];
+
 MenuDialogHandlerResult menudialogMpSimulants(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
-	if (operation == MENUOP_OPEN) {
+	static char labels[MAX_BOTS][8];
+
+	if (operation == MENUOP_PREOPEN) {
 		g_Menus[g_MpPlayerNum].mpsetup.slotcount = 0;
+
+		s32 idx = 0;
+		s32 i;
+
+		// 1. "Add Simulant..."
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_LOCKABLEMINOR;
+		g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_084;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = menuhandlerMpAddSimulant;
+		idx++;
+
+		// 2. Separator
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SEPARATOR;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = 0;
+		g_MpSimulantsMenuItems[idx].param2 = 0;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = NULL;
+		idx++;
+
+		// 3. Simulants
+		for (i = 0; i < MAX_BOTS; i++) {
+			g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+			g_MpSimulantsMenuItems[idx].param = i;
+			g_MpSimulantsMenuItems[idx].param3 = (uintptr_t)&mpMenuTextSimulantName;
+			g_MpSimulantsMenuItems[idx].handler = menuhandlerMpSimulantSlot;
+
+			if (i < 8) {
+				g_MpSimulantsMenuItems[idx].flags = 0;
+				g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_085 + i;
+			} else {
+				g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_LITERAL_TEXT;
+				sprintf(labels[i], "%d:\n", i + 1);
+				g_MpSimulantsMenuItems[idx].param2 = (uintptr_t)labels[i];
+			}
+			idx++;
+		}
+
+		// 4. Separator
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SEPARATOR;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = 0;
+		g_MpSimulantsMenuItems[idx].param2 = 0;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = NULL;
+		idx++;
+
+		// 5. "Clear All"
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_LOCKABLEMINOR;
+		g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_093;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = menuhandlerMpClearAllSimulants;
+		idx++;
+
+		// 6. "Back"
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_SELECTABLE;
+		g_MpSimulantsMenuItems[idx].param = 0;
+		g_MpSimulantsMenuItems[idx].flags = MENUITEMFLAG_SELECTABLE_CLOSESDIALOG;
+		g_MpSimulantsMenuItems[idx].param2 = L_MPMENU_094;
+		g_MpSimulantsMenuItems[idx].param3 = 0;
+		g_MpSimulantsMenuItems[idx].handler = NULL;
+		idx++;
+
+		// 7. End
+		g_MpSimulantsMenuItems[idx].type = MENUITEMTYPE_END;
 	}
 
 	return false;
@@ -3594,113 +3671,6 @@ struct menudialogdef g_MpEditSimulantMenuDialog = {
 	NULL,
 };
 
-struct menuitem g_MpSimulantsMenuItems[] = {
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR,
-		L_MPMENU_084, // "Add Simulant..."
-		0,
-		menuhandlerMpAddSimulant,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		0,
-		L_MPMENU_085, // "1:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		1,
-		0,
-		L_MPMENU_086, // "2:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		2,
-		0,
-		L_MPMENU_087, // "3:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		3,
-		0,
-		L_MPMENU_088, // "4:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		4,
-		0,
-		L_MPMENU_089, // "5:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		5,
-		0,
-		L_MPMENU_090, // "6:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		6,
-		0,
-		L_MPMENU_091, // "7:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		7,
-		0,
-		L_MPMENU_092, // "8:"
-		(uintptr_t)&mpMenuTextSimulantName,
-		menuhandlerMpSimulantSlot,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_LOCKABLEMINOR,
-		L_MPMENU_093, // "Clear All"
-		0,
-		menuhandlerMpClearAllSimulants,
-	},
-	{
-		MENUITEMTYPE_SELECTABLE,
-		0,
-		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG,
-		L_MPMENU_094, // "Back"
-		0,
-		NULL,
-	},
-	{ MENUITEMTYPE_END },
-};
 
 struct menudialogdef g_MpSimulantsMenuDialog = {
 	MENUDIALOGTYPE_DEFAULT,
@@ -3811,7 +3781,7 @@ MenuItemHandlerResult menuhandlerMpMaximumTeams(s32 operation, struct menuitem *
 		u8 team = 0;
 
 		for (i = 0; i != MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				mpchr->team = team++;
@@ -3834,7 +3804,7 @@ MenuItemHandlerResult menuhandlerMpHumansVsSimulants(s32 operation, struct menui
 		s32 i;
 
 		for (i = 0; i != MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				mpchr->team = i < 4 ? 0 : 1;
@@ -3856,7 +3826,7 @@ MenuItemHandlerResult menuhandlerMpHumanSimulantPairs(s32 operation, struct menu
 		s32 simindex = 0;
 
 		for (i = 0; i != MAX_MPCHRS; i++) {
-			if (g_MpSetup.chrslots & (1 << i)) {
+			if (mpIsChrParticipating(i)) {
 				struct mpchrconfig *mpchr = MPCHR(i);
 
 				if (i < 4) {

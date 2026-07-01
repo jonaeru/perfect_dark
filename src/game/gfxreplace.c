@@ -354,3 +354,52 @@ void gfxReplaceGbiCommandsRecursively(struct roomblock *block, s32 type)
 		}
 	}
 }
+
+void gfxMakeRoomUseShade(Gfx *startgdl)
+{
+	if (!startgdl) {
+		return;
+	}
+
+	Gfx *gdl = startgdl;
+
+	// Bound the walk: a well-formed room gdl always terminates with G_ENDDL.
+	// Guarding against a runaway walk avoids a hard crash if a room's display
+	// list is ever malformed.
+	s32 guard = 0;
+	while (gdl->bytes[GFX_W0_BYTE(0)] != (u8)G_ENDDL) {
+		u8 opcode = gdl->bytes[GFX_W0_BYTE(0)];
+
+		if (++guard > 4096) {
+			break;
+		}
+
+		if (opcode == (u8)G_SETCOMBINE) {
+			gDPSetCombineMode(gdl, G_CC_SHADE, G_CC_SHADE);
+		}
+
+		gdl++;
+	}
+}
+
+void gfxMakeRoomUseShadeRecursively(struct roomblock *block)
+{
+	while (true) {
+		if (!block) {
+			return;
+		}
+
+		switch (block->type) {
+		case ROOMBLOCKTYPE_LEAF:
+			gfxMakeRoomUseShade(block->gdl);
+			block = block->next;
+			break;
+		case ROOMBLOCKTYPE_PARENT:
+			gfxMakeRoomUseShadeRecursively(block->child);
+			block = block->next;
+			break;
+		default:
+			return;
+		}
+	}
+}
