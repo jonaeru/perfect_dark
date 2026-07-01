@@ -459,7 +459,9 @@ void mainLoop(void)
 		langReset(g_StageNum);
 		playermgrReset();
 
-		if (g_StageNum >= STAGE_TITLE) {
+		// Match src/lib/main.c: custom pdmap arenas (0x80+) are gameplay stages,
+		// not title/boot menus — only true menu stages get numplayers=0.
+		if (STAGE_IS_MENU(g_StageNum)) {
 			numplayers = 0;
 		} else {
 			if (argFindByPrefix(1, "-play")) {
