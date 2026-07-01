@@ -199,6 +199,14 @@ You will need to provide a `jpn-final` or `pal-final` ROM to run executables bui
 
 It might be possible to build and run the game on platforms that are not specified in the supported platforms list (e.g. Linux on armv7), but this has not been tested.
 
+## Custom multiplayer maps
+
+This fork includes a map pipeline (`tools/pdmap`), a Matrix test arena (`uff`), and the **Perfect Dark Map Editor** app.
+
+- **Start here:** [`docs/MAP_MAKING_WIKI.md`](docs/MAP_MAKING_WIKI.md) — workflow, seg modes, troubleshooting, Test/Play
+- **Deep reference:** [`docs/MAP_CREATION.md`](docs/MAP_CREATION.md) — binary formats, stage registration
+- **Quick play:** `./build/pd.arm64 --test-map --moddir mods/mod_allinone`
+
 ## Credits
 
 * the original [decompilation project](https://github.com/n64decomp/perfect_dark) authors;

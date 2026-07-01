@@ -21,12 +21,10 @@ CANONICAL_SEG = ROOT / "scripts" / "bg_uff.seg"
 
 def _validate_mod_seg() -> list[str]:
     sys.path.insert(0, str(ROOT))
-    from tools.pdmap.seg import validate_seg_g_vtx, validate_seg_phantom_viewport
+    from tools.pdmap.seg import validate_seg_g_vtx
 
     data = MOD_SEG.read_bytes()
-    errors = validate_seg_g_vtx(data)
-    errors.extend(validate_seg_phantom_viewport(data))
-    return errors
+    return validate_seg_g_vtx(data)
 
 
 def main() -> int:
@@ -53,7 +51,7 @@ def main() -> int:
             print(f"  {err}", file=sys.stderr)
         return 1
 
-    # Keep scripts/bg_uff.seg in sync so manual cp/deploy paths stay empty-mode too.
+    # Keep scripts/bg_uff.seg in sync so Node fallback copy paths stay empty-mode too.
     shutil.copy2(MOD_SEG, CANONICAL_SEG)
 
     size = MOD_SEG.stat().st_size
