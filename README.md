@@ -1,4 +1,8 @@
-# Perfect Dark port
+# Perfect Dark port (moyoteg fork)
+
+This repository is a fork of [jonaeru/perfect_dark](https://github.com/jonaeru/perfect_dark) (`port-mods/all-in-one`), based on the [Perfect Dark decompilation PC port](https://github.com/fgsfdsfgs/perfect_dark). It adds custom Combat Sim maps, a deterministic map pipeline, and the **Perfect Dark Map Editor** for macOS arm64.
+
+**Release:** see [`RELEASE_v0.1.0.md`](RELEASE_v0.1.0.md) for v0.1.0 build and play instructions.
 
 This repository contains a work-in-progress port of the [Perfect Dark decompilation](https://github.com/n64decomp/perfect_dark) to modern platforms.
 
@@ -201,14 +205,55 @@ It might be possible to build and run the game on platforms that are not specifi
 
 ## Custom multiplayer maps
 
-This fork includes a map pipeline (`tools/pdmap`), a Matrix test arena (`uff`), and the **Perfect Dark Map Editor** app.
+This fork includes a map pipeline (`tools/pdmap`), custom Combat Sim arenas (`my_arena`, `testarena`), and the **Perfect Dark Map Editor** app.
 
-- **Start here:** [`docs/MAP_MAKING_WIKI.md`](docs/MAP_MAKING_WIKI.md) — workflow, seg modes, troubleshooting, Test/Play
+### QUICKSTART (new mappers, macOS arm64)
+
+1. **ROM (required, not included):** place `pd.ntsc-final.z64` in `data/` and symlink at repo root:
+   ```bash
+   ln -sf data/pd.ntsc-final.z64 pd.ntsc-final.z64
+   ```
+2. **Build the game:**
+   ```bash
+   brew install cmake sdl2 zlib python3
+   cmake -G"Unix Makefiles" -Bbuild -DCMAKE_OSX_ARCHITECTURES=arm64 .
+   cmake --build build --target pd -j8
+   ```
+3. **Play with the All-in-One mod** (always pass `--moddir`):
+   ```bash
+   ./build/pd.arm64 --moddir mods/mod_allinone
+   ```
+   Combat Sim → **Custom Maps** → **My Arena** or **Test Arena**.
+4. **Map editor:** build once, then double-click:
+   ```bash
+   ./scripts/build-map-editor-electron.sh
+   open "scripts/release/Perfect Dark Map Editor.app"
+   ```
+   Use **Test / Play (T)** to build, deploy, and launch `--test-map`.
+5. **Validate a level:**
+   ```bash
+   python3 tools/pdmap.py validate my_arena
+   python3 tools/pdmap.py build mymap --seg --deploy
+   ```
+
+### Fork maintainer notes
+
+- **Default branch:** `port-mods/all-in-one`
+- **Mod deploy targets:** `tools/pdmap/core.py` `MOD_DIRS` → `mod_allinone` + `mod_moyoteg`
+- **Stage registration:** `python3 tools/pdmap.py register <name> --apply` (see wiki §12)
+- **CI:** `.github/workflows/ci.yml` — arm64 `pd` build + `pdmap validate`
+- **Upstream:** track [jonaeru/perfect_dark](https://github.com/jonaeru/perfect_dark); do not bundle ROMs or prebuilt mod zips in releases
+
+### Documentation
+
+- **Start here:** [`docs/MAP_MAKING_WIKI.md`](docs/MAP_MAKING_WIKI.md) — workflow, seg modes, troubleshooting, Test/Play (§15 checklist)
 - **Deep reference:** [`docs/MAP_CREATION.md`](docs/MAP_CREATION.md) — binary formats, stage registration
+- **Pipeline spec:** [`docs/MAP_DETERMINISTIC_SPEC.md`](docs/MAP_DETERMINISTIC_SPEC.md)
 - **Quick play:** `./build/pd.arm64 --test-map --moddir mods/mod_allinone`
 
 ## Credits
 
+* [jonaeru](https://github.com/jonaeru/perfect_dark) — All-in-One mod port branch and upstream fork base;
 * the original [decompilation project](https://github.com/n64decomp/perfect_dark) authors;
 * Ryan Dwyer for the above, additional help, and `pd-extract`;
 * doomhack for the only other publicly available [PD porting effort](https://github.com/doomhack/perfect_dark) I could find;
