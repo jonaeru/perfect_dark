@@ -880,7 +880,7 @@ void mainLoop(void)
 		langReset(g_StageNum);
 		playermgrReset();
 
-		if (g_StageNum >= STAGE_TITLE) {
+		if (STAGE_IS_MENU(g_StageNum)) {
 			numplayers = 0;
 		} else {
 			if (argFindByPrefix(1, "-play")) {

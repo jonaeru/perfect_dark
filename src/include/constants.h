@@ -4051,6 +4051,20 @@
 #define STAGE_CREDITS       0x5e
 #define STAGE_4MBMENU       0x5d
 
+// Title/boot/credits only — NOT a numeric range. Custom pdmap arenas use ids
+// such as 0x80/0x81 (above STAGE_TITLE) and must still allocate gameplay pools.
+#define STAGE_IS_MENU(stage) \
+	((stage) == STAGE_TITLE \
+		|| (stage) == STAGE_BOOTPAKMENU \
+		|| (stage) == STAGE_CREDITS \
+		|| (stage) == STAGE_4MBMENU)
+
+// pdmap box arenas: force room-1 bbox to match ±5000 floor / 3000 ceiling tiles.
+#define STAGE_IS_PDMAP_BOX_ARENA(stage) \
+	((stage) == STAGE_TEST_UFF \
+		|| (stage) == STAGE_MY_ARENA \
+		|| (stage) == STAGE_TESTARENA)
+
 #define STAGE_MP_RANDOM_MULTI 0x02
 #define STAGE_MP_RANDOM_SOLO  0x03
 #define STAGE_MP_RANDOM_GEX   0x04

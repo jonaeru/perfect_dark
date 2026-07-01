@@ -186,7 +186,7 @@ void propsReset(void)
 	g_MaxProjectiles = IS4MB() ? 20 : 100;
 	g_MaxEmbedments = IS4MB() ? 40 : 80;
 
-	if (g_Vars.stagenum >= STAGE_TITLE) {
+	if (STAGE_IS_MENU(g_Vars.stagenum)) {
 		g_MaxWeaponSlots = 0;
 		g_MaxHatSlots = 0;
 		g_MaxAmmoCrates = 0;

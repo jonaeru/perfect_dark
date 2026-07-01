@@ -1982,13 +1982,10 @@ void bgBuildTables(s32 stagenum)
 					+ (g_Rooms[r].bbmin[1] - g_Rooms[r].bbmax[1]) * (g_Rooms[r].bbmin[1] - g_Rooms[r].bbmax[1])
 					+ (g_Rooms[r].bbmin[2] - g_Rooms[r].bbmax[2]) * (g_Rooms[r].bbmin[2] - g_Rooms[r].bbmax[2])) / 2.0f;
 		}
-		if (g_Vars.stagenum == STAGE_TEST_UFF) {
-			// Matrix Test Room: force room 1's bbox to the full box arena so
-			// collision-geo collection and culling cover every spawn. These
-			// extents MUST match the box built by tools/pdmap (BOX_HALF /
-			// BOX_HEIGHT in src/levels/uff.py and the floor tiles): the floor
-			// spans +/-5000 on X/Z with a 3000-tall ceiling. Using a smaller
-			// box here makes outer spawns fall through the floor.
+		if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
+			// pdmap box arena: force room 1's bbox to the full box so collision-
+			// geo collection and culling cover every spawn. Extents MUST match
+			// BOX_HALF / BOX_HEIGHT in src/levels/*.py and the floor tiles.
 			g_Rooms[1].bbmin[0] = -5000.0f;
 			g_Rooms[1].bbmin[1] = 0.0f;
 			g_Rooms[1].bbmin[2] = -5000.0f;
@@ -3062,7 +3059,7 @@ void bgLoadRoom(s32 roomnum)
 		}
 
 		// Do some find/replaces in the gdls based on environment configuration
-		if (g_Vars.stagenum == STAGE_TEST_UFF) {
+		if (STAGE_IS_PDMAP_BOX_ARENA(g_Vars.stagenum)) {
 			gfxMakeRoomUseShadeRecursively(g_Rooms[roomnum].gfxdata->opablocks);
 			gfxMakeRoomUseShadeRecursively(g_Rooms[roomnum].gfxdata->xlublocks);
 		} else if (g_FogEnabled) {
