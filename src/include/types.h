@@ -6179,6 +6179,7 @@ struct mpsetupfile {
 	u8 defaultsetup;
 	u8 numsetups;
 	struct setupblock setups[MPSETUP_MAXSETUPS];
+	u8 blockversions[MPSETUP_MAXSETUPS];
 };
 
 #endif
