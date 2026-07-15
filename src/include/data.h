@@ -396,7 +396,11 @@ extern struct skeleton g_SkelSkedar;
 extern struct skeleton g_SkelDrCaroll;
 extern struct skeleton g_Skel22;
 extern struct skeleton g_SkelRobot;
+#ifdef PLATFORM_N64
 extern struct headorbody g_HeadsAndBodies[152];
+#else // All in One Mod
+extern struct headorbody g_HeadsAndBodies[297];
+#endif
 extern struct hatposition var8007dae4[1][6];
 extern f32 g_SkyCloudOffset;
 extern f32 g_SkyWindSpeed;
@@ -498,14 +502,14 @@ extern bool g_MpEnableMusicSwitching;
 extern struct mpweapon g_MpWeapons[NUM_MPWEAPONS];
 #ifdef PLATFORM_N64
 extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 74 : 75];
-#else // PD Plus Mod
-extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 75 : 76];
+#else // All in One Mod
+extern struct mphead g_MpHeads[155];
 #endif
 extern struct botprofile g_BotProfiles[18];
 #ifdef PLATFORM_N64
 extern struct mpbody g_MpBodies[61];
-#else // PD Plus Mod
-extern struct mpbody g_MpBodies[63];
+#else // All in One Mod
+extern struct mpbody g_MpBodies[129];
 #endif
 extern struct mppreset g_MpPresets[];
 extern u32 g_TeamColours[];

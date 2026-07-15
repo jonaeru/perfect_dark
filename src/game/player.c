@@ -1558,9 +1558,16 @@ void playerTickChrBody(void)
 			g_Vars.currentplayer->vv_headheight += 13;
 		}
 
+#ifdef PLATFORM_N64
 		if (g_Vars.currentplayer->vv_headheight > g_HeadsAndBodies[BODY_MRBLONDE].height + g_HeadsAndBodies[HEAD_MRBLONDE].height) {
 			g_Vars.currentplayer->vv_headheight = g_HeadsAndBodies[BODY_MRBLONDE].height + g_HeadsAndBodies[HEAD_MRBLONDE].height;
 		}
+#else // All in One Mod
+		// Maximize the height of Jaws and Mr.X (181 + 13)
+		if (g_Vars.currentplayer->vv_headheight > g_HeadsAndBodies[BODY_MRX].height + g_HeadsAndBodies[HEAD_MRX].height) {
+			g_Vars.currentplayer->vv_headheight = g_HeadsAndBodies[BODY_MRX].height + g_HeadsAndBodies[HEAD_MRX].height;
+		}
+#endif
 
 		g_Vars.currentplayer->vv_height = g_Vars.currentplayer->vv_eyeheight;
 

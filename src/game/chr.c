@@ -3291,6 +3291,10 @@ void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
 	case BODY_ELVIS1:
 	case BODY_THEKING:
 	case BODY_ELVISWAISTCOAT:
+#ifndef PLATFORM_N64 // All in One Mod
+	case BODY_MAIAN_SOLDIER: // Maian Soldier
+	case BODY_ELTONWAISTCOAT: // Elton
+#endif
 		if (colour1) {
 			colour1[0] = 10;
 			colour1[1] = 0x40;
@@ -3305,8 +3309,9 @@ void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
 	case BODY_DRCAROLL:
 	case BODY_EYESPY:
 	case BODY_CHICROB:
-#ifndef PLATFORM_N64 // PD Plus Mod
-	case BODY_TESTCHR: // Dr. Caroll
+#ifndef PLATFORM_N64 // All in One Mod
+	case BODY_TESTCHR: // Dr. Caroll (Sinister)
+	case BODY_CARROLL3: // Dr. Caroll
 #endif
 		if (colour1) {
 			colour1[0] = 10;
@@ -3323,7 +3328,7 @@ void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
 	case BODY_SKEDAR:
 	case BODY_MINISKEDAR:
 	case BODY_SKEDARKING:
-#ifndef PLATFORM_N64 // PD Plus Mod
+#ifndef PLATFORM_N64 // All in One Mod
 	case BODY_PRESIDENT_CLONE: // Skedar
 #endif
 		if (colour1) {

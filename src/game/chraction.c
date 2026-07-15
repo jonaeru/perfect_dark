@@ -3852,8 +3852,12 @@ void chrChoke(struct chrdata *chr, s32 choketype)
 				nextindexdrcaroll = 0;
 			}
 		}
-#ifndef PLATFORM_N64 // PD Plus Mod
-	} else if (chr->bodynum == BODY_TESTCHR) { // Dr. Caroll
+#ifndef PLATFORM_N64 // All in One Mod
+	} else if (chr->bodynum == BODY_TESTCHR
+			|| chr->bodynum == BODY_CARROLL3
+			|| chr->headnum == HEAD_CARROLL
+			|| chr->headnum == HEAD_CARROLL_SINISTER) {
+		// Dr. Caroll (Playable)
 		s16 sounds[] = {
 			SFX_ARGH_DRCAROLL_0240,
 			SFX_ARGH_DRCAROLL_024C,
@@ -3869,7 +3873,8 @@ void chrChoke(struct chrdata *chr, s32 choketype)
 		if (nextindexdrcaroll >= ARRAYCOUNT(sounds)) {
 			nextindexdrcaroll = 0;
 		}
-	} else if (chr->bodynum == BODY_PRESIDENT_CLONE) { // Skedar
+	} else if (chr->bodynum == BODY_PRESIDENT_CLONE || chr->headnum == HEAD_SKEDAR) {
+		// Skedar (Playable)
 		s16 sounds[] = {
 			SFX_SKEDAR_ROAR_052D,
 			SFX_SKEDAR_ROAR_052E,
