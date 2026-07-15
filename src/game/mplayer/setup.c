@@ -3251,6 +3251,11 @@ MenuItemHandlerResult menuhandlerMpSimulantHead(s32 operation, struct menuitem *
 MenuItemHandlerResult menuhandlerMpSimulantBody(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
+#if VERSION >= VERSION_NTSC_1_0 && !defined(PLATFORM_N64) // All in One Mod
+		if (data->carousel.unk04) {
+			g_BotConfigsArray[g_Menus[g_MpPlayerNum].mpsetup.slotindex].base.mpheadnum = mpGetMpheadnumByMpbodynum(data->carousel.value);
+		}
+#endif
 		g_BotConfigsArray[g_Menus[g_MpPlayerNum].mpsetup.slotindex].base.mpbodynum = data->carousel.value;
 	}
 
