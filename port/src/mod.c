@@ -8,6 +8,7 @@
 #include "romdata.h"
 #include "mod.h"
 #include "data.h"
+#include "bss.h"
 #include "game/stagetable.h"
 
 #define MOD_TEXTURES_DIR "textures"
@@ -379,6 +380,56 @@ static char *modConfigParseStage(char *p, char *token)
 	}
 
 	return p;
+}
+
+// Sized to the g_Textures array bound so a single mod's overrides can never
+// overflow the table (you can't override more textures than exist).
+#define MOD_TEX_OVERRIDE_MAX MAX_TEXTURES
+
+struct modtexoverride {
+	u16 texnum;
+	s16 surfacetype;     // original value, or MOD_TEX_KEEP if not overridden
+	s16 soundsurfacetype; // original value, or MOD_TEX_KEEP if not overridden
+};
+
+static struct modtexoverride g_ModTexOverrides[MOD_TEX_OVERRIDE_MAX];
+static u32 g_ModTexOverrideCount = 0;
+
+void modTexOverrideSet(u16 texnum, s16 surfacetype, s16 soundsurfacetype)
+{
+	if (g_ModTexOverrideCount >= MOD_TEX_OVERRIDE_MAX) {
+		sysLogPrintf(LOG_ERROR, "mod: texture override table full (%d), dropping %04x", MOD_TEX_OVERRIDE_MAX, texnum);
+		return;
+	}
+
+	struct modtexoverride *rec = &g_ModTexOverrides[g_ModTexOverrideCount++];
+	rec->texnum = texnum;
+	rec->surfacetype = MOD_TEX_KEEP;
+	rec->soundsurfacetype = MOD_TEX_KEEP;
+
+	if (surfacetype != MOD_TEX_KEEP) {
+		rec->surfacetype = g_Textures[texnum].surfacetype;
+		g_Textures[texnum].surfacetype = surfacetype;
+	}
+	if (soundsurfacetype != MOD_TEX_KEEP) {
+		rec->soundsurfacetype = g_Textures[texnum].soundsurfacetype;
+		g_Textures[texnum].soundsurfacetype = soundsurfacetype;
+	}
+}
+
+void modTexOverrideRestore(void)
+{
+	// Restore in reverse order so that when a field was changed more than once,
+	// the earliest recorded (true original) value is the one that ends up applied.
+	while (g_ModTexOverrideCount > 0) {
+		struct modtexoverride *rec = &g_ModTexOverrides[--g_ModTexOverrideCount];
+		if (rec->surfacetype != MOD_TEX_KEEP) {
+			g_Textures[rec->texnum].surfacetype = rec->surfacetype;
+		}
+		if (rec->soundsurfacetype != MOD_TEX_KEEP) {
+			g_Textures[rec->texnum].soundsurfacetype = rec->soundsurfacetype;
+		}
+	}
 }
 
 s32 modConfigLoad(const char *fname)
