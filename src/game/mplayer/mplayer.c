@@ -35,6 +35,7 @@
 #ifndef PLATFORM_N64 // All in One Mod
 #include "system.h"
 #include "mod.h"
+#include "mpplayers.h"
 #endif
 
 // bss
@@ -4204,6 +4205,15 @@ s32 mpplayerfileSave(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 		if (ret == 0) {
 			g_PlayerConfigsArray[playernum].fileguid.fileid = newfileid;
 			g_PlayerConfigsArray[playernum].fileguid.deviceserial = deviceserial;
+#ifndef PLATFORM_N64
+			// mpplayers.bin is the authoritative store: save the full profile
+			// wad blob plus the full-width head/body keyed by this profile's guid.
+			// (The eeprom save can only hold a 7-bit head/body number.)
+			mpplayersSetEntry(deviceserial, newfileid,
+					g_PlayerConfigsArray[playernum].base.mpheadnum,
+					g_PlayerConfigsArray[playernum].base.mpbodynum,
+					buffer.bytes);
+#endif
 			return 0;
 		}
 
@@ -4228,7 +4238,34 @@ s32 mpplayerfileLoad(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 			g_PlayerConfigsArray[playernum].fileguid.fileid = fileid;
 			g_PlayerConfigsArray[playernum].fileguid.deviceserial = deviceserial;
 
+#ifndef PLATFORM_N64
+			{
+				// mpplayers.bin is authoritative. If an entry exists, load the
+				// profile from its stored wad blob (when present) and apply the
+				// full-width head/body. Otherwise load from the eeprom data and
+				// migrate it in, so future loads come from mpplayers.bin.
+				u16 exthead;
+				u16 extbody;
+				bool hasblob = false;
+
+				if (mpplayersGetEntry(deviceserial, fileid, &exthead, &extbody, buffer.bytes, &hasblob)) {
+					// If hasblob, buffer.bytes now holds the mpplayers.bin blob
+					// (overwriting the eeprom data we just read); otherwise it
+					// still holds the eeprom data (legacy version 1 entry).
+					mpplayerfileLoadWad(playernum, &buffer, 1);
+					g_PlayerConfigsArray[playernum].base.mpheadnum = (u8)exthead;
+					g_PlayerConfigsArray[playernum].base.mpbodynum = (u8)extbody;
+				} else {
+					mpplayerfileLoadWad(playernum, &buffer, 1);
+					mpplayersSetEntry(deviceserial, fileid,
+							g_PlayerConfigsArray[playernum].base.mpheadnum,
+							g_PlayerConfigsArray[playernum].base.mpbodynum,
+							buffer.bytes);
+				}
+			}
+#else
 			mpplayerfileLoadWad(playernum, &buffer, 1);
+#endif
 			g_PlayerConfigsArray[playernum].handicap = 0x80;
 			return 0;
 		}

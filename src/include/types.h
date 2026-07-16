@@ -1131,7 +1131,11 @@ struct chrdata {
 	/*0x002*/ s8 accuracyrating;
 	/*0x003*/ s8 speedrating; // 0-100
 	/*0x004*/ u8 firecount[2];
+#ifdef PLATFORM_N64
 	/*0x006*/ s8 headnum;
+#else // All in One Mod
+	/*0x006*/ s16 headnum;
+#endif
 	/*0x007*/ s8 actiontype;
 	/*0x008*/ s8 sleep;
 	/*0x009*/ s8 invalidmove;
