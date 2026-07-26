@@ -720,7 +720,7 @@ static void gfx_opengl_set_sampler_parameters(int tile, bool linear_filter, uint
         // MIPMAP_DISABLED   MIPMAP_NEAREST               MIPMAP_LINEAR
         {  GL_NEAREST,       GL_NEAREST_MIPMAP_NEAREST,   GL_NEAREST_MIPMAP_LINEAR  }, // FILTER_NONE
         {  GL_LINEAR,        GL_LINEAR_MIPMAP_NEAREST,    GL_LINEAR_MIPMAP_LINEAR   }, // FILTER_BILINEAR
-        {  GL_NEAREST,       GL_NEAREST_MIPMAP_NEAREST,   GL_NEAREST_MIPMAP_LINEAR  }, // FILTER_THREE_POINT
+        {  GL_NEAREST,       GL_NEAREST,                  GL_NEAREST                }, // FILTER_THREE_POINT
     };
 
     mipmaps = mipmaps && (current_mipmap_filter_mode != MIPMAP_DISABLED);
