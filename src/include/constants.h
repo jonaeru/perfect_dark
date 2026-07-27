@@ -38,6 +38,7 @@
 #define NUM_MPWEAPONSLOTS     6
 #define NUM_SOLOSTAGES        21
 #define NUM_TEXTURES          (VERSION == VERSION_JPN_FINAL ? 3511 : 3503)
+#define MAX_TEXTURES          8192
 
 #define osSyncPrintf
 
@@ -2652,10 +2653,17 @@
 #define MPBODY_PRESIDENT_CLONE2 0x36
 #define MPBODY_PELAGIC_GUARD    0x37
 #define MPBODY_MAIAN_SOLDIER    0x38
+#ifdef PLATFORM_N64
 #define MPBODY_CONNERY          0x39
 #define MPBODY_MOORE            0x3a
 #define MPBODY_DALTON           0x3b
 #define MPBODY_DJBOND           0x3c
+#else // PD Plus Mod
+#define MPBODY_CONNERY          0x3b
+#define MPBODY_MOORE            0x3c
+#define MPBODY_DALTON           0x3d
+#define MPBODY_DJBOND           0x3e
+#endif
 
 #define MPCONFIG_TEMPLE      0x00
 #define MPCONFIG_PISTOLS     0x01
@@ -4029,10 +4037,41 @@
 #define STAGE_TEST_OLD      0x4e
 #define STAGE_DUEL          0x4f
 #define STAGE_TEST_LAM      0x50
-#define STAGE_TITLE         0x5a
-#define STAGE_BOOTPAKMENU   0x5b
-#define STAGE_CREDITS       0x5c
+#define STAGE_TITLE         0x5c
+#define STAGE_BOOTPAKMENU   0x5d
+#define STAGE_CREDITS       0x5e
 #define STAGE_4MBMENU       0x5d
+
+#define STAGE_MP_RANDOM_MULTI 0x02
+#define STAGE_MP_RANDOM_SOLO  0x03
+#define STAGE_MP_RANDOM_GEX   0x04
+
+#define STAGE_EXTRA1  0x05 // Frigate
+#define STAGE_EXTRA2  0x06 // Complex
+#define STAGE_EXTRA3  0x07 // Train
+#define STAGE_EXTRA4  0x08 // Archives
+#define STAGE_EXTRA5  0x0a // Aztec
+#define STAGE_EXTRA6  0x0b // Tample
+#define STAGE_EXTRA7  0x0c // Icicle Pyramid
+#define STAGE_EXTRA8  0x0d // Caves
+#define STAGE_EXTRA9  0x0e // Library
+#define STAGE_EXTRA10 0x0f // Facility
+#define STAGE_EXTRA11 0x10 // Bunker
+#define STAGE_EXTRA12 0x11 // Caverns
+#define STAGE_EXTRA13 0x12 // Basement
+#define STAGE_EXTRA14 0x13 // Egyptian
+#define STAGE_EXTRA15 0x15 // Stack
+#define STAGE_EXTRA16 0x51 // Runway
+#define STAGE_EXTRA17 0x52 // Control
+#define STAGE_EXTRA18 0x53 // Tawfret Ruins
+#define STAGE_EXTRA19 0x54 // Targitzan's Temple
+#define STAGE_EXTRA20 0x55 // Junkyard
+#define STAGE_EXTRA21 0x56 // Steel Mill
+#define STAGE_EXTRA22 0x57 // Mall
+#define STAGE_EXTRA23 0x58 // Tunnels
+#define STAGE_EXTRA24 0x59 // Paradox
+#define STAGE_EXTRA25 0x5a // Rogue
+#define STAGE_EXTRA26 0x5b // War Colors
 
 #define STAGEFLAG_CI_IN_TRAINING            0x00000001
 #define STAGEFLAG_CI_HOLO_FAILED            0x00000002
@@ -4763,4 +4802,13 @@ enum weaponnum {
 
 #endif
 
+#endif
+
+#ifndef PLATFORM_N64 // All in One Mod
+// Mod
+#define MOD_NORMAL 0
+#define MOD_GEX 1
+#define MOD_KAKARIKO 2
+#define MOD_DARKNOON 3
+#define MOD_GOLDFINGER_64 4
 #endif

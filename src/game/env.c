@@ -54,7 +54,11 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ STAGE_PELAGIC,          15, 15000, 3333, 4444, 600, 995, 1000, RGB(0x2d3e60), NO_SUNS,              1,  5000,    0, RGB(0xf0f0f0), 0, -2000, 0, RGB(0x14212b), 0  },
 	{ STAGE_VILLA,            15, 20000,    0,    0,   0, 981, 1047, RGB(0x46a0ff), SUNS(suns_villa),     1,  5000,    0, RGB(0xffffff), 0, -1850, 1, RGB(0x00ffff), 0  },
 	{ STAGE_PELAGIC + 900,    30, 15000, 3333, 4444, 600, 995, 1000, RGB(0x103060), NO_SUNS,              1,  5000,    0, RGB(0xffffff), 0, -1000, 0, RGB(0x000000), 0  },
+#ifdef PLATFORM_N64
 	{ STAGE_24,                2, 25000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              1, 10000,    0, RGB(0xffffff), 0,     0, 1, RGB(0x00ffff), 7  },
+#else // Kakariko Village Mod
+	{ STAGE_24,               10, 20000, 4000, 7200,  10, 996, 1000, RGB(0x45454f), NO_SUNS,              1,  5000,    0, RGB(0xb7bda5), 0,     0, 0, RGB(0x000000), 0  }, // Stormy (Fixed far from 10000 to 20000)
+#endif
 	{ STAGE_2B,                2,  2000, 2500, 3055, 750, 957, 1000, RGB(0x201010), NO_SUNS,              1,  5000,    0, RGB(0x3a1100), 0, -1000, 1, RGB(0x00ffff), 20 },
 	{ STAGE_2B + 900,          2,  8000, 6000, 8000, 800, 991, 1000, RGB(0x201010), NO_SUNS,              1,  5000,    0, RGB(0x3a1100), 0, -1000, 1, RGB(0x00ffff), 0  },
 	{ 238,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x181818), NO_SUNS,              1, 10000,    0, RGB(0x787878), 0,  -500, 0, RGB(0x000000), 0  },
@@ -63,6 +67,22 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ 200,                    10,  7500,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 	{ 300,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 	{ 400,                    10,  5000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
+#ifndef PLATFORM_N64
+	// GoldenEye X Mod
+	{ STAGE_EXTRA2,           10,  5000,    0,    0,    0, 996, 1000, RGB(0x280000), NO_SUNS,             1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Complex
+	{ STAGE_EXTRA6,           10,  6000,    0,    0,    0, 996, 1000, RGB(0x181818), NO_SUNS,             1, 10000,    0, RGB(0x787878), 0,  -1000,  0, RGB(0x000000), 0  }, // Temple
+	{ STAGE_EXTRA12,          10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // Caverns
+	{ STAGE_EXTRA14,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000,  0, RGB(0x000000), 0  }, // Egyptian
+	{ STAGE_TEST_MP14,        10, 20000, 5000, 6000, 1000, 996, 1000, RGB(0x101820), NO_SUNS,             1,  5000,    0, RGB(0xe1af64), 0,  -1000,  0, RGB(0x000000), 0  }, // Streets (Fixed far from 7500 to 20000, clouds_height from 25 to 0)
+	{ STAGE_TEST_MP18,        10,  9500, 3333, 4444,  800, 996, 1000, RGB(0x6080A0), NO_SUNS,             1,  5000,    0, RGB(0xffff00), 0, -10000,  0, RGB(0x000000), 0  }, // Cradle
+	{ STAGE_TEST_MP19,        10,  6000,    0,    0,    0, 996, 1000, RGB(0x103060), NO_SUNS,             1,  5000,    0, RGB(0xffffff), 0,  -1000,  0, RGB(0x000000), 0  }, // Labyrinth
+	{ STAGE_TEST_MP20,        10, 10000,    0,    0,    0, 996, 1000, RGB(0x08040C), NO_SUNS,             1,  7500,    0, RGB(0x403444), 0,  -1000,  0, RGB(0x000000), 0  }, // Citadel
+	{ STAGE_EXTRA16,          10, 30000, 6000, 8000,  800, 996, 1000, RGB(0x103040), SUNS(suns_area51),   1,  5000,    0, RGB(0x191919), 0,      0,  0, RGB(0x000000), 0  }, // Runway (Fixed far from 15000 to 30000, clouds_height from 30 to 0)
+	{ STAGE_EXTRA24,          10,  6000,    0,    0,    0, 993, 1000, RGB(0x080008), NO_SUNS,             0,  5000,    0, RGB(0xffffff), 0,  -3000,  0, RGB(0x00ffff), 0  }, // Rogue (Same as Caverns)
+	// Goldfinger 64 Mod
+	{ STAGE_EXTRA20,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000,  0, RGB(0x000000), 0  }, // Junkyard (Same as Egyptian)
+	{ STAGE_EXTRA21,          10,  5000,    0,    0,    0,  996, 1000, RGB(0x280000), NO_SUNS,            1, 10000,    0, RGB(0xdc0014), 0,  -1000,  0, RGB(0x000000), 0  }, // Steel Mill (Same as Complex)
+#endif
 	{ 0,                       0,     0,    0,    0,   0,   0,    0, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
 };
 
@@ -70,15 +90,25 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	//                                                                                                                                              clouds_height
 	//                                |distfade |                                     |--------- clouds ---------|  |----------- water ----------|  |  transparency
 	// stage             near    far  opa xlu ref  sky colour                         e  colour         scale type  e  colour          scale  type  |  |
+#ifdef PLATFORM_N64
 	{ -1,                  15, 10000,   0,  0,  0, RGB(0x001040), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
+#else // GoldenEye X Mod
+	{ -1,                  15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 }, // Default
+#endif
 	{ STAGE_RESCUE,        15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_MAIANSOS,      15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_ATTACKSHIP,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
 	{ STAGE_INFILTRATION,  15, 12000,   0,  0,  0, RGB(0x000000), SUNS(suns_area51),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_ESCAPE,        15, 10000,   0,  0,  0, RGB(0x000000), SUNS(suns_area51),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
+#ifdef PLATFORM_N64
 	{ STAGE_TEST_ARCH,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
+#else // Suburb Mod
+	{ STAGE_TEST_ARCH,     10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 }, // Suburb
+#endif
 	{ STAGE_DEEPSEA,       15, 10000,   0,  0,  0, RGB(0x050000), NO_SUNS,            0, RGB(0x9b9b9b),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
-	{ STAGE_TEST_DEST,     15, 10000,   0,  0,  0, RGB(0x103060), NO_SUNS,            1, RGB(0xe6e6e6),  3000,   0, 1, RGB(0xffff96),   -150,    2, 0, 0 },
+#ifdef PLATFORM_N64 // Training Day Mod
+	{ STAGE_TEST_DEST,     15, 10000,   0,  0,  0, RGB(0x103060), NO_SUNS,            1, RGB(0xe6e6e6),  3000,   0, 1, RGB(0xffff96),   -150,    2, 0, 0 }, // Training Day
+#endif
 	{ STAGE_TEST_LEN,      15, 10000,   0,  0,  0, RGB(0x304010), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
 	{ STAGE_TEST_ASH,      15, 25000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_DEFENSE,       15, 10000,   0,  0,  0, RGB(0x65b2ff), SUNS(suns_ci),      0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
@@ -92,7 +122,9 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_WAR,           15, 10000,   0,  0,  0, RGB(0x6565ff), SUNS(suns_skedar),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_TEST_RUN,      15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_MP_SKEDAR,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_SILO,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
+#endif
 	{ STAGE_CHICAGO,       10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x50280a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ STAGE_G5BUILDING,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x50280a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ STAGE_AIRFORCEONE,   15, 20000,   0,  0,  0, RGB(0x001040), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 1, RGB(0xffffff),  -5000,    2, 0, 1 },
@@ -105,27 +137,57 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_MP_COMPLEX,    15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_UFF,      10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_OLD,      15, 30000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_LAM,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#else // PD Plus Mod
+	{ STAGE_TEST_LAM,      15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Grand Library (Same as Library)
+#endif
 	{ STAGE_MP_BASE,       15, 20000,   0,  0,  0, RGB(0x040000), NO_SUNS,            1, RGB(0x82b464),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64
 	{ STAGE_TEST_MP2,      15, 20000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#else // PD Plus Mod
+	{ STAGE_TEST_MP2,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Stack
+#endif
 	{ STAGE_MP_AREA52,     15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_WAREHOUSE,  15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_CARPARK,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64
 	{ STAGE_TEST_MP6,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP7,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP8,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#else // PD Plus Mod, Dark Noon Mod, GoldenEye X Mod
+	{ STAGE_EXTRA11,       15, 20000,   0,  0,  0, RGB(0x001050), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
+	{ STAGE_TEST_MP7,      10, 14096,   0,  0,  0, RGB(0x110015), NO_SUNS,            0, RGB(0x3a1100),  3000,   0, 0, RGB(0x000000),      0,    0, 0, 0 }, // Valley
+	{ STAGE_TEST_MP8,      15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Cliff Base
+#endif
 	{ STAGE_MP_RUINS,      15, 10000,   0,  0,  0, RGB(0x030000), NO_SUNS,            1, RGB(0x82e6aa),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_SEWERS,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x646464),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_FELICITY,   10, 10000,   0,  0,  0, RGB(0x040500), NO_SUNS,            1, RGB(0x64d282),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_FORTRESS,   15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x5a90a5),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_VILLA,      15, 10000,   0,  0,  0, RGB(0x8888dc), NO_SUNS,            1, RGB(0xffaa2a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_MP14,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#endif
 	{ STAGE_MP_GRID,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP16,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	{ STAGE_TEST_MP17,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP18,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP19,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_TEST_MP20,     15, 20000,   0,  0,  0, RGB(0x00103c), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
+#endif
+#ifndef PLATFORM_N64
+	// GoldenEye X Mod
+	{ STAGE_EXTRA7,        15, 20000,   0,  0,  0, RGB(0x2020ff), NO_SUNS,            1, RGB(0x8860d0), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Icicle Pyramid
+	{ STAGE_EXTRA8,        15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Caves
+	{ STAGE_EXTRA9,        15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Library
+	{ STAGE_EXTRA10,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Facility
+	{ STAGE_EXTRA11,       15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Bunker
+	{ STAGE_EXTRA26,       15, 20000,   0,  0,  0, RGB(0x8888dc), NO_SUNS,            1, RGB(0xffaa2a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // War Colors (Same as Villa MP, far from 10000 to 20000)
+	// Kakariko Village Mod
+	{ STAGE_EXTRA18,       15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 }, // Tawfret Ruins
+	{ STAGE_EXTRA19,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x50280a),  5000,   0, 0, RGB(0x000000), -31000,    0, 0, 1 }, // Targitzan's Temple
+#endif
 	{ 0 },
 };
 

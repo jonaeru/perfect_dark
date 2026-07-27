@@ -32,6 +32,11 @@
 #include "system.h"
 #include "mpsetups.h"
 
+#ifndef PLATFORM_N64 // All in One Mod
+#include "system.h"
+#include "mod.h"
+#endif
+
 // bss
 struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];
 struct mpchrconfig *g_MpAllChrConfigPtrs[MAX_MPCHRS];
@@ -226,6 +231,247 @@ void mpStartMatch(void)
 	if (g_MpSetup.stagenum == STAGE_MP_RANDOM) {
 		stagenum = mpChooseRandomStage();
 	}
+#ifndef PLATFORM_N64 // All Solos in Multi Mod
+	else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_MULTI) {
+		stagenum = mpChooseRandomMultiStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_SOLO) {
+		stagenum = mpChooseRandomSoloStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_GEX) {
+		stagenum = mpChooseRandomGexStage();
+	}
+
+	// Mod Switch (MP Start)
+	switch (stagenum) {
+	case STAGE_TEST_SILO:
+	case STAGE_TEST_LAM:
+	case STAGE_TEST_MP8:
+	case STAGE_TEST_MP14:
+	case STAGE_TEST_MP16:
+	case STAGE_TEST_MP17:
+	case STAGE_TEST_MP18:
+	case STAGE_TEST_MP19:
+	case STAGE_TEST_MP20:
+	case STAGE_EXTRA1:
+	case STAGE_EXTRA2:
+	case STAGE_EXTRA3:
+	case STAGE_EXTRA4:
+	case STAGE_EXTRA5:
+	case STAGE_EXTRA6:
+	case STAGE_EXTRA7:
+	case STAGE_EXTRA8:
+	case STAGE_EXTRA9:
+	case STAGE_EXTRA10:
+	case STAGE_EXTRA11:
+	case STAGE_EXTRA12:
+	case STAGE_EXTRA13:
+	case STAGE_EXTRA14:
+	case STAGE_EXTRA15:
+	case STAGE_EXTRA16:
+	case STAGE_EXTRA17:
+	case STAGE_EXTRA24:
+	case STAGE_EXTRA25:
+		g_ModNum = MOD_GEX;
+		break;
+	case STAGE_24:
+	case STAGE_EXTRA18:
+	case STAGE_EXTRA19:
+	case STAGE_EXTRA26:
+		g_ModNum = MOD_KAKARIKO;
+		break;
+	case STAGE_TEST_MP7:
+		g_ModNum = MOD_DARKNOON;
+		break;
+	case STAGE_EXTRA20:
+	case STAGE_EXTRA21:
+	case STAGE_EXTRA22:
+	case STAGE_EXTRA23:
+		g_ModNum = MOD_GOLDFINGER_64;
+		break;
+	default:
+		g_ModNum = MOD_NORMAL;
+		break;
+	}
+
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
+	modConfigLoad(MOD_CONFIG_FNAME);
+	// Set textures surfacetype (Resets when multiplayer ends)
+	if (g_ModNum == MOD_GEX) {
+		g_Textures[0x073c].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073d].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x073e].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x073f].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0740].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0741].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0745].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0746].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0746].surfacetype = SURFACETYPE_SHALLOWWATER;
+		// Icicle Pyramid
+		g_Textures[0x0bde].surfacetype = SURFACETYPE_GLASS;
+		g_Textures[0x0bde].soundsurfacetype = SURFACETYPE_GLASS;
+
+		g_Textures[0x06ff].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0716].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0716].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a16].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a16].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a17].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0a17].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0208].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0208].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x06fc].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x065a].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x065a].soundsurfacetype = SURFACETYPE_METAL;
+	} else if (g_ModNum == MOD_KAKARIKO) {
+		g_Textures[0x0c31].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3b].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3c].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3d].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3e].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c42].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c43].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c45].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c48].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c49].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c4a].soundsurfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c4b].soundsurfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0c4c].soundsurfacetype = SURFACETYPE_DEEPWATER;
+		g_Textures[0x0c63].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c64].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c65].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c67].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c68].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c69].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6a].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c6b].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6c].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c6e].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c6f].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c73].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c74].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c75].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c77].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c78].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c79].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7a].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7b].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7c].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7e].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c7f].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c81].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c82].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c83].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c84].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c86].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c8a].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8b].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8c].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8d].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8f].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c31].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3b].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3c].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c3d].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c3e].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c42].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c43].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c45].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c48].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c49].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c4a].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c4b].surfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0c4c].surfacetype = SURFACETYPE_SHALLOWWATER;
+		g_Textures[0x0c63].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c64].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c65].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c67].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c68].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c69].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6a].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c6b].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c6c].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c6e].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c6f].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c73].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c74].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c75].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c77].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0c78].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c79].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7a].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7b].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c7c].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c7e].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0c7f].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c81].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c82].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c83].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0c84].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c86].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0c88].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c8a].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8b].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8c].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8d].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0c8e].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0c8f].surfacetype = SURFACETYPE_DIRT;
+		// Essentially, 0daf - 0dcc
+		g_Textures[0x0048].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0049].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004A].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004B].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x004C].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004D].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004E].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004F].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0050].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0051].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0052].soundsurfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0053].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0054].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x0056].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0057].soundsurfacetype = SURFACETYPE_MUD;
+		g_Textures[0x005C].soundsurfacetype = SURFACETYPE_METAL;
+		g_Textures[0x005D].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x005E].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x005F].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0060].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0061].soundsurfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0062].soundsurfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0064].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0065].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0067].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0068].soundsurfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0048].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0049].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004A].surfacetype = SURFACETYPE_MUD;
+		g_Textures[0x004B].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x004C].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004D].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004E].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x004F].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0050].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0051].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0052].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0053].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0054].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x0056].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0057].surfacetype = SURFACETYPE_NONE;
+		g_Textures[0x005C].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x005D].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x005E].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x005F].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0060].surfacetype = SURFACETYPE_STONE;
+		g_Textures[0x0061].surfacetype = SURFACETYPE_METAL;
+		g_Textures[0x0062].surfacetype = SURFACETYPE_DIRT;
+		g_Textures[0x0064].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0065].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0067].surfacetype = SURFACETYPE_WOOD;
+		g_Textures[0x0068].surfacetype = SURFACETYPE_WOOD;
+	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+		g_Textures[0x0281].surfacetype = SURFACETYPE_DEFAULT;
+		g_Textures[0x0281].soundsurfacetype = SURFACETYPE_DEFAULT;
+	}
+#endif
 
 	titleSetNextStage(stagenum);
 	mainChangeToStage(stagenum);
@@ -1836,6 +2082,9 @@ struct mphead g_MpHeads[] = {
 	{ /*0x49*/ HEAD_MOTO,         0                          },
 #endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
+#ifndef PLATFORM_N64 // PD Plus Mod
+	{ /*0x4b*/ HEAD_GREY,         0                          }, // Joanna (JP version)
+#endif
 };
 
 u32 g_BotHeads[] = {
@@ -1977,6 +2226,10 @@ struct mpbody g_MpBodies[] = {
 	/*0x36*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_PRESIDENT,   MPFEATURE_CHR_PRESCLONE    },
 	/*0x37*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             MPFEATURE_CHR_PELAGIC      },
 	/*0x38*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        },
+#ifndef PLATFORM_N64 // PD Plus Mod
+	/*0x39*/ { BODY_PRESIDENT_CLONE,  L_OPTIONS_356,   1000,             0                          }, // Skedar
+	/*0x3a*/ { BODY_TESTCHR,          L_OPTIONS_355,   1000,             0                          }, // Dr. Caroll
+#endif
 	/*0x39*/ { BODY_CONNERY,          L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3a*/ { BODY_MOORE,            L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 	/*0x3b*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
@@ -3981,8 +4234,14 @@ void mpsetupfileLoadWad(struct savebuffer *buffer, u8 version)
 			g_MpSetup.chrslots |= 1 << (i + 4);
 		}
 
-		g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
-		g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+		if (version > 1) {
+			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 8);
+			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 8);
+		} else {
+			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
+			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+		}
+
 		g_BotConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 	}
 
@@ -4043,7 +4302,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 			savebufferOr(buffer, BOTDIFF_DISABLED, 3);
 		}
 
-		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 7);
+		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 8);
 
 		if (g_BotConfigsArray[i].base.mpbodynum == 0xff) {
 			s32 profilenum = mpFindBotProfile(g_BotConfigsArray[i].type, g_BotConfigsArray[i].difficulty);
@@ -4057,7 +4316,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 			mpbodynum = g_BotConfigsArray[i].base.mpbodynum;
 		}
 
-		savebufferOr(buffer, mpbodynum, 7);
+		savebufferOr(buffer, mpbodynum, 8);
 		savebufferOr(buffer, g_BotConfigsArray[i].base.team, 3);
 	}
 

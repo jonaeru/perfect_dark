@@ -438,7 +438,7 @@ extern struct drawslot *g_BgSpecialDrawSlot;
 extern u16 g_BgFrameCount;
 extern s32 g_BgNumPortalCameraCacheItems;
 extern f32 var8007fcb4;
-extern struct stagetableentry g_Stages[61];
+extern struct stagetableentry g_Stages[87];
 extern s32 g_RoomMtxNumSlots;
 extern u32 g_GfxNumSwaps;
 extern s32 g_NumReasonsToEndMpMatch;
@@ -496,9 +496,17 @@ extern struct menudialogdef g_MpQuickTeamScenarioMenuDialog;
 extern s32 var80087260;
 extern bool g_MpEnableMusicSwitching;
 extern struct mpweapon g_MpWeapons[NUM_MPWEAPONS];
+#ifdef PLATFORM_N64
 extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 74 : 75];
+#else // PD Plus Mod
+extern struct mphead g_MpHeads[VERSION == VERSION_JPN_FINAL ? 75 : 76];
+#endif
 extern struct botprofile g_BotProfiles[18];
+#ifdef PLATFORM_N64
 extern struct mpbody g_MpBodies[61];
+#else // PD Plus Mod
+extern struct mpbody g_MpBodies[63];
+#endif
 extern struct mppreset g_MpPresets[];
 extern u32 g_TeamColours[];
 extern u32 var80087ce4[];
@@ -570,6 +578,19 @@ extern s16 g_MpCurrentSetup;
 
 #define TEX_FILTER_2D g_TexFilter2D
 #define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
+
+// Mod Switch
+// 0: Normal
+// 1: GoldenEye X Mod
+// 2: Kakariko Village Mod
+extern s32 g_ModNum;
+// GoldenEye X Mod
+extern struct modelstate g_GexModelStates[NUM_MODELS];
+extern s8 g_GexPropExplosionTypes[];
+// Goldfinger 64 Mod
+extern struct modelstate g_Goldfinger64ModelStates[NUM_MODELS];
+// All Solos in Multi Mod
+extern bool g_NotLoadMod;
 
 #else // PLATFORM_N64
 
