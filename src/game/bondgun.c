@@ -12834,7 +12834,12 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		bottom += 8;
 	}
 
+#ifdef PLATFORM_N64
 	fncolour = 0xff000040;
+#else // GoldenEye X Mod
+	fncolour = 0x00ff0040; // Red Primary Function Color
+#endif
+
 	funcnum = hand->gset.weaponfunc;
 	fnfaderinc = PALUP(g_Vars.lvupdate240 * 2);
 
@@ -12877,7 +12882,11 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	}
 
 	if (ctrl->fnfader > 128) {
+#ifdef PLATFORM_N64
 		fncolour = ((ctrl->fnfader * 2) - 256) << 16 | 0xff000040;
+#else // GoldenEye X Mod
+		fncolour = ((ctrl->fnfader * 2) - 256) << 16 | 0x00ffff40; // Yellow Primary Function Color
+#endif
 	}
 
 	gdl = textSetPrimColour(gdl, fncolour);
@@ -12902,7 +12911,11 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 		if (ctrl->guntypetimer < 255) {
+#ifdef PLATFORM_N64
 			colour = 0x55ffffff;
+#else // GoldenEye X Mod
+			colour = 0xffffffff; // Gun Name Color
+#endif
 
 			if (ctrl->guntypetimer);
 
@@ -12943,7 +12956,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gdl = text0f153838(gdl);
 			textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
-			textSetWaveColours(0xffffffff, 0xffffffff);
+			textSetWaveColours(0xffffffff, 0xffffffff); // Gun Name Leave Color?, Gun Fade Leave Color?
 			gdl = textRenderProjected(gdl, &x, &y, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, colour, textwidth, 1000, 0, 0);
 			textResetBlends();
 		}
@@ -12951,7 +12964,11 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		if (func) {
 			langGet(func->name);
 
+#ifdef PLATFORM_N64
 			colour = 0xff5555ff;
+#else // GoldenEye X Mod
+			colour = 0x00ff00ff; // Red Primary Function Name Color
+#endif
 
 			if ((ctrl->curfnstr != func->name && ctrl->fnfader > 128) || ctrl->curfnstr == 0) {
 				ctrl->fnstrtimer = 0;
@@ -12969,11 +12986,19 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 #if VERSION >= VERSION_NTSC_1_0
 				if (funcnum == FUNC_SECONDARY && func->name == ctrl->curfnstr) {
+#ifdef PLATFORM_N64
 					colour |= 0x00ff0000;
+#else // GoldenEye X Mod
+					colour = 0x00ffffff; // Yellow Primary Function Name Color
+#endif
 				}
 
 				if (funcnum == FUNC_PRIMARY && func->name != ctrl->curfnstr) {
+#ifdef PLATFORM_N64
 					colour |= 0x00ff0000;
+#else // GoldenEye X Mod
+					colour = 0x00ffffff; // Yellow Primary Function Name Color
+#endif
 				}
 #else
 				if (hand->gset.weaponfunc == FUNC_SECONDARY && func->name == ctrl->curfnstr) {
@@ -13070,9 +13095,17 @@ Gfx *bgunDrawHud(Gfx *gdl)
 			gdl = bgunDrawHudGauge(gdl,
 					xpos, bottom - reserveheight - clipheight - 3, xpos + barwidth, bottom - reserveheight - 3,
 					&lefthand->abmag, lefthand->loadedammo[ammoindex], lefthand->clipsizes[ammoindex],
+#ifdef PLATFORM_N64
 					0x00300080, 0x00ff0040, false);
+#else // GoldenEye X Mod
+					0x40200080, 0xd0800070, false); // Top Ammo Bar Bg Color, Top Ammo Bar Contents Color
+#endif
 			gdl = bgunDrawHudInteger(gdl, lefthand->loadedammo[ammoindex], xpos + barwidth + 2, true,
+#ifdef PLATFORM_N64
 					bottom - reserveheight - 8, 0, 0x00ff00a0);
+#else // GoldenEye X Mod
+					bottom - reserveheight - 8, 0, 0xd08000c0); // Top Ammo Bar Count Color
+#endif
 		}
 	}
 
@@ -13114,9 +13147,17 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				&& (weapon->ammos[ammoindex]->flags & AMMOFLAG_EQUIPPEDISRESERVE) == 0) {
 			gdl = bgunDrawHudGauge(gdl, xpos, bottom - reserveheight - clipheight - 3, xpos + barwidth,
 					bottom - reserveheight - 3, &hand->abmag, hand->loadedammo[ammoindex], hand->clipsizes[ammoindex],
+#ifdef PLATFORM_N64
 					0x00300080, 0x00ff0040, false);
+#else // GoldenEye X Mod
+					0x40200080, 0xd0800070, false); // Top Ammo Bar Bg Color, Top Ammo Bar Contents Color
+#endif
 			gdl = bgunDrawHudInteger(gdl, hand->loadedammo[ammoindex], xpos - 2, false,
+#ifdef PLATFORM_N64
 					bottom - reserveheight - 8, 0, 0x00ff00a0);
+#else // GoldenEye X Mod
+					bottom - reserveheight - 8, 0, 0xd08000c0); // Top Ammo Bar Count Color
+#endif
 		}
 
 		// Reserve
@@ -13136,8 +13177,13 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gdl = bgunDrawHudGauge(gdl, xpos, bottom - reserveheight, xpos + barwidth,
 					bottom, &ctrl->abmag, ammototal, g_AmmoTypes[ammotype].capacity,
+#ifdef PLATFORM_N64
 					0x00403080, 0x00ffc040, true);
 			gdl = bgunDrawHudInteger(gdl, ammototal, xpos - 2, false, bottom - reserveheight + 1, 0, 0x00ffc0a0);
+#else // GoldenEye X Mod
+					0x30300080, 0xc0c00070, true); // Bottom Ammo Bar Bg Color, Bottom Ammo Bar Contents Color
+			gdl = bgunDrawHudInteger(gdl, ammototal, xpos - 2, false, bottom - reserveheight + 1, 0, 0xc0c000c0); // Bottom Ammo Bar Count Color
+#endif
 		}
 
 		// Combat boost timer
@@ -13155,7 +13201,11 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				sprintf(text, "%02d:%02d\n", secs60 / TICKS(60), (secs60 - (secs60 / TICKS(60)) * TICKS(60)) * 100 / TICKS(60));
 			}
 
+#ifdef PLATFORM_N64
 			gdl = bgunDrawHudString(gdl, text, xpos + barwidth - 2, false, bottom - reserveheight + 1, 0, 0x00ffc0a0);
+#else // GoldenEye X Mod
+			gdl = bgunDrawHudString(gdl, text, xpos + barwidth - 2, false, bottom - reserveheight + 1, 0, 0xc0c000c0); // Combat Boost Color
+#endif
 		}
 	}
 

@@ -494,11 +494,23 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 	vertices[5].colour = 8;
 
 	colour1 = text0f1543ac((x1 + x2) / 2, (y2 + y1) / 2, 0xffffffff) & 0xff;
+#ifdef PLATFORM_N64
 	colour2 = (text0f1543ac((x1 + x2) / 2, (y2 + y1) / 2, 0xffffff7f) & 0xff) | 0x00006f00;
+#else // GoldenEye X Mod
+	colour2 = (text0f1543ac((x1 + x2) / 2, (y2 + y1) / 2, 0xffffff7f) & 0xff) | 0x00400000;
+#endif
 
+#ifdef PLATFORM_N64
 	colours[0].word = PD_BE32(colour1 | 0x00006f00);
+#else // GoldenEye X Mod
+	colours[0].word = PD_BE32(colour1 | 0x00400000);
+#endif
 	colours[1].word = PD_BE32(colour2);
+#ifdef PLATFORM_N64
 	colours[2].word = PD_BE32(colour1 | 0x00003f00);
+#else // GoldenEye X Mod
+	colours[2].word = PD_BE32(colour1 | 0x003f0000);
+#endif
 
 	gSPColor(gdl++, osVirtualToPhysical(colours), 3);
 	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
@@ -576,10 +588,20 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3
 	alpha2 = text0f1543ac((x1 + x2) / 2, (y1 + y2) / 2, 0xffffff7f) & 0xff;
 #endif
 
+#ifdef PLATFORM_N64
 	colours[0].word = PD_BE32(0x00006f00 | alpha1);
 	colours[1].word = PD_BE32(0x00006f00 | alpha2);
+#else // GoldenEye X Mod
+	colours[0].word = PD_BE32(0x00400000 | alpha1);
+	colours[1].word = PD_BE32(0x00400000 | alpha2);
+#endif
+
 #if VERSION >= VERSION_NTSC_1_0
+#ifdef PLATFORM_N64
 	colours[2].word = PD_BE32(0x00003f00 | alpha2);
+#else // GoldenEye X Mod
+	colours[2].word = PD_BE32(0x003f0000 | alpha1);
+#endif
 #else
 	colours[2].word = PD_BE32(0x00003f00 | alpha1);
 #endif

@@ -1651,7 +1651,7 @@ Gfx *amRender(Gfx *gdl)
 		if (redhealth) {
 			a2 = part1left + part1width - (s32) (part1width * (0.25f - healthfrac) * 4.0f);
 
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff000060);
+			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff000060); // Red Health Color (AI)
 
 			// Part 1 red
 			RECT(gdl++, a2, y, part1left + part1width, y + barheight);
@@ -1664,7 +1664,11 @@ Gfx *amRender(Gfx *gdl)
 			// Part 2 black
 			RECT(gdl++, PART2LEFT(), y, part1left + barwidth, y + barheight);
 		} else {
+#ifdef PLATFORM_N64
 			gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00c00060);
+#else // GoldenEye X Mod
+			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff6e0060); // Green Health Color (AI)
+#endif
 
 			// Part 1 green
 			RECT(gdl++, part1left, y, part1left + part1width, y + barheight);
@@ -1684,7 +1688,11 @@ Gfx *amRender(Gfx *gdl)
 		y = y + barheight + 2;
 		barheight = barheight * 0.75f;
 
+#ifdef PLATFORM_N64
 		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00c00060);
+#else // GoldenEye X Mod
+		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00668890); // Blue Shield Color (AI)
+#endif
 
 		a2 = part1left + (s32) (barwidth * shieldfrac);
 
