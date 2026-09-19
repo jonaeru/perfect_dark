@@ -77,9 +77,10 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ STAGE_EXTRA16,          10, 30000, 6000,  8000,  800, 996, 1000, RGB(0x103040), SUNS(suns_area51),  1,  5000,    0, RGB(0x191919), 0,      0, 0, RGB(0x000000), 0  }, // Runway (Fixed far from 15000 to 30000, clouds_height from 30 to 0)
 	{ STAGE_EXTRA20,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000, 0, RGB(0x000000), 0  }, // Junkyard (Same as Egyptian)
 	{ STAGE_EXTRA21,          10,  5000,    0,     0,    0, 996, 1000, RGB(0x280000), NO_SUNS,            1, 10000,    0, RGB(0xdc0014), 0,  -1000, 0, RGB(0x000000), 0  }, // Steel Mill (Same as Complex)
+	{ STAGE_EXTRA22,          10, 17000,    0,     0,    0, 996, 1000, RGB(0x40688c), NO_SUNS,            1, 10000,    0, RGB(0xffffff), 1,   -500, 0, RGB(0xdcdcdc), 0  }, // Mall
 	{ STAGE_EXTRA24,          10,  6000,    0,     0,    0, 993, 1000, RGB(0x080008), NO_SUNS,            0,  5000,    0, RGB(0xffffff), 0,  -3000, 0, RGB(0x00ffff), 0  }, // Rogue (Same as Caverns)
 	{ STAGE_EXTRA30,          10, 20000, 3000, 10000, 1500, 996, 1000, RGB(0x103060), NO_SUNS,            1,  5000,    0, RGB(0xffffff), 0,  -5000, 0, RGB(0x000000), 0  }, // Courtyard (Same as Egyptian)
-	{ STAGE_EXTRA31,          10, 20000,    0,    0,     0, 990, 1000, RGB(0x000000), NO_SUNS,            0,  5000,    0, RGB(0xffffff), 0,  -1000, 0, RGB(0x000000), 0  }, // Frost Valley
+	{ STAGE_EXTRA31,          15, 10000,    0,    0,     0, 996, 1000, RGB(0x90a0d8), NO_SUNS,            1, 12500,    0, RGB(0x848c8c), 0,  -1000, 0, RGB(0x000000), 0  }, // Frost Valley
 	{ STAGE_EXTRA32,          10,  5000,    0,    0,     0, 996, 1000, RGB(0x280000), NO_SUNS,            1, 10000,    0, RGB(0xdc0014), 0,  -1000, 0, RGB(0x000000), 0  }, // Void (Same as Complex (GE-X))
 #endif
 	{ 0,                       0,     0,    0,    0,   0,   0,    0, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
