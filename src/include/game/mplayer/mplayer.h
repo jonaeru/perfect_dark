@@ -62,6 +62,10 @@ s32 mpGetMpbodynumByBodynum(u16 bodynum);
 char *mpGetBodyName(u8 mpbodynum);
 u8 mpGetBodyRequiredFeature(u8 bodynum);
 s32 mpGetMpheadnumByMpbodynum(s32 bodynum);
+#ifndef PLATFORM_N64
+bool mpIsGexHead(s32 headnum);
+bool mpIsGexBody(s32 bodynum);
+#endif
 s32 mpChooseRandomLockPlayer(void);
 bool mpSetLock(s32 locktype, s32 playernum);
 s32 mpGetLockType(void);
