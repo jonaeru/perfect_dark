@@ -6407,6 +6407,14 @@ struct menuitem g_MpExtGameOptionsMenuItems[] = {
 		MPOPTION_NODOORS,
 		menuhandlerMpCheckboxOption,
 	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		0,
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Explosive Sims",
+		MPOPTION_EXPLODESIMONDEATH,
+		menuhandlerMpCheckboxOption,
+	},
 	{ MENUITEMTYPE_END },
 };
 
