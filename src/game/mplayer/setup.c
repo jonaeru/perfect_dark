@@ -3265,6 +3265,93 @@ MenuItemHandlerResult menuhandlerMpSimulantBody(s32 operation, struct menuitem *
 			false);
 }
 
+#ifndef PLATFORM_N64 // All in One Mod
+MenuItemHandlerResult menuhandlerMpRandomSimulantCharacter(s32 operation, struct menuitem *item, union handlerdata *data)
+{
+	if (operation == MENUOP_SET) {
+		s32 botnum = g_Menus[g_MpPlayerNum].mpsetup.slotindex;
+		s32 currentbodynum = g_BotConfigsArray[botnum].base.mpbodynum;
+		s32 numheads = mpGetNumHeads2();
+		s32 numbodies = mpGetNumBodies();
+		s32 count = 0;
+		s32 index;
+		s32 i;
+		s8 contpadnum1;
+		s8 contpadnum2;
+		bool randomhead;
+		bool excludecurrent;
+
+		menuGetContPads(&contpadnum1, &contpadnum2);
+
+		randomhead = (contpadnum1 >= 0 && joyGetButtons(contpadnum1, R_TRIG))
+			|| (contpadnum2 >= 0 && joyGetButtons(contpadnum2, R_TRIG));
+
+		if (randomhead) {
+			for (i = 0; i < numheads; i++) {
+				if (challengeIsFeatureUnlocked(mpGetHeadRequiredFeature(i))) {
+					count++;
+				}
+			}
+
+			if (count > 0) {
+				index = rngRandom() % count;
+
+				for (i = 0; i < numheads; i++) {
+					if (challengeIsFeatureUnlocked(mpGetHeadRequiredFeature(i))) {
+						if (index == 0) {
+							g_BotConfigsArray[botnum].base.mpheadnum = i;
+							break;
+						}
+
+						index--;
+					}
+				}
+			}
+		}
+
+		count = 0;
+
+		for (i = 0; i < numbodies; i++) {
+			if (!randomhead && i != currentbodynum && challengeIsFeatureUnlocked(mpGetBodyRequiredFeature(i))) {
+				count++;
+			}
+		}
+
+		excludecurrent = count > 0;
+
+		if (!excludecurrent) {
+			for (i = 0; i < numbodies; i++) {
+				if (challengeIsFeatureUnlocked(mpGetBodyRequiredFeature(i))) {
+					count++;
+				}
+			}
+		}
+
+		if (count > 0) {
+			index = rngRandom() % count;
+
+			for (i = 0; i < numbodies; i++) {
+				if ((!excludecurrent || i != currentbodynum) && challengeIsFeatureUnlocked(mpGetBodyRequiredFeature(i))) {
+					if (index == 0) {
+						g_BotConfigsArray[botnum].base.mpbodynum = i;
+
+						if (!randomhead) {
+							g_BotConfigsArray[botnum].base.mpheadnum = mpGetMpheadnumByMpbodynum(i);
+						}
+
+						break;
+					}
+
+					index--;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+#endif
+
 MenuDialogHandlerResult menudialog0017ccfc(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	switch (operation) {
@@ -3563,6 +3650,21 @@ struct menuitem g_MpEditSimulantMenuItems[] = {
 		0,
 		(void *)&g_MpSimulantCharacterMenuDialog,
 	},
+#ifndef PLATFORM_N64 // All in One Mod
+	{
+		MENUITEMTYPE_SELECTABLE,
+		0,
+#if VERSION == VERSION_JPN_FINAL
+		MENUITEMFLAG_LOCKABLEMINOR,
+		L_MPMENU_048, // "Random"
+#else
+		MENUITEMFLAG_LOCKABLEMINOR | MENUITEMFLAG_LITERAL_TEXT,
+		(uintptr_t)"Random Character\n",
+#endif
+		0,
+		menuhandlerMpRandomSimulantCharacter,
+	},
+#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
