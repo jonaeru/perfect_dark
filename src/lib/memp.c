@@ -269,6 +269,13 @@ s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum)
 		return 1;
 	}
 
+#ifndef PLATFORM_N64
+	if (pool->leftpos + growsize > pool->rightpos) {
+		sysLogPrintf(LOG_NOTE, "mempRealloc: cannot grow allocation %p by %d in pool %d\n", allocation, growsize, poolnum);
+		return 0;
+	}
+#endif
+
 	pool->leftpos += growsize;
 	return 1;
 }
