@@ -136,7 +136,7 @@ static struct menuitem g_RenameSetupItems[] = {
 #endif
 	{
 		MENUITEMTYPE_KEYBOARD,
-		18,
+		MPSETUP_MAXNAME,
 		0,
 		0,
 		1,
