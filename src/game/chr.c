@@ -3291,6 +3291,10 @@ void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
 	case BODY_ELVIS1:
 	case BODY_THEKING:
 	case BODY_ELVISWAISTCOAT:
+#ifndef PLATFORM_N64 // All in One Mod
+	case BODY_MAIAN_SOLDIER: // Maian Soldier
+	case BODY_ELTONWAISTCOAT: // Elton
+#endif
 		if (colour1) {
 			colour1[0] = 10;
 			colour1[1] = 0x40;
@@ -3305,6 +3309,10 @@ void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
 	case BODY_DRCAROLL:
 	case BODY_EYESPY:
 	case BODY_CHICROB:
+#ifndef PLATFORM_N64 // All in One Mod
+	case BODY_TESTCHR: // Dr. Caroll (Sinister)
+	case BODY_CARROLL3: // Dr. Caroll
+#endif
 		if (colour1) {
 			colour1[0] = 10;
 			colour1[1] = 10;
@@ -3320,6 +3328,9 @@ void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
 	case BODY_SKEDAR:
 	case BODY_MINISKEDAR:
 	case BODY_SKEDARKING:
+#ifndef PLATFORM_N64 // All in One Mod
+	case BODY_PRESIDENT_CLONE: // Skedar
+#endif
 		if (colour1) {
 			colour1[0] = 0x40;
 			colour1[1] = 0x19;
@@ -3387,7 +3398,9 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 	chrGetBloodColour(chr->bodynum, spec, NULL);
 	chr0f0246e4(spec);
+#ifdef PLATFORM_N64 // All in One Mod
 	alpha *= objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(model));
+#endif
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		f32 fadedist;
@@ -4708,7 +4721,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				}
 
 				// Create decal depending on the weapon's surface type
-				if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= NUM_TEXTURES) {
+				if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= MAX_TEXTURES) {
 					surfacetype = SURFACETYPE_DEFAULT;
 				} else {
 					surfacetype = g_Textures[hit->hitthing.texturenum].surfacetype;
@@ -4748,7 +4761,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				s32 index;
 
 				// Create decal depending on the hat's surface type
-				if (hit->hitthing.texturenum < 0) {
+				if (hit->hitthing.texturenum < 0 || hit->hitthing.texturenum >= MAX_TEXTURES) {
 					type = g_SurfaceTypes[0];
 				} else {
 					type = g_SurfaceTypes[g_Textures[hit->hitthing.texturenum].surfacetype];

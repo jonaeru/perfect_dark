@@ -137,6 +137,15 @@ u16 g_BgFrameCount = 0xfffe;
 s32 g_BgNumPortalCameraCacheItems = 0;
 #ifndef PLATFORM_N64
 bool g_BgHitXluDisabled = false;
+
+// The mod (g_ModNum) that was active when the current stage's bg file was
+// loaded. Room data is loaded lazily via bgLoadFile long after bgReset, but
+// g_ModNum can change in the meantime (e.g. it is reset to 0 when an MP match
+// ends, see menutick.c). Since romdataFileGetData() resolves the bg file from
+// fileSlots[g_ModNum][...], a changed g_ModNum would make bgLoadRoom read room
+// data from a different mod's bg file than the room table was built from,
+// producing garbage. We pin the bg file to this captured mod num.
+static s32 g_BgModNum = 0;
 #endif
 
 void bgUnpausePropsInRoom(u32 roomnum, bool tintedglassonly)
@@ -1040,6 +1049,9 @@ Gfx *bgRenderScene(Gfx *gdl)
 				|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id
 				|| stagenum == g_Stages[STAGEINDEX_TEST_OLD].id
+#ifndef PLATFORM_N64 // Suburb Mod
+				|| stagenum == g_Stages[STAGEINDEX_TEST_ARCH].id // Suburb
+#endif
 				|| stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id)) {
 		gdl = envStopFog(gdl);
 		gdl = vi0000ab78(gdl);
@@ -1062,7 +1074,13 @@ Gfx *bgRenderScene(Gfx *gdl)
 			roomnum = 0x01;
 		} else if (stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id) {
 			roomnum = 0x71;
+#ifdef PLATFORM_N64
 		}
+#else // Suburb Mod
+		} else if (stagenum == g_Stages[STAGEINDEX_TEST_ARCH].id) { // Suburb
+			roomnum = 0x01;
+		}
+#endif
 
 		if (PLAYERCOUNT() == 1
 				&& (stagenum == STAGE_DEFECTION
@@ -1070,6 +1088,9 @@ Gfx *bgRenderScene(Gfx *gdl)
 					|| stagenum == STAGE_TEST_OLD
 					|| stagenum == STAGE_INFILTRATION
 					|| stagenum == STAGE_ESCAPE
+#ifndef PLATFORM_N64  // Suburb Mod
+					|| stagenum == STAGE_TEST_ARCH // Suburb
+#endif
 					|| stagenum == STAGE_ATTACKSHIP)) {
 			gdl = text0f153628(gdl);
 
@@ -1253,11 +1274,24 @@ Gfx *bgRenderArtifacts(Gfx *gdl)
 
 void bgLoadFile(void *memaddr, u32 offset, u32 len)
 {
+#ifndef PLATFORM_N64
+	// Resolve the bg file using the mod that was active when this stage's bg
+	// was loaded, not the current g_ModNum (which may have changed since, e.g.
+	// reset to 0 at MP end). Otherwise lazily-loaded rooms would be read from a
+	// different mod's bg file than the room table, producing garbage.
+	s32 savedmodnum = g_ModNum;
+	g_ModNum = g_BgModNum;
+#endif
+
 	if (var8007fc04) {
 		bcopy(var8007fc08 + offset, memaddr, len);
 	} else {
 		fileLoadPartToAddr(g_Stages[g_StageIndex].bgfileid, memaddr, offset, len);
 	}
+
+#ifndef PLATFORM_N64
+	g_ModNum = savedmodnum;
+#endif
 }
 
 s32 bgGetStageIndex(s32 stagenum)
@@ -1501,6 +1535,13 @@ void bgReset(s32 stagenum)
 	if (g_StageIndex < 0) {
 		g_StageIndex = 0;
 	}
+
+#ifndef PLATFORM_N64
+	// Remember which mod's bg file we are about to load, so that rooms loaded
+	// lazily later (via bgLoadFile) always read from this same file even if
+	// g_ModNum changes in the meantime.
+	g_BgModNum = g_ModNum;
+#endif
 
 	// Copy section 1 header to stack and parse into variables
 	header = (u8 *)ALIGN16((uintptr_t)headerbuffer);
@@ -2866,7 +2907,7 @@ void bgLoadRoom(s32 roomnum)
 		// Inflate the data to the left side of the allocation
 		inflatedlen = bgInflate(memaddr, allocation, g_BgRooms[roomnum + 1].unk00 - g_BgRooms[roomnum].unk00);
 #ifndef PLATFORM_N64
-		inflatedlen = preprocessBgRoom(allocation, inflatedlen, g_BgRooms[roomnum].unk00);
+		inflatedlen = preprocessBgRoom(allocation, inflatedlen, g_BgRooms[roomnum].unk00, roomnum);
 #endif
 
 		g_Rooms[roomnum].gfxdata = (struct roomgfxdata *)allocation;
@@ -4406,7 +4447,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 											}
 
 #ifdef AVOID_UB
-											if (batch->type == VTXBATCHTYPE_XLU && texturenum >= 0 && g_Textures[texturenum].surfacetype == SURFACETYPE_DEFAULT) {
+											if (batch->type == VTXBATCHTYPE_XLU && texturenum >= 0 && texturenum < MAX_TEXTURES && g_Textures[texturenum].surfacetype == SURFACETYPE_DEFAULT) {
 #else
 											if (batch->type == VTXBATCHTYPE_XLU && g_Textures[texturenum].surfacetype == SURFACETYPE_DEFAULT) {
 #endif
@@ -5858,6 +5899,9 @@ void bgTickPortals(void)
 							&& ((g_StageIndex != STAGEINDEX_INFILTRATION && g_StageIndex != STAGEINDEX_RESCUE && g_StageIndex != STAGEINDEX_ESCAPE) || room != 0xf)
 							&& (g_StageIndex != STAGEINDEX_SKEDARRUINS || room != 0x02)
 							&& ((g_StageIndex != STAGEINDEX_DEFECTION && g_StageIndex != STAGEINDEX_EXTRACTION) || room != 0x01)
+#ifndef PLATFORM_N64 // Suburb Mod
+							&& (g_StageIndex != STAGEINDEX_TEST_ARCH || room != 0x01) // Suburb
+#endif
 							&& (g_StageIndex != STAGEINDEX_ATTACKSHIP || room != 0x71)) {
 						bgSetRoomOnscreen(room, 0, &box);
 					}

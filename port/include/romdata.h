@@ -11,6 +11,7 @@ s32 romdataInit(void);
 u8 *romdataFileLoad(s32 fileNum, u32 *outSize);
 void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *outSize);
 void romdataFileFree(s32 fileNum);
+void romdataFileFreeForSolo(void); // All Solos in Multi Mod
 const char *romdataFileGetName(s32 fileNum);
 
 u8 *romdataFileGetData(s32 fileNum);

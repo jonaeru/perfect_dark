@@ -13,6 +13,7 @@
 #ifndef PLATFORM_N64
 #include "mod.h"
 #include "platform.h"
+#include "system.h"
 #endif
 
 struct texture *g_Textures;
@@ -2245,7 +2246,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 		tex = texFindInPool(g_TexNumToLoad, pool);
 
 		if (tex == NULL) {
-			if (g_TexNumToLoad >= NUM_TEXTURES) {
+			if (g_TexNumToLoad >= MAX_TEXTURES) {
 				return;
 			}
 
@@ -2257,27 +2258,38 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 			osWritebackDCacheAll();
 			osInvalDCache(alignedcompbuffer, DCACHE_SIZE);
 
-			thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
-			nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;
+#ifndef PLATFORM_N64
+			if (g_TexNumToLoad >= NUM_TEXTURES) {
+				if (modTextureLoad(g_TexNumToLoad, alignedcompbuffer, 4096) <= 0) {
+					return;
+				}
+				compptr = alignedcompbuffer;
+			} else {
+#endif
+				thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
+				nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;
 
-			if (thisoffset == nextoffset) {
-				// The texture has no data
-				return;
-			}
+				if (thisoffset == nextoffset && g_TexNumToLoad < NUM_TEXTURES) {
+					// The texture has no data
+					return;
+				}
 
 #ifndef PLATFORM_N64
-			// try to load external replacement if present
-			if (modTextureLoad(g_TexNumToLoad, alignedcompbuffer, 4096) > 0) {
-				compptr = alignedcompbuffer;
-			} else
+				// try to load external replacement if present
+				if (modTextureLoad(g_TexNumToLoad, alignedcompbuffer, 4096) > 0) {
+					compptr = alignedcompbuffer;
+				} else
 #endif
-			{
-				// Copy the compressed texture to RAM
-				dmaExec(alignedcompbuffer,
-						(romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8),
-						((uintptr_t) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
-				compptr = (u8 *) alignedcompbuffer + (thisoffset & 7);
+				{
+					// Copy the compressed texture to RAM
+					dmaExec(alignedcompbuffer,
+							(romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8),
+							((uintptr_t) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
+					compptr = (u8 *) alignedcompbuffer + (thisoffset & 7);
+				}
+#ifndef PLATFORM_N64
 			}
+#endif
 			thisoffset = 0;
 			hasloddata = (*compptr & 0x80) >> 7;
 			iszlib = (*compptr & 0x40) >> 6;
@@ -2387,7 +2399,7 @@ void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct te
 	s32 i;
 
 	for (i = 0; i < numconfigs; i++) {
-		if ((uintptr_t)configs[i].texturenum < NUM_TEXTURES) {
+		if ((uintptr_t)configs[i].texturenum < MAX_TEXTURES) {
 			texLoad(&configs[i].texturenum, pool, true);
 			configs[i].unk0b = 1;
 		} else {

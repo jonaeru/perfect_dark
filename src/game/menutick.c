@@ -28,6 +28,11 @@
 #include "data.h"
 #include "types.h"
 
+#ifndef PLATFORM_N64 // All in One Mod
+#include "system.h"
+#include "mod.h"
+#endif
+
 u8 g_FileState = 0;
 u8 var80062944 = 0;
 u8 var80062948 = 0;
@@ -658,6 +663,18 @@ void menuTick(void)
 						titleSetNextMode(TITLEMODE_SKIP);
 						mainChangeToStage(STAGE_4MBMENU);
 					}
+
+#ifndef PLATFORM_N64 // All in One Mod
+					// Mod Switch (MP End)
+					if (g_ModNum > MOD_NORMAL) {
+						g_ModNum = 0;
+						sysLogPrintf(LOG_NOTE, "g_ModNum: %d", g_ModNum);
+						modConfigLoad(MOD_CONFIG_FNAME);
+						// Restore every texture surfacetype the active mod changed
+						// back to its original value (recorded by modTexOverrideSet).
+						modTexOverrideRestore();
+					}
+#endif
 				}
 				break;
 			case MENUROOT_COOPCONTINUE:

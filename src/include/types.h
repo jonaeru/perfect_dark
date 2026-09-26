@@ -1131,7 +1131,11 @@ struct chrdata {
 	/*0x002*/ s8 accuracyrating;
 	/*0x003*/ s8 speedrating; // 0-100
 	/*0x004*/ u8 firecount[2];
+#ifdef PLATFORM_N64
 	/*0x006*/ s8 headnum;
+#else // All in One Mod
+	/*0x006*/ s16 headnum;
+#endif
 	/*0x007*/ s8 actiontype;
 	/*0x008*/ s8 sleep;
 	/*0x009*/ s8 invalidmove;
@@ -3883,10 +3887,10 @@ struct menumodel {
 	/*0x05e*/ s16 curanimnum;
 	/*0x060*/ struct model bodymodel;
 	/*0x084*/ struct anim bodyanim;
-#ifdef PLATFORM_64BIT
-	/*0x110*/ u32 rwdata[256+128];
-#else
+#ifdef PLATFORM_N64
 	/*0x110*/ u32 rwdata[256];
+#else // All in One Mod
+	/*0x110*/ u32 rwdata[512];
 #endif
 	/*0x510*/ f32 curposx;
 	/*0x514*/ f32 curposy;
@@ -6037,7 +6041,7 @@ struct awardmetrics {
 };
 
 struct tex {
-	/*0x00*/ u16 texturenum : 12;
+	/*0x00*/ u16 texturenum;
 	/*0x04*/ u8 *data;
 	/*0x08*/ u8 width;
 	/*0x09*/ u8 height;
@@ -6179,6 +6183,7 @@ struct mpsetupfile {
 	u8 defaultsetup;
 	u8 numsetups;
 	struct setupblock setups[MPSETUP_MAXSETUPS];
+	u8 blockversions[MPSETUP_MAXSETUPS];
 };
 
 #endif

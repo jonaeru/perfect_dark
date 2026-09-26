@@ -20,7 +20,7 @@ void preprocessBgSection3(u8* data, u32 size);
 void preprocessBgSection1Header(u8 *data, u32 size);
 void preprocessBgSection2Header(u8 *data, u32 size);
 void preprocessBgSection3Header(u8 *data, u32 size);
-u32 preprocessBgRoom(u8* data, u32 size, u32 room_ofs);
+u32 preprocessBgRoom(u8* data, u32 size, u32 room_ofs, s32 roomnum);
 
 u8 *preprocessLangFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessPadsFile(u8 *data, u32 size, u32 *outSize);

@@ -3900,7 +3900,7 @@ void bgunTickGunLoad(void)
 		for (i = player->gunctrl.nexttexturetoload; i < modeldef->numtexconfigs; i++) {
 			osSyncPrintf("BriGun:  at texture %d\n", i);
 
-			if (modeldef->texconfigs[i].texturenum < NUM_TEXTURES) {
+			if (modeldef->texconfigs[i].texturenum < MAX_TEXTURES) {
 				osSyncPrintf("BriGun:  Uncompress %d of %d\n", i, modeldef->numtexconfigs);
 				texLoad(&modeldef->texconfigs[i].texturenum, &player->gunctrl.texpool, true);
 				modeldef->texconfigs[i].unk0b = 1;
@@ -11222,7 +11222,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 		return;
 	}
 
-	if (texturenum >= 0 && texturenum < NUM_TEXTURES
+	if (texturenum >= 0 && texturenum < MAX_TEXTURES
 			&& g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds == 0) {
 		return;
 	}
@@ -11338,7 +11338,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 		}
 	}
 
-	if (texturenum >= 0 && texturenum < NUM_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]) {
+	if (texturenum >= 0 && texturenum < MAX_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]) {
 		s16 soundnum = -1;
 
 		handle = bgunAllocateAudioHandle();
@@ -11367,7 +11367,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 		return;
 	}
 
-	if (texturenum >= 0 && texturenum < NUM_TEXTURES
+	if (texturenum >= 0 && texturenum < MAX_TEXTURES
 			&& g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds == 0) {
 		return;
 	}
@@ -11471,7 +11471,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 		}
 	}
 
-	if (texturenum >= 0 && texturenum < NUM_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]) {
+	if (texturenum >= 0 && texturenum < MAX_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]) {
 		s16 soundnum = -1;
 
 		handle = bgunAllocateAudioHandle();
@@ -11521,7 +11521,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 		return;
 	}
 
-	if (texturenum >= 0 && texturenum < NUM_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds == 0) {
+	if (texturenum >= 0 && texturenum < MAX_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds == 0) {
 		return;
 	}
 
@@ -11589,7 +11589,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 	if (playdefault) {
 		handle = bgunAllocateAudioHandle();
 
-		if (handle != NULL && texturenum >= 0 && texturenum < NUM_TEXTURES) {
+		if (handle != NULL && texturenum >= 0 && texturenum < MAX_TEXTURES) {
 			s16 soundnum;
 			struct surfacetype *type = g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype];
 
@@ -11619,7 +11619,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 		return;
 	}
 
-	if (texturenum >= 0 && texturenum < NUM_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds == 0) {
+	if (texturenum >= 0 && texturenum < MAX_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds == 0) {
 		return;
 	}
 
@@ -11682,7 +11682,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 	// Play default surface hit sound
 	handle = bgunAllocateAudioHandle();
 
-	if (handle != NULL && texturenum >= 0 && texturenum < NUM_TEXTURES) {
+	if (handle != NULL && texturenum >= 0 && texturenum < MAX_TEXTURES) {
 		s16 soundnum;
 		struct surfacetype *type = g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype];
 

@@ -418,7 +418,8 @@ s32 texModeToGbiMode(s32 txmode)
 
 Gfx *texWriteTileFromDefinition(Gfx *gdl, struct tex *tex, s32 offset, s32 shifts, s32 shiftt, s32 min)
 {
-	struct texture *s0 = &g_Textures[tex->texturenum];
+	struct texture fallback = {0};
+	struct texture *s0 = &fallback;
 	s32 masks;
 	s32 maskt;
 	s32 line;
@@ -427,6 +428,10 @@ Gfx *texWriteTileFromDefinition(Gfx *gdl, struct tex *tex, s32 offset, s32 shift
 	s32 ult;
 	s32 lrs;
 	s32 lrt;
+
+	if (tex->texturenum < NUM_TEXTURES) {
+		s0 = &g_Textures[tex->texturenum];
+	}
 
 	masks = texDimensionToMask(tex->width);
 	maskt = texDimensionToMask(tex->height);
@@ -891,7 +896,8 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 				spe8 = true;
 			}
 
-			texturenum = ingdl->words.w1 & 0xfff;
+			texturenum = ingdl->words.w1 & (ingdl->unkc0.subcmd == 1 ? 0xfff : 0xffff);
+
 			flag = ingdl->words.w0 & 0x200;
 
 			texLoadFromTextureNum(texturenum, pool);
@@ -1014,6 +1020,16 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 						dyntexSetCurrentType(DYNTEXTYPE_ARROWS);
 						animated = true;
 					}
+
+#ifndef PLATFORM_N64 // GoldenEye X Mod
+					if (g_ModNum == MOD_GEX) {
+						// Caverns - deep water
+						if (texturenum == TEXTURE_0C90) {
+							dyntexSetCurrentType(DYNTEXTYPE_OCEAN);
+							animated = true;
+						}
+					}
+#endif
 				}
 			}
 

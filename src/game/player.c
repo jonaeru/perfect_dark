@@ -896,7 +896,11 @@ bool playerSpawnAnti(struct chrdata *hostchr, bool force)
 
 		if (hostchr->bodynum == BODY_SKEDAR) {
 			g_Vars.antiheadnum = HEAD_MRBLONDE;
+#ifdef PLATFORM_N64
 			g_Vars.antibodynum = BODY_MRBLONDE;
+#else // PD Plus Mod
+			g_Vars.antibodynum = BODY_PRESIDENT_CLONE; // Skedar
+#endif
 		} else {
 			g_Vars.antiheadnum = hostchr->headnum;
 			g_Vars.antibodynum = hostchr->bodynum;
@@ -1425,8 +1429,8 @@ void playerTickChrBody(void)
 			rwdatas = (u32 *)(allocation + offset1);
 			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
-#ifdef PLATFORM_64BIT
-			offset1 += 0x200;
+#ifndef PLATFORM_N64 // All in One Mod
+			offset1 += 0x400;
 #endif
 			offset1 = ALIGN64(offset1);
 
@@ -1446,7 +1450,7 @@ void playerTickChrBody(void)
 			}
 
 			offset2 += 0x4000;
-#ifdef PLATFORM_64BIT
+#ifndef PLATFORM_N64 // All in One Mod
 			offset2 += 0x2000;
 #endif
 			bgunCalculateGunMemCapacity();
@@ -1469,10 +1473,14 @@ void playerTickChrBody(void)
 			modelInit(model, bodymodeldef, rwdatas, false);
 			animInit(model->anim);
 
+#ifdef PLATFORM_N64
 			model->rwdatalen = 256;
+#else // All in One Mod
+			model->rwdatalen = bodymodeldef->rwdatalen;
 
-#ifdef PLATFORM_64BIT
-			model->rwdatalen += 128;
+			if (headmodeldef != NULL) {
+				model->rwdatalen += headmodeldef->rwdatalen;
+			}
 #endif
 
 			texGetPoolLeftPos(&texpool);
@@ -1550,9 +1558,16 @@ void playerTickChrBody(void)
 			g_Vars.currentplayer->vv_headheight += 13;
 		}
 
+#ifdef PLATFORM_N64
 		if (g_Vars.currentplayer->vv_headheight > g_HeadsAndBodies[BODY_MRBLONDE].height + g_HeadsAndBodies[HEAD_MRBLONDE].height) {
 			g_Vars.currentplayer->vv_headheight = g_HeadsAndBodies[BODY_MRBLONDE].height + g_HeadsAndBodies[HEAD_MRBLONDE].height;
 		}
+#else // All in One Mod
+		// Maximize the height of Jaws and Mr.X (181 + 13)
+		if (g_Vars.currentplayer->vv_headheight > g_HeadsAndBodies[BODY_MRX].height + g_HeadsAndBodies[HEAD_MRX].height) {
+			g_Vars.currentplayer->vv_headheight = g_HeadsAndBodies[BODY_MRX].height + g_HeadsAndBodies[HEAD_MRX].height;
+		}
+#endif
 
 		g_Vars.currentplayer->vv_height = g_Vars.currentplayer->vv_eyeheight;
 
@@ -1622,7 +1637,13 @@ void playersBeginMpSwirl(void)
 	g_MpSwirlForwardSpeed = 0;
 	g_MpSwirlDistance = 80;
 
+#ifdef PLATFORM_N64 // GoldenEye X Mod
 	envChooseAndApply(mainGetStageNum(), false);
+#else
+	s32 stagenum;
+	stagenum = mainGetStageNum();
+	envChooseAndApply(stagenum, false);
+#endif
 }
 
 void playerTickMpSwirl(void)

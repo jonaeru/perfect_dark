@@ -48,7 +48,7 @@
 #error "This ROM version is unsupported."
 #endif
 
-#define ROMDATA_MAX_FILES 2048
+#define ROMDATA_MAX_FILES NUM_FILES
 
 #define GBC_ROM_NAME "pd.gbc"
 #define GBC_ROM_SIZE 4194304
@@ -94,8 +94,12 @@ static const struct romfilepatch filePatches[] = {
 	{ 0x92b0, 1, "\x6c", "\x99" },
 };
 
-static struct romfile fileSlots[ROMDATA_MAX_FILES] = {
-	[FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 },
+static struct romfile fileSlots[5][ROMDATA_MAX_FILES] = {
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } },
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // GoldenEye X Mod
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Kakariko Village Mod
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Dark Moon Mod
+	{ [FILE_USETUPLUE] = { .patches = &filePatches[0], .numpatches = 2 } }, // Goldfinger 64 Mod
 };
 
 #define ROMSEG_START(n) _ ## n ## SegmentRomStart
@@ -331,7 +335,7 @@ static inline s32 romdataLoadExternalFileList(void)
 			if (*p) {
 				*p++ = '\0';
 			}
-			fileSlots[n++].name = start;
+			fileSlots[g_ModNum][n++].name = start;
 		}
 	}
 
@@ -355,10 +359,14 @@ static inline void romdataInitFiles(void)
 		if (offsets + i + 1 < (u32 *)(romDataSeg + romDataSegSize)) {
 			const u32 nextofs = PD_BE32(offsets[i + 1]);
 			const u32 ofs = PD_BE32(offsets[i]);
-			fileSlots[i].data = g_RomFile + ofs;
-			fileSlots[i].size = nextofs - ofs;
-			fileSlots[i].source = SRC_UNLOADED;
-			fileSlots[i].preprocessed = 0;
+			fileSlots[MOD_NORMAL][i].data = g_RomFile + ofs;
+			fileSlots[MOD_NORMAL][i].size = nextofs - ofs;
+			fileSlots[MOD_NORMAL][i].source = SRC_UNLOADED;
+			fileSlots[MOD_NORMAL][i].preprocessed = 0;
+
+			for (int modnum = MOD_GEX; modnum < NUM_MODS; modnum++) {
+				fileSlots[modnum][i] = fileSlots[MOD_NORMAL][i];
+			}
 		}
 	}
 
@@ -366,7 +374,281 @@ static inline void romdataInitFiles(void)
 	const u32 *nameOffsets = (u32 *)(g_RomFile + PD_BE32(offsets[i - 1]));
 	for (i = 1; nameOffsets[i]; ++i) {
 		const u32 ofs = PD_BE32(nameOffsets[i]);
-		fileSlots[i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
+		fileSlots[MOD_NORMAL][i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
+
+		for (int modnum = MOD_GEX; modnum < NUM_MODS; modnum++) {
+			fileSlots[modnum][i].name = fileSlots[MOD_NORMAL][i].name;
+		}
+	}
+}
+
+struct FileSlotExpansionData {
+	s32 fileNum;
+	const char *name;
+};
+
+static const struct FileSlotExpansionData expansionFiles[] = {
+	// All in One Mod
+	{ FILE_CCARROLL2,             "Ccarroll2Z"             }, // Dr. Caroll Body
+	{ FILE_CSKEDAR2,              "Cskedar2Z"              }, // Skedar Body
+	{ FILE_GHAND_CAROLL,          "Ghand_carollZ"          }, // Dr. Caroll Hand
+	{ FILE_GHAND_SKEDAR,          "Ghand_skedarZ"          }, // Skedar Hand
+	{ FILE_CHEADNATALYA,          "CheadnatalyaZ"          }, // Natalya (Russia) Head
+	{ FILE_CNATALYA,              "CnatalyaZ"              }, // Natalya (Russia) Body
+	{ FILE_CHEADXENIA,            "CheadxeniaZ"            },
+	{ FILE_CXENIA,                "CxeniaZ"                },
+	{ FILE_GHAND_XENIA,           "Ghand_xeniaZ"           },
+	{ FILE_CHEADTREVELYAN,        "CheadtrevelyanZ"        },
+	{ FILE_CTREVELYAN,            "CtrevelyanZ"            },
+	{ FILE_GHAND_TREVELYAN,       "Ghand_trevelyanZ"       },
+	{ FILE_CHEADOURUMOV,          "CheadourumovZ"          },
+	{ FILE_COURUMOV,              "CourumovZ"              },
+	{ FILE_GHAND_OURUMOV,         "Ghand_ourumovZ"         },
+	{ FILE_CSPICEBOND,            "CspicebondZ"            },
+	{ FILE_CHEADBROSNAN,          "CheadbrosnanZ"          },
+	{ FILE_CDJBOND2,              "Cdjbond2Z"              },
+	{ FILE_GHAND_BOND,            "Ghand_bondZ"            },
+	{ FILE_CHEADDALTON,           "CheaddaltonZ"           },
+	{ FILE_CDALTON2,              "Cdalton2Z"              },
+	{ FILE_CHEADCONNERY,          "CheadconneryZ"          },
+	{ FILE_CCONNERY2,             "Cconnery2Z"             },
+	{ FILE_GHAND_BONDWHITE,       "Ghand_bondwhiteZ"       },
+	{ FILE_CHEADMOORE,            "CheadmooreZ"            },
+	{ FILE_CMOORE2,               "Cmoore2Z"               },
+	{ FILE_CHEADLAZENBY,          "CheadlazenbyZ"          },
+	{ FILE_CLAZENBY,              "ClazenbyZ"              },
+	{ FILE_CHEADJAWS,             "CheadjawsZ"             },
+	{ FILE_CJAWS,                 "CjawsZ"                 },
+	{ FILE_CHEADSNOWGUARD,        "CheadsnowguardZ"        },
+	{ FILE_CSNOWGUARD,            "CsnowguardZ"            },
+	{ FILE_GHAND_SNOWGUARD,       "Ghand_snowguardZ"       },
+	{ FILE_CHEADBROSNAN2,         "Cheadbrosnan2Z"         },
+	{ FILE_CSNOWBOND,             "CsnowbondZ"             },
+	{ FILE_CHEADODDJOB,           "CheadoddjobZ"           },
+	{ FILE_CODDJOB,               "CoddjobZ"               },
+	{ FILE_GHAND_ODDJOB,          "Ghand_oddjobZ"          },
+	{ FILE_CHEADDAVED,            "CheaddavedZ"            },
+	{ FILE_CHEADDAVED2,           "Cheaddaved2Z"           },
+	{ FILE_CTECHMAN,              "CtechmanZ"              },
+	{ FILE_CHEADMISHKIN,          "CheadmishkinZ"          },
+	{ FILE_CGREATGUARD,           "CgreatguardZ"           },
+	{ FILE_GHAND_MISHKIN,         "Ghand_mishkinZ"         },
+	{ FILE_CSUITBOND,             "CsuitbondZ"             },
+	{ FILE_GHAND_BLUE_SUIT,       "Ghand_blue_suitZ"       },
+	{ FILE_CBOILERBOND,           "CboilerbondZ"           },
+	{ FILE_GHAND_BLACKSTEALTH,    "Ghand_blackstealthZ"    },
+	{ FILE_CBOILERTREV,           "CboilertrevZ"           },
+	{ FILE_CTIMBERBOND,           "CtimberbondZ"           },
+	{ FILE_CELTONWAISTCOAT,       "CeltonwaistcoatZ"       },
+	{ FILE_CHEADBORIS,            "CheadborisZ"            },
+	{ FILE_CBORIS,                "CborisZ"                },
+	{ FILE_GHAND_BORIS,           "Ghand_borisZ"           },
+	{ FILE_CHEADVALENTIN,         "CheadvalentinZ"         },
+	{ FILE_CVALENTIN,             "CvalentinZ"             },
+	{ FILE_CHEADMAYDAY,           "CheadmaydayZ"           },
+	{ FILE_CMAYDAY,               "CmaydayZ"               },
+	{ FILE_GHAND_MAYDAY,          "Ghand_maydayZ"          },
+	{ FILE_CHEADBARONSAMEDI,      "CheadbaronsamediZ"      },
+	{ FILE_CBARONSAMEDI,          "CbaronsamediZ"          },
+	{ FILE_GHAND_SAMEDI,          "Ghand_samediZ"          },
+	{ FILE_CHEADBARONSAMEDI2,     "Cheadbaronsamedi2Z"     },
+	{ FILE_CBARONSAMEDI2,         "Cbaronsamedi2Z"         },
+	{ FILE_GHAND_SAMEDI2,         "Ghand_samedi2Z"         },
+	{ FILE_CHEADBALACLAVA,        "CheadbalaclavaZ"        },
+	{ FILE_CHEADDWAYNE,           "CheaddwayneZ"           },
+	{ FILE_CHEADSANTA,            "CheadsantaZ"            },
+	{ FILE_CSANTA,                "CsantaZ"                },
+	{ FILE_GHAND_SANTA,           "Ghand_santaZ"           },
+	{ FILE_CHEADELF,              "CheadelfZ"              },
+	{ FILE_CELF,                  "CelfZ"                  },
+	{ FILE_GHAND_ELF,             "Ghand_elfZ"             },
+	{ FILE_COLIVEGUARD,           "ColiveguardZ"           },
+	{ FILE_GHAND_OLIVEGUARD,      "Ghand_oliveguardZ"      },
+	{ FILE_CHEADPILOT,            "CheadpilotZ"            },
+	{ FILE_CPILOT,                "CpilotZ"                },
+	{ FILE_GHAND_PILOT,           "Ghand_pilotZ"           },
+	{ FILE_CTREVGUARD,            "CtrevguardZ"            },
+	{ FILE_CARMOURGUARD,          "CarmourguardZ"          },
+	{ FILE_GHAND_GREYMAN,         "Ghand_greymanZ"         },
+	{ FILE_CGREATGUARD2,          "Cgreatguard2Z"          },
+	{ FILE_GHAND_BROWN,           "Ghand_brownZ"           },
+	{ FILE_CBLUECAMGUARD,         "CbluecamguardZ"         },
+	{ FILE_GHAND_BLUECAMGUARD,    "Ghand_bluecamguardZ"    },
+	{ FILE_CBLUEMAN,              "CbluemanZ"              },
+	{ FILE_CGREYMAN,              "CgreymanZ"              },
+	{ FILE_CMOONGUARD,            "CmoonguardZ"            },
+	{ FILE_GHAND_MOONGUARD,       "Ghand_moonguardZ"       },
+	{ FILE_CMOONFEMALE,           "CmoonfemaleZ"           },
+	{ FILE_CCAMGUARD,             "CcamguardZ"             },
+	{ FILE_GHAND_CAMGUARD,        "Ghand_camguardZ"        },
+	{ FILE_CGREYGUARD,            "CgreyguardZ"            },
+	{ FILE_GHAND_STPGUARD,        "Ghand_stpguardZ"        },
+	{ FILE_CRUSGUARD,             "CrusguardZ"             },
+	{ FILE_GHAND_RUSGUARD,        "Ghand_rusguardZ"        },
+	{ FILE_CCOMMGUARD,            "CcommguardZ"            },
+	{ FILE_GHAND_COMMGUARD,       "Ghand_commguardZ"       },
+	{ FILE_CNAVYGUARD,            "CnavyguardZ"            },
+	{ FILE_GHAND_NAVYGUARD,       "Ghand_navyguardZ"       },
+	{ FILE_CHEADMARION,           "CheadmarionZ"           },
+	{ FILE_CFATTECHWOMAN,         "CfattechwomanZ"         },
+	{ FILE_CTECHWOMAN,            "CtechwomanZ"            },
+	{ FILE_CJEANWOMAN,            "CjeanwomanZ"            },
+	{ FILE_CBLUEWOMAN,            "CbluewomanZ"            },
+	{ FILE_CCARDIMAN,             "CcardimanZ"             },
+	{ FILE_CCHECKMAN,             "CcheckmanZ"             },
+	{ FILE_GHAND_CHECKMAN,        "Ghand_checkmanZ"        },
+	{ FILE_CREDMAN,               "CredmanZ"               },
+	{ FILE_GHAND_REDMAN,          "Ghand_redmanZ"          },
+	{ FILE_CHEADKARL,             "CheadkarlZ"             },
+	{ FILE_CHEADKARL2,            "Cheadkarl2Z"            },
+	{ FILE_CHEADMARTIN,           "CheadmartinZ"           },
+	{ FILE_CHEADMARK0,            "Cheadmark0Z"            },
+	{ FILE_CHEADDUNCAN0,          "Cheadduncan0Z"          },
+	{ FILE_CHEADDUNCAN01,         "Cheadduncan01Z"         },
+	{ FILE_CHEADJONES0,           "Cheadjones0Z"           },
+	{ FILE_CHEADGRANT0,           "Cheadgrant0Z"           },
+	{ FILE_CHEADROBIN0,           "Cheadrobin0Z"           },
+	{ FILE_CHEADGRAEME,           "CheadgraemeZ"           },
+	{ FILE_CHEADGRAEME2,          "Cheadgraeme2Z"          },
+	{ FILE_CHEADSTEVE_E,          "Cheadsteve_eZ"          },
+	{ FILE_CHEADKEN0,             "Cheadken0Z"             },
+	{ FILE_CHEADMANDY,            "CheadmandyZ"            },
+	{ FILE_CHEADVIVIEN,           "CheadvivienZ"           },
+	{ FILE_CHEADSALLY,            "CheadsallyZ"            },
+	{ FILE_CHEADJOEL0,            "Cheadjoel0Z"            },
+	{ FILE_CHEADJOE2,             "Cheadjoe2Z"             },
+	{ FILE_CHEADJOE,              "CheadjoeZ"              },
+	{ FILE_CHEADSCOTT_H0,         "Cheadscott_h0Z"         },
+	{ FILE_CHEADSTEVEH,           "CheadstevehZ"           },
+	{ FILE_CHEADJIM,              "CheadjimZ"              },
+	{ FILE_CHEADJIM2,             "Cheadjim2Z"             },
+	{ FILE_CHEADNEIL0,            "Cheadneil0Z"            },
+	{ FILE_CHEADLEE,              "CheadleeZ"              },
+	{ FILE_CHEADCHRIS,            "CheadchrisZ"            },
+	{ FILE_CHEADCHRIS2,           "Cheadchris2Z"           },
+	{ FILE_CHEADDES,              "CheaddesZ"              },
+	{ FILE_CHEADSHAUN0,           "Cheadshaun0Z"           },
+	{ FILE_CHEADPETE,             "CheadpeteZ"             },
+	{ FILE_CHEADALAN,             "CheadalanZ"             },
+	{ FILE_CHEADBANDOVERFLOW,     "CheadbandoverflowZ"     },
+	{ FILE_CHEADWRECK,            "CheadwreckZ"            },
+	{ FILE_CHEADSUBDRAG,          "CheadsubdragZ"          },
+	{ FILE_CBONDALPS,             "CbondalpsZ"             },
+	{ FILE_GHAND_BONDALPS,        "Ghand_bondalpsZ"        },
+	{ FILE_CBONDRANCH,            "CbondranchZ"            },
+	{ FILE_GHAND_BONDRANCH,       "Ghand_bondranchZ"       },
+	{ FILE_CHEADGALORE,           "CheadgaloreZ"           },
+	{ FILE_CGALOREPLANE,          "CgaloreplaneZ"          },
+	{ FILE_CGALORERANCH,          "CgaloreranchZ"          },
+	{ FILE_GHAND_GALORERANCH,     "Ghand_galoreranchZ"     },
+	{ FILE_CHEADSOGUN,            "CheadsogunZ"            },
+	{ FILE_CSOGUNTRON,            "CsoguntronZ"            },
+	{ FILE_GHAND_SOGUNTRON,       "Ghand_soguntronZ"       },
+	{ FILE_CHEADMRKANE,           "CheadmrkaneZ"           },
+	{ FILE_CHEADPARIS,            "CheadparisZ"            },
+	{ FILE_CCARROLL3,             "Ccarroll3Z"             },
+	{ FILE_CNATALYA_XMAS,         "Cnatalya_xmasZ"         },
+	{ FILE_CNATALYA_ELF,          "Cnatalya_elfZ"          },
+	{ FILE_CHEADDONKEY,           "CheaddonkeyZ"           },
+	{ FILE_CHEADCASEYDARK,        "CheadcaseydarkZ"        },
+	{ FILE_CCASEYDARK,            "CcaseydarkZ"            },
+	{ FILE_CHEADHAMM,             "CheadhammZ"             },
+	{ FILE_CEVERETTHAMM,          "CeveretthammZ"          },
+	{ FILE_CHEADDRNO,             "CheaddrnoZ"             },
+	{ FILE_CHEADWAILIN,           "CheadwailinZ"           },
+	{ FILE_CHEADAURIC,            "CheadauricZ"            },
+	{ FILE_CHEADELEKTRA,          "CheadelektraZ"          },
+	{ FILE_CXENIA_XMAS,           "Cxenia_xmasZ"           },
+	{ FILE_GHAND_XENIA_XMAS,      "Ghand_xenia_xmasZ"      },
+	{ FILE_CHEADMRX,              "CheadmrxZ"              },
+	{ FILE_CMRX,                  "CmrxZ"                  },
+	{ FILE_GHAND_MRX,             "Ghand_mrxZ"             },
+	{ FILE_CHEADDARK_US,          "Cheaddark_usZ"          }, // Joanna (US)
+	{ FILE_CHEADDARK_COMBAT_JP,   "Cheaddark_combat_jpZ"   }, // Joanna (JP)
+	{ FILE_CHEADDARK_FROCK_JP,    "Cheaddark_frock_jpZ"    }, // Joanna (JP)
+	{ FILE_CHEADDARKAQUA_JP,      "Cheaddarkaqua_jpZ"      }, // Joanna (JP)
+	{ FILE_CHEADDARK_SNOW_JP,     "Cheaddark_snow_jpZ"     }, // Joanna (JP)
+	{ FILE_CDARK_COMBAT_JP,       "Cdark_combat_jpZ"       }, // Joanna (JP)
+	{ FILE_CDARK_FROCK_JP,        "Cdark_frock_jpZ"        }, // Joanna (JP)
+	{ FILE_CDARK_RIPPED_JP,       "Cdark_ripped_jpZ"       }, // Joanna (JP)
+	{ FILE_CDARK_AF1_JP,          "Cdark_af1_jpZ"          }, // Joanna (JP)
+	{ FILE_CDARKSNOW_JP,          "Cdarksnow_jpZ"          }, // Joanna (JP)
+	{ FILE_CDARK_LEATHER_JP,      "Cdark_leather_jpZ"      }, // Joanna (JP)
+	{ FILE_CDARK_NEGOTIATOR_JP,   "Cdark_negotiator_jpZ"   }, // Joanna (JP)
+	{ FILE_GHAND_NATALYA,         "Ghand_natalyaZ"         },
+	{ FILE_GHAND_GALOREPLANE,     "Ghand_galoreplaneZ"     },
+	{ FILE_GHAND_TECHWOMAN,       "Ghand_techwomanZ"       },
+	{ FILE_GHAND_MOONFEMALE,      "Ghand_moonfemaleZ"      },
+	{ FILE_GHAND_CILABTECH,       "Ghand_cilabtechZ"       },
+	{ FILE_GHAND_TIMBERBOND,      "Ghand_timberbondZ"      },
+	{ FILE_GHAND_PRES_SECURITY,   "Ghand_pres_securityZ"   },
+	{ FILE_GHAND_NSA_LACKEY,      "Ghand_nsa_lackeyZ"      },
+	{ FILE_GHAND_VALENTIN,        "Ghand_valentinZ"        },
+	{ FILE_GHAND_CASEYDARK,       "Ghand_caseydarkZ"       },
+	{ FILE_GHAND_STEWARD,         "Ghand_stewardZ"         },
+	{ FILE_GHAND_ARMOURGUARD,     "Ghand_armourguardZ"     },
+	{ FILE_GHAND_LABTECH,         "Ghand_labtechZ"         },
+	{ FILE_GHAND_JAWS,            "Ghand_jawsZ"            },
+	{ FILE_GHAND_DD_GUARD,        "Ghand_dd_guardZ"        },
+	{ FILE_GHAND_PRESIDENT_CLONE, "Ghand_president_cloneZ" },
+	{ FILE_CHEADSKEDAR,           "CheadskedarZ"           },
+	{ FILE_CHEADCARROLL,          "CheadcarrollZ"          },
+	{ FILE_CHEADCARROLL_SINISTER, "Cheadcarroll_sinisterZ" },
+	{ FILE_CSILVERWOMAN,          "CsilverwomanZ"          },
+	{ FILE_CHEADCHRISTMASJONES,   "CheadchristmasjonesZ"   },
+	{ FILE_CJAWS_BLUE,            "Cjaws_blueZ"            },
+	{ FILE_GHAND_JAWS_BLUE,       "Ghand_jaws_blueZ"       },
+	{ FILE_CFEMSPY_BLU,           "Cfemspy_bluZ"           },
+	{ FILE_GHAND_FEMSPY_BLU,      "Ghand_femspy_bluZ"      },
+	{ FILE_CHEADCJ,               "CheadcjZ"               },
+	{ FILE_CCJ,                   "CcjZ"                   },
+	{ FILE_CHEADMACTONIGHT,       "CheadmactonightZ"       },
+};
+
+static inline bool romdataIsExternalOnlyFile(s32 fileNum)
+{
+	for (int i = 0; i < ARRAYCOUNT(expansionFiles); i++) {
+		if (expansionFiles[i].fileNum == fileNum) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static inline void romdataInitFileSlotExpansion(void)
+{
+	// file slot expansion
+	for (int i = 0; i < ARRAYCOUNT(expansionFiles); i++) {
+		s32 fileNum = expansionFiles[i].fileNum;
+
+		fileSlots[MOD_NORMAL][fileNum].data = 0;
+		fileSlots[MOD_NORMAL][fileNum].size = 0;
+		fileSlots[MOD_NORMAL][fileNum].source = SRC_UNLOADED;
+		fileSlots[MOD_NORMAL][fileNum].preprocessed = 0;
+		fileSlots[MOD_NORMAL][fileNum].name = expansionFiles[i].name;
+
+		for (int modnum = MOD_GEX; modnum < NUM_MODS; modnum++) {
+			fileSlots[modnum][fileNum] = fileSlots[MOD_NORMAL][fileNum];
+		}
+	}
+}
+
+static inline void romdataResetFile(s32 fileNum)
+{
+	// the file offset table is in the data seg
+	const u32 *offsets = (u32 *)(romDataSeg + ROMDATA_FILES_OFS);
+	if (offsets + fileNum + 1 < (u32 *)(romDataSeg + romDataSegSize)) {
+		const u32 nextofs = PD_BE32(offsets[fileNum + 1]);
+		const u32 ofs = PD_BE32(offsets[fileNum]);
+		// free any external (mod) allocation before repointing data to the ROM
+		if (fileSlots[g_ModNum][fileNum].source == SRC_EXTERNAL && fileSlots[g_ModNum][fileNum].data) {
+			sysMemFree(fileSlots[g_ModNum][fileNum].data);
+		}
+		fileSlots[g_ModNum][fileNum].data = g_RomFile + ofs;
+		fileSlots[g_ModNum][fileNum].size = nextofs - ofs;
+		fileSlots[g_ModNum][fileNum].source = SRC_UNLOADED;
+		fileSlots[g_ModNum][fileNum].preprocessed = 0;
 	}
 }
 
@@ -395,6 +677,9 @@ s32 romdataInit(void)
 
 	// load file table from the files segment
 	romdataInitFiles();
+
+	// file slot expansion
+	romdataInitFileSlotExpansion();
 
 	sysLogPrintf(LOG_NOTE, "romdataInit: loaded rom, size = %u", g_RomFileSize);
 
@@ -457,7 +742,7 @@ s32 romdataFileGetSize(s32 fileNum)
 
 	// ensure any external files are loaded and we use their size
 	if (romdataFileLoad(fileNum, NULL)) {
-		return fileSlots[fileNum].size;
+		return fileSlots[g_ModNum][fileNum].size;
 	}
 
 	sysLogPrintf(LOG_ERROR, "romdataFileGetSize: could not load file num %d", fileNum);
@@ -479,31 +764,47 @@ u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
 	u8 *out = NULL;
 
 	// try to load external file
-	if (fileSlots[fileNum].source == SRC_UNLOADED) {
+	if (fileSlots[g_ModNum][fileNum].source == SRC_UNLOADED) {
 		char tmp[FS_MAXPATH] = { 0 };
-		snprintf(tmp, sizeof(tmp), ROMDATA_FILEDIR "/%s", fileSlots[fileNum].name);
-		if (fsFileSize(tmp) > 0) {
+		snprintf(tmp, sizeof(tmp), ROMDATA_FILEDIR "/%s", fileSlots[g_ModNum][fileNum].name);
+
+		// All Solos in Multi Mod: in solo/coop/counter-op do not load vanilla-slot mod
+		// replacements (stage bg/pads/tiles), but still load external-only expansion files
+		// (new custom head/body/hand slots referenced by robot.c), otherwise they resolve
+		// to NULL and crash when a solo character uses a custom model (e.g. Ghand_labtechZ).
+		if (fsFileSize(tmp) > 0 && (!g_NotLoadMod || romdataIsExternalOnlyFile(fileNum))) {
 			u32 size = 0;
+
 			out = fsFileLoad(tmp, &size);
+
 			if (out && size) {
-				sysLogPrintf(LOG_NOTE, "file %d (%s) loaded externally", fileNum, fileSlots[fileNum].name);
-				fileSlots[fileNum].data = out;
-				fileSlots[fileNum].size = size;
-				fileSlots[fileNum].source = SRC_EXTERNAL;
+				sysLogPrintf(LOG_NOTE, "file %d (%s) loaded externally (g_ModNum: %d)", fileNum, fileSlots[g_ModNum][fileNum].name, g_ModNum);
+				fileSlots[g_ModNum][fileNum].data = out;
+				fileSlots[g_ModNum][fileNum].size = size;
+				fileSlots[g_ModNum][fileNum].source = SRC_EXTERNAL;
 				// external file; do not apply patches to this
-				fileSlots[fileNum].numpatches = 0;
+				fileSlots[g_ModNum][fileNum].numpatches = 0;
 			}
 		}
-		// tried and failed, fall back to ROM
-		fileSlots[fileNum].source = SRC_ROM;
+
+		if (fileSlots[g_ModNum][fileNum].source == SRC_UNLOADED) {
+			// if external-only file not found
+			if (romdataIsExternalOnlyFile(fileNum)) {
+				sysLogPrintf(LOG_ERROR, "romdataFileLoad: external-only file %d (%s) not found", fileNum, fileSlots[g_ModNum][fileNum].name ? fileSlots[g_ModNum][fileNum].name : "(null)");
+				return NULL;
+			} else {
+				// tried and failed, fall back to ROM
+				fileSlots[g_ModNum][fileNum].source = SRC_ROM;
+			}
+		}
 	}
 
 	if (!out) {
-		out = fileSlots[fileNum].data;
+		out = fileSlots[g_ModNum][fileNum].data;
 	}
 
 	if (out && outSize) {
-		*outSize = fileSlots[fileNum].size;
+		*outSize = fileSlots[g_ModNum][fileNum].size;
 	}
 
 	return out;
@@ -516,19 +817,19 @@ void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *o
 		return;
 	}
 
-	if (data && size /* && !fileSlots[fileNum].preprocessed*/) {
+	if (data && size /* && !fileSlots[g_ModNum][fileNum].preprocessed*/) {
 		if (loadType && loadType < (u32)ARRAYCOUNT(filePreprocFuncs) && filePreprocFuncs[loadType]) {
 			// apply patches
-			for (u32 i = 0; i < fileSlots[fileNum].numpatches; ++i) {
-				const struct romfilepatch *p = &fileSlots[fileNum].patches[i];
+			for (u32 i = 0; i < fileSlots[g_ModNum][fileNum].numpatches; ++i) {
+				const struct romfilepatch *p = &fileSlots[g_ModNum][fileNum].patches[i];
 				if (!memcmp(data + p->ofs, p->src, p->len)) {
 					memcpy(data + p->ofs, p->dst, p->len);
-					sysLogPrintf(LOG_NOTE, "file %d (%s) patched at offset 0x%x", fileNum, fileSlots[fileNum].name, p->ofs);
+					sysLogPrintf(LOG_NOTE, "file %d (%s) patched at offset 0x%x", fileNum, fileSlots[g_ModNum][fileNum].name, p->ofs);
 				}
 			}
 			// then preprocess
 			filePreprocFuncs[loadType](data, size, outSize);
-			// fileSlots[fileNum].preprocessed = 1;
+			// fileSlots[g_ModNum][fileNum].preprocessed = 1;
 		}
 	}
 }
@@ -540,12 +841,28 @@ void romdataFileFree(s32 fileNum)
 		return;
 	}
 
-	if (fileSlots[fileNum].source == SRC_EXTERNAL) {
-		sysMemFree(fileSlots[fileNum].data);
-		fileSlots[fileNum].data = NULL;
+	if (fileSlots[g_ModNum][fileNum].source == SRC_EXTERNAL) {
+		sysMemFree(fileSlots[g_ModNum][fileNum].data);
+		fileSlots[g_ModNum][fileNum].data = NULL;
 	}
 
-	fileSlots[fileNum].source = SRC_UNLOADED;
+	fileSlots[g_ModNum][fileNum].source = SRC_UNLOADED;
+}
+
+void romdataFileFreeForSolo(void)
+{
+	// reset files so mods don't affect solo, co-op and counter-op missions
+	for (s32 fileNum = 1; fileNum < ROMDATA_MAX_FILES; fileNum++) {
+		// exclude additional files
+		if (romdataIsExternalOnlyFile(fileNum)) {
+			continue;
+		}
+		// exclude language text files
+		if (fileNum >= FILE_LAMEE && fileNum <= FILE_LWAX_STR_I) {
+			continue;
+		}
+		romdataResetFile(fileNum);
+	}
 }
 
 const char *romdataFileGetName(s32 fileNum)
@@ -553,7 +870,7 @@ const char *romdataFileGetName(s32 fileNum)
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		return NULL;
 	}
-	return fileSlots[fileNum].name;
+	return fileSlots[g_ModNum][fileNum].name;
 }
 
 s32 romdataFileGetNumForName(const char *name)
@@ -563,7 +880,7 @@ s32 romdataFileGetNumForName(const char *name)
 	}
 
 	for (s32 i = 0; i < ROMDATA_MAX_FILES; ++i) {
-		if (fileSlots[i].name && !strcmp(fileSlots[i].name, name)) {
+		if (fileSlots[g_ModNum][i].name && !strcmp(fileSlots[g_ModNum][i].name, name)) {
 			return i;
 		}
 	}

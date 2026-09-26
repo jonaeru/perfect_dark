@@ -869,6 +869,9 @@ s16 var8005ecf8[] = {
 	0x6665,
 	0x4ccc,
 	0x6ccb,
+	0x5fff,
+	0x5fff,
+	0x5fff,
 	-1,
 };
 
@@ -1492,6 +1495,8 @@ void sndInit(void)
 		u8 *heapstart = ptr;
 		u8 *end = heapstart + heaplen;
 		ALBankFile *bankfile;
+		u16 romseqtablecount;
+		u16 expandedseqtablecount;
 
 		while (ptr < end) {
 			*ptr = 0;
@@ -1523,15 +1528,28 @@ void sndInit(void)
 		g_SeqTable = alHeapDBAlloc(0, 0, &g_SndHeap, 1, 0x10);
 		dmaExec(g_SeqTable, (romptr_t) REF_SEG _sequencesSegmentRomStart, 0x10);
 
-		len = g_SeqTable->count * sizeof(struct seqtableentry) + 4;
+		romseqtablecount = g_SeqTable->count;
+		expandedseqtablecount = romseqtablecount;
+
+		if (expandedseqtablecount < MUSIC_END) {
+			expandedseqtablecount = MUSIC_END;
+		}
+		len = expandedseqtablecount * sizeof(struct seqtableentry) + 4;
 		g_SeqTable = alHeapDBAlloc(0, 0, &g_SndHeap, 1, len);
-		dmaExec(g_SeqTable, (romptr_t) REF_SEG _sequencesSegmentRomStart, (len + 0xf) & ~0xf);
+		dmaExec(g_SeqTable, (romptr_t) REF_SEG _sequencesSegmentRomStart, (romseqtablecount * sizeof(struct seqtableentry) + 4 + 0xf) & ~0xf);
+
+		for (i = romseqtablecount; i < expandedseqtablecount; i++) {
+			g_SeqTable->entries[i].romaddr = 0;
+			g_SeqTable->entries[i].binlen = 0;
+			g_SeqTable->entries[i].ziplen = 0;
+		}
+		g_SeqTable->count = expandedseqtablecount;
 
 		// Promote segment-relative offsets to ROM addresses
 		g_SeqRomAddrs = mempAlloc(g_SeqTable->count * sizeof(uintptr_t), MEMPOOL_PERMANENT);
 		
 		for (i = 0; i < g_SeqTable->count; i++) {
-			g_SeqRomAddrs[i] = g_SeqTable->entries[i].romaddr + (romptr_t) REF_SEG _sequencesSegmentRomStart;
+			g_SeqRomAddrs[i] = g_SeqTable->entries[i].romaddr ? g_SeqTable->entries[i].romaddr + (romptr_t) REF_SEG _sequencesSegmentRomStart : 0;
 		}
 
 		synconfig.maxVVoices = 44;
@@ -1643,7 +1661,7 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 		return false;
 	}
 
-	if (g_SeqRomAddrs[seq->tracknum] < 0x10000) {
+	if (seq->tracknum < 0 || seq->tracknum >= g_SeqTable->count) {
 		return false;
 	}
 
@@ -1678,6 +1696,10 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 	} else
 #endif
 	{
+		if (g_SeqRomAddrs[seq->tracknum] < 0x10000) {
+			return false;
+		}
+
 		binlen = ALIGN16(g_SeqTable->entries[seq->tracknum].binlen) + 0x40;
 
 		if (binlen >= g_SeqBufferSize) {

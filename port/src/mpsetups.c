@@ -21,9 +21,11 @@ MP Setup File Format
 	[setup_1{80}]
 	...
 	[setup_n{80}]
+	# per-setup versions (MPSETUP_VERSION >= 2 only)
+	[blockversions{n}]
  */
 
-#define MPSETUP_VERSION 1
+#define MPSETUP_VERSION 2
 
 #define MPSETUP_EXPORTDIR "$S/exported/"
 #define MPSETUP_FILENAME "mpsetups"
@@ -134,7 +136,7 @@ static struct menuitem g_RenameSetupItems[] = {
 #endif
 	{
 		MENUITEMTYPE_KEYBOARD,
-		18,
+		MPSETUP_MAXNAME,
 		0,
 		0,
 		1,
@@ -366,6 +368,16 @@ static s32 mpsetupDeserialize(FILE *f, struct mpsetupfile *setupfile)
 		rx += fread(setupfile->setups[i].bytes, sizeof(setupfile->setups[i].bytes), 1, f);
 	}
 
+	if (setupfile->version == 1) {
+		// block version was not introduced yet, so set them all to 1
+		for (int i = 0; i < MPSETUP_MAXSETUPS; ++i) {
+			setupfile->blockversions[i] = 1;
+		}
+	}
+	else {
+		rx += fread(setupfile->blockversions, MPSETUP_MAXSETUPS, 1, f);
+	}
+
 	return rx;
 }
 
@@ -379,6 +391,10 @@ static s32 mpsetupSerialize(FILE *f, struct mpsetupfile *setupfile)
 
 	for (int i = 0; i < setupfile->numsetups; ++i) {
 		wx += fwrite(setupfile->setups[i].bytes, sizeof(setupfile->setups[i].bytes), 1, f);
+	}
+
+	if (setupfile->version > 1) {
+		wx += fwrite(setupfile->blockversions, MPSETUP_MAXSETUPS, 1, f);
 	}
 
 	return wx;
@@ -493,6 +509,7 @@ static s32 mpsetupImportFile(u8 op, u8 skipOverlap)
 		}
 
 		memcpy(g_MpSetupFile.setups[importIdx].bytes, g_ImportMpSetupFile.setups[i].bytes, MPSETUP_BLOCKSIZE);
+		g_MpSetupFile.blockversions[importIdx] = g_ImportMpSetupFile.blockversions[i];
 	}
 
 	return mpsetupSaveCurrentFile();
@@ -504,6 +521,7 @@ static s32 mpsetupExportFile(void)
 	expMpSetupFile.numsetups = 0;
 	expMpSetupFile.defaultsetup = 0;
 	expMpSetupFile.version = MPSETUP_VERSION;
+	memset(expMpSetupFile.blockversions, 0, sizeof(expMpSetupFile.blockversions));
 
 	u8 maxsetups = MPSETUP_MAXSETUPS;
 	maxsetups = MIN(maxsetups, g_MpSetupFile.numsetups);
@@ -515,6 +533,8 @@ static s32 mpsetupExportFile(void)
 			expMpSetupFile.numsetups++;
 			char *name = g_MpSetupFile.setups[i].bytes;
 			memcpy(expMpSetupFile.setups[n].bytes, g_MpSetupFile.setups[i].bytes, MPSETUP_BLOCKSIZE);
+			// Remap the version to the compacted index n (not the source index i).
+			expMpSetupFile.blockversions[n] = g_MpSetupFile.blockversions[i];
 			expMpSetupFile.numsetups = n + 1;
 		}
 	}
@@ -534,6 +554,7 @@ static s32 mpsetupDelete(void)
 		u8* dst = g_MpSetupFile.setups[i].bytes;
 		u8* src = g_MpSetupFile.setups[i+1].bytes;
 		memcpy(dst, src, MPSETUP_BLOCKSIZE);
+		g_MpSetupFile.blockversions[i] = g_MpSetupFile.blockversions[i+1];
 	}
 
 	if (g_MpCurrentSetup > slotindex) {
@@ -848,18 +869,19 @@ s32 mpsetupSaveSetup(s32 slotindex, u8 savefile)
 	mpsetupfileSaveWad(&setup);
 
 	memcpy(g_MpSetupFile.setups[slotindex].bytes, setup.bytes, MPSETUP_BLOCKSIZE);
+	g_MpSetupFile.blockversions[slotindex] = MPSETUP_VERSION;
 
 	return savefile ? mpsetupSaveCurrentFile() : 0;
 }
 
-void mpsetupLoadSetup(s32 index)
+void mpsetupLoadSetup(s32 setupIdx)
 {
 	struct savebuffer buffer;
 	savebufferClear(&buffer);
-	struct setupblock *block = &g_MpSetupFile.setups[index];
+	struct setupblock *block = &g_MpSetupFile.setups[setupIdx];
 	memcpy(&buffer.bytes, block->bytes, MPSETUP_BLOCKSIZE);
-	mpsetupfileLoadWad(&buffer, g_MpSetupFile.version);
-	g_MpCurrentSetup = index;
+	mpsetupfileLoadWad(&buffer, g_MpSetupFile.blockversions[setupIdx]);
+	g_MpCurrentSetup = setupIdx;
 }
 
 void mpsetupCopyAllFromPak(void)
