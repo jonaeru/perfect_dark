@@ -378,6 +378,16 @@ static s32 mpsetupDeserialize(FILE *f, struct mpsetupfile *setupfile)
 		rx += fread(setupfile->blockversions, MPSETUP_MAXSETUPS, 1, f);
 	}
 
+	// Blocks written by the port always have a version of at least 1. A zero
+	// here means the block versions were never stored (truncated or otherwise
+	// broken file), and would make mpsetupfileLoadWad() read the setup name
+	// with the old N64 length, truncating it.
+	for (int i = 0; i < MPSETUP_MAXSETUPS; ++i) {
+		if (setupfile->blockversions[i] == 0) {
+			setupfile->blockversions[i] = 1;
+		}
+	}
+
 	return rx;
 }
 
