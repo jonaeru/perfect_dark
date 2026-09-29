@@ -20,6 +20,9 @@
 #include "data.h"
 #include "types.h"
 #include "mpsetups.h"
+#ifndef PLATFORM_N64
+#include "mpplayers.h"
+#endif
 
 // bss
 struct fileguid g_FilemgrFileToCopy;
@@ -824,6 +827,14 @@ bool filemgrAttemptOperation(s32 device, bool closeonsuccess)
 				filetypes[g_Menus[g_MpPlayerNum].fm.fileop - 6],
 				g_Menus[g_MpPlayerNum].fm.unke44, &newfileid, NULL);
 		var80075bd0[g_Menus[g_MpPlayerNum].fm.fileop - 6] = 1;
+#ifndef PLATFORM_N64
+		// Copying a player profile writes the raw eeprom pak to a new file, so
+		// also copy the extended head/body from the source profile to the new one.
+		if (errnum == 0 && g_Menus[g_MpPlayerNum].fm.fileop == FILEOP_WRITE_MPPLAYER) {
+			mpplayersCopyEntry(g_FilemgrFileToCopy.deviceserial, g_FilemgrFileToCopy.fileid,
+					g_Menus[g_MpPlayerNum].fm.deviceserial, newfileid);
+		}
+#endif
 		break;
 	case FILEOP_LOAD_GAME:
 		errnum = gamefileLoad(device);
@@ -970,6 +981,13 @@ void filemgrDeleteCurrentFile(void)
 		g_Menus[g_MpPlayerNum].fm.device1 = device;
 		filemgrPushErrorDialog(FILEERROR_DELETEFAILED);
 	} else {
+#ifndef PLATFORM_N64
+		// Drop the extended head/body so a reused fileid can't inherit stale data
+		if (g_FileLists[g_Menus[g_MpPlayerNum].fm.listnum]->filetype == FILETYPE_MPPLAYER) {
+			mpplayersDeleteEntry(g_FilemgrFileToDelete[g_MpPlayerNum].deviceserial,
+					g_FilemgrFileToDelete[g_MpPlayerNum].fileid);
+		}
+#endif
 		// If deleting a loaded MP player, reset them to default
 		for (i = 0; i < MAX_PLAYERS; i++) {
 			if (g_FilemgrFileToDelete[g_MpPlayerNum].fileid == g_PlayerConfigsArray[i].fileguid.fileid
@@ -997,6 +1015,13 @@ void filemgrDeleteCurrentFile(void)
 		g_Menus[g_MpPlayerNum].fm.device1 = device;
 		filemgrPushErrorDialog(FILEERROR_DELETEFAILED);
 	} else {
+#ifndef PLATFORM_N64
+		// Drop the extended head/body so a reused fileid can't inherit stale data
+		if (g_FileLists[g_Menus[g_MpPlayerNum].fm.listnum]->filetype == FILETYPE_MPPLAYER) {
+			mpplayersDeleteEntry(g_FilemgrFileToDelete.deviceserial,
+					g_FilemgrFileToDelete.fileid);
+		}
+#endif
 		// If deleting a loaded MP player, reset them to default
 		for (i = 0; i < MAX_PLAYERS; i++) {
 			if (g_FilemgrFileToDelete.fileid == g_PlayerConfigsArray[i].fileguid.fileid

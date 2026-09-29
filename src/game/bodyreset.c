@@ -22,9 +22,15 @@ void bodiesReset(s32 stagenum)
 	s32 whichteamlist = 1;
 	s32 index;
 
+#ifdef PLATFORM_N64
 	for (i = 0; g_HeadsAndBodies[i].filenum != 0; i++) {
 		g_HeadsAndBodies[i].modeldef = NULL;
 	}
+#else // All in One Mod
+	for (i = 0; i < ARRAYCOUNT(g_HeadsAndBodies); i++) {
+		g_HeadsAndBodies[i].modeldef = NULL;
+	}
+#endif
 
 	var80062c80 = rngRandom() % g_NumBondBodies;
 	var80062b14 = 0;

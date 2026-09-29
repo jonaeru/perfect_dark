@@ -399,6 +399,9 @@ void roomInitLights(s32 roomnum)
 				&& roomnum == 0x000f) // freight elevator shaft
 			|| ((g_StageIndex == STAGEINDEX_DEFECTION || g_StageIndex == STAGEINDEX_EXTRACTION || g_StageIndex == STAGEINDEX_MBR)
 				&& roomnum == 0x0001) // moon
+#ifndef PLATFORM_N64 // Suburb Mod
+			|| (g_StageIndex == STAGEINDEX_TEST_ARCH && roomnum == 0x0001) // Suburb
+#endif
 			|| ((g_StageIndex == STAGEINDEX_SKEDARRUINS || g_StageIndex == STAGEINDEX_WAR)
 				&& roomnum == 0x0002) // fake sky
 			|| ((s32)g_StageIndex == STAGEINDEX_TEST_OLD
@@ -640,7 +643,13 @@ void func0f001c0c(void)
 		}
 	}
 
+#ifdef PLATFORM_N64
 	if (g_Vars.stagenum == STAGE_EXTRACTION || g_Vars.stagenum == STAGE_DEFECTION) {
+#else // Suburb Mod
+	if (g_Vars.stagenum == STAGE_EXTRACTION
+			|| g_Vars.stagenum == STAGE_DEFECTION
+			|| g_Vars.stagenum == STAGE_TEST_ARCH ) {
+#endif
 		var80061438[98] = false;
 		var80061438[100] = false;
 	}

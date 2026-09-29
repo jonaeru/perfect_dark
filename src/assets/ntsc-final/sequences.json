@@ -474,5 +474,17 @@
     {
         "id": "MUSIC_ESCAPE_OUTRO_SHORT",
         "file": "escape-outro-short.seq"
+    },
+    {
+        "id": "MUSIC_SUBURB",
+        "file": "suburb-pri.seq"
+    },
+    {
+        "id": "MUSIC_SUBURB_X",
+        "file": "suburb-nrg.seq"
+    },
+    {
+        "id": "MUSIC_INSTITUTE_SALUTE",
+        "file": "institutesalute.seq"
     }
 ]

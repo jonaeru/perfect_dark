@@ -170,6 +170,9 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 	f32 scale = g_HeadsAndBodies[bodynum].scale * 0.10000001f;
 	f32 animscale = g_HeadsAndBodies[bodynum].animscale;
 	struct modelnode *node = NULL;
+#ifndef PLATFORM_N64 // All in One Mod
+	s32 requiredrwdatalen;
+#endif
 	u32 stack[2];
 
 	if (cheatIsActive(CHEAT_DKMODE)) {
@@ -256,7 +259,17 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 		modelSetScale(model, scale);
 		modelSetAnimScale(model, animscale);
 
+#ifdef PLATFORM_N64
 		if (headmodeldef && !g_HeadsAndBodies[bodynum].unk00_01) {
+#else // All in One Mod
+		if (headmodeldef && !g_HeadsAndBodies[bodynum].unk00_01 && node != NULL) {
+			requiredrwdatalen = bodymodeldef->rwdatalen;
+
+			if (model->rwdatalen >= 0 && requiredrwdatalen > model->rwdatalen) {
+				return model;
+			}
+#endif
+
 			bodymodeldef->rwdatalen -= headmodeldef->rwdatalen;
 
 			modelmgrAttachHead(model, node, headmodeldef);
@@ -669,9 +682,15 @@ void bodyCalculateHeadOffset(struct modeldef *headmodeldef, s32 headnum, s32 bod
 		}
 		break;
 	}
+#else // All in One Mod
+	offset = 0;
 #endif
 
 	if ((s16)(*(s32 *)&headmodeldef->skel) == SKEL_HEAD) {
+#ifndef PLATFORM_N64 // All in One Mod
+		// GE-X body with PD head, or PD body with GE-X head
+		bool ismix = mpIsGexHead(headnum) != mpIsGexBody(bodynum);
+#else
 #if VERSION >= VERSION_JPN_FINAL
 		if (g_HeadsAndBodies[headnum].type == g_HeadsAndBodies[bodynum].type && offset == 0) {
 			return;
@@ -680,6 +699,7 @@ void bodyCalculateHeadOffset(struct modeldef *headmodeldef, s32 headnum, s32 bod
 		if (g_HeadsAndBodies[headnum].type == g_HeadsAndBodies[bodynum].type) {
 			return;
 		}
+#endif
 #endif
 
 #if VERSION >= VERSION_JPN_FINAL
@@ -761,6 +781,67 @@ void bodyCalculateHeadOffset(struct modeldef *headmodeldef, s32 headnum, s32 bod
 					|| g_HeadsAndBodies[headnum].type == HEADBODYTYPE_MRBLONDE)) {
 			offset -= 5;
 		}
+
+#ifndef PLATFORM_N64 // All in One Mod
+		// PD/GE-X mixed head+body combinations
+		if (ismix) {
+			offset = 0;
+
+			// GE-X Head + PD Body
+			if (mpIsGexHead(headnum)) {
+				switch (g_HeadsAndBodies[bodynum].type) {
+				case HEADBODYTYPE_FEMALE:
+					offset += 10;
+					break;
+				case HEADBODYTYPE_MAIAN:
+					offset -= 20;
+					break;
+				case HEADBODYTYPE_DEFAULT:
+					offset += 45;
+					break;
+				case HEADBODYTYPE_MRBLONDE:
+					offset += 10;
+					break;
+				case HEADBODYTYPE_CASS:
+					offset += 30;
+					break;
+				case HEADBODYTYPE_FEMALEGUARD:
+					offset += 50;
+					break;
+				}
+			} else {
+				// PD Head + GE-X Body
+				offset = -54;
+
+				// GE-X Elton Body
+				if (bodynum == BODY_ELTONWAISTCOAT) {
+					offset -= 35;
+				}
+
+				switch (g_HeadsAndBodies[headnum].type) {
+				default:
+				case HEADBODYTYPE_FEMALE:
+					offset += 20;
+					break;
+				case HEADBODYTYPE_MAIAN:
+					offset += 20;
+					break;
+				case HEADBODYTYPE_DEFAULT:
+					offset -= 15;
+					break;
+				case HEADBODYTYPE_MRBLONDE:
+					offset += 20;
+					break;
+				case HEADBODYTYPE_CASS:
+					offset -= 0;
+					break;
+				case HEADBODYTYPE_FEMALEGUARD:
+					offset -= 20;
+					break;
+				}
+			}
+		}
+#endif
 
 		// Apply the offset
 		if (offset != 0) {

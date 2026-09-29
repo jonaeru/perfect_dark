@@ -13,6 +13,8 @@
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
 #include "game/options.h"
+#include "game/explosions.h"
+#include "lib/rng.h"
 #include "bss.h"
 #include "data.h"
 #include "types.h"
@@ -316,6 +318,34 @@ void mpstatsRecordDeath(s32 aplayernum, s32 vplayernum)
 				&& vplayernum >= PLAYERCOUNT()
 				&& aplayernum != vplayernum) {
 			g_MpAllChrPtrs[vplayernum]->aibot->lastkilledbyplayernum = aplayernum;
+
+#ifndef PLATFORM_N64 // All in One Mod
+			if (g_MpSetup.options & MPOPTION_EXPLODESIMONDEATH) {
+				struct prop *prop = g_MpAllChrPtrs[vplayernum]->prop;
+				u32 rand = rngRandom() % 100;
+				if (prop) {
+					if (rand >= 90) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_ROCKET, aplayernum);
+					} else if (rand >= 80) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_GASBARREL, aplayernum);
+					} else if (rand >= 70) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_A51TABLE, aplayernum);
+					} else if (rand >= 60) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_SDGRENADE, aplayernum);
+					} else if (rand >= 50) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_PHOENIX, aplayernum);
+					} else if (rand >= 40) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_LAPTOP, aplayernum);
+					} else if (rand >= 30) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_9, aplayernum);
+					} else if (rand >= 20) {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_24, aplayernum);
+					} else {
+						explosionCreateSimple(prop, &prop->pos, prop->rooms, EXPLOSIONTYPE_HUGE25, aplayernum);
+					}
+				}
+			}
+#endif
 		}
 	}
 

@@ -5,7 +5,7 @@
 
 s32 mpsetupLoadCurrentFile(void);
 s32 mpsetupSaveCurrentFile(void);
-void mpsetupLoadSetup(s32 slotindex);
+void mpsetupLoadSetup(s32 setupIdx);
 s32 mpsetupSaveSetup(s32 slotindex, u8 savefile);
 void mpsetupCopyAllFromPak(void);
 

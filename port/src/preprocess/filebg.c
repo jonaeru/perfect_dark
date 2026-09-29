@@ -242,7 +242,7 @@ void relinkPtr(uintptr_t* ptr)
 	*ptr = marker->ptr_host;
 }
 
-static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
+static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs, s32 roomnum)
 {
 	ptrReset();
 	gbiReset();
@@ -267,6 +267,23 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 	intptr_t endpos = (uintptr_t)dst_header->vertices - src_ofs;
 	uintptr_t curpos_src = sizeof(struct n64_roomgfxdata);
 	uintptr_t curpos_dst = sizeof(struct roomgfxdata) - sizeof(struct roomblock); // compensate for the [1]
+
+	// Guard against corrupt room data: a bogus vertices pointer would produce a
+	// huge endpos and send the roomblock loop out of bounds (overflowing dst and
+	// the gdls_addr stack array).
+	// A vertices pointer of 0 is legitimate: it means an empty room with no
+	// geometry (e.g. sho room 137). In that case endpos is negative and the
+	// roomblock loop is correctly skipped, so don't treat it as corruption.
+	if (dst_header->vertices != NULL
+			&& (endpos < (intptr_t)curpos_src || (uintptr_t)endpos > infsize)) {
+		sysFatalError("convertRoomGfxData: invalid vertices offset\n"
+				"  room %d  room_ofs 0x%08x  bufsize %u\n"
+				"  raw ptr_vertices 0x%08x  ptr_colours 0x%08x\n"
+				"  endpos %ld  curpos_src %lu",
+				roomnum, src_ofs, infsize,
+				(u32)(uintptr_t)dst_header->vertices, (u32)(uintptr_t)dst_header->colours,
+				(long)endpos, (unsigned long)curpos_src);
+	}
 
 	// roomblocks
 	int ncoords = 0;
@@ -293,6 +310,13 @@ static u32 convertRoomGfxData(u8 *dst, u8 *src, u32 infsize, u32 src_ofs)
 			if (vtx_ptr < endpos) endpos = vtx_ptr;
 		}
 		else if (src_roomblock->ptr_gdl) {
+			if (numgdls >= ARRAYCOUNT(gdls_addr)) {
+				sysFatalError("convertRoomGfxData: too many GDL blocks for room\n"
+						"  room %d  room_ofs 0x%08x  bufsize %u  max %d\n"
+						"  numblocks %d  curpos_src %lu  endpos %ld",
+						roomnum, src_ofs, infsize, (int) ARRAYCOUNT(gdls_addr),
+						numblocks, (unsigned long)curpos_src, (long)endpos);
+			}
 			gdls_addr[numgdls++] = PD_BE32(src_roomblock->ptr_gdl) - src_ofs;
 		}
 
@@ -456,14 +480,19 @@ void preprocessBgSection1(u8 *data, u32 size, u32 ofs)
 	sysMemFree(dst);
 }
 
-u32 preprocessBgRoom(u8 *data, u32 size, u32 room_ofs)
+u32 preprocessBgRoom(u8 *data, u32 size, u32 room_ofs, s32 roomnum)
 {
 	size *= 2;
 	u8 *dst = sysMemZeroAlloc(size);
-	u32 newSize = convertRoomGfxData(dst, data, size, room_ofs);
+
+	if (dst == NULL) {
+		sysFatalError("out of memory when trying to preprocess a bg room (room %d, size %d)", roomnum, size);
+	}
+
+	u32 newSize = convertRoomGfxData(dst, data, size, room_ofs, roomnum);
 
 	if (newSize > size) {
-		sysFatalError("overflow when trying to preprocess a bg room, size %d newsize %d", size, newSize);
+		sysFatalError("overflow when trying to preprocess a bg room (room %d, size %d newsize %d)", roomnum, size, newSize);
 	}
 
 	memcpy(data, dst, newSize);

@@ -32,6 +32,12 @@
 #include "system.h"
 #include "mpsetups.h"
 
+#ifndef PLATFORM_N64 // All in One Mod
+#include "system.h"
+#include "mod.h"
+#include "mpplayers.h"
+#endif
+
 // bss
 struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];
 struct mpchrconfig *g_MpAllChrConfigPtrs[MAX_MPCHRS];
@@ -226,6 +232,183 @@ void mpStartMatch(void)
 	if (g_MpSetup.stagenum == STAGE_MP_RANDOM) {
 		stagenum = mpChooseRandomStage();
 	}
+#ifndef PLATFORM_N64 // All in One Mod
+	else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_MULTI) {
+		stagenum = mpChooseRandomMultiStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_SOLO) {
+		stagenum = mpChooseRandomSoloStage();
+	} else if (g_MpSetup.stagenum == STAGE_MP_RANDOM_GEX) {
+		stagenum = mpChooseRandomGexStage();
+	}
+
+	// Mod Switch (MP Start)
+	switch (stagenum) {
+	case STAGE_TEST_SILO:
+	case STAGE_TEST_LAM:
+	case STAGE_TEST_MP8:
+	case STAGE_TEST_MP14:
+	case STAGE_TEST_MP16:
+	case STAGE_TEST_MP17:
+	case STAGE_TEST_MP18:
+	case STAGE_TEST_MP19:
+	case STAGE_TEST_MP20:
+	case STAGE_EXTRA1:
+	case STAGE_EXTRA2:
+	case STAGE_EXTRA3:
+	case STAGE_EXTRA4:
+	case STAGE_EXTRA5:
+	case STAGE_EXTRA6:
+	case STAGE_EXTRA7:
+	case STAGE_EXTRA8:
+	case STAGE_EXTRA9:
+	case STAGE_EXTRA10:
+	case STAGE_EXTRA11:
+	case STAGE_EXTRA12:
+	case STAGE_EXTRA13:
+	case STAGE_EXTRA14:
+	case STAGE_EXTRA15:
+	case STAGE_EXTRA16:
+	case STAGE_EXTRA17:
+	case STAGE_EXTRA24:
+	case STAGE_EXTRA25:
+	case STAGE_EXTRA27:
+	case STAGE_EXTRA30:
+	case STAGE_EXTRA31:
+	case STAGE_EXTRA32:
+	case STAGE_EXTRA33:
+		g_ModNum = MOD_GEX;
+		break;
+	case STAGE_24:
+	case STAGE_EXTRA18:
+	case STAGE_EXTRA19:
+	case STAGE_EXTRA26:
+		g_ModNum = MOD_KAKARIKO;
+		break;
+	case STAGE_TEST_MP7:
+	case STAGE_EXTRA34:
+	case STAGE_EXTRA35:
+	case STAGE_EXTRA36:
+		g_ModNum = MOD_DARKNOON;
+		break;
+	case STAGE_EXTRA20:
+	case STAGE_EXTRA21:
+	case STAGE_EXTRA22:
+	case STAGE_EXTRA23:
+		g_ModNum = MOD_GOLDFINGER_64;
+		break;
+	default:
+		g_ModNum = MOD_NORMAL;
+		break;
+	}
+
+	sysLogPrintf(LOG_NOTE, "stagenum: %02x, g_ModNum: %d", stagenum, g_ModNum);
+	modConfigLoad(MOD_CONFIG_FNAME);
+	// Set textures surfacetype (Resets when multiplayer ends)
+	if (g_ModNum == MOD_GEX) {
+		modTexOverrideSet(0x0208, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x065a, SURFACETYPE_METAL, SURFACETYPE_METAL);
+		modTexOverrideSet(0x066c, SURFACETYPE_DEFAULT, MOD_TEX_KEEP);
+		modTexOverrideSet(0x06fc, SURFACETYPE_DEFAULT, MOD_TEX_KEEP);
+		modTexOverrideSet(0x06ff, SURFACETYPE_DEFAULT, MOD_TEX_KEEP);
+		modTexOverrideSet(0x0716, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x073c, SURFACETYPE_DEFAULT, MOD_TEX_KEEP);
+		modTexOverrideSet(0x073d, SURFACETYPE_DEFAULT, MOD_TEX_KEEP);
+		modTexOverrideSet(0x073e, MOD_TEX_KEEP, SURFACETYPE_METAL);
+		modTexOverrideSet(0x073f, MOD_TEX_KEEP, SURFACETYPE_METAL);
+		modTexOverrideSet(0x0740, MOD_TEX_KEEP, SURFACETYPE_METAL);
+		modTexOverrideSet(0x0741, MOD_TEX_KEEP, SURFACETYPE_METAL);
+		modTexOverrideSet(0x0745, SURFACETYPE_DEFAULT, MOD_TEX_KEEP);
+		modTexOverrideSet(0x0746, SURFACETYPE_SHALLOWWATER, SURFACETYPE_SHALLOWWATER);
+		modTexOverrideSet(0x0a16, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x0a17, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x0bde, SURFACETYPE_GLASS, SURFACETYPE_GLASS);
+	} else if (g_ModNum == MOD_KAKARIKO) {
+		modTexOverrideSet(0x0048, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0049, SURFACETYPE_MUD, SURFACETYPE_MUD);
+		modTexOverrideSet(0x004a, SURFACETYPE_MUD, SURFACETYPE_MUD);
+		modTexOverrideSet(0x004b, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x004c, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x004d, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x004e, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x004f, SURFACETYPE_NONE, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0050, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0051, SURFACETYPE_NONE, SURFACETYPE_MUD);
+		modTexOverrideSet(0x0052, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x0053, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0054, SURFACETYPE_NONE, SURFACETYPE_MUD);
+		modTexOverrideSet(0x0056, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0057, SURFACETYPE_NONE, SURFACETYPE_MUD);
+		modTexOverrideSet(0x005c, SURFACETYPE_METAL, SURFACETYPE_METAL);
+		modTexOverrideSet(0x005d, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x005e, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x005f, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0060, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0061, SURFACETYPE_METAL, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0062, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0064, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0065, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0067, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0068, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x00fa, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x01c7, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x09cd, SURFACETYPE_SHALLOWWATER, SURFACETYPE_SHALLOWWATER);
+		modTexOverrideSet(0x09ce, SURFACETYPE_SHALLOWWATER, SURFACETYPE_SHALLOWWATER);
+		modTexOverrideSet(0x0c31, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c3b, SURFACETYPE_MUD, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c3c, SURFACETYPE_MUD, SURFACETYPE_DEFAULT);
+		modTexOverrideSet(0x0c3d, SURFACETYPE_MUD, SURFACETYPE_NONE);
+		modTexOverrideSet(0x0c3e, SURFACETYPE_NONE, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c42, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c43, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c45, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c48, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c49, SURFACETYPE_MUD, SURFACETYPE_MUD);
+		modTexOverrideSet(0x0c4a, SURFACETYPE_NONE, SURFACETYPE_NONE);
+		modTexOverrideSet(0x0c4b, SURFACETYPE_MUD, SURFACETYPE_MUD);
+		modTexOverrideSet(0x0c4c, SURFACETYPE_SHALLOWWATER, SURFACETYPE_DEEPWATER);
+		modTexOverrideSet(0x0c63, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c64, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c65, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c67, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c68, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c69, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c6a, SURFACETYPE_NONE, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c6b, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c6c, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c6e, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c6f, SURFACETYPE_METAL, SURFACETYPE_METAL);
+		modTexOverrideSet(0x0c72, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c73, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c74, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c75, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c77, SURFACETYPE_MUD, SURFACETYPE_MUD);
+		modTexOverrideSet(0x0c78, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c79, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c7a, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c7b, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c7c, SURFACETYPE_WOOD, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c7d, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c7e, SURFACETYPE_METAL, SURFACETYPE_METAL);
+		modTexOverrideSet(0x0c7f, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c80, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c81, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c82, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c83, SURFACETYPE_STONE, SURFACETYPE_STONE);
+		modTexOverrideSet(0x0c84, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c86, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+		modTexOverrideSet(0x0c88, SURFACETYPE_NONE, MOD_TEX_KEEP);
+		modTexOverrideSet(0x0c8a, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c8b, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c8c, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c8d, SURFACETYPE_WOOD, SURFACETYPE_WOOD);
+		modTexOverrideSet(0x0c8e, SURFACETYPE_NONE, MOD_TEX_KEEP);
+		modTexOverrideSet(0x0c8f, SURFACETYPE_DIRT, SURFACETYPE_DIRT);
+	} else if (g_ModNum == MOD_DARKNOON) {
+		modTexOverrideSet(0x00f9, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+	} else if (g_ModNum == MOD_GOLDFINGER_64) {
+		modTexOverrideSet(0x0281, SURFACETYPE_DEFAULT, SURFACETYPE_DEFAULT);
+	}
+#endif
 
 	titleSetNextStage(stagenum);
 	mainChangeToStage(stagenum);
@@ -1759,83 +1942,165 @@ struct mphead g_MpBeauHeads[] = {
 
 struct mphead g_MpHeads[] = {
 	// head, require feature
-	{ /*0x00*/ HEAD_DARK_COMBAT,  0                          },
-	{ /*0x01*/ HEAD_DARK_FROCK,   MPFEATURE_CHR_CI           },
-	{ /*0x02*/ HEAD_DARKAQUA,     MPFEATURE_CHR_PELAGIC      },
-	{ /*0x03*/ HEAD_DARK_SNOW,    MPFEATURE_CHR_DARKSNOW               },
-	{ /*0x04*/ HEAD_ELVIS,        MPFEATURE_CHR_ELVIS        },
-	{ /*0x05*/ HEAD_ELVIS_GOGS,   MPFEATURE_CHR_ELVIS        },
-	{ /*0x06*/ HEAD_CARRINGTON,   0                          },
-	{ /*0x07*/ HEAD_MRBLONDE,     MPFEATURE_CHR_MRBLONDE     },
-	{ /*0x08*/ HEAD_CASSANDRA,    0                          },
-	{ /*0x09*/ HEAD_TRENT,        MPFEATURE_CHR_TRENT        },
-	{ /*0x0a*/ HEAD_JONATHAN,     MPFEATURE_CHR_INFILTRATION },
-	{ /*0x0b*/ HEAD_VD,           0                          },
-	{ /*0x0c*/ HEAD_PRESIDENT,    MPFEATURE_CHR_CI           },
-	{ /*0x0d*/ HEAD_DDSHOCK,      0                          },
-	{ /*0x0e*/ HEAD_BIOTECH,      MPFEATURE_CHR_BIOTECH      },
-	{ /*0x0f*/ HEAD_DDSNIPER,     MPFEATURE_CHR_VILLACHRS    },
-	{ /*0x10*/ HEAD_A51FACEPLATE, MPFEATURE_CHR_INFILTRATION },
-	{ /*0x11*/ HEAD_SECRETARY,    0                          },
-	{ /*0x12*/ HEAD_FEM_GUARD,    MPFEATURE_CHR_FEMGUARD     },
-	{ /*0x13*/ HEAD_FEM_GUARD2,   MPFEATURE_CHR_FEMGUARD     },
-	{ /*0x14*/ HEAD_MAIAN_S,      MPFEATURE_CHR_ELVIS        },
-	{ /*0x15*/ HEAD_JON,          0                          },
-	{ /*0x16*/ HEAD_BEAU1,        0                          },
-	{ /*0x17*/ HEAD_ROSS,         0                          },
-	{ /*0x18*/ HEAD_MARK2,        0                          },
-	{ /*0x19*/ HEAD_CHRIST,       0                          },
-	{ /*0x1a*/ HEAD_RUSS,         0                          },
-	{ /*0x1b*/ HEAD_DARLING,      0                          },
-	{ /*0x1c*/ HEAD_BRIAN,        0                          },
-	{ /*0x1d*/ HEAD_JAMIE,        0                          },
-	{ /*0x1e*/ HEAD_DUNCAN2,      0                          },
-	{ /*0x1f*/ HEAD_KEITH,        0                          },
-	{ /*0x20*/ HEAD_STEVEM,       0                          },
-	{ /*0x21*/ HEAD_GRANT,        0                          },
-	{ /*0x22*/ HEAD_PENNY,        0                          },
-	{ /*0x23*/ HEAD_DAVEC,        0                          },
-	{ /*0x24*/ HEAD_JONES,        0                          },
-	{ /*0x25*/ HEAD_GRAHAM,       0                          },
-	{ /*0x26*/ HEAD_ROBERT,       0                          },
-	{ /*0x27*/ HEAD_NEIL2,        0                          },
-	{ /*0x28*/ HEAD_SHAUN,        0                          },
-	{ /*0x29*/ HEAD_ROBIN,        0                          },
-	{ /*0x2a*/ HEAD_COOK,         0                          },
-	{ /*0x2b*/ HEAD_PRYCE,        0                          },
-	{ /*0x2c*/ HEAD_SILKE,        0                          },
-	{ /*0x2d*/ HEAD_SMITH,        0                          },
-	{ /*0x2e*/ HEAD_GARETH,       0                          },
-	{ /*0x2f*/ HEAD_MURCHIE,      0                          },
-	{ /*0x30*/ HEAD_WONG,         0                          },
-	{ /*0x31*/ HEAD_CARTER,       0                          },
-	{ /*0x32*/ HEAD_TINTIN,       0                          },
-	{ /*0x33*/ HEAD_MUNTON,       0                          },
-	{ /*0x34*/ HEAD_STAMPER,      0                          },
-	{ /*0x35*/ HEAD_PHELPS,       0                          },
-	{ /*0x36*/ HEAD_ALEX,         0                          },
-	{ /*0x37*/ HEAD_JULIANNE,     0                          },
-	{ /*0x38*/ HEAD_LAURA,        0                          },
-	{ /*0x39*/ HEAD_EDMCG,        0                          },
-	{ /*0x3a*/ HEAD_ANKA,         0                          },
-	{ /*0x3b*/ HEAD_LESLIE_S,     0                          },
-	{ /*0x3c*/ HEAD_MATT_C,       0                          },
-	{ /*0x3d*/ HEAD_PEER_S,       0                          },
-	{ /*0x3e*/ HEAD_EILEEN_T,     0                          },
-	{ /*0x3f*/ HEAD_ANDY_R,       0                          },
-	{ /*0x40*/ HEAD_BEN_R,        0                          },
-	{ /*0x41*/ HEAD_STEVE_K,      0                          },
-	{ /*0x42*/ HEAD_SANCHEZ,      0                          },
-	{ /*0x43*/ HEAD_TIM,          0                          },
-	{ /*0x44*/ HEAD_KEN,          0                          },
-	{ /*0x45*/ HEAD_EILEEN_H,     0                          },
-	{ /*0x46*/ HEAD_SCOTT_H,      0                          },
-	{ /*0x47*/ HEAD_JOEL,         0                          },
-	{ /*0x48*/ HEAD_GRIFFEY,      0                          },
-#if VERSION != VERSION_JPN_FINAL
-	{ /*0x49*/ HEAD_MOTO,         0                          },
+	{ /*0x00*/ HEAD_DARK_COMBAT,  0                          }, // Joanna Combat
+	{ /*0x01*/ HEAD_DARK_FROCK,   MPFEATURE_CHR_CI           }, // Joanna Party Frock
+	{ /*0x02*/ HEAD_DARKAQUA,     MPFEATURE_CHR_PELAGIC      }, // Joanna Wet Suit
+	{ /*0x03*/ HEAD_DARK_SNOW,    MPFEATURE_CHR_DARKSNOW     }, // Joanna Arctic
+	{ /*0x04*/ HEAD_ELVIS,        MPFEATURE_CHR_ELVIS        }, // Elvis
+	{ /*0x05*/ HEAD_ELVIS_GOGS,   MPFEATURE_CHR_ELVIS        }, // * Elvis (Snorkle) (* is not defined head in g_MpBodies)
+	{ /*0x06*/ HEAD_CARRINGTON,   0                          }, // Daniel Carrington
+	{ /*0x07*/ HEAD_MRBLONDE,     MPFEATURE_CHR_MRBLONDE     }, // Mr. Blonde
+	{ /*0x08*/ HEAD_CASSANDRA,    0                          }, // Cassandra De Vries
+	{ /*0x09*/ HEAD_TRENT,        MPFEATURE_CHR_TRENT        }, // Trent Easton
+	{ /*0x0a*/ HEAD_JONATHAN,     MPFEATURE_CHR_INFILTRATION }, // Jonathan
+	{ /*0x0b*/ HEAD_VD,           0                          }, // * Velvet Dark
+	{ /*0x0c*/ HEAD_PRESIDENT,    MPFEATURE_CHR_CI           }, // The President
+	{ /*0x0d*/ HEAD_DDSHOCK,      0                          }, // dataDyne Shock Trooper
+	{ /*0x0e*/ HEAD_BIOTECH,      MPFEATURE_CHR_BIOTECH      }, // Biotechnician
+	{ /*0x0f*/ HEAD_DDSNIPER,     MPFEATURE_CHR_VILLACHRS    }, // dataDyne Sniper
+	{ /*0x10*/ HEAD_A51FACEPLATE, MPFEATURE_CHR_INFILTRATION }, // * Area 51 Faceplate
+	{ /*0x11*/ HEAD_SECRETARY,    0                          }, // * Secretary
+	{ /*0x12*/ HEAD_FEM_GUARD,    MPFEATURE_CHR_FEMGUARD     }, // * Female Guard
+	{ /*0x13*/ HEAD_FEM_GUARD2,   MPFEATURE_CHR_FEMGUARD     }, // * Female Guard 2 / Night Vision
+	{ /*0x14*/ HEAD_MAIAN_S,      MPFEATURE_CHR_ELVIS        }, // Maian Soldier
+	{ /*0x15*/ HEAD_JON,          0                          }, // * Male, Jon
+	{ /*0x16*/ HEAD_BEAU1,        0                          }, // * Male, Beau
+	{ /*0x17*/ HEAD_ROSS,         0                          }, // * Male, Ross
+	{ /*0x18*/ HEAD_MARK2,        0                          }, // * Grimshaw (Mark 2)
+	{ /*0x19*/ HEAD_CHRIST,       0                          }, // * Foster (Chris T)
+	{ /*0x1a*/ HEAD_RUSS,         0                          }, // * Male, Russ
+	{ /*0x1b*/ HEAD_DARLING,      0                          }, // * Male, Darling
+	{ /*0x1c*/ HEAD_BRIAN,        0                          }, // * Male, Brian
+	{ /*0x1d*/ HEAD_JAMIE,        0                          }, // * Male, Jamie
+	{ /*0x1e*/ HEAD_DUNCAN2,      0                          }, // * Male, Duncan
+	{ /*0x1f*/ HEAD_KEITH,        0                          }, // * Male, Keith
+	{ /*0x20*/ HEAD_STEVEM,       0                          }, // * Male, Steve M
+	{ /*0x21*/ HEAD_GRANT,        0                          }, // * Male, Grant
+	{ /*0x22*/ HEAD_PENNY,        0                          }, // * Male, Penny
+	{ /*0x23*/ HEAD_DAVEC,        0                          }, // * Male, Dave C
+	{ /*0x24*/ HEAD_JONES,        0                          }, // * Male, Jones
+	{ /*0x25*/ HEAD_GRAHAM,       0                          }, // * Male, Graham
+	{ /*0x26*/ HEAD_ROBERT,       0                          }, // * Male, Robert
+	{ /*0x27*/ HEAD_NEIL2,        0                          }, // * Male, Neil
+	{ /*0x28*/ HEAD_SHAUN,        0                          }, // * Male, Shaun
+	{ /*0x29*/ HEAD_ROBIN,        0                          }, // * Male, Robin
+	{ /*0x2a*/ HEAD_COOK,         0                          }, // * Male, Cook
+	{ /*0x2b*/ HEAD_PRYCE,        0                          }, // * Male, Pryce
+	{ /*0x2c*/ HEAD_SILKE,        0                          }, // * Male, Silke
+	{ /*0x2d*/ HEAD_SMITH,        0                          }, // * Male, Smith
+	{ /*0x2e*/ HEAD_GARETH,       0                          }, // * Male, Gareth
+	{ /*0x2f*/ HEAD_MURCHIE,      0                          }, // * Male, Murchie
+	{ /*0x30*/ HEAD_WONG,         0                          }, // * Male, Wong
+	{ /*0x31*/ HEAD_CARTER,       0                          }, // * Male, Carter
+	{ /*0x32*/ HEAD_TINTIN,       0                          }, // * Male, Tintin
+	{ /*0x33*/ HEAD_MUNTON,       0                          }, // * Male, Munton
+	{ /*0x34*/ HEAD_STAMPER,      0                          }, // * Male, Stampler
+	{ /*0x35*/ HEAD_PHELPS,       0                          }, // * Male, Phelps
+	{ /*0x36*/ HEAD_ALEX,         0                          }, // * Female, Alex
+	{ /*0x37*/ HEAD_JULIANNE,     0                          }, // * Female, Julianne
+	{ /*0x38*/ HEAD_LAURA,        0                          }, // * Female, Laura
+	{ /*0x39*/ HEAD_EDMCG,        0                          }, // * Male, Ed McG
+	{ /*0x3a*/ HEAD_ANKA,         0                          }, // * Female, Anka
+	{ /*0x3b*/ HEAD_LESLIE_S,     0                          }, // * Female, Leslie S
+	{ /*0x3c*/ HEAD_MATT_C,       0                          }, // * Male, Matt C
+	{ /*0x3d*/ HEAD_PEER_S,       0                          }, // * Male, Peer S
+	{ /*0x3e*/ HEAD_EILEEN_T,     0                          }, // * Female, Eileen T
+	{ /*0x3f*/ HEAD_ANDY_R,       0                          }, // * Male, Andy R
+	{ /*0x40*/ HEAD_BEN_R,        0                          }, // * Male, Ben R
+	{ /*0x41*/ HEAD_STEVE_K,      0                          }, // * Male, Steve K
+	{ /*0x42*/ HEAD_SANCHEZ,      0                          }, // * Male, Sanchez
+	{ /*0x43*/ HEAD_TIM,          0                          }, // * Male, Tim
+	{ /*0x44*/ HEAD_KEN,          0                          }, // * Male, Ken
+	{ /*0x45*/ HEAD_EILEEN_H,     0                          }, // * Male, Eileen H
+	{ /*0x46*/ HEAD_SCOTT_H,      0                          }, // * Male, Scott H
+	{ /*0x47*/ HEAD_JOEL,         0                          }, // * Male, Joel
+	{ /*0x48*/ HEAD_GRIFFEY,      0                          }, // * Male, Griffey
+#if !((VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)) // All in One Mod
+	{ /*0x49*/ HEAD_MOTO,         0                          }, // * Male, Shigeru Miyamoto
 #endif
-	{ /*0x4a*/ HEAD_WINNER,       0                          },
+	{ /*0x4a*/ HEAD_WINNER,       0                          }, // * Male, Winner
+#ifndef PLATFORM_N64 // All in One Mod
+	{ /*0x4b*/ HEAD_GREY,         0                          }, // Joanna (JP)
+	{ /*0x4c*/ HEAD_SKEDAR,       0                          },
+	{ /*0x4d*/ HEAD_CARROLL,      0                          },
+	{ /*0x4e*/ HEAD_CARROLL_SINISTER, 0                      },
+	{ /*0x4f*/ HEAD_CONNERY,      0                          },
+	{ /*0x50*/ HEAD_LAZENBY,      0                          },
+	{ /*0x51*/ HEAD_MOORE,        0                          },
+	{ /*0x52*/ HEAD_DALTON,       0                          },
+	{ /*0x53*/ HEAD_BROSNAN,      0                          },
+	{ /*0x54*/ HEAD_BROSNAN2,     0                          },
+	{ /*0x55*/ HEAD_NATALYA,      0                          },
+	{ /*0x56*/ HEAD_TREVELYAN,    0                          },
+	{ /*0x57*/ HEAD_XENIA,        0                          },
+	{ /*0x58*/ HEAD_OURUMOV,      0                          },
+	{ /*0x59*/ HEAD_BORIS,        0                          },
+	{ /*0x5a*/ HEAD_VALENTIN,     0                          },
+	{ /*0x5b*/ HEAD_MISHKIN,      0                          },
+	{ /*0x5c*/ HEAD_MAYDAY,       0                          },
+	{ /*0x5d*/ HEAD_JAWS,         0                          },
+	{ /*0x5e*/ HEAD_ODDJOB,       0                          },
+	{ /*0x5f*/ HEAD_BARONSAMEDI,  0                          },
+	{ /*0x60*/ HEAD_BARONSAMEDI2, 0                          },
+	{ /*0x61*/ HEAD_PILOT,        0                          },
+	{ /*0x62*/ HEAD_SNOWGUARD,    0                          },
+	{ /*0x63*/ HEAD_BALACLAVA,    0                          },
+	{ /*0x64*/ HEAD_KARL2,        0                          },
+	{ /*0x65*/ HEAD_DAVED2,       0                          },
+	{ /*0x66*/ HEAD_JIM2,         0                          },
+	{ /*0x67*/ HEAD_GRAEME2,      0                          },
+	{ /*0x68*/ HEAD_DUNCAN01,     0                          },
+	{ /*0x69*/ HEAD_CHRIS2,       0                          },
+	{ /*0x6a*/ HEAD_KARL,         0                          },
+	{ /*0x6b*/ HEAD_MARTIN,       0                          },
+	{ /*0x6c*/ HEAD_MARK0,        0                          },
+	{ /*0x6d*/ HEAD_DAVED,        0                          },
+	{ /*0x6e*/ HEAD_DUNCAN0,      0                          },
+	{ /*0x6f*/ HEAD_JONES0,       0                          },
+	{ /*0x70*/ HEAD_STEVE_E,      0                          },
+	{ /*0x71*/ HEAD_GRANT0,       0                          },
+	{ /*0x72*/ HEAD_GRAEME,       0                          },
+	{ /*0x73*/ HEAD_KEN0,         0                          },
+	{ /*0x74*/ HEAD_ALAN,         0                          },
+	{ /*0x75*/ HEAD_PETE,         0                          },
+	{ /*0x76*/ HEAD_SHAUN0,       0                          },
+	{ /*0x77*/ HEAD_DWAYNE,       0                          },
+	{ /*0x78*/ HEAD_DES,          0                          },
+	{ /*0x79*/ HEAD_CHRIS,        0                          },
+	{ /*0x7a*/ HEAD_LEE,          0                          },
+	{ /*0x7b*/ HEAD_NEIL0,        0                          },
+	{ /*0x7c*/ HEAD_JIM,          0                          },
+	{ /*0x7d*/ HEAD_ROBIN0,       0                          },
+	{ /*0x7e*/ HEAD_STEVEH,       0                          },
+	{ /*0x7f*/ HEAD_JOEL0,        0                          },
+	{ /*0x80*/ HEAD_SCOTT_H0,     0                          },
+	{ /*0x81*/ HEAD_JOE,          0                          },
+	{ /*0x82*/ HEAD_JOE2,         0                          },
+	{ /*0x83*/ HEAD_SALLY,        0                          },
+	{ /*0x84*/ HEAD_MARION,       0                          },
+	{ /*0x85*/ HEAD_MANDY,        0                          },
+	{ /*0x86*/ HEAD_VIVIEN,       0                          },
+	{ /*0x87*/ HEAD_BANDOVERFLOW, 0                          },
+	{ /*0x88*/ HEAD_SANTA,        0                          },
+	{ /*0x89*/ HEAD_ELF,          0                          },
+	{ /*0x8a*/ HEAD_SUBDRAG,      0                          },
+	{ /*0x8b*/ HEAD_WRECK,        0                          },
+	{ /*0x8c*/ HEAD_GALORE,       0                          },
+	{ /*0x8d*/ HEAD_SOGUN,        0                          },
+	{ /*0x8e*/ HEAD_MRKANE,       0                          },
+	{ /*0x8f*/ HEAD_PARIS,        0                          },
+	{ /*0x90*/ HEAD_DONKEY,       0                          },
+	{ /*0x91*/ HEAD_CJ,           0                          },
+	{ /*0x92*/ HEAD_CASEYDARK,    0                          },
+	{ /*0x93*/ HEAD_HAMM,         0                          },
+	{ /*0x94*/ HEAD_DRNO,         0                          },
+	{ /*0x95*/ HEAD_WAILIN,       0                          },
+	{ /*0x96*/ HEAD_AURIC,        0                          },
+	{ /*0x97*/ HEAD_ELEKTRA,      0                          },
+	{ /*0x98*/ HEAD_CHRISTMASJONES, 0                        },
+	{ /*0x99*/ HEAD_MACTONIGHT,   0                          },
+	{ /*0x9a*/ HEAD_MRX,          0                          },
+#endif
 };
 
 u32 g_BotHeads[] = {
@@ -1891,7 +2156,7 @@ u32 g_BotHeads[] = {
 	MPHEAD_SCOTT_H,
 	MPHEAD_JOEL,
 	MPHEAD_GRIFFEY,
-#if VERSION != VERSION_JPN_FINAL
+#if !((VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)) // All in One Mod
 	MPHEAD_MOTO,
 #endif
 };
@@ -1920,67 +2185,139 @@ struct botprofile g_BotProfiles[] = {
 
 struct mpbody g_MpBodies[] = {
 	// global body ID,                name,            head,             require feature
-	/*0x00*/ { BODY_DARK_COMBAT,      L_OPTIONS_016,   HEAD_DARK_COMBAT, 0                          },
-	/*0x01*/ { BODY_DARK_TRENCH,      L_OPTIONS_017,   HEAD_DARK_COMBAT, MPFEATURE_CHR_JOTRENCH     },
-	/*0x02*/ { BODY_DARK_FROCK,       L_OPTIONS_018,   HEAD_DARK_FROCK,  MPFEATURE_CHR_CI           },
-	/*0x03*/ { BODY_DARK_RIPPED,      L_OPTIONS_019,   HEAD_DARK_FROCK,  MPFEATURE_CHR_CI           },
-	/*0x04*/ { BODY_DARK_AF1,         L_OPTIONS_020,   HEAD_DARK_COMBAT, MPFEATURE_CHR_AF1          },
-	/*0x05*/ { BODY_DARK_LEATHER,     L_MPWEAPONS_156, HEAD_DARK_COMBAT, MPFEATURE_CHR_G5           },
-	/*0x06*/ { BODY_DARK_NEGOTIATOR,  L_MPWEAPONS_157, HEAD_DARK_COMBAT, MPFEATURE_CHR_VILLACHRS    },
-	/*0x07*/ { BODY_DARKWET,          L_OPTIONS_021,   HEAD_DARKAQUA,    MPFEATURE_CHR_PELAGIC      },
-	/*0x08*/ { BODY_DARKAQUALUNG,     L_OPTIONS_022,   HEAD_DARKAQUA,    MPFEATURE_CHR_PELAGIC      },
-	/*0x09*/ { BODY_DARKSNOW,         L_OPTIONS_023,   HEAD_DARK_SNOW,   MPFEATURE_CHR_DARKSNOW     },
-	/*0x0a*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_DARK_COMBAT, MPFEATURE_CHR_INFILTRATION },
-	/*0x0b*/ { BODY_THEKING,          L_OPTIONS_025,   HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        },
-	/*0x0c*/ { BODY_ELVIS1,           L_OPTIONS_026,   HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        },
-	/*0x0d*/ { BODY_ELVISWAISTCOAT,   L_MPWEAPONS_158, HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        },
-	/*0x0e*/ { BODY_CARRINGTON,       L_OPTIONS_027,   HEAD_CARRINGTON,  0                          },
-	/*0x0f*/ { BODY_CARREVENINGSUIT,  L_OPTIONS_028,   HEAD_CARRINGTON,  MPFEATURE_CHR_CI           },
-	/*0x10*/ { BODY_MRBLONDE,         L_OPTIONS_029,   HEAD_MRBLONDE,    MPFEATURE_CHR_MRBLONDE     },
-	/*0x11*/ { BODY_CASSANDRA,        L_OPTIONS_030,   HEAD_CASSANDRA,   0                          },
-	/*0x12*/ { BODY_TRENT,            L_OPTIONS_031,   HEAD_TRENT,       MPFEATURE_CHR_TRENT        },
-	/*0x13*/ { BODY_JONATHAN,         L_OPTIONS_032,   HEAD_JONATHAN,    MPFEATURE_CHR_JONATHAN     },
-	/*0x14*/ { BODY_CILABTECH,        L_OPTIONS_033,   1000,             0                          },
-	/*0x15*/ { BODY_CIFEMTECH,        L_OPTIONS_034,   1000,             0                          },
-	/*0x16*/ { BODY_CISOLDIER,        L_OPTIONS_035,   1000,             0                          },
-	/*0x17*/ { BODY_DDSHOCK,          L_OPTIONS_036,   HEAD_DDSHOCK,     0                          },
-	/*0x18*/ { BODY_FEM_GUARD,        L_OPTIONS_037,   1000,             MPFEATURE_CHR_FEMGUARD     },
-	/*0x19*/ { BODY_DD_SECGUARD,      L_OPTIONS_038,   1000,             0                          },
-	/*0x1a*/ { BODY_DD_GUARD,         L_OPTIONS_039,   1000,             0                          },
-	/*0x1b*/ { BODY_DD_SHOCK_INF,     L_OPTIONS_040,   1000,             0                          },
-	/*0x1c*/ { BODY_SECRETARY,        L_OPTIONS_041,   1000,             0                          },
-	/*0x1d*/ { BODY_OFFICEWORKER,     L_OPTIONS_042,   1000,             MPFEATURE_CHR_OFFICEWORKER },
-	/*0x1e*/ { BODY_OFFICEWORKER2,    L_OPTIONS_043,   1000,             MPFEATURE_CHR_OFFICEWORKER },
-	/*0x1f*/ { BODY_NEGOTIATOR,       L_OPTIONS_044,   1000,             MPFEATURE_CHR_VILLACHRS    },
-	/*0x20*/ { BODY_DDSNIPER,         L_OPTIONS_045,   HEAD_DDSNIPER,    MPFEATURE_CHR_VILLACHRS    },
-	/*0x21*/ { BODY_G5_GUARD,         L_OPTIONS_046,   1000,             MPFEATURE_CHR_G5           },
-	/*0x22*/ { BODY_G5_SWAT_GUARD,    L_OPTIONS_047,   1000,             MPFEATURE_CHR_G5           },
-	/*0x23*/ { BODY_CIAGUY,           L_OPTIONS_048,   1000,             MPFEATURE_CHR_CIAFBI       },
-	/*0x24*/ { BODY_FBIGUY,           L_OPTIONS_049,   1000,             MPFEATURE_CHR_CIAFBI       },
-	/*0x25*/ { BODY_AREA51GUARD,      L_OPTIONS_050,   1000,             MPFEATURE_CHR_INFILTRATION },
-	/*0x26*/ { BODY_A51TROOPER,       L_OPTIONS_051,   1000,             MPFEATURE_CHR_INFILTRATION },
-	/*0x27*/ { BODY_A51AIRMAN,        L_OPTIONS_052,   1000,             MPFEATURE_CHR_INFILTRATION },
-	/*0x28*/ { BODY_OVERALL,          L_OPTIONS_053,   1000,             MPFEATURE_CHR_INFILTRATION },
-	/*0x29*/ { BODY_STRIPES,          L_OPTIONS_054,   1000,             MPFEATURE_CHR_STRIPES      },
-	/*0x2a*/ { BODY_LABTECH,          L_OPTIONS_055,   1000,             MPFEATURE_CHR_LABTECH      },
-	/*0x2b*/ { BODY_FEMLABTECH,       L_OPTIONS_056,   1000,             MPFEATURE_CHR_LABTECH      },
-	/*0x2c*/ { BODY_DD_LABTECH,       L_OPTIONS_057,   1000,             MPFEATURE_CHR_LABTECH      },
-	/*0x2d*/ { BODY_BIOTECH,          L_OPTIONS_058,   HEAD_BIOTECH,     MPFEATURE_CHR_BIOTECH      },
-	/*0x2e*/ { BODY_ALASKAN_GUARD,    L_OPTIONS_059,   1000,             MPFEATURE_CHR_ALASKANGUARD },
-	/*0x2f*/ { BODY_PILOTAF1,         L_OPTIONS_060,   1000,             MPFEATURE_CHR_AF1          },
-	/*0x30*/ { BODY_STEWARD,          L_OPTIONS_061,   1000,             MPFEATURE_CHR_AF1          },
-	/*0x31*/ { BODY_STEWARDESS,       L_OPTIONS_062,   1000,             MPFEATURE_CHR_AF1          },
-	/*0x32*/ { BODY_STEWARDESS_COAT,  L_OPTIONS_063,   1000,             MPFEATURE_CHR_AF1          },
-	/*0x33*/ { BODY_PRESIDENT,        L_OPTIONS_064,   HEAD_PRESIDENT,   MPFEATURE_CHR_CI           },
-	/*0x34*/ { BODY_NSA_LACKEY,       L_OPTIONS_065,   1000,             MPFEATURE_CHR_NSALACKEY    },
-	/*0x35*/ { BODY_PRES_SECURITY,    L_OPTIONS_066,   1000,             MPFEATURE_CHR_PRESSECURITY },
-	/*0x36*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_PRESIDENT,   MPFEATURE_CHR_PRESCLONE    },
-	/*0x37*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             MPFEATURE_CHR_PELAGIC      },
-	/*0x38*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        },
-	/*0x39*/ { BODY_CONNERY,          L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
-	/*0x3a*/ { BODY_MOORE,            L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
-	/*0x3b*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
-	/*0x3c*/ { BODY_DJBOND,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
+	/*0x00*/ { BODY_DARK_COMBAT,      L_OPTIONS_016,   HEAD_DARK_COMBAT, 0                          }, // Joanna Combat
+	/*0x01*/ { BODY_DARK_TRENCH,      L_OPTIONS_017,   HEAD_DARK_COMBAT, MPFEATURE_CHR_JOTRENCH     }, // Joanna Trench Coat
+	/*0x02*/ { BODY_DARK_FROCK,       L_OPTIONS_018,   HEAD_DARK_FROCK,  MPFEATURE_CHR_CI           }, // Joanna Party Frock
+	/*0x03*/ { BODY_DARK_RIPPED,      L_OPTIONS_019,   HEAD_DARK_FROCK,  MPFEATURE_CHR_CI           }, // Joanna Frock (Ripped)
+	/*0x04*/ { BODY_DARK_AF1,         L_OPTIONS_020,   HEAD_DARK_COMBAT, MPFEATURE_CHR_AF1          }, // Joanna Stewardess
+	/*0x05*/ { BODY_DARK_LEATHER,     L_MPWEAPONS_156, HEAD_DARK_COMBAT, MPFEATURE_CHR_G5           }, // Joanna Leather
+	/*0x06*/ { BODY_DARK_NEGOTIATOR,  L_MPWEAPONS_157, HEAD_DARK_COMBAT, MPFEATURE_CHR_VILLACHRS    }, // Joanna Negotiator
+	/*0x07*/ { BODY_DARKWET,          L_OPTIONS_021,   HEAD_DARKAQUA,    MPFEATURE_CHR_PELAGIC      }, // Joanna Wet Suit
+	/*0x08*/ { BODY_DARKAQUALUNG,     L_OPTIONS_022,   HEAD_DARKAQUA,    MPFEATURE_CHR_PELAGIC      }, // Joanna Aqualung
+	/*0x09*/ { BODY_DARKSNOW,         L_OPTIONS_023,   HEAD_DARK_SNOW,   MPFEATURE_CHR_DARKSNOW     }, // Joanna Arctic
+	/*0x0a*/ { BODY_DARKLAB,          L_OPTIONS_024,   HEAD_DARK_COMBAT, MPFEATURE_CHR_INFILTRATION }, // Joanna Lab Tech.
+	/*0x0b*/ { BODY_THEKING,          L_OPTIONS_025,   HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        }, // Elvis
+	/*0x0c*/ { BODY_ELVIS1,           L_OPTIONS_026,   HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        }, // Maian
+	/*0x0d*/ { BODY_ELVISWAISTCOAT,   L_MPWEAPONS_158, HEAD_ELVIS,       MPFEATURE_CHR_ELVIS        }, // Elvis (Waistcoat)
+	/*0x0e*/ { BODY_CARRINGTON,       L_OPTIONS_027,   HEAD_CARRINGTON,  0                          }, // Daniel Carrington
+	/*0x0f*/ { BODY_CARREVENINGSUIT,  L_OPTIONS_028,   HEAD_CARRINGTON,  MPFEATURE_CHR_CI           }, // Carrington Evening Wear
+	/*0x10*/ { BODY_MRBLONDE,         L_OPTIONS_029,   HEAD_MRBLONDE,    MPFEATURE_CHR_MRBLONDE     }, // Mr. Blonde
+	/*0x11*/ { BODY_CASSANDRA,        L_OPTIONS_030,   HEAD_CASSANDRA,   0                          }, // Cassandra De Vries
+	/*0x12*/ { BODY_TRENT,            L_OPTIONS_031,   HEAD_TRENT,       MPFEATURE_CHR_TRENT        }, // Trent Easton
+	/*0x13*/ { BODY_JONATHAN,         L_OPTIONS_032,   HEAD_JONATHAN,    MPFEATURE_CHR_JONATHAN     }, // Jonathan
+	/*0x14*/ { BODY_CILABTECH,        L_OPTIONS_033,   1000,             0                          }, // CI Male Lab Technician
+	/*0x15*/ { BODY_CIFEMTECH,        L_OPTIONS_034,   1000,             0                          }, // CI Female Lab Technician
+	/*0x16*/ { BODY_CISOLDIER,        L_OPTIONS_035,   1000,             0                          }, // CI Soldier
+	/*0x17*/ { BODY_DDSHOCK,          L_OPTIONS_036,   HEAD_DDSHOCK,     0                          }, // dataDyne Shock Trooper
+	/*0x18*/ { BODY_FEM_GUARD,        L_OPTIONS_037,   1000,             MPFEATURE_CHR_FEMGUARD     }, // dataDyne Female Guard
+	/*0x19*/ { BODY_DD_SECGUARD,      L_OPTIONS_038,   1000,             0                          }, // dataDyne Security
+	/*0x1a*/ { BODY_DD_GUARD,         L_OPTIONS_039,   1000,             0                          }, // dataDyne Infantry
+	/*0x1b*/ { BODY_DD_SHOCK_INF,     L_OPTIONS_040,   1000,             0                          }, // dataDyne Trooper
+	/*0x1c*/ { BODY_SECRETARY,        L_OPTIONS_041,   1000,             0                          }, // Secretary
+	/*0x1d*/ { BODY_OFFICEWORKER,     L_OPTIONS_042,   1000,             MPFEATURE_CHR_OFFICEWORKER }, // Office Suit
+	/*0x1e*/ { BODY_OFFICEWORKER2,    L_OPTIONS_043,   1000,             MPFEATURE_CHR_OFFICEWORKER }, // Office Casual
+	/*0x1f*/ { BODY_NEGOTIATOR,       L_OPTIONS_044,   1000,             MPFEATURE_CHR_VILLACHRS    }, // Negotiator
+	/*0x20*/ { BODY_DDSNIPER,         L_OPTIONS_045,   HEAD_DDSNIPER,    MPFEATURE_CHR_VILLACHRS    }, // dataDyne Sniper
+	/*0x21*/ { BODY_G5_GUARD,         L_OPTIONS_046,   1000,             MPFEATURE_CHR_G5           }, // G5 Guard
+	/*0x22*/ { BODY_G5_SWAT_GUARD,    L_OPTIONS_047,   1000,             MPFEATURE_CHR_G5           }, // G5 SWAT Guard
+	/*0x23*/ { BODY_CIAGUY,           L_OPTIONS_048,   1000,             MPFEATURE_CHR_CIAFBI       }, // CIA Agent
+	/*0x24*/ { BODY_FBIGUY,           L_OPTIONS_049,   1000,             MPFEATURE_CHR_CIAFBI       }, // FBI Agent
+	/*0x25*/ { BODY_AREA51GUARD,      L_OPTIONS_050,   1000,             MPFEATURE_CHR_INFILTRATION }, // Area 51 Guard
+	/*0x26*/ { BODY_A51TROOPER,       L_OPTIONS_051,   1000,             MPFEATURE_CHR_INFILTRATION }, // Area 51 Trooper
+	/*0x27*/ { BODY_A51AIRMAN,        L_OPTIONS_052,   1000,             MPFEATURE_CHR_INFILTRATION }, // Pilot
+	/*0x28*/ { BODY_OVERALL,          L_OPTIONS_053,   1000,             MPFEATURE_CHR_INFILTRATION }, // Overalls
+	/*0x29*/ { BODY_STRIPES,          L_OPTIONS_054,   1000,             MPFEATURE_CHR_STRIPES      }, // NSA Bodyguard
+	/*0x2a*/ { BODY_LABTECH,          L_OPTIONS_055,   1000,             MPFEATURE_CHR_LABTECH      }, // Male Lab Technician
+	/*0x2b*/ { BODY_FEMLABTECH,       L_OPTIONS_056,   1000,             MPFEATURE_CHR_LABTECH      }, // Female Lab Technician
+	/*0x2c*/ { BODY_DD_LABTECH,       L_OPTIONS_057,   1000,             MPFEATURE_CHR_LABTECH      }, // dataDyne Lab Technician
+	/*0x2d*/ { BODY_BIOTECH,          L_OPTIONS_058,   HEAD_BIOTECH,     MPFEATURE_CHR_BIOTECH      }, // Biotechnician
+	/*0x2e*/ { BODY_ALASKAN_GUARD,    L_OPTIONS_059,   1000,             MPFEATURE_CHR_ALASKANGUARD }, // Alaskan Guard
+	/*0x2f*/ { BODY_PILOTAF1,         L_OPTIONS_060,   1000,             MPFEATURE_CHR_AF1          }, // Air Force One Pilot
+	/*0x30*/ { BODY_STEWARD,          L_OPTIONS_061,   1000,             MPFEATURE_CHR_AF1          }, // Steward
+	/*0x31*/ { BODY_STEWARDESS,       L_OPTIONS_062,   1000,             MPFEATURE_CHR_AF1          }, // Stewardess
+	/*0x32*/ { BODY_STEWARDESS_COAT,  L_OPTIONS_063,   1000,             MPFEATURE_CHR_AF1          }, // Head Stewardess
+	/*0x33*/ { BODY_PRESIDENT,        L_OPTIONS_064,   HEAD_PRESIDENT,   MPFEATURE_CHR_CI           }, // The President
+	/*0x34*/ { BODY_NSA_LACKEY,       L_OPTIONS_065,   1000,             MPFEATURE_CHR_NSALACKEY    }, // NSA Lackey
+	/*0x35*/ { BODY_PRES_SECURITY,    L_OPTIONS_066,   1000,             MPFEATURE_CHR_PRESSECURITY }, // Presidential Security
+	/*0x36*/ { BODY_PRESIDENT_CLONE2, L_OPTIONS_067,   HEAD_PRESIDENT,   MPFEATURE_CHR_PRESCLONE    }, // President"s Clone
+	/*0x37*/ { BODY_PELAGIC_GUARD,    L_OPTIONS_068,   1000,             MPFEATURE_CHR_PELAGIC      }, // Pelagic II Guard
+	/*0x38*/ { BODY_MAIAN_SOLDIER,    L_OPTIONS_069,   HEAD_MAIAN_S,     MPFEATURE_CHR_ELVIS        }, // Maian Soldier
+#ifndef PLATFORM_N64 // All in One Mod
+	/*0x39*/ { BODY_PRESIDENT_CLONE,  L_OPTIONS_086,   HEAD_SKEDAR,      0                          }, // Skedar
+	/*0x3a*/ { BODY_CARROLL3,         L_OPTIONS_090,   HEAD_CARROLL,     0                          }, // Dr. Caroll
+	/*0x3b*/ { BODY_TESTCHR,          L_OPTIONS_091,   HEAD_CARROLL_SINISTER, 0                     }, // Dr. Caroll (Sinister)
+#endif
+	/*0x3c*/ { BODY_CONNERY,          L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            }, // Dinner Jacket
+	/*0x3d*/ { BODY_MOORE,            L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            }, // Dinner Jacket
+	/*0x3e*/ { BODY_DALTON,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            }, // Dinner Jacket
+	/*0x3f*/ { BODY_DJBOND,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            }, // Dinner Jacket
+#ifndef PLATFORM_N64 // All in One Mod
+	/*0x40*/ { BODY_CONNERY2,         L_OPTIONS_092,   HEAD_CONNERY,     0                          }, // Bond (Classic)
+	/*0x41*/ { BODY_BONDALPS,         L_OPTIONS_094,   HEAD_CONNERY,     0                          }, // Bond (Classic, Alps)
+	/*0x42*/ { BODY_BONDRANCH,        L_OPTIONS_097,   HEAD_CONNERY,     0                          }, // Bond (Classic, Ranch)
+	/*0x43*/ { BODY_LAZENBY,          L_OPTIONS_092,   HEAD_LAZENBY,     0                          }, // Bond (Classic)
+	/*0x44*/ { BODY_MOORE2,           L_OPTIONS_092,   HEAD_MOORE,       0                          }, // Bond (Classic)
+	/*0x45*/ { BODY_DALTON2,          L_OPTIONS_092,   HEAD_DALTON,      0                          }, // Bond (Classic)
+	/*0x46*/ { BODY_DJBOND2,          L_OPTIONS_098,   HEAD_BROSNAN,     0                          }, // Bond (Tuxedo)
+	/*0x47*/ { BODY_SUITBOND,         L_OPTIONS_169,   HEAD_BROSNAN2,    0                          }, // Bond (Formal)
+	/*0x48*/ { BODY_BOILERBOND,       L_OPTIONS_186,   HEAD_BROSNAN2,    0                          }, // Bond (Stealth)
+	/*0x49*/ { BODY_SNOWBOND,         L_OPTIONS_211,   HEAD_BROSNAN2,    0                          }, // Bond (Arctic)
+	/*0x4a*/ { BODY_TIMBERBOND,       L_OPTIONS_303,   HEAD_BROSNAN2,    0                          }, // Bond (Jungle)
+	/*0x4b*/ { BODY_NATALYA,          L_OPTIONS_304,   HEAD_NATALYA,     0                          }, // Natalya (Russia)
+	/*0x4c*/ { BODY_SPICEBOND,        L_OPTIONS_318,   HEAD_NATALYA,     0                          }, // Natalya (Cuba)
+	/*0x4d*/ { BODY_NATALYA_XMAS,     L_OPTIONS_319,   HEAD_NATALYA,     0                          }, // Natalya (Santa)
+	/*0x4e*/ { BODY_NATALYA_ELF,      L_OPTIONS_340,   HEAD_NATALYA,     0                          }, // Natalya (Elf)
+	/*0x4f*/ { BODY_BOILERTREV,       L_OPTIONS_341,   HEAD_TREVELYAN,   0                          }, // Trevelyan (006)
+	/*0x50*/ { BODY_TREVELYAN,        L_OPTIONS_342,   HEAD_TREVELYAN,   0                          }, // Trevelyan (Janus)
+	/*0x51*/ { BODY_XENIA,            L_OPTIONS_343,   HEAD_XENIA,       0                          }, // Xenia
+	/*0x52*/ { BODY_XENIA_XMAS,       L_OPTIONS_344,   HEAD_XENIA,       0                          }, // Xenia (Santa)
+	/*0x53*/ { BODY_OURUMOV,          L_OPTIONS_355,   HEAD_OURUMOV,     0                          }, // Ourumov
+	/*0x54*/ { BODY_BORIS,            L_OPTIONS_356,   HEAD_BORIS,       0                          }, // Boris
+	/*0x55*/ { BODY_VALENTIN,         L_OPTIONS_357,   HEAD_VALENTIN,    0                          }, // Valentin
+	/*0x56*/ { BODY_GREATGUARD,       L_OPTIONS_358,   HEAD_MISHKIN,     0                          }, // Mishkin
+	/*0x57*/ { BODY_MAYDAY,           L_OPTIONS_364,   HEAD_MAYDAY,      0                          }, // May Day
+	/*0x58*/ { BODY_JAWS,             L_OPTIONS_437,   HEAD_JAWS,        0                          }, // Jaws
+	/*0x59*/ { BODY_JAWS_BLUE,        L_MPMENU_389,    HEAD_JAWS,        0                          }, // Jaws (Blazer)
+	/*0x5a*/ { BODY_ODDJOB,           L_OPTIONS_449,   HEAD_ODDJOB,      0                          }, // Oddjob
+	/*0x5b*/ { BODY_BARONSAMEDI,      L_OPTIONS_489,   HEAD_BARONSAMEDI, 0                          }, // Baron Samedi
+	/*0x5c*/ { BODY_BARONSAMEDI2,     L_MPMENU_349,    HEAD_BARONSAMEDI2, 0                         }, // Baron Samedi (Death)
+	/*0x5d*/ { BODY_OLIVEGUARD,       L_MPMENU_350,    1001,             0                          }, // Russian Soldier
+	/*0x5e*/ { BODY_RUSGUARD,         L_MPMENU_351,    1001,             0                          }, // Russian Infantry
+	/*0x5f*/ { BODY_COMMGUARD,        L_MPMENU_352,    1001,             0                          }, // Russian Commandant
+	/*0x60*/ { BODY_TECHMAN,          L_MPMENU_353,    1001,             0                          }, // Male Scientist
+	/*0x61*/ { BODY_TECHWOMAN,        L_MPMENU_354,    1001,             0                          }, // Female Scientist
+	/*0x62*/ { BODY_ARMOURGUARD,      L_MPMENU_355,    1001,             0                          }, // Janus Marine
+	/*0x63*/ { BODY_NAVYGUARD,        L_MPMENU_356,    1001,             0                          }, // Naval Officer
+	/*0x64*/ { BODY_PILOT,            L_MPMENU_357,    HEAD_PILOT,       0                          }, // Helicopter Pilot
+	/*0x65*/ { BODY_GREYGUARD,        L_MPMENU_358,    1001,             0                          }, // St. Petersburg Guard
+	/*0x66*/ { BODY_JEANWOMAN,        L_MPMENU_359,    1001,             0                          }, // Female Civilian (Jeans)
+	/*0x67*/ { BODY_BLUEWOMAN,        L_MPMENU_360,    1001,             0                          }, // Female Civilian (Skirt)
+	/*0x68*/ { BODY_CARDIMAN,         L_MPMENU_361,    1001,             0                          }, // Male Civilian (Vest)
+	/*0x69*/ { BODY_CHECKMAN,         L_MPMENU_362,    1001,             0                          }, // Male Civilian (Plaid)
+	/*0x6a*/ { BODY_REDMAN,           L_MPMENU_363,    1001,             0                          }, // Male Civilian (Red)
+	/*0x6b*/ { BODY_BLUEMAN,          L_MPMENU_364,    1001,             0                          }, // Male Civilian (Blue)
+	/*0x6c*/ { BODY_GREYMAN,          L_MPMENU_365,    1001,             0                          }, // Male Civilian (Grey)
+	/*0x6d*/ { BODY_GREATGUARD2,      L_MPMENU_366,    1001,             0                          }, // Siberian Guard (Brown)
+	/*0x6e*/ { BODY_BLUECAMGUARD,     L_MPMENU_367,    1001,             0                          }, // Arctic Commando
+	/*0x6f*/ { BODY_SNOWGUARD,        L_MPMENU_368,    HEAD_SNOWGUARD,   0                          }, // Siberian Special Forces
+	/*0x70*/ { BODY_CAMGUARD,         L_MPMENU_369,    1001,             0                          }, // Jungle Commando
+	/*0x71*/ { BODY_TREVGUARD,        L_MPMENU_370,    1001,             0                          }, // Janus Special Forces
+	/*0x72*/ { BODY_MOONGUARD,        L_MPMENU_371,    1001,             0                          }, // Male Moonraker Elite
+	/*0x73*/ { BODY_MOONFEMALE,       L_MPMENU_372,    1001,             0                          }, // Female Moonraker Elite
+	/*0x74*/ { BODY_FATTECHWOMAN,     L_MPMENU_373,    HEAD_MARION,      0                          }, // Rosika
+	/*0x75*/ { BODY_ELTONWAISTCOAT,   L_MPMENU_374,    HEAD_ELVIS,       0                          }, // Elton
+	/*0x76*/ { BODY_SANTA,            L_MPMENU_375,    HEAD_SANTA,       0                          }, // Santa Claus
+	/*0x77*/ { BODY_ELF,              L_MPMENU_376,    HEAD_ELF,         0                          }, // Elf
+	/*0x78*/ { BODY_GALOREPLANE,      L_MPMENU_377,    HEAD_GALORE,      0                          }, // Galore (Plane)
+	/*0x79*/ { BODY_GALORERANCH,      L_MPMENU_378,    HEAD_GALORE,      0                          }, // Galore (Ranch)
+	/*0x7a*/ { BODY_SILVERWOMAN,      L_MPMENU_388,    1001,             0                          }, // Estate Patron (Silver)
+	/*0x7b*/ { BODY_FEMSPY_BLU,       L_MPMENU_390,    1000,             0                          }, // Female Spy (Blue)
+	/*0x7c*/ { BODY_CASEYDARK,        L_MPMENU_379,    HEAD_CASEYDARK,   0                          }, // Casey Dark
+	/*0x7d*/ { BODY_EVERETTHAMM,      L_MPMENU_380,    HEAD_HAMM,        0                          }, // Everett Hamm
+	/*0x7e*/ { BODY_SOGUNTRON,        L_MPMENU_381,    HEAD_SOGUN,       0                          }, // Sogun
+	/*0x7f*/ { BODY_CJ,               L_MPMENU_391,    HEAD_CJ,          0                          }, // Carl Johnson "CJ"
+	/*0x80*/ { BODY_MRX,              L_MPMENU_382,    HEAD_MRX,         0                          }, // Tyrant Mr. X
+#endif
 };
 
 u32 g_MpMaleHeads[] = {
@@ -2027,7 +2364,7 @@ u32 g_MpMaleHeads[] = {
 	HEAD_KEN,
 	HEAD_SCOTT_H,
 	HEAD_JOEL,
-#if VERSION != VERSION_JPN_FINAL
+#if !((VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)) // All in One Mod
 	HEAD_MOTO,
 #endif
 };
@@ -2041,6 +2378,236 @@ u32 g_MpFemaleHeads[] = {
 	HEAD_EILEEN_T,
 	HEAD_EILEEN_H,
 };
+
+#ifndef PLATFORM_N64 // All in One Mod
+u32 g_GexMaleHeads[] = {
+	HEAD_KARL,
+	HEAD_ALAN,
+	HEAD_PETE,
+	HEAD_MARTIN,
+	HEAD_MARK0,
+	HEAD_DUNCAN0,
+	HEAD_SHAUN0,
+	HEAD_DWAYNE,
+	HEAD_JONES0,
+	HEAD_DAVED,
+	HEAD_GRANT0,
+	HEAD_DES,
+	HEAD_CHRIS,
+	HEAD_LEE,
+	HEAD_NEIL0,
+	HEAD_JIM,
+	HEAD_ROBIN0,
+	HEAD_STEVEH,
+	HEAD_GRAEME,
+	HEAD_STEVE_E,
+	HEAD_JOEL0,
+	HEAD_SCOTT_H0,
+	HEAD_JOE2,
+	HEAD_KEN0,
+	HEAD_PILOT,
+	HEAD_SNOWGUARD,
+	HEAD_BROSNAN,
+	HEAD_BROSNAN2,
+	HEAD_TREVELYAN,
+	HEAD_OURUMOV,
+	HEAD_BORIS,
+	HEAD_VALENTIN,
+	HEAD_MISHKIN,
+	HEAD_JAWS,
+	HEAD_ODDJOB,
+	HEAD_BARONSAMEDI,
+	HEAD_DAVED2,
+	HEAD_CHRIS2,
+	HEAD_JIM2,
+	HEAD_DUNCAN01,
+	HEAD_GRAEME2,
+	HEAD_SUBDRAG,
+	HEAD_WRECK,
+	HEAD_MRKANE,
+	HEAD_DRNO,
+	HEAD_AURIC,
+};
+
+u32 g_GexFemaleHeads[] = {
+	HEAD_SALLY,
+	HEAD_MARION,
+	HEAD_MANDY,
+	HEAD_VIVIEN,
+	HEAD_NATALYA,
+	HEAD_XENIA,
+	HEAD_MAYDAY,
+	HEAD_GALORE,
+	HEAD_PARIS,
+	HEAD_WAILIN,
+};
+
+u32 g_GexHeads[] = {
+	HEAD_KARL,
+	HEAD_ALAN,
+	HEAD_PETE,
+	HEAD_MARTIN,
+	HEAD_MARK0,
+	HEAD_DUNCAN0,
+	HEAD_SHAUN0,
+	HEAD_DWAYNE,
+	HEAD_JONES0,
+	HEAD_DAVED,
+	HEAD_GRANT0,
+	HEAD_DES,
+	HEAD_CHRIS,
+	HEAD_LEE,
+	HEAD_NEIL0,
+	HEAD_JIM,
+	HEAD_ROBIN0,
+	HEAD_STEVEH,
+	HEAD_GRAEME,
+	HEAD_STEVE_E,
+	HEAD_JOEL0,
+	HEAD_SCOTT_H0,
+	HEAD_JOE2,
+	HEAD_KEN0,
+	HEAD_PILOT,
+	HEAD_SNOWGUARD,
+	HEAD_BROSNAN,
+	HEAD_BROSNAN2,
+	HEAD_TREVELYAN,
+	HEAD_OURUMOV,
+	HEAD_BORIS,
+	HEAD_VALENTIN,
+	HEAD_MISHKIN,
+	HEAD_JAWS,
+	HEAD_ODDJOB,
+	HEAD_BARONSAMEDI,
+	HEAD_DAVED2,
+	HEAD_CHRIS2,
+	HEAD_JIM2,
+	HEAD_DUNCAN01,
+	HEAD_GRAEME2,
+	HEAD_SUBDRAG,
+	HEAD_WRECK,
+	HEAD_MRKANE,
+	HEAD_DRNO,
+	HEAD_AURIC,
+	HEAD_SALLY,
+	HEAD_MARION,
+	HEAD_MANDY,
+	HEAD_VIVIEN,
+	HEAD_NATALYA,
+	HEAD_XENIA,
+	HEAD_MAYDAY,
+	HEAD_GALORE,
+	HEAD_PARIS,
+	HEAD_WAILIN,
+	HEAD_CONNERY,
+	HEAD_LAZENBY,
+	HEAD_MOORE,
+	HEAD_DALTON,
+	HEAD_BARONSAMEDI2,
+	HEAD_SANTA,
+	HEAD_ELF,
+	HEAD_BALACLAVA,
+	HEAD_BANDOVERFLOW,
+	HEAD_JOE,
+	HEAD_KARL2,
+};
+
+u32 g_GexBodies[] = {
+	BODY_CONNERY2,
+	BODY_BONDALPS,
+	BODY_BONDRANCH,
+	BODY_LAZENBY,
+	BODY_MOORE2,
+	BODY_DALTON2,
+	BODY_DJBOND2,
+	BODY_SUITBOND,
+	BODY_BOILERBOND,
+	BODY_SNOWBOND,
+	BODY_TIMBERBOND,
+	BODY_NATALYA,
+	BODY_SPICEBOND,
+	BODY_NATALYA_XMAS,
+	BODY_NATALYA_ELF,
+	BODY_BOILERTREV,
+	BODY_TREVELYAN,
+	BODY_XENIA,
+	BODY_XENIA_XMAS,
+	BODY_OURUMOV,
+	BODY_BORIS,
+	BODY_VALENTIN,
+	BODY_GREATGUARD,
+	BODY_MAYDAY,
+	BODY_JAWS,
+	BODY_JAWS_BLUE,
+	BODY_ODDJOB,
+	BODY_BARONSAMEDI,
+	BODY_BARONSAMEDI2,
+	BODY_OLIVEGUARD,
+	BODY_RUSGUARD,
+	BODY_COMMGUARD,
+	BODY_TECHMAN,
+	BODY_TECHWOMAN,
+	BODY_ARMOURGUARD,
+	BODY_NAVYGUARD,
+	BODY_PILOT,
+	BODY_GREYGUARD,
+	BODY_JEANWOMAN,
+	BODY_BLUEWOMAN,
+	BODY_CARDIMAN,
+	BODY_CHECKMAN,
+	BODY_REDMAN,
+	BODY_BLUEMAN,
+	BODY_GREYMAN,
+	BODY_GREATGUARD2,
+	BODY_BLUECAMGUARD,
+	BODY_SNOWGUARD,
+	BODY_CAMGUARD,
+	BODY_TREVGUARD,
+	BODY_MOONGUARD,
+	BODY_MOONFEMALE,
+	BODY_FATTECHWOMAN,
+	BODY_ELTONWAISTCOAT,
+	BODY_SANTA,
+	BODY_ELF,
+	BODY_GALOREPLANE,
+	BODY_GALORERANCH,
+	BODY_SILVERWOMAN,
+};
+
+/**
+ * Returns true if the given head num (a HEAD_* value) is a GE-X head, according
+ * to the g_GexHeads classification list.
+ */
+bool mpIsGexHead(s32 headnum)
+{
+	s32 i;
+
+	for (i = 0; i < ARRAYCOUNT(g_GexHeads); i++) {
+		if (g_GexHeads[i] == headnum) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Returns true if the given body id (a BODY_* value) is a GoldenEye X body,
+ * looked up against g_GexBodies.
+ */
+bool mpIsGexBody(s32 bodynum)
+{
+	s32 i;
+
+	for (i = 0; i < ARRAYCOUNT(g_GexBodies); i++) {
+		if (g_GexBodies[i] == bodynum) {
+			return true;
+		}
+	}
+
+	return false;
+}
+#endif
 
 /**
  * Calculate player awards, medals, and update character statistics.
@@ -2417,6 +2984,7 @@ void mpCalculateAwards(void)
 				struct mpchrconfig *mpchr = MPCHR(k);
 
 				for (j = 0; j < MAX_MPCHRS; j++) {
+#ifdef PLATFORM_N64
 					// @bug: i should be k. The value of i was incremented after
 					// the last iteration of its loop above so it'll be between
 					// 1 and 4 inclusively depending on the number of players.
@@ -2427,6 +2995,9 @@ void mpCalculateAwards(void)
 					// total kills. Additionally, suicides are counted as kills
 					// while the intention here was to omit them.
 					if (i != j) {
+#else
+					if (k != j) {
+#endif
 						totalkills += mpchr->killcounts[j];
 					}
 				}
@@ -2592,7 +3163,11 @@ s32 mpGetBodyId(u8 bodynum)
 	 * @bug: bodynum 61 (0x3d) would cause an array overflow.
 	 * ARRAYCOUNT(g_MpBodies) is 61.
 	 */
+#ifdef PLATFORM_N64
 	if (bodynum > ARRAYCOUNT(g_MpBodies)) {
+#else
+	if (bodynum >= ARRAYCOUNT(g_MpBodies)) {
+#endif
 		if (bodynum == ARRAYCOUNT(g_MpBodies) + 1) {
 			return BODY_DRCAROLL;
 		}
@@ -2623,7 +3198,11 @@ s32 mpGetMpbodynumByBodynum(u16 bodynum)
 char *mpGetBodyName(u8 mpbodynum)
 {
 	// @bug: This should be >=
+#ifdef PLATFORM_N64
 	if (mpbodynum > ARRAYCOUNT(g_MpBodies)) {
+#else
+	if (mpbodynum >= ARRAYCOUNT(g_MpBodies)) {
+#endif
 		mpbodynum = 0;
 	}
 
@@ -2633,7 +3212,11 @@ char *mpGetBodyName(u8 mpbodynum)
 u8 mpGetBodyRequiredFeature(u8 mpbodynum)
 {
 	// @bug: This should be >=
+#ifdef PLATFORM_N64
 	if (mpbodynum > ARRAYCOUNT(g_MpBodies)) {
+#else
+	if (mpbodynum >= ARRAYCOUNT(g_MpBodies)) {
+#endif
 		mpbodynum = 0;
 	}
 
@@ -2646,7 +3229,11 @@ s32 mpGetMpheadnumByMpbodynum(s32 mpbodynum)
 	s32 index = 0;
 	s32 i;
 
+#ifdef PLATFORM_N64
 	if (mpbodynum >= HEAD_VD) {
+#else
+	if (mpbodynum >= ARRAYCOUNT(g_MpBodies)) {
+#endif
 		mpbodynum = 0;
 	}
 
@@ -2659,6 +3246,15 @@ s32 mpGetMpheadnumByMpbodynum(s32 mpbodynum)
 			headnum = g_MpFemaleHeads[rngRandom() % ARRAYCOUNT(g_MpFemaleHeads)];
 		}
 	}
+#ifndef PLATFORM_N64 // All in One Mod
+	else if (headnum == 1001) {
+		if (g_HeadsAndBodies[g_MpBodies[mpbodynum].bodynum].ismale) {
+			headnum = g_GexMaleHeads[rngRandom() % ARRAYCOUNT(g_GexMaleHeads)];
+		} else {
+			headnum = g_GexFemaleHeads[rngRandom() % ARRAYCOUNT(g_GexFemaleHeads)];
+		}
+	}
+#endif
 
 	for (i = 0; i != ARRAYCOUNT(g_MpHeads); i++) {
 		if (g_MpHeads[i].headnum == headnum) {
@@ -2815,10 +3411,13 @@ struct mptrack g_MpTracks[] = {
 	/*0x27*/ { MUSIC_SKEDARRUINS,     120, L_MISC_163, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Ruins"
 	/*0x28*/ { MUSIC_SKEDARRUINS_X,   120, L_MISC_164, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Ruins X"
 	/*0x29*/ { MUSIC_CREDITS,         120, L_MISC_165, SOLOSTAGEINDEX_SKEDARRUINS }, // "End Credits"
-#if VERSION < VERSION_PAL_BETA
-	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_261, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Warrior" (Skedar Leader)
-#else
-	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_041, SOLOSTAGEINDEX_SKEDARRUINS }, // "E R R O R" (can't find a good approximation for Skedar Leader)
+#ifndef PLATFORM_N64 // All in One Mod
+	/*0x2a*/ { MUSIC_SKEDARRUINS_KING, 120,  L_MPMENU_387, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Leader"
+	/*0x2b*/ { MUSIC_CI_TRAINING,      120,  L_MPMENU_385, -1 }, // "Training"
+	/*0x2c*/ { MUSIC_DEEPSEA_BETA,     120,  L_MPMENU_383, -1 }, // "Ocean Bed"
+	/*0x2d*/ { MUSIC_SUBURB,           120,  L_MPMENU_324, -1 }, // "Suburb" (0x0077)
+	/*0x2e*/ { MUSIC_SUBURB_X,         120,  L_MPMENU_384, -1 }, // "Suburb X" (0x0078)
+	/*0x2f*/ { MUSIC_INSTITUTE_SALUTE, 120,  L_MPMENU_386, -1 }, // "Institute Salute" (0x0079)
 #endif
 };
 
@@ -3700,6 +4299,15 @@ s32 mpplayerfileSave(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 		if (ret == 0) {
 			g_PlayerConfigsArray[playernum].fileguid.fileid = newfileid;
 			g_PlayerConfigsArray[playernum].fileguid.deviceserial = deviceserial;
+#ifndef PLATFORM_N64
+			// mpplayers.bin is the authoritative store: save the full profile
+			// wad blob plus the full-width head/body keyed by this profile's guid.
+			// (The eeprom save can only hold a 7-bit head/body number.)
+			mpplayersSetEntry(deviceserial, newfileid,
+					g_PlayerConfigsArray[playernum].base.mpheadnum,
+					g_PlayerConfigsArray[playernum].base.mpbodynum,
+					buffer.bytes);
+#endif
 			return 0;
 		}
 
@@ -3724,7 +4332,34 @@ s32 mpplayerfileLoad(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 			g_PlayerConfigsArray[playernum].fileguid.fileid = fileid;
 			g_PlayerConfigsArray[playernum].fileguid.deviceserial = deviceserial;
 
+#ifndef PLATFORM_N64
+			{
+				// mpplayers.bin is authoritative. If an entry exists, load the
+				// profile from its stored wad blob (when present) and apply the
+				// full-width head/body. Otherwise load from the eeprom data and
+				// migrate it in, so future loads come from mpplayers.bin.
+				u16 exthead;
+				u16 extbody;
+				bool hasblob = false;
+
+				if (mpplayersGetEntry(deviceserial, fileid, &exthead, &extbody, buffer.bytes, &hasblob)) {
+					// If hasblob, buffer.bytes now holds the mpplayers.bin blob
+					// (overwriting the eeprom data we just read); otherwise it
+					// still holds the eeprom data (legacy version 1 entry).
+					mpplayerfileLoadWad(playernum, &buffer, 1);
+					g_PlayerConfigsArray[playernum].base.mpheadnum = (u8)exthead;
+					g_PlayerConfigsArray[playernum].base.mpbodynum = (u8)extbody;
+				} else {
+					mpplayerfileLoadWad(playernum, &buffer, 1);
+					mpplayersSetEntry(deviceserial, fileid,
+							g_PlayerConfigsArray[playernum].base.mpheadnum,
+							g_PlayerConfigsArray[playernum].base.mpbodynum,
+							buffer.bytes);
+				}
+			}
+#else
 			mpplayerfileLoadWad(playernum, &buffer, 1);
+#endif
 			g_PlayerConfigsArray[playernum].handicap = 0x80;
 			return 0;
 		}
@@ -3981,8 +4616,14 @@ void mpsetupfileLoadWad(struct savebuffer *buffer, u8 version)
 			g_MpSetup.chrslots |= 1 << (i + 4);
 		}
 
-		g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
-		g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+		if (version > 1) {
+			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 8);
+			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 8);
+		} else {
+			g_BotConfigsArray[i].base.mpheadnum = savebufferReadBits(buffer, 7);
+			g_BotConfigsArray[i].base.mpbodynum = savebufferReadBits(buffer, 7);
+		}
+
 		g_BotConfigsArray[i].base.team = savebufferReadBits(buffer, 3);
 	}
 
@@ -4043,7 +4684,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 			savebufferOr(buffer, BOTDIFF_DISABLED, 3);
 		}
 
-		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 7);
+		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 8);
 
 		if (g_BotConfigsArray[i].base.mpbodynum == 0xff) {
 			s32 profilenum = mpFindBotProfile(g_BotConfigsArray[i].type, g_BotConfigsArray[i].difficulty);
@@ -4057,7 +4698,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 			mpbodynum = g_BotConfigsArray[i].base.mpbodynum;
 		}
 
-		savebufferOr(buffer, mpbodynum, 7);
+		savebufferOr(buffer, mpbodynum, 8);
 		savebufferOr(buffer, g_BotConfigsArray[i].base.team, 3);
 	}
 
