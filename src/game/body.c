@@ -46,6 +46,7 @@ s32 g_BondBodies[] = {
 };
 
 s32 g_MaleGuardHeads[] = {
+#ifdef PLATFORM_N64
 	HEAD_BEAU1,
 	HEAD_CHRIST,
 	HEAD_DARLING,
@@ -89,9 +90,56 @@ s32 g_MaleGuardHeads[] = {
 	HEAD_TIM,
 	HEAD_ROBIN,
 	-1,
+#else // GoldenEye X Mod
+	HEAD_A51FACEPLATE,
+	HEAD_MOTO,
+	HEAD_VD,
+	HEAD_KEITH,
+	HEAD_STEVEM,
+	HEAD_WINNER,
+	HEAD_ELVIS_GOGS,
+	HEAD_GRIFFEY,
+	HEAD_BEAU6,
+	HEAD_BEAU5,
+	HEAD_SHAUN,
+	HEAD_BEAU2,
+	HEAD_EILEEN_H,
+	HEAD_SCOTT_H,
+	HEAD_SANCHEZ,
+	HEAD_DARKAQUA,
+	HEAD_DDSNIPER,
+	HEAD_BEAU3,
+	HEAD_BEAU4,
+	HEAD_KEN,
+	HEAD_JOEL,
+	HEAD_TIM,
+	HEAD_GRANT,
+	HEAD_PENNY,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	HEAD_ROBIN,
+	-1,
+#endif
+
 };
 
 s32 g_MaleGuardTeamHeads[] = {
+#ifdef PLATFORM_N64
 	HEAD_BEAU1,
 	HEAD_CHRIST,
 	HEAD_DARLING,
@@ -109,22 +157,57 @@ s32 g_MaleGuardTeamHeads[] = {
 	HEAD_DAVEC,
 	HEAD_JONES,
 	-1,
+#else // GoldenEye X Mod
+	HEAD_SHAUN,
+	HEAD_SCOTT_H,
+	HEAD_SANCHEZ,
+	HEAD_BEAU5,
+	HEAD_DARKAQUA,
+	HEAD_BEAU4,
+	HEAD_KEN,
+	HEAD_BEAU6,
+	HEAD_VD,
+	HEAD_PENNY,
+	HEAD_MOTO,
+	HEAD_ELVIS_GOGS,
+	HEAD_JOEL,
+	HEAD_TIM,
+	HEAD_TIM,
+	HEAD_TIM,
+	-1,
+#endif
 };
 
 s32 g_FemaleGuardHeads[] = {
+#ifdef PLATFORM_N64
 	HEAD_LESLIE_S,
 	HEAD_ANKA,
 	HEAD_EILEEN_T,
 	HEAD_EILEEN_H,
 	-1,
+#else // GoldenEye X Mod
+	HEAD_JULIANNE,
+	HEAD_LAURA,
+	HEAD_DAVEC,
+	HEAD_COOK,
+	-1,
+#endif
 };
 
 s32 g_FemaleGuardTeamHeads[] = {
+#ifdef PLATFORM_N64
 	HEAD_LESLIE_S,
 	HEAD_ANKA,
 	HEAD_EILEEN_T,
 	HEAD_EILEEN_H,
 	-1,
+#else // GoldenEye X Mod
+	HEAD_JULIANNE,
+	HEAD_LAURA,
+	HEAD_DAVEC,
+	HEAD_COOK,
+	-1,
+#endif
 };
 
 s32 var80062c80 = 0;
@@ -132,9 +215,16 @@ s32 g_ActiveMaleHeadsIndex = 0;
 s32 g_ActiveFemaleHeadsIndex = 0;
 
 s32 g_FemGuardHeads[3] = {
+#ifdef PLATFORM_N64
 	HEAD_ALEX,
 	HEAD_JULIANNE,
 	HEAD_LAURA,
+#else // GoldenEye X Mod
+	HEAD_JULIANNE,
+	HEAD_LAURA,
+	HEAD_DAVEC,
+	-1,
+#endif
 };
 
 u32 bodyGetRace(s32 bodynum)

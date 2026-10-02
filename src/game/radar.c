@@ -26,22 +26,41 @@ u32 g_TeamColours[] = {
 	0xff000000, // Red
 	0xffff0000, // Yellow
 	0x0000ff00, // Blue
+#ifdef PLATFORM_N64
 	0xff00ff00, // Magenta
 	0x00ffff00, // Cyan
 	0xff885500, // Orange
 	0x8800ff00, // Pink
 	0x88445500, // Brown
+#else // GoldenEye X Mod
+	0x00ff0000, // Magenta -> Green
+	0x8800ff00, // Cyan -> Purple
+	0x00ffff00, // Orange -> Cyan
+	0xff888800, // Pink
+	0xd0c07000, // Brown -> Beige
+#endif
 };
 
 u32 var80087ce4[] = {
-	0xf801f801,
-	0xffc1ffc1,
-	0x003f003f,
-	0xf83ff83f,
-	0x07ff07ff,
-	0xfc55fc55,
-	0xfc63fc63,
-	0x8a158a15,
+	// Team Color Line
+	0xf801f801, // Red
+	0xffc1ffc1, // Yellow
+	0x003f003f, // Blue
+#ifdef PLATFORM_N64
+	0xf83ff83f, // Magenta
+	0x07ff07ff, // Cyan
+	0xfc55fc55, // Orange
+#else // GoldenEye X Mod
+	0x07c107c1, // Magenta -> Green
+	0x883f883f, // Cyan -> Purple
+	0x07ff07ff, // Orange -> Cyan
+#endif
+	0xfc63fc63, // Pink
+#ifdef PLATFORM_N64
+	0x8a158a15, // Brown
+#else // GoldenEye X Mod
+	0xd61dd61d, // Brown -> Beige
+#endif
 };
 
 void radarSetYIndicatorsEnabled(bool enable)
@@ -354,7 +373,11 @@ Gfx *radarRender(Gfx *gdl)
 					s32 index = g_PlayerConfigsArray[g_Vars.playerstats[i].mpindex].base.team;
 					colour = g_TeamColours[index];
 				} else {
+#ifdef PLATFORM_N64
 					colour = 0x00ff0000;
+#else // GoldenEye X Mod
+					colour = 0xff800000;
+#endif
 				}
 
 				gdl = radarDrawDot(gdl, g_Vars.players[i]->prop, &pos, colour, 0, 0);
@@ -379,7 +402,11 @@ Gfx *radarRender(Gfx *gdl)
 				pos.y = prop->pos.y - g_Vars.currentplayer->prop->pos.y;
 				pos.z = prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
+#ifdef PLATFORM_N64
 				gdl = radarDrawDot(gdl, prop, &pos, 0x00ff0000, 0, 0);
+#else // GoldenEye X Mod
+				gdl = radarDrawDot(gdl, prop, &pos, 0xff800000, 0, 0);
+#endif
 			}
 		}
 	}
@@ -401,7 +428,11 @@ Gfx *radarRender(Gfx *gdl)
 				if (g_Vars.normmplayerisrunning && (g_MpSetup.options & MPOPTION_TEAMSENABLED)) {
 					colour = g_TeamColours[radarGetTeamIndex(g_MpBotChrPtrs[i]->team)];
 				} else {
+#ifdef PLATFORM_N64
 					colour = 0x00ff0000;
+#else // GoldenEye X Mod
+					colour = 0xff800000;
+#endif
 				}
 
 				gdl = radarDrawDot(gdl, g_MpBotChrPtrs[i]->prop, &pos, colour, 0, 0);
@@ -426,7 +457,11 @@ Gfx *radarRender(Gfx *gdl)
 			s32 index = g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].base.team;
 			colour = g_TeamColours[index];
 		} else {
+#ifdef PLATFORM_N64
 			colour = 0x00ff0000;
+#else // GoldenEye X Mod
+			colour = 0xff800000;
+#endif
 		}
 
 		gdl = radarDrawDot(gdl, g_Vars.currentplayer->prop, &pos, colour, 0, 0);
