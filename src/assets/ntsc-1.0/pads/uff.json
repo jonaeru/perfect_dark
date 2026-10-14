@@ -1,5 +1,1260 @@
 {
-    "pads": [],
+    "pads": [
+        {
+            "id": "PAD_UFF_0000",
+            "room": 1,
+            "pos": [
+                -4000,
+                0,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0001",
+            "room": 1,
+            "pos": [
+                4000,
+                0,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0002",
+            "room": 1,
+            "pos": [
+                -4000,
+                0,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0003",
+            "room": 1,
+            "pos": [
+                4000,
+                0,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0004",
+            "room": 1,
+            "pos": [
+                -2000,
+                0,
+                -2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0005",
+            "room": 1,
+            "pos": [
+                2000,
+                0,
+                -2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0006",
+            "room": 1,
+            "pos": [
+                -2000,
+                0,
+                2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0007",
+            "room": 1,
+            "pos": [
+                2000,
+                0,
+                2000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0008",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                -3000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0009",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                3000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_000A",
+            "room": 1,
+            "pos": [
+                -3000,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_000B",
+            "room": 1,
+            "pos": [
+                3000,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_000C",
+            "room": 1,
+            "pos": [
+                -1000,
+                0,
+                -1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_000D",
+            "room": 1,
+            "pos": [
+                1000,
+                0,
+                -1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_000E",
+            "room": 1,
+            "pos": [
+                -1000,
+                0,
+                1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_000F",
+            "room": 1,
+            "pos": [
+                1000,
+                0,
+                1000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0010",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0011",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                -1500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0012",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                1500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0013",
+            "room": 1,
+            "pos": [
+                -1500,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0014",
+            "room": 1,
+            "pos": [
+                1500,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0015",
+            "room": 1,
+            "pos": [
+                -3500,
+                0,
+                -3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0016",
+            "room": 1,
+            "pos": [
+                3500,
+                0,
+                -3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0017",
+            "room": 1,
+            "pos": [
+                -3500,
+                0,
+                3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0018",
+            "room": 1,
+            "pos": [
+                3500,
+                0,
+                3500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0019",
+            "room": 1,
+            "pos": [
+                -4500,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_001A",
+            "room": 1,
+            "pos": [
+                -4200,
+                0,
+                -4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_001B",
+            "room": 1,
+            "pos": [
+                -4200,
+                0,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_001C",
+            "room": 1,
+            "pos": [
+                4200,
+                0,
+                -4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_001D",
+            "room": 1,
+            "pos": [
+                4200,
+                0,
+                -4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_001E",
+            "room": 1,
+            "pos": [
+                -4200,
+                0,
+                4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_001F",
+            "room": 1,
+            "pos": [
+                -4200,
+                0,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0020",
+            "room": 1,
+            "pos": [
+                4200,
+                0,
+                4200
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0021",
+            "room": 1,
+            "pos": [
+                4200,
+                0,
+                4000
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0022",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                0
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0023",
+            "room": 1,
+            "pos": [
+                -2500,
+                0,
+                -2500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0024",
+            "room": 1,
+            "pos": [
+                2500,
+                0,
+                -2500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        },
+        {
+            "id": "PAD_UFF_0025",
+            "room": 1,
+            "pos": [
+                0,
+                0,
+                -2500
+            ],
+            "dir": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "up": [
+                0.0,
+                0.0,
+                -1.0
+            ],
+            "xmin": -100.0,
+            "xmax": 100.0,
+            "ymin": -100.0,
+            "ymax": 100.0,
+            "zmin": -100.0,
+            "zmax": 100.0,
+            "aiwaitlift": false,
+            "aionlift": false,
+            "aiwalkdirect": false,
+            "aidrop": false,
+            "aicrouch": false,
+            "aiignorey": false,
+            "aiduck": false,
+            "liftnum": 0
+        }
+    ],
     "waypoints": [],
     "waygroups": [],
     "cover": []

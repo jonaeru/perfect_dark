@@ -535,6 +535,16 @@ void waypointFindRoute(struct waypoint *from, struct waypoint *to)
 		curto->step += 10000;
 		curto = waypointChooseNeighbour(curto->neighbours, value, from->groupnum, IGNORE_OUTWARDS);
 
+		// Defensive guard: on a degenerate/asymmetric waypoint graph (e.g. a
+		// custom-built arena whose neighbour links are not perfectly
+		// bidirectional) the back-walk can fail to find the next step, leaving
+		// curto NULL. Stock levels never hit this, but without the guard a bad
+		// graph dereferences NULL here (EXC_BAD_ACCESS) and crashes the game.
+		// Bail out gracefully so navigation simply yields no/partial route.
+		if (curto == NULL) {
+			return;
+		}
+
 		value--;
 	}
 
