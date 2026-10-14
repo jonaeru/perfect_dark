@@ -75,7 +75,7 @@ s32 g_NumPortalXluFracs;
 
 void portalSetXluFrac2(s32 portalnum, f32 frac)
 {
-	if (portalnum >= 0) {
+	if (portalnum >= 0 && g_PortalXluFracs) {
 		u8 value = (u32)(255 * frac);
 		value <<= 0;
 		g_PortalXluFracs[portalnum] = (g_PortalXluFracs[portalnum] & 0xff00) | value;
@@ -84,7 +84,7 @@ void portalSetXluFrac2(s32 portalnum, f32 frac)
 
 void portalSetXluFrac(s32 portalnum, f32 frac)
 {
-	if (portalnum >= 0) {
+	if (portalnum >= 0 && g_PortalXluFracs) {
 		u8 value = (u32)(15 * frac) & 0xf;
 		g_PortalXluFracs[portalnum] = (g_PortalXluFracs[portalnum] & 0xf0ff) | (value << 8);
 	}
